@@ -1,0 +1,18 @@
+   Here's a super quick tutorial that should be re-written at some 
+   point:
+
+   1. To connect to a mud type:
+      #ses sessname hostname port
+
+      replacing hostname with the ip address or host name, and port 
+      with the port number of the mud you want to connect to.
+
+   2. Type:
+      #help
+
+      and read through the various help topics which will help you
+      use Lyntin.
+
+   3. When you want to quit Lyntin, type:
+      #end
+

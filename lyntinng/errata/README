@@ -1,0 +1,13 @@
+--------------------
+ERRATA README
+--------------------
+
+This directory will contain a series of scripts and other helper 
+utilities that can be used for Lyntin development and use:
+
+Contents:
+
+testserver.py
+    a super basic testserver that you can connect to for bug
+    testing if you don't have a mud available.  it could use 
+    some work.

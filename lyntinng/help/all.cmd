@@ -1,0 +1,7 @@
+   syntax: #all <command...>
+
+   Sends 'command' (which is any valid lyntin command) to all
+   the sessions you're currently running.
+
+   ex: #all shout ARGH!
+       Will shout ARGH! in every session
