@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.8 2002/11/06 03:03:20 willhelm Exp $
+# $Id: modutils.py,v 1.9 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module holds helper functions for building other Lyntin modules.
@@ -13,7 +13,7 @@ an API module and the contents herein are subject to change if we
 need to change them.  Having said that, I will note it doesn't change
 much.
 """
-import string
+import types
 import exported
 
 
@@ -32,7 +32,7 @@ def load_commands(commands_dict):
   """
   for mem in commands_dict.keys(): 
     args = commands_dict[mem]
-    if type(args) == type(()):
+    if type(args) == types.TupleType:
       exported.add_command(*((mem,)+args))
     else:
       exported.add_command(mem, args)
@@ -87,12 +87,12 @@ def unsomething_helper(args, func, ses, sing, plur):
     else:
       data = []
       for mem in removedthings:
-        if type(mem) == type(()) or type(mem) == type([]):
-          mem = "{" + string.join(mem, "} {") + "}"
+        if type(mem) == types.TupleType or type(mem) == types.ListType:
+          mem = "{%s}" % ("} {".join(mem))
           data.append("un%s: %s removed." % (sing, mem))
         else:
           data.append("un%s: {%s} removed." % (sing, mem))
-      data = string.join(data, "\n")
+      data = "\n".join(data)
     exported.write_message(data, ses)
 
 

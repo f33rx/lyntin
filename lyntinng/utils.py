@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.62 2002/11/09 04:21:59 willhelm Exp $
+# $Id: utils.py,v 1.64 2002/12/05 02:08:46 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
 in the application, but are useful in a variety of places.  They're 
 not dependent on application things, so it's easier to test them.
 """
-import os, string, re, time
+import os, string, re, time, types
 import ansi, lyntin
 
 # for finding non-escaped semi-colons in user input
@@ -412,7 +412,7 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
     wraplength = wraplength - 2
 
   # split the formatting from the text
-  if type(textlist) == type(''):
+  if type(textlist) == types.StringType:
     textlist = ansi.split_ansi_from_text(textlist)
 
   for i in range(0, len(textlist)):
@@ -497,7 +497,7 @@ def columnize(textlist, screenwidth=72, indent=0):
     idx = (idx + 1) % numrows
 
   rows = map(string.rstrip, map(string.join, rows))
-  return (indent * " ") + string.join(rows, "\n" + (indent * " "))
+  return (indent * " ") + ("\n" + (indent * " ")).join(rows)
 
 
 def parse_timespan(timespan):

@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.24 2002/12/14 23:37:23 willhelm Exp $
+# $Id: tkui.py,v 1.25 2002/12/22 23:07:21 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
 Lyntin, but largely re-coded in various areas.
 """
 
-import string, os, Tkinter, tkFont, ScrolledText, copy
+import os, Tkinter, tkFont, ScrolledText, copy, types
 import ansi, ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
@@ -300,7 +300,7 @@ class Tkui(ui.BaseUI):
     This is overridden from the 'ui.BaseUI'.
     """
     message = args[0]
-    if type(message) == type(''):
+    if type(message) == types.StringType:
       message = ui.Message(message, ui.LTDATA)
 
     line = message.data

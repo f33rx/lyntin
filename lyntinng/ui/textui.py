@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.37 2002/12/09 04:08:12 willhelm Exp $
+# $Id: textui.py,v 1.38 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
 """
-import string, re, sys, os, select
+import re, sys, os, select, types
 import lyntin, ansi, engine, hooks, event, utils, ui, exported
 
 HELP_TEXT = """
@@ -21,7 +21,13 @@ To enable GNU readline support (if it's available) use:
 
    --readline on
 
-at the command line.
+at the command line.  Also, depending on what terminal you're running
+Lyntin from, it might help to set the TERMTYPE at the commandline.
+Lyntin returns "lyntin" when asked, but doing something like:
+
+   --term xterm
+
+will kick Lyntin into returning "xterm" as the TERMTYPE.
 """
 
 try:
@@ -205,7 +211,7 @@ class Textui(ui.BaseUI):
     """
     message = args[0]
 
-    if type(message) == type(''):
+    if type(message) == types.StringType:
       message = ui.Message(message)
 
     line = message.data

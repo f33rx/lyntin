@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.16 2002/11/06 03:03:19 willhelm Exp $
+# $Id: helpmanager.py,v 1.17 2002/12/22 23:07:20 willhelm Exp $
 #######################################################################
 """
 Lyntin has a comprehensive X{help} system that can be accessed in-game
@@ -32,7 +32,7 @@ help file text, and also exporting help content into some format
 which then can be converted to a variety of other formats: HTML,
 XML, JoesMagicTextMarkup, ...
 """
-import string
+import types
 import utils, lyntin, manager
 
 class HelpManager(manager.Manager):
@@ -88,7 +88,7 @@ class HelpManager(manager.Manager):
     place = self._help_tree
     for mem in categorylist:
       if place.has_key(mem):
-        if type(place[mem]) == type({}):
+        if type(place[mem]) == types.DictType:
           place = place[mem]
         else:
           tmp = place[mem]
@@ -100,7 +100,7 @@ class HelpManager(manager.Manager):
         place = place[mem]
 
     if place.has_key(helpname):
-      if type(place[helpname]) == type({}):
+      if type(place[helpname]) == types.DictType:
         place[helpname]["__doc__"] = helptext
       else:
         place[helpname] = helptext
@@ -108,7 +108,7 @@ class HelpManager(manager.Manager):
       place[helpname] = helptext
 
     if categorylist:
-      fqn = "%s.%s" % (string.join(categorylist, "."), helpname)
+      fqn = "%s.%s" % (".".join(categorylist), helpname)
     else:
       fqn = "root.%s" % helpname
     return fqn
@@ -153,7 +153,7 @@ class HelpManager(manager.Manager):
     @type  tree: dict
     """
     for mem in tree.keys():
-      if type(tree[mem]) == type({}):
+      if type(tree[mem]) == types.DictType:
         self._trimTree(tree[mem])
 
         if len(tree[mem].keys()) == 0:
@@ -184,7 +184,7 @@ class HelpManager(manager.Manager):
     tree = self._help_tree
 
     for mem in categorylist:
-      if type(tree) == type({}):
+      if type(tree) == types.DictType:
         if tree.has_key(mem):
           tree = tree[mem]
         else:
@@ -192,7 +192,7 @@ class HelpManager(manager.Manager):
       else:
         raise ValueError, "FQN '%s' doesn't exist." % fqn
 
-    if type(tree) == type({}):
+    if type(tree) == types.DictType:
       list = []
       for key, value in tree.items():
         list.append("%s.%s" % (".".join(categorylist), key))
@@ -232,7 +232,7 @@ class HelpManager(manager.Manager):
     found = 1
 
     for mem in categorylist:
-      if type(tree) == type({}):
+      if type(tree) == types.DictType:
         if tree.has_key(mem):
           tree = tree[mem]
           breadcrumbs += "." + mem
@@ -256,7 +256,7 @@ class HelpManager(manager.Manager):
           currentbreadcrumbs = "%s.%s" % (nextbreadcrumbs, key)
           if key == categorylist[0]:
             potentialroots.append( (currentbreadcrumbs,nextnode[key]) )
-          if type(nextnode[key]) == type({}):
+          if type(nextnode[key]) == types.DictType:
             tosearch.append( (currentbreadcrumbs,nextnode[key]) )
 
       foundnodes = []
@@ -265,7 +265,7 @@ class HelpManager(manager.Manager):
       # they have they have categorylist[1:] under them.
       for bc,node in potentialroots:
         for key in categorylist[1:]:
-          if type(node) != type({}) or not node.has_key(key):
+          if type(node) != types.DictType or not node.has_key(key):
             bc=None
             node=None
           else:
@@ -290,10 +290,10 @@ class HelpManager(manager.Manager):
     else:
       error = ""
 
-    if type(tree) == type({}):
+    if type(tree) == types.DictType:
       list = []
       for key, value in tree.items():
-        if type(value) == type({}):
+        if type(value) == types.DictType:
           list.append("%s*" % (key,))
         else:
           list.append(key)
@@ -315,7 +315,7 @@ class HelpManager(manager.Manager):
       print tab + "Root:"
 
     for mem in tree.keys():
-      if type(tree[mem]) == type({}):
+      if type(tree[mem]) == types.DictType:
         print "%s  %s:" % (tab, mem)
         self._printTree(tree[mem], tab + "  ")
       else:

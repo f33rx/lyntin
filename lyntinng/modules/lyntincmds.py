@@ -4,9 +4,9 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.25 2002/12/24 00:48:20 willhelm Exp $
+# $Id: lyntincmds.py,v 1.26 2002/12/24 00:52:56 willhelm Exp $
 #######################################################################
-import string
+import types
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
@@ -25,7 +25,7 @@ def _fixmap(w, themap):
   output = []
 
   for mem in keys:
-    if type(themap[mem]) == type([]):
+    if type(themap[mem]) == types.ListType:
       output.append("   %s %s" % (mem.ljust(w), themap[mem][0]))
       for mem2 in themap[mem][1:]:
         output.append((18 * " ") + mem2)
@@ -155,7 +155,7 @@ def datagrep_cmd(ses, args, input):
 
   ret = ses.getDataBuffer().grepbuffer(pattern,size)
   exported.write_message("datagrep %s results:\n%s"
-                         % (pattern, string.join(ret, "\n")), ses)
+                         % (pattern, "\n".join(ret)), ses)
 
 commands_dict["datagrep"] = (datagrep_cmd, "pattern size:int=300")
 
@@ -175,7 +175,7 @@ def datagreplines_cmd(ses, args, input):
   size = args["size"]
   ret = ses.getDataBuffer().greplines(pattern,size)
   exported.write_message("datagreplines %s results:\n%s"
-                         % (pattern, string.join(ret, "")), ses)
+                         % (pattern, "".join(ret)), ses)
 
 commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
 
@@ -233,7 +233,7 @@ def diagnostics_cmd(ses, args, input):
   for mem in lyntin.options.keys():
     message.append("   %s: %s" % (mem, repr(lyntin.options[mem])))
 
-  exported.write_message(string.join(message, "\n"))
+  exported.write_message("\n".join(message))
   exported.write_message("This information can be dumped to a "
         "file by doing:\n   #diagnostics dumpfile.txt")
 
@@ -244,7 +244,7 @@ def diagnostics_cmd(ses, args, input):
       f = open(logfile, "w")
       f.write("This file was created on: %s" % time.asctime())
       f.write(os.linesep + os.linesep)
-      f.write(string.join(message, os.linesep))
+      f.write(os.linesep.join(message))
       f.close()
       exported.write_message("diagnostics: written out to file %s." % logfile)
     except Exception, e:
