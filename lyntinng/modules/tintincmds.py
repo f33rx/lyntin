@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.49 2002/10/23 23:59:09 willhelm Exp $
+# $Id: tintincmds.py,v 1.50 2002/10/24 23:07:04 willhelm Exp $
 #######################################################################
 import string, traceback, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -475,6 +475,7 @@ def session_cmd(ses, args, input):
 
   if not exported.get_engine().isUniqueSessionName(name):
     exported.write_error("session: session of that name already exists.")
+    return
 
   sock = None
   ses = None

@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.25 2002/10/16 23:59:07 willhelm Exp $
+# $Id: textui.py,v 1.26 2002/10/24 23:07:04 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
 """
-import string, re, sys, traceback
-import engine, hooks, event, utils, ui, exported
+import string, re, sys, traceback, os
+import lyntin, ansi, engine, hooks, event, utils, ui, exported
 
 HELP_TEXT = """
 The textui is the most basic ui you can get.  It works great over
@@ -20,6 +20,9 @@ time, because it's so basic, it tends to be a good testing ui.
 The textui has no special features.
 """
 myui = None
+
+DEFAULT = [-1, -1, -1]
+DEFAULT_ANSI = chr(27) + "[0m"
 
 def get_ui_instance():
   global myui
@@ -38,6 +41,8 @@ class Textui(ui.BaseUI):
     ui.BaseUI.__init__(self)
     hooks.startup_hook.register(self.startui)
     hooks.to_user_hook.register(self.write)
+    self._currcolors = {}
+    self._unfinishedcolor = {}
 
   def startui(self, args):
     """ Sets up the UI."""
@@ -86,42 +91,96 @@ class Textui(ui.BaseUI):
 
   def write(self, args):
     """
-    Handles writing information from the mud and/or SB
+    Handles writing information from the mud and/or Lyntin
     to the user.
     """
+    global DEFAULT, DEFAULT_ANSI
+
     # FIXME - re-write this so it handles the pretext better
     # without getting ANSI color bleed from the mud
     message = args[0]
+
     if type(message) == type(''):
-      sys.stdout.write ("lyntin: " + message.replace("\n", "\nlyntin: ") + 
-                        "\n")
+      message = "lyntin: " + utils.chomp(message).replace("\n", "\nlyntin: ")
+      if lyntin.ansicolor == 1:
+        message = DEFAULT_ANSI + message
+      sys.stdout.write(message + "\n")
       return
 
+    line = message.data
+    ses = message.session
+
+    # we prepend the session name to the text if this is not the 
+    # current session sending text.
     pretext = ""
-    if (message.session != None 
-        and message.session != exported.get_current_session()):
-      pretext = "[" + message.session.getName() + "] "
+    if (ses != None and ses != exported.get_current_session()):
+      pretext = "[" + ses.getName() + "] "
 
-    if message.type == ui.ERROR:
-      pretext = "error: " + pretext
+    if message.type == ui.ERROR or message.type == ui.LTDATA:
+      if message.type == ui.ERROR:
+        pretext = "error: " + pretext
+      else:
+        pretext = "lyntin: " + pretext
 
-    elif message.type == ui.LTDATA:
-      pretext = "lyntin: " + pretext
+      line = pretext + utils.chomp(line).replace("\n", "\n" + pretext)
+      if lyntin.ansicolor == 1:
+        line = DEFAULT_ANSI + line 
+      sys.stdout.write(line + "\n")
+      return
 
     elif message.type == ui.USERDATA:
       # we don't print user data in the textui
       return
 
-    if pretext != "":
-      if len(message.data) > 0 and message.data[-1] == "\n":
-        message.data = (pretext + 
-                        message.data[:-1].replace("\n", "\n" + pretext) + 
-                        "\n")
-      else:
-        message.data = pretext + message.data.replace("\n", "\n" + pretext)
 
-    sys.stdout.write(message.data)
-    sys.stdout.flush()
+    index = 0
+    start = 0
+
+    if lyntin.ansicolor == 0:
+      if pretext:
+        if line[-1] == "\n":
+          line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
+        else:
+          line = pretext + line.replace("\n", "\n" + pretext)
+      sys.stdout.write(line)
+      sys.stdout.flush()
+      return
+
+    # each session has a saved current color for mud data.  we grab
+    # that current color--or user our default if we don't have one
+    # for the session yet.
+    if self._currcolors.has_key(ses):
+      color = self._currcolors[ses]
+    else:
+      color = DEFAULT
+
+    # some sessions have an unfinished color as well--in case we
+    # got a part of an ansi color code in a mud message, and the other
+    # part is in another message.
+    if self._unfinishedcolor.has_key(ses):
+      leftover = self._unfinishedcolor[ses]
+    else:
+      leftover = ""
+
+    lines = line.splitlines(1)
+    if lines:
+      for i in range(0, len(lines)):
+        mem = lines[i]
+        acolor = ansi.convert_tuple_to_ansi(color)
+
+        if pretext:
+          lines[i] = DEFAULT_ANSI + pretext + acolor + mem
+        else:
+          lines[i] = DEFAULT_ANSI + acolor + mem
+
+        color, leftover = ansi.figure_color(mem, color, leftover)
+
+      self._currcolors[ses] = color
+      self._unfinishedcolor[ses] = leftover
+
+      sys.stdout.write("".join(lines))
+      sys.stdout.flush()
+
 
   def prompt(self):
     """ Prints a prompt to the user."""

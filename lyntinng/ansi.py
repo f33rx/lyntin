@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.1 2002/10/20 16:09:57 willhelm Exp $
+# $Id: ansi.py,v 1.2 2002/10/20 16:59:23 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -240,6 +240,9 @@ def figure_color(textlist, currentcolor, leftover=""):
     textlist.insert(0, leftover)
     leftover = ''
 
+  if type(textlist) == type(''):
+    textlist = split_ansi_from_text(textlist)
+
   for mem in textlist:
     if is_color_token(mem):
       color = mem[2:-1]
@@ -281,6 +284,27 @@ def figure_color(textlist, currentcolor, leftover=""):
       
   return currentcolor, leftover
 
+
+def convert_tuple_to_ansi(token):
+  options = token[0]
+  fg = token[1]
+  bg = token[2]
+
+  color = []
+
+  if options == 1:
+    color.append("1")
+
+  if fg != -1:
+    color.append(str(fg))
+
+  if bg != -1:
+    color.append(str(bg))
+
+  if len(color) == 0:
+    return chr(27) + "[0m"
+
+  return chr(27) + "[" + ";".join(color) + "m"
 
 # Local variables:
 # mode:python

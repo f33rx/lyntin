@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.54 2002/10/20 16:09:57 willhelm Exp $
+# $Id: utils.py,v 1.55 2002/10/24 23:07:03 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -58,19 +58,15 @@ def exists_dir(dir):
 
 def chomp(text):
   """
-  Removes all CR and LF from the input string.  This is similar to
-  but not the same as the Perl chomp function.
-
-  WARNING:  because this removes ALL CR and LF from the string, you
-  should probably only call it on strings that consist of one line.
+  Removes all CR and LF from the end of the input string.
 
   @param text: the text to chomp
   @type  text: string
 
-  @returns: the text without any CR or LF
+  @returns: the text without CR or LF at the end.
   @rtype: string
   """
-  return re.sub("\n|\r", '', text)
+  return re.sub("[\n\r]+$", '', text)
 
 
 def http_get(url):
