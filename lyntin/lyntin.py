@@ -39,7 +39,7 @@ def InternalError():
     import traceback
     traceback.print_exc()
     print '\n\nPlease submit a bug report describing the circumstances ' +\
-          'including the traceback at http://lyntin.sourceforget.net'
+          'including the traceback at http://lyntin.sourceforget.net/'
     sys.exit(1)
     
 def main():
@@ -58,7 +58,7 @@ def main():
     app.set_path(ltd)
     app.run()
 
-debugging = 1
+debugging = 0
 if __name__ == '__main__':
     if debugging:
         main()
