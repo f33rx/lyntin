@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: test.py,v 1.1 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -55,6 +55,15 @@ if __name__ == '__main__':
   print wrap_text(text, indent=5)
   print wrap_text(text, indent=5, firstline=1)
 
+  text = "Hi.  Check this out: Thistexthasnospacesinitandmightcausethingstocrashorgointoaninfiniteloopandstuff.whichwouldbesuperbad.  What do you think?"
+  print wrap_text(text)
+  print wrap_text(text, indent=5)
+
+  text = "This is some text \33[1;37mwith some\33[0m ansi formatting in it to see if we can handle wrapping with it \33[1;37mtoo.\33[0m"
+  print wrap_text(text)
+  print wrap_text(text, indent=5)
+
+  """
   print "time parsing test"
   from utils import parse_timespan
   _pass_fail(parse_timespan("1h"), 3600)
@@ -84,3 +93,4 @@ if __name__ == '__main__':
   _pass_fail(expand_vars(r"This has no vars.", varmap), "This has no vars.")
   _pass_fail(expand_vars(r"$var1 $var2 $var3", varmap), "value1 value2 value3")
   _pass_fail(expand_vars(r"$var1 $$var2 \$var3", varmap), r"value1 $$var2 \$var3")
+  """

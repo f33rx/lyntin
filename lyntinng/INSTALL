@@ -4,7 +4,7 @@
 VERSION
 =======
 
-$Id: INSTALL,v 1.6 2002/07/14 15:14:00 willhelm Exp $
+$Id: INSTALL,v 1.7 2002/07/14 20:53:57 jmberne Exp $
 
 For more up-to-date documentation, check out the web-site at:
 http://lyntin.sourceforge.net/
@@ -27,8 +27,7 @@ UNIX/LINUX
    you don't have Python 2.0 or later installed, Lyntin won't work.
 2. Download the version of Lyntin you're looking for (below) 
 3. Untar the client into ~/lyntin or something along those lines
-4. Do ``chmod 775 lyntin.py`` to set the lyntin.py file to be executable
-5. Run lyntin.py
+4. Run ``python lyntin.py``
 
 lyntin.py takes a series of options.  For a list of options 
 and explanations, run::

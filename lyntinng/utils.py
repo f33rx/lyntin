@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.37 2002/07/11 04:11:19 willhelm Exp $
+# $Id: utils.py,v 1.38 2002/07/13 20:34:29 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -327,6 +327,25 @@ def insert_cr(text, index, indent=0):
   return (text[:index] + '\n' + (indent * ' ') + text[index+1:].lstrip())
 
 
+def find_next_break(token, marker, wrapcount, wraplength):
+  # first we check to see to see if we need to find a break
+  if len(token) < marker - wrapcount + wraplength:
+    return -1
+
+  # first we look at carriage returns--they're fun and yummy!
+  x = token.rfind("\n", marker, marker + wrapcount - wraplength)
+  if x != -1 and x - wrapcount - marker < wraplength:
+    return x
+
+  # ok--no carriage returns.  so we try going out wraplength and working
+  # to the left for spaces.
+  x = token.rfind(" ", marker, marker - wrapcount + wraplength)
+  if x != -1:
+    return x
+
+  return marker - wrapcount + wraplength
+
+
 def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
   """
   It takes a block of text and wraps it nicely.
@@ -348,8 +367,8 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
 
     (string) the wrapped text 
   """
-  wrapcount = 0               # how much we've got on the line so far
-  linecount = 0               # which line we're on
+  wrapcount = 0           # how much we've got on the line so far
+  linecount = 0           # which line we're on
 
   if wraplength > 2:
     wraplength = wraplength - 2
@@ -359,67 +378,27 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
     textlist = split_ansi_from_text(textlist)
 
   for i in range(0, len(textlist)):
-
     # COLOR TOKEN
     if is_color_token(textlist[i]):
-      pass
+      continue
 
     # TEXT TOKEN
+    marker = 0
+
+    if firstline:
+      x = find_next_break(textlist[i], marker, wrapcount, wraplength - indent)
     else:
-      marker = 0
+      x = find_next_break(textlist[i], marker, wrapcount, wraplength)
 
-      # while we keep finding carriage returns...
-      x = textlist[i].find('\n')
-      while x != -1:
+    while x != -1:
+      textlist[i] = insert_cr(textlist[i], x, indent)
+      marker = x + indent + 1
+      wrapcount = 0
 
-        # if the carriage return is in a nice place we wrap there.
-        if wrapcount + (x - marker) < wraplength:
-          textlist[i] = insert_cr(textlist[i], x, indent)
-          marker = x + 1
-          wrapcount = 0
+      x = find_next_break(textlist[i], marker, wrapcount, wraplength - indent)
 
-        # if the carriage return is not in a nice place.
-        else:
-          breakpoint = x
-          # we look to the left for a space to wrap on.
-          while wrapcount + (breakpoint - marker) > wraplength:
-            breakpoint = textlist[i].rfind(' ', marker, breakpoint)
-            if breakpoint <= marker:
-              break
+    wrapcount = len(textlist[i]) - marker + wrapcount
 
-          # we either found a breakpoint or there are no spaces.
-          # in the case of a breakpoint, we break.  otherwise
-          # we just don't wrap that line....  i'm not a big fan
-          # of wrapping inside a word thing.
-          if breakpoint > marker:
-            textlist[i] = insert_cr(textlist[i], breakpoint, indent)
-
-          marker = breakpoint + 1
-          wrapcount = 0
-
-        x = textlist[i].find('\n', marker)
-
-      # at this point there are no more carriage returns.  so we gots
-      # to break at spaces.
-
-      # if the remaining string exceeds the wraplength...       
-      while len(textlist[i]) - marker + wrapcount >= wraplength:
-        breakpoint = textlist[i].rfind(' ', 
-                                       marker, 
-                                       marker + wraplength - wrapcount)
-
-        # we start looking from the end of the string leftwards
-        # until we find a space
-
-        # if there's a nice break point, we wrap there...
-        if breakpoint > marker:
-          textlist[i] = insert_cr(textlist[i], breakpoint, indent)
-          wrapcount = 0
-          marker = breakpoint
-        else:
-          break
-
-      wrapcount += len(textlist[i]) - marker
 
   # this next line joins the list with no separator (GASP!)
   if firstline:
