@@ -30,6 +30,13 @@ class client(dict_plus.c):
        self.numerrors = 0
        self.commands = {}  # holds command mappings above and beyond core
       
+   def ReturnCommandHash(self):
+       """ReturnCommandList(self) -> command hash
+
+       Returns the hash of commands.
+       """
+       return self.commands
+
    def AddCommand(self, name, func):
        """AddCommand(self) -> None
        

@@ -31,6 +31,14 @@ def lyntin_add_command(str, func):
     """
     data.theapp.AddCommand(str, func)
 
+def lyntin_get_commands():
+    """lyntin_get_commands() -> command hash
+
+    Returns the hash of all the commands available.  This
+    was tossed in so i could do some testing and may be
+    changed in the future.
+    """
+    return data.theapp.ReturnCommandHash()
 
 def get_session(sesname):
     """get_session(sesname) -> session ob

@@ -174,6 +174,24 @@ def PutReallyUntouchedLine(line):
 ### User standard commands
 ###
 
+def PrintCommands(words, input, seslist):
+    """PrintCommands(words, input, seslist) -> None
+
+    Prints all the commands to the screen in a pretty list.
+    """
+    the_list = data.theapp.ReturnCommandHash().keys()
+    the_list.sort()
+    new_line = 'Commands:\n   '
+    count = 1
+    for mem in the_list:
+        new_line = new_line + string.ljust(mem, 16)
+        if (count % 3) == 0:
+            PutUntouchedLine(new_line)
+            new_line = '   '
+        count = count + 1
+    PutUntouchedLine(new_line + "\n")
+    return
+
 def AddCommand(words, input, seslist):
     """AddCommand(words, input, seslist) -> None
 
@@ -1169,6 +1187,7 @@ def InitPlayer():
     data.theapp.AddCommand("^quit", player.Quit)
     data.theapp.AddCommand("uncommand", player.UnCommand)
     data.theapp.AddCommand("command", player.AddCommand)
+    data.theapp.AddCommand("printcommands", player.PrintCommands)
     data.theapp.AddCommand("action", player.Action)
     data.theapp.AddCommand("databuffer", player.DataBuffer)
     data.theapp.AddCommand("datagreplines", player.DataGrepLines)
