@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.31 2002/06/04 00:52:39 willhelm Exp $
+# $Id: utils.py,v 1.32 2002/06/09 02:11:45 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -687,6 +687,71 @@ def parse_time(timearg):
     print e
     return None
 
+def figure_color(textlist, currentcolor, leftover=""):
+  """ 
+  Takes a textlist of text and color tokens and figures out
+  the latest current color.
+
+  arguments:
+
+    'textlist' -- the list of strings and ansi color codes
+
+    'currentcolor' -- a tuple of three items that represent
+                      the current color.  
+                      (attribute, foreground, background)
+
+    'leftover=""' -- if we encounter a half done color code
+                     we throw it in the leftover.  the leftover
+                     gets prepended to the first textlist element
+                     on the next run of figureColor
+
+  returns:
+
+    the new currentcolor and leftover as a tuple
+  """
+  if leftover:
+    ind = textlist[0].find("m")
+    if ind > -1:
+      leftover += textlist[0][:ind]
+      textlist[0] = textlist[0][ind+1:]
+    textlist.insert(0, leftover)
+    leftover = ''
+
+  for mem in textlist:
+    if is_color_token(mem):
+      color = mem[2:-1]
+      color = color.split(";")
+      for i in color:
+        if not i.isdigit():
+          continue
+
+        i = int(i)
+
+        if i == 0:
+          # 0 is a reset
+          currentcolor = [-1, -1, -1]
+      
+        elif 0 < i and i < 10:
+          # these are ansi color attributes
+          currentcolor[0] = i
+
+        elif 30 <= i and i < 40:
+          # these are foreground attributes
+          currentcolor[1] = i
+
+        elif 40 <= i and i < 50:
+          # these are background attributes
+          currentcolor[2] = i
+
+  # we're looking for leftover pieces here
+  if len(textlist) > 0:
+    mem = textlist[-1]
+    if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
+      leftover = mem
+
+  return currentcolor, leftover
+
+
 def _pass_fail(testoutput, realoutput):
   """ Used for testing purposes."""
   if testoutput == realoutput:
@@ -734,6 +799,12 @@ if __name__ == '__main__':
   print replace_vars("#test 1 2 3", "#test %:-1")
   print replace_vars("#test 1 2 3", "#test %1:-1")
 
+  """
+  print "figure color test"
+  textlist = split_ansi_from_text("Hi \33[1;37mThis is\33[0m text.")
+  _pass_fail(figure_color(
+  """
+
   print "time parsing test"
   print parse_timespan("1h")
   print parse_timespan("1m")
@@ -746,4 +817,3 @@ if __name__ == '__main__':
   print parse_time("4m")
   print parse_time("9")
   print parse_time("1:17:34a")
-  

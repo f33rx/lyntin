@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.27 2002/06/04 03:47:23 willhelm Exp $
+# $Id: highlight.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -168,7 +168,7 @@ class HighlightData:
 
       # here we sweep through the text string to update our current
       # color and leftover color attributes
-      self._currcolor, self._colorleftover = self.figureColor(textlist, self._currcolor)
+      self._currcolor, self._colorleftover = utils.figure_color(textlist, self._currcolor, self._colorleftover)
 
       text = string.join(textlist, "")
 
@@ -209,7 +209,7 @@ class HighlightData:
     for mem in textlist[:i]:
       newlist.append(mem)
     newlist.append(textlist[i][:place])
-    newcolor = self.figureColor(newlist, self._currcolor)[0]
+    newcolor = utils.figure_color(newlist, self._currcolor)[0]
     newlist.append(hl)
 
     # if the string to highlight begins and ends in the
@@ -240,7 +240,7 @@ class HighlightData:
         else:
           break
       else:
-        newcolor = self.figureColor([textlist[j]], newcolor, '')[0]
+        newcolor = utils.figure_color([textlist[j]], newcolor, '')[0]
 
     newlist.append(textlist[j][:memlength])
     newlist.append(chr(27) + "[0m")
@@ -268,73 +268,6 @@ class HighlightData:
     else:
       c = chr(27) + "[" + string.join(c, ";") + "m"
     return c
-
-  def figureColor(self, textlist, currentcolor, leftover=-1):
-    """ 
-    Takes a textlist of text and color tokens and figures out
-    the latest current color.
-
-    arguments:
-
-      'textlist' -- the list of strings and ansi color codes
-
-      'currentcolor' -- a tuple of three items that represent
-                        the current color.  
-                        (attribute, foreground, background)
-
-      'leftover=-1' -- if we encounter a half done color code
-                       we throw it in the leftover.  the leftover
-                       gets prepended to the first textlist element
-                       on the next run of figureColor
-
-    returns:
-
-      the new currentcolor and leftover as a tuple
-    """
-    if leftover == -1:
-      leftover = self._colorleftover
-
-    if leftover:
-      ind = textlist[0].find("m")
-      if ind > -1:
-        leftover += textlist[0][:ind]
-        textlist[0] = textlist[0][ind+1:]
-      textlist.insert(0, leftover)
-      leftover = ''
-
-    for mem in textlist:
-      if utils.is_color_token(mem):
-        color = mem[2:-1]
-        color = color.split(";")
-        for i in color:
-          if not i.isdigit():
-            continue
-
-          i = int(i)
-
-          if i == 0:
-            # 0 is a reset
-            currentcolor = [-1, -1, -1]
-      
-          elif 0 < i and i < 10:
-            # these are ansi color attributes
-            currentcolor[0] = i
-
-          elif 30 <= i and i < 40:
-            # these are foreground attributes
-            currentcolor[1] = i
-
-          elif 40 <= i and i < 50:
-            # these are background attributes
-            currentcolor[2] = i
-
-    # we're looking for leftover pieces here
-    if len(textlist) > 0:
-      mem = textlist[-1]
-      if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
-        leftover = mem
-
-    return currentcolor, leftover
 
   def getInfo(self, text=""):
     """ Returns information about the highlights in here.
@@ -441,6 +374,8 @@ class HighlightManager(manager.Manager):
     else:
       if self._highlights.has_key(ses):
         return self._highlights[ses].expand(text)
+
+    return text
 
 
 commands_dict = {}
