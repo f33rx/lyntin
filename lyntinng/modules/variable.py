@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.18 2002/12/18 04:47:59 willhelm Exp $
+# $Id: variable.py,v 1.19 2002/12/22 23:07:21 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -338,14 +338,15 @@ def variable_cmd(ses, args, input):
   (which defaults to $) and the variable name.  In the case of the
   above, the variable name would be $hps.
 
-  There are also system variables ($HOME, $TIMESTAMP, $DATADIR) and
-  global variables.  To set a global variable, it must be preceded
+  There are also system variables $HOME, $TIMESTAMP, and $DATADIR 
+  (must be upper-cased) and global variables.  To set a global 
+  variable which can be used in all sessions, it must be preceded
   by a _.
 
   examples:
     #variable {_fun} {happy fun ball}
-
-  Global variables can be accessed by any session.
+    #showme $_fun
+    #showme $TIMESTAMP
 
   category: commands
   """
