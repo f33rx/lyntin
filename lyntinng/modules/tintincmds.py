@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.4 2002/05/05 17:29:31 jmberne Exp $
+# $Id: tintincmds.py,v 1.5 2002/05/05 17:49:52 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -266,19 +266,25 @@ With an argument, shows that specific help file.
     exported.write_message(data)
     return
 
+
   command_list = exported.get_commands()
   helpfiles = dircache.listdir(helpdir + "/")
-
 
   if item[0] == lyntin.commandchar:
     item = item[1:]
 
-  if item in command_list:
-    ap = exported.get_engine().getArgParser(item)
-    if ap:
-      data += "syntax: %s %s\n" % (item, ap.syntaxline)
+  if "^" + item in command_list:
+    commandname = "^" + item
+  else:
+    commandname = item
 
-    command = exported.get_engine().getCommand(item)
+  if commandname in command_list:
+    ap = exported.get_engine().getArgParser(commandname)
+    if ap:
+      data += "syntax: %s%s %s\n" % (lyntin.commandchar, item, ap.syntaxline)
+
+    command = exported.get_engine().getCommand(commandname)
+    helptext = ""
     if command and command.__doc__:
       helptext = command.__doc__
 
