@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.25 2002/05/16 03:35:21 willhelm Exp $
+# $Id: utils.py,v 1.26 2002/05/17 00:07:34 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -490,9 +490,9 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
 
   # this next line joins the list with no separator (GASP!)
   if firstline:
-    return (indent * " ") + ''.join(textlist) + '\n'
+    return (indent * " ") + ''.join(textlist)
   else:
-    return ''.join(textlist) + '\n'
+    return ''.join(textlist)
 
 
 def columnize(textlist, screenwidth=72, indent=0):
