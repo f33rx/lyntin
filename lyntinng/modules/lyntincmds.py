@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.33 2003/02/25 00:08:10 willhelm Exp $
+# $Id: lyntincmds.py,v 1.34 2003/02/28 01:05:09 jmberne Exp $
 #######################################################################
 import types, re
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -53,7 +53,10 @@ def config_cmd(ses, args, input):
     globmap = {"ansicolor": bv(lyntin.ansicolor) + " (boolean)",
                "commandchar": lyntin.commandchar + " (char)",
                "mudecho": bv(lyntin.mudecho) + " (boolean)",
-               "speedwalk": bv(lyntin.speedwalk) + " (boolean)"}
+               "speedwalk": bv(lyntin.speedwalk) + " (boolean)",
+               "debugmode": bv(lyntin.debugmode) + " (boolean)",
+               "promptdetection": bv(lyntin.promptdetection) + " (boolean)"}
+
     if lyntin.evalmode == lyntin.EVALMODE_LYNTIN:
       globmap["evalmode"] = "lyntin  (\"lyntin\" or \"tintin\")"
     elif lyntin.evalmode == lyntin.EVALMODE_TINTIN:
@@ -67,13 +70,13 @@ def config_cmd(ses, args, input):
               "verbatim": bv(ses._verbatim) + " (boolean)"}
 
     output = "Commandline:\n"
-    output += _fixmap(14, lyntin.options) + "\n"
+    output += _fixmap(16, lyntin.options) + "\n"
 
     output += "Global:\n"
-    output += _fixmap(14, globmap) + "\n"
+    output += _fixmap(16, globmap) + "\n"
 
     output += "Session:\n"
-    output += _fixmap(14, sesmap) + "\n"
+    output += _fixmap(16, sesmap) + "\n"
 
     exported.write_message(output, ses)
     return
@@ -106,7 +109,7 @@ def config_cmd(ses, args, input):
         exported.write_error("config: '%s' is not a valid %s value." % (value, name), ses)
     return
 
-  if name in ["ansicolor", "speedwalk"]:
+  if name in ["ansicolor", "speedwalk", "debugmode", "promptdetection"]:
     if not value:
       value = getattr(lyntin, name)
       exported.write_message("config: %s set to %s." % (name, bv(value)), ses)

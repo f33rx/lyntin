@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.37 2002/12/04 03:46:28 willhelm Exp $
+# $Id: lyntin.py,v 1.38 2003/01/18 16:49:10 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -122,6 +122,14 @@ variablechar = '$'
 
 # the character used to denote commands
 commandchar = '#'
+
+# whether (1) or not (0) we're in debug mode which helps us figure out
+# how our commands are being evaluated
+debugmode = 0
+
+# whether (1) or not (0) we're doing prompt detection.  prompt detection
+# is done in net.py when mud data comes in.
+promptdetection = 0
 
 # whether (1) or not (0) we do speedwalking checks
 speedwalk = 1

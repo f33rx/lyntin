@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.83 2003/02/14 01:48:23 willhelm Exp $
+# $Id: engine.py,v 1.84 2003/02/15 03:35:04 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -235,6 +235,9 @@ class Engine:
         exactly what the user typed--this is for the history manager)
     @rtype: string
     """ 
+    if lyntin.debugmode == 1:
+      exported.write_message("evaluating: %s" % input)
+
     inputlist = utils.split_commands(input)
     if session == None:
       session = self._current_session

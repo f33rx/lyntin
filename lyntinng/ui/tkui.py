@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.33 2003/01/24 02:59:56 willhelm Exp $
+# $Id: tkui.py,v 1.34 2003/02/15 03:35:06 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -97,14 +97,14 @@ class _Event:
   def execute(self, tkui):
     pass
 
-class _OutputEvent(Event):
+class _OutputEvent(_Event):
   def __init__(self, text):
     self._text = text
 
   def execute(self, tkui):
     tkui.write_internal(self._text)
 
-class _TitleEvent(Event):
+class _TitleEvent(_Event):
   def __init__(self, tk, title):
     self._tk = tk
     self._title = title
@@ -112,7 +112,7 @@ class _TitleEvent(Event):
   def execute(self, tkui):
     tkui._tk.title(self._title)
 
-class _WriteWindowEvent(Event):
+class _WriteWindowEvent(_Event):
   def __init__(self, windowname, message):
     self._windowname = windowname
     self._message = message

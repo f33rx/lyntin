@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.34 2003/03/26 00:16:34 willhelm Exp $
+# $Id: net.py,v 1.35 2003/04/07 03:21:55 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -121,7 +121,6 @@ class SocketCommunicator:
     """
     if prompt:
       r = "(" + IAC+GA + "|" + IAC+TELOPT_EOR + "|" + prompt + ")"
-      print "setting prompt"
     else:
       r = "(" + IAC+GA + "|" + IAC+TELOPT_EOR + ")"
     return re.compile(r)
@@ -296,7 +295,10 @@ class SocketCommunicator:
     data = data.replace(BELL, "")
 
     # handle IAC GA, IAC TELOPT_EOR, and text prompts
-    splitdata = self._prompt_regex.split(data)
+    if lyntin.promptdetection == 1:
+      splitdata = self._prompt_regex.split(data)
+    else:
+      splitdata = [data]
 
     # we split on prompts so that we serialize MudEvents with prompt_hook
     # calls.  this allows inline prompt detection in the stream.
