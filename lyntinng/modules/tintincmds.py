@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.1 2002/05/05 15:20:16 willhelm Exp $
+# $Id: tintincmds.py,v 1.2 2002/05/05 15:46:16 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -208,7 +208,9 @@ regular expression matching syntax as you see fit.
 ex: #gag {has missed you.}    <-- will prevent any incoming line
                                   with "has missed you" to be shown.
   """
-  if not args.has_key("text"):
+  gaggedtext = args["text"]
+
+  if not gaggedtext:
     data = session.getManager("gag").getInfo()
     if data == '':
       data = "gag: no gags defined."
