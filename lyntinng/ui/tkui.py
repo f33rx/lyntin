@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.2 2002/06/07 23:43:31 willhelm Exp $
+# $Id: tkui.py,v 1.3 2002/06/15 14:17:01 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -13,6 +13,8 @@ Lyntin, but largely re-coded in various areas.
 
 import string, os, Tkinter, tkFont, ScrolledText
 import ui, hooks, event, engine, exported, lyntin
+
+UNICODE_ENCODING = "latin-1"
 
 """
 0 -- all off
@@ -470,7 +472,7 @@ class CommandEntry(Tkinter.Entry):
         
   def createInputEvent(self, tkevent):
     """ Handles the <KeyPress-Return> event."""
-    val = self.get()
+    val = fix_unicode(self.get())
     self._partk.handleinput(val)
 
     # self._inputstack.insert(0, val)
@@ -664,7 +666,20 @@ class CommandEntry(Tkinter.Entry):
       self.insert(0, hist[self.hist_index])
 
 class Autotyper:
+  """
+  Autotyper class, it generates the autotyper window, waits for entering text
+  and then calls a function to work with the text.
+  """
+  
   def __init__(self, master, sendfunc):
+    """
+    Initializes the autotyper.
+    
+    arguments:
+    
+      'master' -- (Tkinter.Tk instance) the main tk window
+      'sendfunc' -- (function) the callback function
+    """
     self._sendfunc = sendfunc
     
     self._tk = Tkinter.Toplevel(master)
@@ -694,11 +709,25 @@ class Autotyper:
     engine.myengine.startthread("autotyper", self._tk.mainloop)
   
   def send(self):
-    text = self._txt.get(1.0, Tkinter.END)
-    
+    """
+    Will be called when the user clicks on the 'Send' button.
+    """
+    text = fix_unicode(self._txt.get(1.0, Tkinter.END))
     self._sendfunc(text)
     self._tk.destroy()
   
   def cancel(self):
+    """
+    Will be called when the user clicks on the 'Cancel' button.
+    """
     self._sendfunc(None)
     self._tk.destroy()
+
+def fix_unicode(text):
+    """
+    Unicode to standard string translation, fixes unicode bug.
+    """
+    if type(text) == unicode:
+        return text.encode(UNICODE_ENCODING)
+    else:
+        return text
