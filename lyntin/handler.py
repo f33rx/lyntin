@@ -9,7 +9,7 @@
 #
 # a handler intercepts server output at a primitive level,
 # and can respond to it or change the input for the next handler.
-# $Id: handler.py,v 1.3 2001/04/28 06:51:50 willhelm Exp $
+# $Id: handler.py,v 1.4 2001/04/28 07:28:02 willhelm Exp $
 ##################################################################
 
 """
@@ -43,3 +43,10 @@ class AppHandler:
 
         return (CONTINUE, read)
 
+
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:

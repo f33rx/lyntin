@@ -179,3 +179,11 @@ def echo_off():
     Alerts the ui to shut off echo.
     """
     data.theapp.ui.OffEcho()
+
+
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:

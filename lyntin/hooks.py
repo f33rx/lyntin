@@ -223,3 +223,11 @@ tickset_command_hook = Hook()
 
 """arg tuple contains a list of sessions."""
 tick_command_hook = Hook()
+
+
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:

@@ -205,3 +205,11 @@ def split_action(ac):
             ac_trigger = ac_trigger[1:-1]
 
     return (ac_trigger, ac_response)
+
+
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:

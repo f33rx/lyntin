@@ -1276,3 +1276,11 @@ def init_player():
     data.theapp.AddCommand("verbose", player.Verbose)
     data.theapp.AddCommand("version", player.Version)
     data.theapp.AddCommand("write", player.WriteFile)
+
+
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:

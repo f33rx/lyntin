@@ -73,3 +73,10 @@ if __name__ == '__main__':
             pass
         except:
             InternalError()
+
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:
