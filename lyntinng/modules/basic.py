@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.57 2002/04/11 23:30:47 willhelm Exp $
+# $Id: basic.py,v 1.58 2002/04/12 03:13:37 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -170,7 +170,7 @@ def datagrep_cmd(session, words, input):
   printing all matches in their entirety.
   """
   if (len(words) < 2):
-    exported.write_error("syntax: #datagrep {pattern}")
+    exported.write_error("syntax: #datagrep <pattern>")
     return
 
   if (session.getName() == "common"):
@@ -190,7 +190,7 @@ def datagreplines_cmd(session, words, input):
   entirety.
   """
   if (len(words) < 2):
-    exported.write_error("syntax: #datagreplines {pattern}")
+    exported.write_error("syntax: #datagreplines <pattern>")
     return
 
   if (session.getName() == "common"):
@@ -433,7 +433,7 @@ def if_cmd(session, words, input):
   # original if_cmd code contributed by Sebastian John
 
   if len(words) < 3:
-    exported.write_error("syntax: #if {<expr>} {<action>}")
+    exported.write_error("syntax: #if <expr> <action>")
     return
 
   try:
@@ -532,7 +532,7 @@ def loop_cmd(session, words, input):
   """
   import event
   if len(words) < 3:
-    exported.write_error("syntax: #loop {<from>,<to>} {command}")
+    exported.write_error("syntax: #loop <from,to> <command>")
     return
 
   try:
@@ -544,7 +544,7 @@ def loop_cmd(session, words, input):
     looprange = looprange.split(',')
 
     if len(looprange) != 2:    
-      exported.write_error("syntax: #loop {<from>,<to>} {command}")
+      exported.write_error("syntax: #loop <from,to> <command>")
       return
 
     # remove trailing and leading whitespace and convert to ints
@@ -570,6 +570,36 @@ def loop_cmd(session, words, input):
 
   except Exception, e:
     exported.write_error("loop: error in the loop. %s", e)
+
+
+def math_cmd(session, words, input):
+  """#math <variable> <math ops>
+
+  Implements the #math command which allows you to manipulate
+  variables above and beyond setting them.
+  """
+  if len(words) < 3:
+    exported.write_error("syntax: #math <variable> <math ops>")
+    return
+
+  try:
+    inputadjusted = input.split(" ", 1)[1]
+    var, ops = utils.split_braced(inputadjusted)
+  except Exception, e:
+    exported.write_error("math: problems splitting arguments. %s" % e)
+    return
+  
+
+  # we have to do manual variable expansion here.
+  varexpansion = session.getManager("variable").expand(ops)
+  if varexpansion:
+    ops = varexpansion
+
+  try:
+    rvalue = eval(ops)
+    session.getManager("variable").addVariable(var, repr(rvalue))
+  except Exception, e:
+    exported.write_error("math: exception: %s" % e)
 
 
 def mudecho_cmd(session, words, input):
@@ -1037,7 +1067,7 @@ def variable_cmd(session, words, input):
     (a, b) = utils.split_braced(inputadjusted)
 
     session.getManager("variable").addVariable(a, b)
-    exported.write_message("variable: " + a + " -> '" + b + "'")
+    exported.write_message("variable: " + a + " -> '" + b + "'.")
   except Exception, e:
     exported.write_error("variable: cannot be set. %s", e)
 
@@ -1142,6 +1172,7 @@ def load():
   exported.add_command("log", log_cmd)
   exported.add_command("loop", loop_cmd)
   # exported.add_command("map", map_cmd)
+  exported.add_command("math", math_cmd)
   # exported.add_command("mark", mark_cmd)
   # exported.add_command("message", message_cmd)
   exported.add_command("mudecho", mudecho_cmd)

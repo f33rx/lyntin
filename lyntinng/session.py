@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.30 2002/04/11 03:19:56 willhelm Exp $
+# $Id: session.py,v 1.31 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -305,6 +305,11 @@ class Session:
 
     for i in range(0, len(inputlines)):
       mem = inputlines[i]
+      # call the pre-filter hook
+      spamtuple = self,mem,mem
+      spamtuple = hooks.mud_filter_hook.spamhook(spamtuple)
+      mem = spamtuple[2]
+
       # handle gags
       mem = self.getManager("gag").removeGaggedText(mem)
 

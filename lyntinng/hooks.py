@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.2 2002/04/11 03:58:22 willhelm Exp $
+# $Id: hooks.py,v 1.3 2002/04/12 03:13:37 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -27,8 +27,9 @@ class Hook:
   """
   def __init__(self):
     self.functionlist = []
+    self.defaultMapper = lambda x,y:x
 
-  def spamhook(self, arglist=()):
+  def spamhook(self, arglist=(), mappingFunction=None):
     """ Sends out input to all the registrants of a hook.
 
     arguments:
@@ -36,10 +37,17 @@ class Hook:
       'arglist' -- (list of arguments--depends on hook)
                    the list of arguments that gets passed to
                    each function in the hook 
-    """
-    for mem in self.functionlist:
-      mem(arglist)
 
+      'mappingFunction' -- function whose output will be passed to the next
+                           function in the hook.  Must take two arguments, 
+                           the previous arglist and the return from the 
+                           previous function
+    """
+    mappingFunction = mappingFunction or self.defaultMapper
+    for mem in self.functionlist:
+      output = mem(arglist)
+      arglist = mappingFunction(arglist,output)
+    return arglist
 
   def unregister(self, func):
     """
@@ -157,3 +165,36 @@ When the user_custom variable too_many_errors is exceeded.
 arg tuple is empty.
 """
 too_many_errors_hook = Hook()
+
+"""
+This is the mapping function to use for filter-style hooks.  
+Spamhook should be called as 
+spamtuple = hook.spamhook( (session,original,original) );
+output = spamtuple[2]
+Each filter function will get (session,original,filteredoriginal) 
+when it is called.
+"""
+def filter_mapper(x,y):
+  return x[0],x[1],y
+
+"""
+Whenever data comes back from the mud it will first be passed through
+all filter functions.
+These should return the text that should be processed as if it came from the mud.
+arg tuple will contain the session, the original text and the currently filtered text
+"""
+mud_filter_hook = Hook()
+mud_filter_hook.defaultMapper=filter_mapper
+
+#"""
+#
+#"""
+#user_filter_hook = Hook()
+#user_filter_hook.defaultMapper=filter_mapper
+
+
+
+
+
+
+
