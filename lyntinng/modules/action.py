@@ -4,11 +4,28 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.15 2002/10/26 15:17:24 willhelm Exp $
+# $Id: action.py,v 1.16 2002/10/31 02:40:50 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
-(triggers) and expansion of actions.
+(triggers), matching triggers in mud_data and executing the resulting
+action on behalf of the user for that session.
+
+The ActionManager contains an ActionData object for every session that
+has actions.
+
+An action consists of:
+
+1. the trigger statement
+2. the response statement
+3. whether or not the action is a onetime action
+
+We also store a compiled regular expression of the trigger which
+we use on incoming mud_data to check for triggered actions.
+
+The compiled regular expressions gets recompiled every time a variable
+changes--this allows us to handle Lyntin variables in the action trigger
+statements.
 """
 import re, string, copy, ansi
 import manager, utils, event, lyntin, hooks, exported, modutils
@@ -16,8 +33,6 @@ import manager, utils, event, lyntin, hooks, exported, modutils
 # the placement variable regular expression
 VARREGEXP = re.compile('%_?(\d+)')
 
-# for finding placement variable holders in the action triggers
-COMPILEVARREGEXP = re.compile('%_?[0-9]+')
 
 class ActionData:
   def __init__(self, ses):
@@ -29,19 +44,18 @@ class ActionData:
     Compiles a trigger pattern and adds the entire action to the
     hash.
 
-    arguments:
+    @param trigger: the trigger pattern
+    @type  trigger: string
 
-      'trigger' -- (string) the trigger pattern
+    @param response: what to do when the trigger pattern is found
+    @type  response: string
 
-      'response' -- (string) what to do when the trigger pattern
-                    is found
+    @param onetime: if the trigger is found, should this action then
+        get removed after the response is executed
+    @type  onetime: boolean
 
-      'onetime' -- (boolean) whethere this should be an auto-removing action
-
-    returns:
-
-      (int) always returns a 1
-
+    @return: 1
+    @rtype:  boolean
     """
     if lyntin.evalmode == lyntin.TINTIN:
       # first we expand variables in the action trigger then compile
@@ -54,7 +68,7 @@ class ActionData:
     self._actions[trigger] = (trigger, compiled, response, onetime)
     return 1
 
-  def recompileRegexps(self):
+  def _recompileRegexps(self):
     """
     When a variable changes, we go through and recompile all the
     regular expressions for the actions in this session.
@@ -80,18 +94,14 @@ class ActionData:
     returns the list of actions that were removed so the calling
     function knows what actually happened.
 
-    arguments:
+    @param text: all actions that match this text pattern will 
+        be removed.  the text pattern is "expanded" by 
+        "utils.expand_text"
+    @type  text: string
 
-      'text' -- (string) all actions that match this text pattern
-                will be removed.  the text pattern is "expanded" by
-                'utils.expand_text'
-
-    returns:
-
-      list of tuples (trigger, response) of the action.  both
-      trigger and response are strings--the same strings used when
-      calling 'addAction'.
-
+    @return: list of tuples (trigger, response) of the action
+        that were removed.
+    @rtype: (string, string)
     """
     badactions = utils.expand_text(text, self._actions.keys())
 
@@ -107,11 +117,8 @@ class ActionData:
     Returns a list of all the actions this actionmanager is currently
     managing.
 
-    returns:
-
-      list of triggers for the actions we're managing.  the trigger
-      is a string.
-
+    @return: list of triggers for the actions we're managing.
+    @rtype: list of strings
     """
     list = self._actions.keys()
     list.sort()
@@ -122,11 +129,8 @@ class ActionData:
     Checks to see if text triggered any actions.  Any resulting 
     actions will get added as an InputEvent to the queue.
 
-    arguments:
-
-      'text' -- (string) the data coming from the mud to check
-                for triggers on
-
+    @param text: the data coming from the mud to check for triggers
+    @type  text: string
     """
     # FIXME - make sure this works even when lines are broken up.
 
@@ -166,29 +170,28 @@ class ActionData:
 
 
   def getStatus(self):
-    """ Returns a one-liner as to how many actions we have.
+    """
+    Returns a one-liner as to how many actions we have.
 
-    returns:
-
-      (string) a description of our status.
+    @return: a description of the status of this manager
+    @rtype:  string
     """
     return "%d action(s)." % len(self._actions)
 
   def getInfo(self, text=""):
-    """ Returns information about the actions in here.
+    """
+    Returns information about the actions in here.
 
     This is used by #action to tell all the actions involved
     as well as #write which takes this information and dumps
     it to the file.
 
-    arguments:
+    @param text: the text to expand to find actions the user
+        wants information about.
+    @type  text: string
 
-      'text=""' -- (string) the text to expand on to find
-                   actions that the user is interested in
-
-    returns:
-
-      a string of all the action information
+    @return: a string containing all the action information
+    @rtype: string
     """
     if len(self._actions.keys()) == 0:
       return ''
@@ -208,11 +211,11 @@ class ActionData:
     return string.join(data, "\n")
 
   def getCount(self):
-    """ Returns how many aliases we're managing.
+    """
+    Returns how many aliases we're managing.
 
-    returns:
-
-      (int) the number of aliases being managed.
+    @return: the number of actions being managed.
+    @rtype: int
     """
     return len(self._actions)
 
@@ -257,12 +260,10 @@ class ActionManager(manager.Manager):
           self.addAction(newsession, mem, acdata[mem][2], acdata[mem][3])
 
   def removeSession(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._actions.has_key(ses):
       del self._actions[ses]
 
   def getStatus(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._actions.has_key(ses):
       return self._actions[ses].getStatus()
     return "0 action(s)."
@@ -293,7 +294,7 @@ class ActionManager(manager.Manager):
     """
     ses = args[0]
     if self._actions.has_key(ses):
-      self._actions[ses].recompileRegexps()
+      self._actions[ses]._recompileRegexps()
 
   def mudfilter(self, args):
     """
@@ -313,15 +314,12 @@ def get_ordered_vars(text):
   Takes in a string and removes any ordered variables
   from it.  Returns a list of the variables.
 
-  arguments:
+  @param text: the incoming string which may have ordered variables in it.
+  @type  text: string
 
-    'text' -- (string) the incoming string which may have
-              ordered variables in it.
-
-  returns:
-
-    list of strings of the form '%[0-9]+' for ordered variable
-    substitution.
+  @return: list of strings of the form '%[0-9]+' for ordered variable
+      substitution.
+  @rtype: list of strings
   """
   keylist = []
   matches = VARREGEXP.findall(text)

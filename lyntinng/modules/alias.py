@@ -4,11 +4,29 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.12 2002/10/12 22:14:48 willhelm Exp $
+# $Id: alias.py,v 1.13 2002/10/23 23:59:09 willhelm Exp $
 #######################################################################
 """
-This module defines the AliasManager which handles aliases,
-compiling, and checking and such.
+This module defines the AliasManager which manages aliases, creating new
+aliases, removing aliases, checking user input for aliases, expanding
+aliases, and other such things.
+
+The AliasManager has an AliasData object for every session that has
+aliases.
+
+An alias consists of an "alias" and an "expansion".  So if there is
+an alias:
+
+   l3k -> #ses a localhost 3000
+
+the "alias" is "l3k" and the "expansion" is "#ses a localhost 3000".
+Whenever the user types "l3k" this module expands it to 
+"#ses a localhost 3000" which then (after going through other user_filter
+hook functions) gets executed.
+
+Aliases are currently handled via string finding and not regular
+expressions.  At some point in the future, this will be changed to
+regular expressions to better handle a wider variety of aliases.
 """
 import string
 import manager, utils, lyntin, exported, hooks, modutils
@@ -19,37 +37,40 @@ class AliasData:
     self._aliases = {}
 
   def addAlias(self, name, expansion):
-    """ Adds an alias to the dict.
+    """
+    Adds an alias to the dict.
 
-    arguments:
+    @param name: the alias name
+    @type  name: string
 
-      'name' -- (string) the alias name
+    @param expansion: the string the alias expands to
+    @type  expansion: string
 
-      'expansion' -- (string) the alias expansion
+    @raises ValueError: when the name is the same as the expansion
     """
     if name == expansion:
       raise ValueError, "name cannot equal expansion."
     self._aliases[name] = expansion
 
   def clear(self):
-    """ Removes all the aliases."""
+    """
+    Removes all the aliases.
+    """
     self._aliases.clear()
 
   def removeAliases(self, text):
-    """ Removes aliases from the list.
+    """
+    Removes aliases from the list.
 
     Returns a list of tuples of alias name/expansion that
     were removed.
 
-    arguments:
+    @param text: the text which when run through util.expand
+        gives us the aliases to remove
+    @type  text: string
 
-      'text' -- (string) the text which when run through
-                util.expand gives us the aliases to remove
-
-    returns:
-
-      list of (name, expansion) tuples
-    
+    @return: the list of alias/expansions that match the text
+    @rtype: list of (string, string)
     """
     badaliases = utils.expand_text(text, self._aliases.keys())
 
@@ -61,25 +82,23 @@ class AliasData:
     return ret
 
   def getAliases(self):
-    """ Returns the keys of the alias dict.
+    """
+    Returns the keys of the alias dict.
 
-    returns:
-
-      list of strings
-
+    @return: all the aliases we're managing (but not the expansions)
+    @rtype: list of strings
     """
     list = self._aliases.keys()
     list.sort()
     return list
 
   def getAlias(self, alias):
-    """ Does an alias lookup and returns the alias in question or
+    """
+    Does an alias lookup and returns the alias in question or
     an empty string.
 
-    returns:
-
-      (string) empty string or the alias expansion
-
+    @returns: empty string or the alias expansion
+    @rtype: string
     """
     if self._aliases.has_key(alias):
       return self._aliases[alias]
@@ -87,19 +106,18 @@ class AliasData:
       return ""
 
   def expand(self, input):
-    """ Looks at user input and expands any aliases involved.
+    """
+    Looks at user input and expands any aliases involved.
 
     It'll return the expansion if there is one.  Otherwise
     it returns None.
 
-    arguments:
+    @param input: the user input to expand
+    @type  input: string
 
-      'input' -- the user input
-
-    returns:
-
-      the alias expansion for the given input if it's an
-      alias, or None if it is not.
+    @return: the alias expansion for the given input if it's an alias
+        or None
+    @rtype: string
     """
     if len(input) > 0:
       # pull out the first word of the input
@@ -112,23 +130,28 @@ class AliasData:
     return None
 
   def getStatus(self):
+    """
+    Returns the one-line status of this manager.
+
+    @return: the one line status
+    @rtype: string
+    """
     return "%d alias(es)." % len(self._aliases)
     
   def getInfo(self, text=""):
-    """ Returns information about the aliases in here.
+    """
+    Returns information about the aliases in here.
 
     This is used by #alias to tell all the aliases involved
     as well as #write which takes this information and dumps
     it to the file.
 
-    arguments:
+    @param text: the text to expand to find aliases the user
+        wants information about.
+    @type  text: string
 
-      'text=""' -- (string) the text to match
-
-    arguments:
-
-      a string telling about all the aliases and expansions
-      in this manager.
+    @return: a string containing all the alias information
+    @rtype: string
     """
     if len(self._aliases) == 0:
       return ''
@@ -146,11 +169,11 @@ class AliasData:
     return string.join(data, "\n")
 
   def getCount(self):
-    """ Returns the alias count.
+    """
+    Returns the alias count.
 
-    returns:
-
-      (int) the number of aliases managed
+    @return: the number of aliases managed
+    @rtype: int
     """
     return len(self._aliases)
 
@@ -219,19 +242,7 @@ class AliasManager(manager.Manager):
 
   def userfilter(self, args):
     """ 
-    Handle the filtering of input through the current aliases.
-    If input gets changed then we pass it back to
-    exported.get_engine().HandleUserData and return None to stop
-    this chain of filtering.
-
-    arguments:
-
-      'args' -- (tuple) user_filter_hook arg tuple (session, internal,
-                input, filtered)
-
-    returns:
-
-      filtered text or None if any changes took place.
+    user_filter_hook.
     """
     # we check for aliases here--and if we find some, we
     # do the variable expansion and then recurse over the result
@@ -253,7 +264,6 @@ class AliasManager(manager.Manager):
       return None
 
   def addSession(self, newsession, basesession=None):
-    """ over-ridden from manager.Manager."""
     if basesession:
       if self._aliasdata.has_key(basesession):
         aldata = self._aliasdata[basesession]
@@ -261,7 +271,6 @@ class AliasManager(manager.Manager):
           self.addAlias(newsession, mem, aldata._aliases[mem])
 
   def removeSession(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._aliasdata.has_key(ses):
       del self._aliasdata[ses]
 

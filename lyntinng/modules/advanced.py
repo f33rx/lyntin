@@ -4,12 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.25 2002/10/26 15:17:24 willhelm Exp $
+# $Id: advanced.py,v 1.26 2002/10/31 02:40:50 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
 and attempts to execute it in the lyntinuser.py module.  If no such
 module exists, it executes it in this module.
+
+It also holds import_cmd which does a lot of other magic stuff.
 """
 import os, sys, string
 import exported, engine, ui.ui, utils, lyntin
@@ -19,7 +21,12 @@ onetime = 0
 
 def _get_user_module():
   """
-  Imports and returns the nicest user module it can find.
+  Imports and returns the nicest user module it can find.  If we've
+  already imported a usermodule, then we use the cached one we
+  imported before so we're not doing this over and over again.
+
+  @returns: the user module we just imported or None
+  @rtype: module
   """
   global usermodule
   if usermodule:

@@ -4,8 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
+# $Id: __init__.py,v 1.6 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
+"""
+This is the ui package.  Ui's to be used in Lyntin need to be dropped
+in here.  ui's should extend the ui.BaseUI class and should also
+implement the get_ui function that actually returns an instance of
+the ui.
+
+See the textui and tkui as examples.
+"""
 import glob, os
 
 def get_ui(uiname):
