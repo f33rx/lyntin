@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.53 2002/05/22 01:35:50 jmberne Exp $
+# $Id: session.py,v 1.54 2002/05/29 23:58:03 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -303,6 +303,8 @@ class Session:
         return
       else:
         input = spamtuple[-1]
+
+    input = input.replace("\\;", ";")
 
     # handle lyntin commands
     if len(input) > 1 and input[0] == lyntin.commandchar:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.44 2002/05/09 16:57:57 jmberne Exp $
+# $Id: engine.py,v 1.45 2002/05/09 23:20:11 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -35,7 +35,6 @@ myengine is a singleton.  so when it gets instantiated, this
 variable can be used to retrieve the engine singleton.
 """
 myengine = None
-
 
 class Engine:
   """
@@ -219,7 +218,8 @@ class Engine:
 
     for mem in inputlist:
       # chomp it, replace \; -> ;, and strip leading/trailing whitespace
-      mem = utils.chomp(mem).replace("\;", ";").strip()
+      # FIXME mem = utils.chomp(mem).replace("\;", ";").strip()
+      mem = utils.chomp(mem).strip()
 
       if len(mem) == 0:
         mem = lyntin.commandchar + "cr"

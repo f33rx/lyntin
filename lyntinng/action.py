@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.29 2002/05/27 23:12:59 jmberne Exp $
+# $Id: action.py,v 1.30 2002/05/28 03:42:40 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -17,7 +17,7 @@ import manager, utils, event, lyntin
 VARREGEXP = re.compile('%_?(\d+)')
 
 class ActionManager(manager.Manager):
-  """ Extends the base manager class to manages actions."""
+  """ Extends the base manager class to manage actions."""
   def __init__(self):
     self._actions = {}
 
@@ -65,6 +65,9 @@ class ActionManager(manager.Manager):
       (int) always returns a 1
 
     """
+
+    # Note: if you change the tuple, you need to change the __copy__
+    # method as well!
     compiled = self._compileAction(trigger)
     self._actions[trigger] = (trigger, compiled, response, onetime)
     return 1
@@ -208,7 +211,6 @@ class ActionManager(manager.Manager):
 
       event.InputEvent(response, internal=1).enqueue()
 
-
   def getInfo(self, text=""):
     """ Returns information about the actions in here.
 
@@ -236,8 +238,10 @@ class ActionManager(manager.Manager):
 
     data = []
     for mem in list:
+      actup = self._actions[mem]
+
       data.append("%saction {%s} {%s} onetime=%s" % 
-              (lyntin.commandchar, mem, self._actions[mem][2], self._actions[mem][3]))
+              (lyntin.commandchar, mem, actup[2], actup[3]))
 
     return string.join(data, "\n")
 
@@ -248,7 +252,7 @@ class ActionManager(manager.Manager):
 
       (int) the number of aliases being managed.
     """
-    return len(self._actions.keys())
+    return len(self._actions)
 
   def filter(self, args):
     """

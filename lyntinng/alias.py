@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.15 2002/05/16 14:27:45 jmberne Exp $
+# $Id: alias.py,v 1.16 2002/05/18 03:45:59 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -132,13 +132,13 @@ class AliasManager(manager.Manager):
       a string telling about all the aliases and expansions
       in this manager.
     """
-    if len(self._aliases.keys()) == 0:
+    if len(self._aliases) == 0:
       return ''
 
-    if text=='':
-      list = self._aliases.keys()
-    else:
-      list = utils.expand(text, self._aliases.keys())
+    list = self._aliases.keys()
+
+    if text:
+      list = utils.expand(text, list)
 
     data = []
     for mem in list:
@@ -154,7 +154,7 @@ class AliasManager(manager.Manager):
 
       (int) the number of aliases managed
     """
-    return len(self._aliases.keys())
+    return len(self._aliases)
 
   def filter(self, args):
     """ Handle the filtering of input through the current aliases.
