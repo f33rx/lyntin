@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.1 2002/04/29 00:31:42 jmberne Exp $
+# $Id: speedwalk.py,v 1.2 2002/04/29 05:02:05 willhelm Exp $
 #######################################################################
 """
 This module defines the SpeedwalkManager which handles speedwalking
@@ -38,9 +38,9 @@ class SpeedwalkManager(manager.Manager):
     """
     text = tuple[-1]
     if lyntin.speedwalk == 1:
-      if self.SPEEDWALK_REGEXP.search(text) and text != "news":
+      if SPEEDWALK_REGEXP.search(text) and text != "news":
         return self.expand_speedwalk(text)
-    return tex
+    return text
 
 
   def expand_speedwalk(self, input):
