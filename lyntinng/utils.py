@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.24 2002/05/16 01:59:15 willhelm Exp $
+# $Id: utils.py,v 1.25 2002/05/16 03:35:21 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -373,6 +373,128 @@ def replace_vars(input, expansion):
   return expansion
 
 
+def insert_cr(text, index, indent=0):
+  """
+  Inserts a carriage return into the line and deals with indenting
+  the next line (if need be).
+
+  arguments:
+
+    'text' -- (string) the text in question
+
+    'index' -- (int) the place to stick the cr
+
+    'indent=0' -- (int) how much to indent the next line
+
+  returns:
+
+    (string) the text with the cr at the index and the next line
+    indented so many spaces
+
+  """
+  return (text[:index] + '\n' + (indent * ' ') + text[index+1:].lstrip())
+
+def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
+  """
+  It takes a block of text and wraps it nicely.
+
+  arguments:
+
+    'textlist' -- (string) or (list of strings) either a string of 
+                  text needing to be formatted and 
+                  wrapped or a textlist--preferably the former.
+
+    'wraplength' -- (int) how many characters to wrap at
+
+    'indent=0' -- (int) how many spaces to indent each line
+
+    'firstline=0' -- (int) 0 if we don't indent the first line, 1 if we do
+
+
+  returns:
+
+    (string) the wrapped text 
+  """
+  wrapcount = 0               # how much we've got on the line so far
+  linecount = 0               # which line we're on
+
+  if wraplength > 2:
+    wraplength = wraplength - 2
+
+  # split the formatting from the text
+  if type(textlist) == type(''):
+    textlist = split_ansi_from_text(textlist)
+
+  for i in range(0, len(textlist)):
+
+    # COLOR TOKEN
+    if is_color_token(textlist[i]):
+      pass
+
+    # TEXT TOKEN
+    else:
+      marker = 0
+
+      # while we keep finding carriage returns...
+      x = textlist[i].find('\n')
+      while x != -1:
+
+        # if the carriage return is in a nice place we wrap there.
+        if wrapcount + (x - marker) < wraplength:
+          textlist[i] = insert_cr(textlist[i], x, indent)
+          marker = x + 1
+          wrapcount = 0
+
+        # if the carriage return is not in a nice place.
+        else:
+          breakpoint = x
+          # we look to the left for a space to wrap on.
+          while wrapcount + (breakpoint - marker) > wraplength:
+            breakpoint = textlist[i].rfind(' ', marker, breakpoint)
+            if breakpoint <= marker:
+              break
+
+          # we either found a breakpoint or there are no spaces.
+          # in the case of a breakpoint, we break.  otherwise
+          # we just don't wrap that line....  i'm not a big fan
+          # of wrapping inside a word thing.
+          if breakpoint > marker:
+            textlist[i] = insert_cr(textlist[i], breakpoint, indent)
+
+          marker = breakpoint + 1
+          wrapcount = 0
+
+        x = textlist[i].find('\n', marker)
+
+      # at this point there are no more carriage returns.  so we gots
+      # to break at spaces.
+
+      # if the remaining string exceeds the wraplength...       
+      while len(textlist[i]) - marker + wrapcount >= wraplength:
+        breakpoint = textlist[i].rfind(' ', 
+                                       marker, 
+                                       marker + wraplength - wrapcount)
+
+        # we start looking from the end of the string leftwards
+        # until we find a space
+
+        # if there's a nice break point, we wrap there...
+        if breakpoint > marker:
+          textlist[i] = insert_cr(textlist[i], breakpoint, indent)
+          wrapcount = 0
+          marker = breakpoint
+        else:
+          break
+
+      wrapcount += len(textlist[i]) - marker
+
+  # this next line joins the list with no separator (GASP!)
+  if firstline:
+    return (indent * " ") + ''.join(textlist) + '\n'
+  else:
+    return ''.join(textlist) + '\n'
+
+
 def columnize(textlist, screenwidth=72, indent=0):
   """
   Takes a list of data and converts it into a series of columns
@@ -450,6 +572,12 @@ if __name__ == '__main__':
             ["\33[1;37m", "This is", "\33[0"])
 
   print
+
+  text = "This is a really long line to see if we're wrapping correctly.  Because it's way cool when we write code that works.  Yay!"
+
+  print wrap_text(text)
+  print wrap_text(text, indent=5)
+  print wrap_text(text, indent=5, firstline=1)
 
   print "replace_vars tests"
   print replace_vars("#test 1 2 3", "#test")
