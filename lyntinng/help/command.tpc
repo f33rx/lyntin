@@ -14,11 +14,15 @@ character.
 
 	#<SESSION_NAME> <COMMAND...>
 
-2. You can execute commands in all sessions by typing 
+2. You can switch to another session by typing
+
+	#<SESSION_NAME>
+
+3. You can execute commands in all sessions by typing 
 
 	#all <COMMAND...>
 
-3. You can execute a command a number of times by typing 
+4. You can execute a command a number of times by typing 
 
 	#<NUMBER> <COMMAND...>
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.7 2002/07/21 04:14:48 willhelm Exp $
+# $Id: alias.py,v 1.8 2002/07/27 03:03:34 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -206,9 +206,15 @@ class AliasManager(manager.Manager):
     """
     ses = args[0]
     file = args[1]
+    quiet = args[2]
+
     data = self.getInfo(ses)
     if data:
-      file.write(data + "\n")
+      if quiet == 1:
+        data = data.replace("\n", " quiet={true}\n")
+        file.write(data + " quiet={true}\n")
+      else:
+        file.write(data + "\n")
 
   def filter(self, args):
     """ 
@@ -267,11 +273,8 @@ def alias_cmd(ses, args, input):
   With one argument, prints all aliases which match the arg.
   With multiple arguments, creates an alias.
 
-  You can use pattern variables which look like % and a number.  
-
-  ex:
-    %4  - is the fourth argument passed in
-    %0  - is all the arguments passed in
+  You can use pattern variables which look like % and a number.  %0 
+  will be all the arguments passed in.
 
   Ranges can be used by using python colon-syntax, specifying a
   half-open slice of the input items, so %0:3 is the alias name, first,
@@ -280,6 +283,11 @@ def alias_cmd(ses, args, input):
   Negative numbers count back from the end of the list.  So %-1 is the
   last item in the list, %:-1 is everything but the last item in the
   list. 
+
+  examples:
+
+    #alias {k} {kill %1}
+    #alias {gg} {put %1: in chest}
 
   category: commands
   """

@@ -4,46 +4,61 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.2 2002/07/17 01:21:58 willhelm Exp $
+# $Id: test.py,v 1.3 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
 Lyntin.
 """
-def _pass_fail(testoutput, realoutput):
+failures = 0
+
+def _pass_fail(desc, testoutput, realoutput):
   """ Used for testing purposes."""
+  import test
+
   if testoutput == realoutput:
-    print "   pass:", testoutput
+    # print "   pass:", testoutput
+    print "   pass:", desc
   else:
-    print "   fail:", testoutput
+    print "   fail:", desc, "\n", testoutput
+    test.failures += 1
 
 
 if __name__ == '__main__':
-  print "split_commands tests"
+  import test
+
   from utils import split_commands
-  _pass_fail(split_commands('test'), 
+  _pass_fail("split_commands 1", split_commands('test'), 
             ['test'])
-  _pass_fail(split_commands('test;test2'), 
+  _pass_fail("split_commands 2", split_commands('test;test2'), 
             ['test', 'test2'])
-  _pass_fail(split_commands('#alias t3k #ses a localhost 3000'),
+  _pass_fail("split_commands 3", 
+            split_commands('#alias t3k #ses a localhost 3000'),
             ['#alias t3k #ses a localhost 3000'])
-  _pass_fail(split_commands('#alias gv {put all in vortex;get all}'),
+  _pass_fail("split commands 4", 
+            split_commands('#alias gv {put all in vortex;get all}'),
             ['#alias gv {put all in vortex;get all}'])
-  _pass_fail(split_commands('#alias sv {put all in vortex;get all};test'),
+  _pass_fail("split_commands 5", 
+            split_commands('#alias sv {put all in vortex;get all};test'),
             ['#alias sv {put all in vortex;get all}', 'test'])
-  _pass_fail(split_commands(r'#showme \{ blah;#showme another }'), 
+  _pass_fail("split commands 6",
+            split_commands(r'#showme \{ blah;#showme another }'), 
             [r'#showme \{ blah', r'#showme another }'])
 
   print 
 
   from utils import split_ansi_from_text
-  _pass_fail(split_ansi_from_text("This is some text."),
+  _pass_fail("split_ansi_from_text 1",
+            split_ansi_from_text("This is some text."),
             ["This is some text."])
-  _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0m text."),
+  _pass_fail("split_ansi_from_text 2",
+            split_ansi_from_text("\33[1;37mThis is\33[0m text."),
             ["\33[1;37m", "This is", "\33[0m", " text."])
-  _pass_fail(split_ansi_from_text("Hi \33[1;37mThis is\33[0m text."),
+  _pass_fail("split_ansi_from_text 3",
+            split_ansi_from_text("Hi \33[1;37mThis is\33[0m text."),
             ["Hi ", "\33[1;37m", "This is", "\33[0m", " text."])
-  _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0"),
+  _pass_fail("split_ansi_from_text 4",
+            split_ansi_from_text("\33[1;37mThis is\33[0"),
             ["\33[1;37m", "This is", "\33[0"])
 
   print
@@ -51,49 +66,103 @@ if __name__ == '__main__':
   text = "This is a really long line to see if we're wrapping correctly.  Because it's way cool when we write code that works.  Yay!"
 
   from utils import wrap_text
-  print wrap_text(text)
-  print wrap_text(text, indent=5)
-  print wrap_text(text, indent=5, firstline=1)
+  _pass_fail("wrap text 1",
+            wrap_text(text),
+"""This is a really long line to see if we're
+wrapping correctly.  Because it's way cool when
+we write code that works.  Yay!""")
+
+  _pass_fail("wrap text 2",
+            wrap_text(text, indent=5),
+"""This is a really long line to see if we're
+     wrapping correctly.  Because it's way cool
+     when we write code that works.  Yay!""")
+  _pass_fail("wrap text 3",
+            wrap_text(text, indent=5, firstline=1),
+"""     This is a really long line to see if we're
+     wrapping correctly.  Because it's way cool
+     when we write code that works.  Yay!""")
+
 
   text = "Hi.  Check this out: Thistexthasnospacesinitandmightcausethingstocrashorgointoaninfiniteloopandstuff.whichwouldbesuperbad.  What do you think?"
-  print wrap_text(text)
-  print wrap_text(text, indent=5)
+  _pass_fail("wrap_text 4 (big big string)", wrap_text(text),
+"""Hi.  Check this out:
+Thistexthasnospacesinitandmightcausethingstocras
+orgointoaninfiniteloopandstuff.whichwouldbesuper
+ad.  What do you think?""")
+  _pass_fail("wrap_text 5 (big big string with indent)", 
+            wrap_text(text, indent=5),
+"""Hi.  Check this out:
+     Thistexthasnospacesinitandmightcausethingst
+     crashorgointoaninfiniteloopandstuff.whichwo
+     ldbesuperbad.  What do you think?""")
+
 
   text = "This is some text \33[1;37mwith some\33[0m ansi formatting in it to see if we can handle wrapping with it \33[1;37mtoo.\33[0m"
-  print wrap_text(text)
-  print wrap_text(text, indent=5)
+  _pass_fail("wrap_text 6 (with ansi)", wrap_text(text),
+"""This is some text \33[1;37mwith some\33[0m ansi formatting in
+it to see if we can handle wrapping with it \33[1;37mtoo.
+\33[0m""")
 
-  """
-  print "time parsing test"
+  _pass_fail("wrap_text 7 (with ansi)", wrap_text(text, indent=5),
+"""This is some text \33[1;37mwith some\33[0m ansi formatting in
+     it to see if we can handle wrapping with
+     it \33[1;37mtoo.\33[0m""")
+
+  print
+
   from utils import parse_timespan
-  _pass_fail(parse_timespan("1h"), 3600)
-  _pass_fail(parse_timespan("1m"), 60)
-  _pass_fail(parse_timespan("1s"), 1)
-  _pass_fail(parse_timespan("1h2m3s"), 3723)
-  _pass_fail(parse_timespan("17"), 17)
-  _pass_fail(parse_timespan("5h"), 3600 * 5)
+  _pass_fail("parse_timespan 1", parse_timespan("1h"), 3600)
+  _pass_fail("parse_timespan 2", parse_timespan("1m"), 60)
+  _pass_fail("parse_timespan 3", parse_timespan("1s"), 1)
+  _pass_fail("parse_timespan 4", parse_timespan("1h2m3s"), 3723)
+  _pass_fail("parse_timespan 5", parse_timespan("17"), 17)
+  _pass_fail("parse_timespan 6", parse_timespan("5h"), 3600 * 5)
+
+  print
 
   from utils import parse_time
-  print parse_time("4:20p")
-  print parse_time("4m")
-  print parse_time("9")
-  print parse_time("1:17:34a")
+  _pass_fail("parse_time 1", parse_time("4:20p"), 1029878400.0)
+  _pass_fail("parse_time 2", parse_time("4m"), 1029796956.9)
+  _pass_fail("parse_time 3", parse_time("9"), 1029796725.9)
+  _pass_fail("parse_time 4", parse_time("1:17:34a"), 1029824254.0)
 
-  from modules.alias import expand_placement_vars
-  print "expand_placement_vars tests"
-  print expand_placement_vars("#test 1 2 3", "#test")
-  print expand_placement_vars("#test 1 2 3", "#test %1 %2")
-  print expand_placement_vars("#test 1 2 3", "#test %0")
-  print expand_placement_vars("#test 1 2 3", "#test %-1")
-  print expand_placement_vars("#test 1 2 3", "#test %:-1")
-  print expand_placement_vars("#test 1 2 3", "#test %1:-1")
+  print
 
-  from modules.variable import expand_vars
+  from utils import expand_placement_vars
+  # these are lyntin mode tests
+  _pass_fail("expand_placement_vars 1", 
+            expand_placement_vars("#test 1 2 3", "#test"),
+            "#test 1 2 3")
+  _pass_fail("expand_placement_vars 2",
+            expand_placement_vars("#test 1 2 3", "#test %1 %2"),
+            "#test 1 2")
+  _pass_fail("expand_placement_vars 3",
+            expand_placement_vars("#test 1 2 3", "#test %0"),
+            "#test #test")
+  _pass_fail("expand_placement_vars 4",
+            expand_placement_vars("#test 1 2 3", "#test %-1"),
+            "#test 3")
+  _pass_fail("expand_placement_vars 5",
+            expand_placement_vars("#test 1 2 3", "#test %:-1"),
+            "#test #test 1 2")
+  _pass_fail("expand_placement_vars 6",
+            expand_placement_vars("#test 1 2 3", "#test %1:-1"),
+            "#test 1 2")
+
+  print
+
+  from utils import expand_vars
+  # these are lyntin mode tests
   varmap = {"var1": "value1", "var2": "value2", "var3": "value3"}
-  _pass_fail(expand_vars(r"This has no vars.", varmap), "This has no vars.")
-  _pass_fail(expand_vars(r"$var1 $var2 $var3", varmap), "value1 value2 value3")
-  _pass_fail(expand_vars(r"$var1 $$var2 \$var3", varmap), r"value1 $$var2 \$var3")
-  """
+  _pass_fail("expand_vars 1", 
+            expand_vars(r"This has no vars.", varmap), "This has no vars.")
+  _pass_fail("expand_vars 2", 
+            expand_vars(r"$var1 $var2 $var3", varmap), "value1 value2 value3")
+  _pass_fail("expand_vars 3", 
+            expand_vars(r"$var1 $$var2 \$var3", varmap), r"value1 $$var2 \$var3")
+
+  print "There were %d failures." % test.failures
 
 # Local variables:
 # mode:python

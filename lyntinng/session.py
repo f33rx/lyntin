@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.63 2002/07/21 04:14:48 willhelm Exp $
+# $Id: session.py,v 1.64 2002/07/30 23:07:42 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -139,20 +139,25 @@ class Session:
       return
 
     file = args[1]
+    quiet = args[2]
+    if quiet == 1:
+      quiet = " quiet={true}"
+    else:
+      quiet = ""
 
     data = []
 
     # saves speedwalking state
     if lyntin.speedwalk == 1:
-      data.append(lyntin.commandchar + "config speedwalk on")
+      data.append(lyntin.commandchar + "config speedwalk on" + quiet)
     else: 
-      data.append(lyntin.commandchar + "config speedwalk off")
+      data.append(lyntin.commandchar + "config speedwalk off" + quiet)
 
     # saves ansi state
     if lyntin.ansicolor == 1:
-      data.append(lyntin.commandchar + "config ansicolor on")
+      data.append(lyntin.commandchar + "config ansicolor on" + quiet)
     else: 
-      data.append(lyntin.commandchar + "config ansicolor off")
+      data.append(lyntin.commandchar + "config ansicolor off" + quiet)
 
     file.write(string.join(data, "\n") + "\n")
 

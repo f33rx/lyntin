@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
+# $Id: action.py,v 1.6 2002/07/22 22:33:04 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -200,7 +200,7 @@ class ActionData:
     for mem in list:
       actup = self._actions[mem]
 
-      data.append("%saction {%s} {%s} onetime=%s" % 
+      data.append("%saction {%s} {%s} onetime={%s}" % 
               (lyntin.commandchar, mem, actup[2], actup[3]))
 
     return string.join(data, "\n")
@@ -270,9 +270,15 @@ class ActionManager(manager.Manager):
     """
     ses = args[0]
     file = args[1]
+    quiet = args[2]
+
     data = self.getInfo(ses)
     if data:
-      file.write(data + "\n")
+      if quiet == 1:
+        data = data.replace("\n", " quiet={true}\n")
+        file.write(data + " quiet={true}\n")
+      else:
+        file.write(data + "\n")
 
   def variableChange(self, args):
     """
@@ -383,12 +389,6 @@ def action_cmd(ses, args, input):
   pattern against it, and saves any match it finds so you can 
   use it in the response.  See below for examples.
 
-  the onetime argument can be set to true to have the action remove
-  itself automatically if it is ever executed
-  The response can be any mud command or Lyntin command and can
-  contain placement-variables and the special variable %a which
-  means "the whole matched line".
-
   Triggers get converted to regular expressions by converting
   placement variables %[0-9]+ to (.+?).  Feel free to use
   regular expression matching stuff.
@@ -397,11 +397,19 @@ def action_cmd(ses, args, input):
   expressions.   %1 gets translated to (.+?) and %_1 gets translated
   to (\S+?).
 
-  ex:
+  The response can be any mud command or Lyntin command and can
+  contain placement-variables and the special variable %a which
+  means "the whole matched line".
+
+  The onetime argument can be set to true to have the action remove
+  itself automatically if it is ever executed.
+
+  examples:
+
      #action {^You are hungry} {get bread bag;eat bread}
      #action {EVISCERATES joey} {rescue joey}
      #action {%0 gives you %5} {say thanks for the %5, %0!}
-     #action {^%1 tells you %2$} {say %1 just told me %2}
+     #action {^%_1 tells\s+you %2$} {say %1 just told me %2}
 
   category: commands
   """
@@ -438,7 +446,12 @@ commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false q
 
 def unaction_cmd(ses, args, input):
   """
-  Allows you to remove actions.
+  Removes action(s) from the manager.
+
+  examples:
+
+    #unaction {missed you.}
+    #unaction missed*
 
   category: commands
   """

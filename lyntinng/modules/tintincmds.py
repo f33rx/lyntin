@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.40 2002/08/13 02:30:12 willhelm Exp $
+# $Id: tintincmds.py,v 1.41 2002/08/15 01:26:11 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -47,8 +47,8 @@ commands_dict["clear"] = (clear_cmd, "")
 
 def cr_cmd(session, args, input):
   """
-  This sends a carriage return to the mud.  Sometimes this is useful
-  in aliases that require a carriage return.
+  This sends a carriage return to the mud.  This is useful in aliases 
+  and actions that require a carriage return.
 
   category: commands
   """
@@ -60,6 +60,11 @@ commands_dict["^cr"] = (cr_cmd, "")
 def end_cmd(session, args, input):
   """
   Closes all sessions and quits out of Lyntin.
+
+  Note, on most muds this will leave your character in a state of 
+  linkdeath--it does not sell all your stuff, return you to town, 
+  save your character, tell your friends goodbye, or anything of 
+  that nature.
 
   category: commands
   """
@@ -74,6 +79,12 @@ def help_cmd(session, args, input):
   """
   With no arguments, shows all the help files available.
   With an argument, shows that specific help file.
+
+  examples:
+
+    #help
+    #help help
+    #help commands.substitute
 
   category: commands
   """
@@ -102,16 +113,17 @@ def history_cmd(session, args, input):
   ! will call an item in the history indexed by the number after
   the !.  You can also do replacements via the sub=repl syntax.
 
-  ex:
-     #history [count=30]
-         prints the last count entries in the history buffer
-     !
-         executes the last thing you did
-     !4
-         executes the fourth to last thing you did
-     !4 3k=gk
-         executes the fourth to last thing you did after replacing
-         3k with gk in it
+  examples:
+
+    #history [count=30]
+        prints the last count entries in the history buffer
+    !
+        executes the last thing you did
+    !4
+        executes the fourth to last thing you did
+    !4 3k=gk
+        executes the fourth to last thing you did after replacing
+        3k with gk in it
 
   category: commands
   """
@@ -134,10 +146,11 @@ def if_cmd(ses, args, input):
 
   Strings should be in single quotes:
 
-  ex:
-     #if {$myhpvar < 100} {#showme PANIC!}
-     #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
-     #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
+  examples:
+
+    #if {$myhpvar < 100} {#showme PANIC!}
+    #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
+    #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
 
   category: commands
   """
@@ -253,17 +266,24 @@ def loop_cmd(session, args, input):
   Executes a given command replacing %0 in the command with
   the range of numbers specified in <from> and <to>.
 
-  ex:
+  example:
 
-     #loop {1,5} {reclaim %0.corpse}
+    #loop {1,5} {reclaim %0.corpse}
 
   will execute:
 
-     reclaim 1.corpse
-     reclaim 2.corpse
-     reclaim 3.corpse
-     reclaim 4.corpse
-     reclaim 5.corpse
+    reclaim 1.corpse
+    reclaim 2.corpse
+    reclaim 3.corpse
+    reclaim 4.corpse
+    reclaim 5.corpse
+
+  A better way to execute a command a number of times without regard
+  to an index, would be:
+
+    #5 {reclaim corpse}
+
+  which will send "reclaim corpse" to the mud 5 times.
 
   category: commands
   """
@@ -305,6 +325,10 @@ def math_cmd(ses, args, input):
   """
   Implements the #math command which allows you to manipulate
   variables above and beyond setting them.
+
+  examples:
+
+    #math {hps} {$hps + 5}
 
   category: commands
   """
@@ -350,13 +374,13 @@ def read_cmd(ses, args, input):
 
   You can also read in via the commandline when you start Lyntin:
 
-     lyntin --read 3k
+    lyntin --read 3k
 
   And read can handle HTTP urls:
 
-     lyntin --read http://lyntin.sourceforge.net/lyntinrc
+    lyntin --read http://lyntin.sourceforge.net/lyntinrc
 
-     #read http://lyntin.sourceforge.net/lyntinrc
+    #read http://lyntin.sourceforge.net/lyntinrc
 
   Note: the first non-whitespace char is used to set the Lyntin
   command character.  If you use non Lyntin commands in your file,
@@ -402,22 +426,23 @@ commands_dict["read"] = (read_cmd, "filename")
 
 def session_cmd(session, args, input):
   """
-  This is the command you use to connect to the muds. The session that 
-  you startup will become the active session. That is, all commands you 
-  type, will be sent to this session.
+  This command creates a connection to a specific mud.  When you create
+  a session, that session becomes the active Lyntin session.
 
-  Here's a small example to get you started:
-  It shows how you can log into GrimneMUD with 2 chars and play a bit 
-  with them.
+  To create a session to 3k.org named "3k":
 
-  ex: #session valgar 129.241.36.229 4000 <= define a session named
-                                             'valgar'.
-  ex: #session eto gytje.pvv.unit.no 4000 <= define session named
-                                             'eto'.
-  You can change the active session, by typing #sessionname 
-  #eto      <= make the char in the 'eto' session the active one.
-  ...       <= all commands now go to session 'eto'.
-  #valgar   <= switching now to session 'valgar'.
+    #session 3k www.3k.org 5000
+
+  Then to create another session to another mud:
+
+    #session eto gytje.pvv.unit.no 4000
+
+  Then if 3k was your active session, you could do things on the eto
+  session by prepending your command with "#eto ":
+
+    #eto say hello
+
+  or switch to the eto session by typing just "#eto".
 
   category: commands
   """
@@ -496,8 +521,8 @@ def showme_cmd(ses, args, input):
   Will display {text} on your screen.  Doesn't get sent to the mud--
   just your screen.
 
-  ex:
-     #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
+  examples:
+    #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
 
   category: commands
   """
@@ -686,9 +711,9 @@ def write_cmd(session, args, input):
   You can then use the #read command to read this file in and
   restore your session settings.
 
-  The quiet argument lets you specify whether you want things to
-  be persisted in such a way that when you #read the command file
-  they are quiet as opposed to verbose in their messages.
+  The quiet argument lets you specify whether you want command data
+  to be written to the file so that when you read it back in with #read,
+  the commands are executed quietly.
 
   Note: Windows users should either use two \\'s or use / to separate
   directory names.
