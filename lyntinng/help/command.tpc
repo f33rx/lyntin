@@ -1,31 +1,27 @@
-Lyntin has a series of commands that have been registered with the client
-to enable you to change client side things.  For instance, there are
-Lyntin commands for creating a session to a mud, creating aliases, removing
-aliases, manipulating variables, so on and so forth.
+Lyntin uses Lyntin commands to allow you to manipulate the Lyntin client
+and setup your session with aliases, variables, actions, and such.
+Commands start with the command character--by default this is "#".  It
+can be changed with the "#config" command.  The command character can
+also do some other special things:
 
-Commands in Lyntin are denoted by the command character.  By default, this
-character is "#" but it can be changed using the #config command and 
-changing the commandchar.
+1. You can execute commands in another session by typing the command
+   character and then the sesion name: "#3k say hello" will say hello
+   in the 3k session.
 
-There are some other special things you can do using the command 
-character.
+2. You can switch to another session by typing the command character
+   and then the session name: "#3k" will switch to the 3k session.
 
-1. You can execute commands in other sessions by typing 
+3. You can execute a command in all sessions by typing the command
+   character then all: "#all say hello" will say hello in all sessions.
 
-	#<SESSION_NAME> <COMMAND...>
+4. You can execute a command a number of times by typing the command
+   character then a number, then the command: "#5 say hello" will
+   send "say hello" to the current session 5 times.
 
-2. You can switch to another session by typing
+Commands are separated by the semicolon.  Semicolons can be escaped
+with the \ character.
 
-	#<SESSION_NAME>
-
-3. You can execute commands in all sessions by typing 
-
-	#all <COMMAND...>
-
-4. You can execute a command a number of times by typing 
-
-	#<NUMBER> <COMMAND...>
-
-see also: semicolon
+Command arguments can be enclosed with { }.  This enables you to specify
+arguments that have multiple words in them.
 
 category: readme
