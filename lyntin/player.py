@@ -857,7 +857,7 @@ def Alias(words, input, seslist):
             if expanded:
                 count = count + len(expanded)
                 for al in expanded:
-                    PutUntouchedLine('#al {%s} = {%s}'%(al, ses.aliases[al]))
+                    PutUntouchedLine('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
             if not count:
                 Putline("alias: that alias is not defined")
 
@@ -865,7 +865,7 @@ def Alias(words, input, seslist):
             # print all current aliases
             for al in ses.aliases.keys():
                 count = count + 1
-                PutUntouchedLine('#al {%s} = {%s}'%(al, ses.aliases[al]))
+                PutUntouchedLine('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
             if count == 0:
                 Putline("alias: no aliases defined.")
 
@@ -881,7 +881,7 @@ def Help(words, input, seslist):
     import os
 
     helpdir = data.initdir + "help"
-    PutUntouchedLine('::lyntin help::')
+    PutUntouchedLine('::lyntin help::\n')
     if words == ['help']:
         PutUntouchedLine("Topics Available:\n")
         the_list = os.listdir(helpdir)
@@ -891,7 +891,7 @@ def Help(words, input, seslist):
         for mem in the_list:
             new_line = new_line + string.ljust(mem, 16)
             if (count % 3) == 0:
-                PutUntouchedLine(new_line)
+                PutUntouchedLine(new_line + "\n")
                 new_line = '   '
             count = count + 1
         PutUntouchedLine(new_line + "\n")
@@ -903,7 +903,7 @@ def Help(words, input, seslist):
             f = open(helpdir + "/" + mem, "r")
             lines = f.readlines()
             f.close()
-            PutUntouchedLine(string.join(lines, ""))
+            PutUntouchedLine(string.join(lines, "") + "\n")
         else:
             PutUntouchedLine(mem + " is not a valid help topic.")
 

@@ -14,7 +14,10 @@ basic.
 """
 
 import data, string, sys, mud, app, select, os, time, regsub
+from basegui import BaseGUI
 import exported
+
+
 if os.name != 'posix':
     import thread
 
@@ -46,12 +49,7 @@ def GetInputLine(host):
     while not host.closing:
         host.line_read = sys.stdin.readline()
 
-def filter_crud(txt):
-    txt = regsub.gsub('\015\\|\r', '', txt)
-    # txt = regsub.gsub(chr(27) + '[[0-9;]+[mJ]', '', txt)
-    return txt
-
-class Textui:
+class Textui(BaseGUI):
     closing = 0
 
     def __init__(self):
@@ -59,41 +57,34 @@ class Textui:
             self.line_read = ''
             thread.start_new_thread(GetInputLine, (self,))
             
+    def filter_crud(self, txt):
+        txt = regsub.gsub('\015\\|\r', '', txt)
+        # txt = regsub.gsub(chr(27) + '[[0-9;]+[mJ]', '', txt)
+        return txt
+
+    def close(self):
+        print "closing text ui"
+        self.closing = 1
+         
+
     def CloseUI(self):
         print "closing text ui"
         self.closing = 1
         pass
 
-    def Putline(self, line):
-        """Putline (self, line) -> None
-
-        Prints a line from the client to the user.
-        """
-        if line:
+    def print_string(self,line,modifiers=None,ending='\n',target=None):
+        if modifiers == 'client':
             line = string.replace(line, "\n", "\n## ")
-            print "##", line
-            sys.stdout.flush()
+            line = line + "\n"
 
-    def PutUserInput(self, line):
-        if line:
-            print line
-            sys.stdout.flush()
-
-    def PutUntouchedLine(self, line):
-        if line:
-            line = filter_crud(line)
-            print line
-            sys.stdout.flush()
-        
-    def PutReallyUntouchedLine(self, line):
-        if line:
-            line = filter_crud(line)
-            sys.stdout.write(line)
-            sys.stdout.flush()
+        line = self.filter_crud(line)
+        print line,
+        sys.stdout.flush()
 
 
     # check for stuff from stdin
-    def GetUserInput(self):
+    # def GetUserInput(self):
+    def get_input(self):
         if os.name == 'posix':
             readers,w,e = select.select([sys.stdin], [], [], data.timeout)
             if not readers: # timer expired
@@ -108,15 +99,23 @@ class Textui:
             self.line_read = ''
             return retval
 
-    def Prompt(self):
-        self.PutReallyUntouchedLine('\n>')
+    def prompt(self):
+        self.print_string('\n> ','user','')
 
     def has_echo(self):
         return tio
 
+    def echo(self,yesno):
+        if yesno == 1:
+            self.turnonecho()
+        else:
+            self.turnoffecho()
+
+
     # turn on echo
-    def OnEcho(self, checktio="yes"):
-        if not tio and chectio == "yes":
+    # def OnEcho(self, checktio="yes"):
+    def turnonecho(self, checktio="yes"):
+        if not tio and checktio == "yes":
             return
         global echo
         global offecho_attr
@@ -132,7 +131,8 @@ class Textui:
             raise 'lt_echo_error', 'unable to turn on echo'
 
     # turn off echo
-    def OffEcho(self, checktio="yes"):
+    # def OffEcho(self, checktio="yes"):
+    def turnoffecho(self, checktio="yes"):
         if not tio and checktio == "yes":
             return
         global echo
@@ -157,6 +157,7 @@ class Textui:
             self.Putline('Install the termios module or Tkinter to enable '+
                          'echo toggling')
 
+    """
     def mainloop(self):
         while 1:
             try:
@@ -164,3 +165,4 @@ class Textui:
                     return
             except SystemExit:
                 return
+    """
