@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.10 2002/09/04 05:36:37 willhelm Exp $
+# $Id: substitute.py,v 1.11 2002/10/05 22:29:06 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
 """
-import string, re
+import string
 import manager, utils, lyntin, hooks, exported, modutils
 
 class SubstituteData:

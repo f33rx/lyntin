@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.50 2002/10/13 03:16:22 willhelm Exp $
+# $Id: utils.py,v 1.51 2002/10/13 03:56:45 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -54,12 +54,16 @@ def filter_cm(text):
 
 def chomp(text):
   """
-  Removes all CR and LF from the input string.
+  Removes all CR and LF from the input string.  This is similar to
+  but not the same as the Perl chomp function.
+
+  WARNING:  because this removes ALL CR and LF from the string, you
+  should probably only call it on strings that consist of one line.
 
   @param text: the text to chomp
   @type  text: string
 
-  @returns: the chomped text
+  @returns: the text without any CR or LF
   @rtype: string
   """
   return re.sub("\n|\r", '', text)
@@ -99,6 +103,79 @@ def http_get(url):
 
   return sock.getfile()
 
+
+# handles regular expression syntax and flags
+REG_REGEXP = re.compile("^r{.*}[Ii]*$")
+
+# for finding variables in the subject
+SUBVAR_REGEXP = re.compile("%_?[0-9]+")
+
+def compile_regexp(str):
+  """
+  Takes in a string and compiles it into a regular expression.  This
+  is for commands that take in strings that can be compiled either
+  as a full-fledged regular expression (using Perl5 regexp syntax) or
+  strings that are not regular expressions and use * as a wildcard
+  character.
+
+  TBD
+
+  @param str: the string to convert
+  @type  str: string
+
+  @return: the resulting regular expression
+  @rtype: RE
+  """
+  if not str:
+    return re.compile("")
+
+  flags_bitmask = 0
+  pieces = []
+
+  if REG_REGEXP.match(str) != None:
+    # this is something we should compile as a regular expression
+    # without doing any finagling
+
+    end_index = str.rfind("}")
+    # handle flags issues
+    flags = str[end_index+1:]
+    if flags == 'i' or flags == 'I':
+      flags_bitmask = re.IGNORECASE
+
+    # handle adjusting the string
+    str = str[2:end_index]
+
+    i = 0
+    match = SUBVAR_REGEXP.search(str)
+    while match:
+      b, e = match.span()
+      pieces.append(str[i:b])
+      if str[b:e].find("_") != -1:
+        pieces.append("(\S+?)")
+      else:
+        pieces.append("(.+?)")
+      i = e
+      match = SUBVAR_REGEXP.search(str, i)
+
+    pieces.append(str[i:])
+
+  else:
+    i = 0
+    match = SUBVAR_REGEXP.search(str)
+    while match:
+      b, e = match.span()
+      pieces.append(re.escape(str[i:b]))
+      if str[b:e].find("_") != -1:
+        pieces.append("(\S+?)")
+      else:
+        pieces.append("(.+?)")
+
+      i = e
+      match = SUBVAR_REGEXP.search(str, i)
+
+    pieces.append(re.escape(str[i:]))
+
+  return re.compile("".join(pieces), flags_bitmask)
 
 def is_color_token(token):
   """

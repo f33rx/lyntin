@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.9 2002/09/04 05:36:36 willhelm Exp $
+# $Id: action.py,v 1.10 2002/10/12 22:14:48 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -50,7 +50,7 @@ class ActionData:
     else:
       expansion = trigger
 
-    compiled = compile_action(expansion)
+    compiled = utils.compile_regexp(expansion)
     self._actions[trigger] = (trigger, compiled, response, onetime)
     return 1
 
@@ -64,7 +64,7 @@ class ActionData:
       expansion = exported.expand_ses_vars(trigger, self._ses)
       if not expansion:
         expansion = trigger
-      compiled = compile_action(expansion)
+      compiled = utils.compile_regexp(expansion)
 
       self._actions[trigger] = (trigger, compiled, response, onetime)
 
@@ -138,33 +138,32 @@ class ActionData:
       line = utils.filter_cm(utils.filter_ansi(text))
       match = actioncompiled.search(line)
       if match:
-        matched.append((line, action, actioncompiled, response))
+        # for every match we figure out what the expanded response
+        # is and add it as an InputEvent in the queue.  the reason
+        # we do a series of separate events rather than one big
+        # event with ; separators is due to possible issues with 
+        # braces and such in malformed responses.
+
+        # get variables from the action
+        actionvars = get_ordered_vars(action)
+
+        # fill in values for all the variables in the match
+        varvals = {}
+        for i in xrange(len(actionvars)):
+          varvals[actionvars[i]] = match.group(i+1)
+
+        # add special variables
+        varvals['a'] = line.replace(';', '_')
+            
+        # fill in response variables from those that
+        # matched on the trigger
+        response = utils.expand_vars(response, varvals)
+
+        event.InputEvent(response, internal=1).enqueue()
+
         if onetime:
           del self._actions[action]
 
-    # for every match we figure out what the expanded response
-    # is and add it as an InputEvent in the queue.  the reason
-    # we do a series of separate events rather than one big
-    # event with ; separators is due to possible issues with 
-    # braces and such in malformed responses.
-    for (line, action, actioncompiled, response) in matched:
-      match = actioncompiled.search(line)
-
-      # get variables from the action
-      actionvars = get_ordered_vars(action)
-      varvals = {}
-      # fill in values for all the variables in the match
-      for i in xrange(len(actionvars)):
-        varvals[actionvars[i]] = match.group(i+1)
-
-      # add special variables
-      varvals['a'] = line.replace(';', '_')
-            
-      # fill in response variables from those that
-      # matched on the trigger
-      response = utils.expand_vars(response, varvals)
-
-      event.InputEvent(response, internal=1).enqueue()
 
   def getStatus(self):
     """ Returns a one-liner as to how many actions we have.
@@ -184,8 +183,8 @@ class ActionData:
 
     arguments:
 
-         'text=""' -- (string) the text to expand on to find
-                      actions that the user is interested in
+      'text=""' -- (string) the text to expand on to find
+                   actions that the user is interested in
 
     returns:
 
@@ -308,26 +307,6 @@ class ActionManager(manager.Manager):
     return text
 
 
-def compile_action(trigger):
-  """
-  Converts a trigger with pattern variables into a compiled
-  regular expression and returns the regular expression.
-
-  arguments:
-
-    'trigger' -- (string) the trigger string to compile into
-                 a regexp
-
-  returns:
-
-    (SRE_Pattern) returns a compiled regexp pattern ob
-  """
-  # COMPILEVARREGEXP = re.compile('%_?[0-9]+')
-  regexp = re.sub('%[0-9]+', '(.+?)', trigger)
-  regexp = re.sub('%_[0-9]+', '(\S+?)', regexp)
-  return re.compile(regexp)
-
-
 def get_ordered_vars(text):
   """
   Takes in a string and removes any ordered variables
@@ -443,9 +422,14 @@ def action_cmd(ses, args, input):
     exported.write_message("actions:\n" + data)
     return
 
-  am.addAction(ses, trigger, action, onetime)
-  if not quiet:
-    exported.write_message("action: {%s} {%s} added." % (trigger, action))
+  import traceback
+  try:
+    am.addAction(ses, trigger, action, onetime)
+    if not quiet:
+      exported.write_message("action: {%s} {%s} added." % (trigger, action))
+  except Exception, e:
+    exported.write_error("action: exception '%s'." % e)
+    traceback.print_exc()
 
 commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false quiet:boolean=false")
 

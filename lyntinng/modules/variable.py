@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.10 2002/08/31 16:36:17 jmberne Exp $
+# $Id: variable.py,v 1.11 2002/09/04 05:36:37 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
 It also defines global variables like $TIMESTAMP.
 """
-import re, string, time
+import string, time
 import manager, utils, lyntin, engine, hooks, exported, modutils
 
 class TimeStampBuiltin:
