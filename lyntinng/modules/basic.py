@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.69 2002/04/25 17:29:59 jmberne Exp $
+# $Id: basic.py,v 1.70 2002/04/25 19:18:51 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -22,6 +22,7 @@ def action_cmd(session, args, input):
   """
   trigger = args["trigger"]
   action = args["action"]
+  quiet = args["quiet"]
 
   # they typed '#action'--print out all the current actions
   if not trigger and not action:
@@ -42,9 +43,10 @@ def action_cmd(session, args, input):
     return
 
   session.getManager("action").addAction(trigger, action)
-  exported.write_message("action: {%s} {%s} added." % (trigger, action))
+  if not quiet:
+    exported.write_message("action: {%s} {%s} added." % (trigger, action))
 
-commands_dict["action"] = (action_cmd, "trigger= action=")
+commands_dict["action"] = (action_cmd, "trigger= action= quiet:boolean=false")
 
 
 def alias_cmd(session, args, input):
@@ -55,6 +57,7 @@ def alias_cmd(session, args, input):
   """
   name = args["alias"]
   command = args["expansion"]
+  quiet = args["quiet"]
 
   # they typed '#alias'--print out all current aliases
   if not name and not command:
@@ -75,9 +78,10 @@ def alias_cmd(session, args, input):
     return
 
   session.getManager("alias").addAlias(name, command)
-  exported.write_message("alias: {%s} {%s} added." % (name, command))
+  if not quiet:
+    exported.write_message("alias: {%s} {%s} added." % (name, command))
 
-commands_dict["alias"] = (alias_cmd, "alias= expansion=")
+commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false")
 
 
 def ansi_cmd(session, args, input):
@@ -1047,6 +1051,7 @@ def variable_cmd(session, args, input):
   """
   var = args["var"]
   expansion = args["expansion"]
+  quiet = args["quiet"]
 
   if not var and not expansion:
     data = session.getManager("variable").getInfo()
@@ -1066,11 +1071,12 @@ def variable_cmd(session, args, input):
 
   try:
     session.getManager("variable").addVariable(var, expansion)
-    exported.write_message("variable: {%s} {%s} added." % (var, expansion))
+    if not quiet:
+      exported.write_message("variable: {%s} {%s} added." % (var, expansion))
   except Exception, e:
     exported.write_error("variable: cannot be set. %s", e)
 
-commands_dict["variable"] = (variable_cmd, "var= expansion=")
+commands_dict["variable"] = (variable_cmd, "var= expansion= quiet:boolean=false")
 
 
 def verbatim_cmd(session, args, input):
