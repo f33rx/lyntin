@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.67 2003/01/25 01:05:23 willhelm Exp $
+# $Id: tintincmds.py,v 1.68 2003/01/31 15:21:32 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -17,6 +17,17 @@ modules along with their manager and any helper functions involved.
 """
 commands_dict = {}
 
+
+def bell_cmd(ses, words, input):
+  """
+  Kicks off the bell for a given session.  Anything registered
+  with the bell_hook will get tickled.
+
+  category: commands
+  """
+  exported.get_hook("bell_hook").spamhook((ses,))
+
+commands_dict["bell"] = (bell_cmd, "")
 
 def boss_cmd(ses, words, input):
   """

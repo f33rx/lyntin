@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.28 2002/12/18 04:47:59 willhelm Exp $
+# $Id: advanced.py,v 1.29 2003/01/07 01:38:07 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
 and attempts to execute it in the lyntinuser.py module.  If no such
 module exists, it executes it in this module.
 
-It also holds import_cmd which does a lot of other magic stuff.
+It also holds load_cmd which does a lot of other magic stuff.
 """
 import sys
 import exported, lyntin
@@ -22,10 +22,10 @@ execdict = None
 def _get_user_module():
   """
   Imports and returns the nicest user module it can find.  If we've
-  already imported a usermodule, then we use the cached one we
-  imported before so we're not doing this over and over again.
+  already loaded a usermodule, then we use the cached one we
+  loaded before so we're not doing this over and over again.
 
-  @returns: the user module we just imported or None
+  @returns: the user module we just loaded or None
   @rtype: module
   """
   global usermodule
@@ -44,7 +44,7 @@ def _get_user_module():
   return None
 
 
-def python_cmd(session, words, input):
+def python_cmd(ses, words, input):
   """
   #@ allows you to execute arbitrary Python code inside of Lyntin.
   It will first look for a module named "lyntinuser" and execute
@@ -66,7 +66,7 @@ def python_cmd(session, words, input):
     if my_usermodule == None:
       if execdict == None:
         execdict = {}
-        exported.write_error("No lyntinuser module imported--executing in advanced.py.")
+        exported.write_error("No lyntinuser module loaded--executing in advanced.py.")
       exec input[1:].lstrip() in execdict
     else:
       exec input[1:].lstrip() in usermodule.__dict__
@@ -75,25 +75,23 @@ def python_cmd(session, words, input):
     exported.tally_error()
 
 
-def import_cmd(session, args, input):
+def load_cmd(ses, args, input):
   """
-  Imports/reloads a module.
+  Loads/reloads a module.
 
-  When reloading, it looks for an "unload" function and executes it
-  prior to reloading the module.
-
-  After reloading/importing, it looks for a "load" function and
-  executes it.
+  When reloading, it looks for an "unload" function and executes 
+  it prior to reloading the module.  After reloading/loading, it 
+  looks for a "load" function and executes it.
 
   Lyntin modules located in the modules package are safe to reload 
   in-game.  Lyntin core modules (engine, helpmanager, event...) are
   NOT safe to import in-game.
 
   examples:
-    #import modules.action
-    #import exportuser
+    #load modules.action
+    #load exportuser
 
-  #import will look for the module on the sys.path.  So if your module
+  #load will look for the module on the sys.path.  So if your module
   is not on the sys.path, you should first add the directory using #@:
 
     #@ import sys
@@ -116,48 +114,70 @@ def import_cmd(session, args, input):
         try:
           _module.unload()
         except:
-          exported.write_traceback("import: module %s didn't unload properly." % mod)
+          exported.write_traceback("load: module %s didn't unload properly." % mod)
+      del sys.modules[mod]
+      exported.write_message("load: reloading %s." % mod)
 
-      reload(_module)
-
-      if (_module.__dict__.has_key("load")):
-        _module = sys.modules[mod]
-        _module.load()
-      _module.__dict__["lyntin_import"] = 1
-
-      if mod not in lyntin.lyntinmodules:
-        lyntin.lyntinmodules.append(mod)
-
-      exported.write_message("import: module %s reloaded." % mod)
     except:
-      exported.write_traceback("import: had problems with %s." % mod)
+      exported.write_traceback("load: had problems unloading %s." % mod)
       return
 
-  else:
-    try:
-      _module = __import__( mod )
+  try:
+    _module = __import__( mod )
 
-      _module = sys.modules[mod]
-      if (_module.__dict__.has_key("load")):
-        _module.load()
+    _module = sys.modules[mod]
+    if (_module.__dict__.has_key("load")):
+      _module.load()
 
-      _module.__dict__["lyntin_import"] = 1
-      exported.write_message("import successful.")
-      if mod not in lyntin.lyntinmodules:
-        lyntin.lyntinmodules.append(mod)
+    _module.__dict__["lyntin_import"] = 1
+    exported.write_message("load successful.")
+    if mod not in lyntin.lyntinmodules:
+      lyntin.lyntinmodules.append(mod)
 
-    except:
-      exported.write_traceback("import: had problems with %s." % mod)
+  except:
+    exported.write_traceback("load: had problems with %s." % mod)
+
+def unload_cmd(ses, args, input):
+  """
+  Unloads a module from Lyntin by calling the module's "unload" function
+  and then removing references to it in the Python environment.
+
+  examples:
+    #unload wbgscheduler
+    #unload modules.alias
+
+  category: commands
+  """
+  mod = args["modulename"]
+
+  if sys.modules.has_key(mod):
+    _module = sys.modules[mod]
+
+    if _module.__dict__.has_key("lyntin_import"):
+      if _module.__dict__.has_key("unload"):
+        try:
+          _module.unload()
+        except:
+          exported.write_traceback("unload: module %s didn't unload properly." % mod)
+      else:
+        exported.write_error("unload: module %s doesn't have an unload function." % mod)
+
+      del sys.modules[mod]
+      exported.write_message("unload: module %s unloaded." % mod)
+      return
+
+  exported.write_error("unload: it doesn't look like module %s is loaded." % mod)
 
 
 def load():
-  """ Initializes the module by binding all the commands."""
   exported.add_command("@", python_cmd)
-  exported.add_command("^import", import_cmd, "modulename")
+  exported.add_command("^load", load_cmd, "modulename")
+  exported.add_command("^unload", unload_cmd, "modulename")
 
 def unload():
   exported.remove_command("@")
-  exported.remove_command("^import")
+  exported.remove_command("^load")
+  exported.remove_command("^unload")
 
 # Local variables:
 # mode:python
