@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.34 2003/02/01 01:26:29 jmberne Exp $
+# $Id: hooks.py,v 1.35 2003/02/01 01:52:59 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -528,9 +528,8 @@ def query_done(x):
 # These should return the text that should be processed as if it came from 
 # the mud.
 # 
-# arg tuple: (session, boolean, string, string)
+# arg tuple: (session, string, string)
 #  - the session the mud data came from
-#  - 0 or 1: whether or not the data is internal
 #  - the original text the mud sent
 #  - the filtered text (this allows people to adjust it as they go along)
 # 
