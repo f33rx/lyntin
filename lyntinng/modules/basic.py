@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.72 2002/04/26 03:36:51 jmberne Exp $
+# $Id: basic.py,v 1.73 2002/04/26 17:22:08 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -518,9 +518,12 @@ def log_cmd(session, args, input):
       exported.write_message("Logging is disabled.")
     return
 
+      if session.isConnected():
   if session.getLogfile() != None:
     try:
       exported.write_message("log: stopping logging to '%s'." % 
+      else:
+        exported.write_message("log: You must have a session to log")
                              session.getLogfileName())
       session.closeLogfile()
     except:
