@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.56 2002/11/15 02:36:24 willhelm Exp $
+# $Id: tintincmds.py,v 1.57 2002/12/04 03:46:28 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -503,6 +503,8 @@ def snoop_cmd(ses, args, input):
   examples:
     #snoop a          -- tells you whether a is in snoop mode
     #snoop a on       -- sets snoop mode for a
+
+  category: commands
   """
   snoopsession = args["session"]
   mode = args["mode"]
