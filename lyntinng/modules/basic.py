@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.85 2002/05/04 04:31:48 willhelm Exp $
+# $Id: basic.py,v 1.86 2002/05/04 04:53:05 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -923,11 +923,11 @@ def swexclude_cmd(session, args, input):
   speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
   get speedwalk-parsing.
   """
-  exclude = args["exclude"]
+  excludes = args["exclude"]
   quiet = args["quiet"]
 
   # they typed '#swexclude'--print out all current speedwalking excludes
-  if not exclude:
+  if len(excludes) == 0:
     data = session.getManager("speedwalk").getExcludesInfo()
     if data == '':
       data = "swexcl: no speedwalking excludes defined."
@@ -935,11 +935,12 @@ def swexclude_cmd(session, args, input):
     exported.write_message(data)
     return
 
-  session.getManager("speedwalk").addExclude(exclude)
-  if not quiet:
-    exported.write_message("swexclude: {%s} added." % exclude)
+  for exclude in excludes:
+    session.getManager("speedwalk").addExclude(exclude)
+    if not quiet:
+      exported.write_message("swexclude: {%s} added." % exclude)
 
-commands_dict["swexclude"] = (swexclude_cmd, "exclude= quiet:boolean=false")
+commands_dict["swexclude"] = (swexclude_cmd, "exclude* quiet:boolean=false")
 
 
 def substitute_cmd(session, args, input):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.8 2002/05/03 23:38:50 willhelm Exp $
+# $Id: speedwalk.py,v 1.9 2002/05/04 04:31:48 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -134,7 +134,7 @@ class SpeedwalkManager(manager.Manager):
     """
     keys = "|".join(self._dirs.keys())
     if self._dirs:
-      regexp = "^(\\d|%s)(\\d*(%s))+$" % (keys, keys)
+      regexp = "^(\\d*(%s))+$" % (keys)
       self._regexp = re.compile(regexp)
     else:
       self._regexp = None
@@ -280,6 +280,7 @@ class SpeedwalkManager(manager.Manager):
       return text
 
     swdirs = []
+    dirsavailable = self._dirs.keys()
     dir = num = ""
     n = 0
     while n < len(text):
@@ -287,7 +288,7 @@ class SpeedwalkManager(manager.Manager):
         num = num + text[n]
       else:
         dir = dir + text[n]
-        if dir in self._dirs:
+        if dir in dirsavailable:
           if num: count = int(num)
           else: count = 1
           for i in range(count):
@@ -295,4 +296,11 @@ class SpeedwalkManager(manager.Manager):
           dir = num = ""
       n = n + 1
 
-    engine.myengine.handleUserData(";".join(swdirs), internal, session)
+    output = ";".join(swdirs)
+    if output == text:
+      return text
+    else:
+      engine.myengine.handleUserData(";".join(swdirs), internal, session)
+      return None
+
+
