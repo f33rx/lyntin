@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.10 2004/01/27 21:22:41 glasssnake Exp $
+# $Id: utils.py,v 1.11 2004/04/10 19:40:10 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -53,6 +53,7 @@ class PriorityQueue:
     for priority in priorities:
       for mem in self._prioritymap[priority]:
         self._orderedlist.append(mem)
+    self._dirty = 0        
 
   def add(self, func, priority=constants.LAST):
     """
