@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.22 2002/04/30 02:53:46 willhelm Exp $
+# $Id: action.py,v 1.23 2002/05/02 23:39:07 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -240,10 +240,11 @@ class ActionManager(manager.Manager):
     """
     return len(self._actions.keys())
 
-  def filter(self, tuple):
-    """ mud_filger_hook function to check for actions when data
-        comes from the mud
+  def filter(self, args):
     """
-    text = tuple[-1]
+    Mud_filter_hook function to check for actions when data
+    comes from the mud.
+    """
+    text = args[-1]
     self.checkActions(text)
     return text

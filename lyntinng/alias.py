@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.11 2002/05/02 23:39:07 willhelm Exp $
+# $Id: alias.py,v 1.12 2002/05/03 23:38:50 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -149,7 +149,7 @@ class AliasManager(manager.Manager):
     """
     return len(self._aliases.keys())
 
-  def filter(self, tuple):
+  def filter(self, args):
     """ Handle the filtering of input through the current aliases.
         If input gets changed then we pass it back to
         engine.myengine.HandleUserData and return None to stop this
@@ -157,8 +157,8 @@ class AliasManager(manager.Manager):
 
     arguments:
 
-      tuple: user_filter_hook arg tuple (session, internal, input,
-      filtered)
+      'args' -- (tuple) user_filter_hook arg tuple (session, internal,
+                input, filtered)
 
     returns:
 
@@ -166,9 +166,9 @@ class AliasManager(manager.Manager):
     """
     # we check for aliases here--and if we find some, we
     # do the variable expansion and then recurse over the result
-    session = tuple[0]
-    internal = tuple[1]
-    text = tuple[-1]
+    session = args[0]
+    internal = args[1]
+    text = args[-1]
     aliasexpansion = self.expand(text)
 
     if aliasexpansion:

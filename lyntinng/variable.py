@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.12 2002/04/29 00:31:42 jmberne Exp $
+# $Id: variable.py,v 1.13 2002/05/02 23:39:07 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -202,7 +202,7 @@ class VariableManager(manager.Manager):
     """ Returns a count of all the variables."""
     return len(self._variables.keys()) - 1
 
-  def filter(self, tuple):
+  def filter(self, args):
     """ Handle the filtering of input through the current variables.
         If input gets changed then we pass it back to
         engine.myengine.HandleUserData and return None to stop this
@@ -210,16 +210,16 @@ class VariableManager(manager.Manager):
 
     arguments:
 
-      tuple: user_filter_hook arg tuple (session, internal, input,
-      filtered)
+      'args' -- user_filter_hook arg tuple (session, internal, input,
+                filtered)
 
     returns:
 
       filtered text or None if any changes took place.
     """
-    session = tuple[0]
-    internal = tuple[1]
-    text = tuple[-1]
+    session = args[0]
+    internal = args[1]
+    text = args[-1]
     varexpansion = self.expand(text)
     if varexpansion:
       engine.myengine.handleUserData(varexpansion, internal, session)
