@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.11 2002/05/04 17:36:30 jmberne Exp $
+# $Id: argparser.py,v 1.12 2002/05/05 17:01:45 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -43,7 +43,8 @@ class ArgumentParser:
     self.typecheckers = { "string": stringChecker(),
                           "int": intChecker(),
                           "boolean": booleanChecker(),
-                          "booleanornone": booleanOrNoneChecker() }
+                          "booleanornone": booleanOrNoneChecker(),
+                          "eval": evalChecker() }
 
     if argoptions:
       self.buildOptions(argoptions)
@@ -462,6 +463,19 @@ class booleanOrNoneChecker:
       return None
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
+
+class evalChecker:
+  """
+  Evaluate its input argument as python code and return the resulting object.
+  """
+  def __init__(self):
+    return
+
+  def check(self,arg):
+    try:
+      return eval(arg)
+    except Exception, e:
+      raise ParserException, "Error eval-ing argument (%s): %s" % (arg, e)
 
 
 if __name__ == '__main__':
