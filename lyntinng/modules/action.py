@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.16 2002/10/31 02:40:50 willhelm Exp $
+# $Id: action.py,v 1.17 2002/11/06 01:56:51 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -57,7 +57,7 @@ class ActionData:
     @return: 1
     @rtype:  boolean
     """
-    if lyntin.evalmode == lyntin.TINTIN:
+    if lyntin.evalmode == lyntin.EVALMODE_TINTIN:
       # first we expand variables in the action trigger then compile
       # it into a regular expression
       expansion = exported.expand_ses_vars(trigger, self._ses)
@@ -338,17 +338,17 @@ def evalmodechange(args):
   old = args[0]
   new = args[1]
 
-  if (old == lyntin.LYNTIN or old == -1) and new == lyntin.TINTIN:
-    # lyntin's just starting up into TINTIN mode or we just switched
-    # into TINTIN
+  if (old == lyntin.EVALMODE_LYNTIN or old == -1) and new == lyntin.EVALMODE_TINTIN:
+    # lyntin's just starting up into EVALMODE_TINTIN mode or we just switched
+    # into EVALMODE_TINTIN
     hooks.variable_change_hook.register(am.variableChange)
 
-  elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
-    # lyntin's just starting up into LYNTIN mode or we just switched
-    # into LYNTIN
+  elif (old == lyntin.EVALMODE_TINTIN or old == -1) and new == lyntin.EVALMODE_LYNTIN:
+    # lyntin's just starting up into EVALMODE_LYNTIN mode or we just switched
+    # into EVALMODE_LYNTIN
     hooks.variable_change_hook.unregister(am.variableChange)
 
-  elif old == lyntin.TINTIN and new == -1:
+  elif old == lyntin.EVALMODE_TINTIN and new == -1:
     # this module is being unloaded
     hooks.variable_change_hook.unregister(am.variableChange)
 

@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.32 2002/10/23 23:59:08 willhelm Exp $
+# $Id: lyntin.py,v 1.33 2002/10/30 03:12:12 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -133,22 +133,22 @@ lyntinmodules = []
 errorcount = 0
 
 # evalmode constants
-TINTIN = 0
-LYNTIN = 1
+EVALMODE_TINTIN = 0
+EVALMODE_LYNTIN = 1
 
 # holds the application options--these are adjusted by command-line 
 # arguments only
 options = {'datadir': '',
-           'evalmode': LYNTIN,
+           'evalmode': EVALMODE_LYNTIN,
            'moduledir': [],
            'readfile': [],
            'ui': 'textui'}
 
-# Lyntin has two modes for user input evaluation.  TINTIN mode
-# will evaluate user input just like TINTIN does.  LYNTIN mode
-# evaluates user input using different semantics.  We default
-# to LYNTIN mode.
-evalmode = LYNTIN
+# Lyntin has two modes for user input evaluation.  EVALMODE_TINTIN mode
+# will evaluate user input just like EVALMODE_TINTIN does.  
+# EVALMODE_LYNTIN mode evaluates user input using different semantics.  
+# We default to EVALMODE_LYNTIN mode.
+evalmode = EVALMODE_LYNTIN
 
 
 def shutdown():
@@ -195,9 +195,9 @@ if __name__ == '__main__':
 
       elif mem[0] == '--evalmode' or mem[0] == '-e':
         if mem[1] == 'tintin':
-          lyntin.options['evalmode'] = TINTIN
+          lyntin.options['evalmode'] = EVALMODE_TINTIN
         else:
-          lyntin.options['evalmode'] = LYNTIN
+          lyntin.options['evalmode'] = EVALMODE_LYNTIN
 
       elif mem[0] == '--help':
         print HELPTEXT

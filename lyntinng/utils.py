@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.58 2002/10/26 04:32:39 willhelm Exp $
+# $Id: utils.py,v 1.59 2002/10/26 15:17:23 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -646,7 +646,7 @@ def expand_vars(text, varmap):
   @return: the text with all variables expanded
   @rtype: string
   """
-  if lyntin.evalmode == lyntin.TINTIN:
+  if lyntin.evalmode == lyntin.EVALMODE_TINTIN:
     return _tintin_expand_vars(text, varmap)
   else:
     return _lyntin_expand_vars(text, varmap)
@@ -799,7 +799,7 @@ def denest_vars(text, varmap):
   @return: the text with all variables expanded
   @rtype: string
   """
-  if lyntin.evalmode == lyntin.TINTIN:
+  if lyntin.evalmode == lyntin.EVALMODE_TINTIN:
     return text
   else:
     return lyntin_denest_vars(text)
@@ -849,7 +849,7 @@ def expand_arguments(text, varmap):
 
   @return: the text with all variables expanded
   """
-  if lyntin.evalmode == lyntin.TINTIN:
+  if lyntin.evalmode == lyntin.EVALMODE_TINTIN:
     return _tintin_expand_arguments(text, varmap)
   else:
     return text
@@ -883,7 +883,7 @@ def expand_placement_vars(input, expansion):
       vars replaced
   @rtype: string
   """
-  if lyntin.evalmode == lyntin.TINTIN:
+  if lyntin.evalmode == lyntin.EVALMODE_TINTIN:
     return _tintin_expand_placement_vars(input, expansion)
   else:
     return _lyntin_expand_placement_vars(input, expansion)

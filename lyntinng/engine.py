@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.71 2002/10/20 16:09:57 willhelm Exp $
+# $Id: engine.py,v 1.72 2002/10/26 15:17:22 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -698,18 +698,18 @@ def evalmodechange(args):
 
   if (old == -1):
     # just started up
-    if new == lyntin.TINTIN:
+    if new == lyntin.EVALMODE_TINTIN:
       hooks.user_filter_hook.register(cm.filter, 1)
     else:
       hooks.user_filter_hook.register(cm.filter, 100)
 
-  elif old == lyntin.LYNTIN and new == lyntin.TINTIN:
-    # just switched into TINTIN mode
+  elif old == lyntin.EVALMODE_LYNTIN and new == lyntin.EVALMODE_TINTIN:
+    # just switched into EVALMODE_TINTIN mode
     hooks.user_filter_hook.unregister(cm.filter)
     hooks.user_filter_hook.register(cm.filter, 1)
 
-  elif old == lyntin.TINTIN and new == lyntin.LYNTIN:
-    # just switched into LYNTIN mode
+  elif old == lyntin.EVALMODE_TINTIN and new == lyntin.EVALMODE_LYNTIN:
+    # just switched into EVALMODE_LYNTIN mode
     hooks.user_filter_hook.unregister(cm.filter)
     hooks.user_filter_hook.register(cm.filter, 100)
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.19 2002/10/24 23:07:04 willhelm Exp $
+# $Id: lyntincmds.py,v 1.20 2002/10/26 15:17:24 willhelm Exp $
 #######################################################################
 import string
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -37,10 +37,12 @@ def config_cmd(ses, args, input):
              "   commandchar   " + lyntin.commandchar + "  (char)\n" + \
              "   mudecho       " + bv(lyntin.mudecho) + "  (boolean)\n" + \
              "   speedwalk     " + bv(lyntin.speedwalk) + "  (boolean)\n"
-    if lyntin.evalmode == lyntin.LYNTIN:
+    if lyntin.evalmode == lyntin.EVALMODE_LYNTIN:
       output += "   evalmode      lyntin  (\"lyntin\" or \"tintin\")\n"
-    else:
+    elif lyntin.evalmode == lyntin.EVALMODE_TINTIN:
       output += "   evalmode      tintin  (\"lyntin\" or \"tintin\")\n"
+    else:
+      output += "   evalmode      unknown (\"lyntin\" or \"tintin\")\n"
 
     output += "Session:\n" + \
               "   ignoreactions " + bv(ses._ignoreactions) + "  (boolean)\n" + \
@@ -96,13 +98,13 @@ def config_cmd(ses, args, input):
   if name == "evalmode":
     old = lyntin.evalmode
     if value == "tintin":
-      lyntin.evalmode = lyntin.TINTIN
-      hooks.evalmode_change_hook.spamhook((old, lyntin.TINTIN))
+      lyntin.evalmode = lyntin.EVALMODE_TINTIN
+      hooks.evalmode_change_hook.spamhook((old, lyntin.EVALMODE_TINTIN))
       if not quiet:
         exported.write_message("config: %s set to %s." % (name, value))
     elif value == "lyntin":
-      lyntin.evalmode = lyntin.LYNTIN
-      hooks.evalmode_change_hook.spamhook((old, lyntin.LYNTIN))
+      lyntin.evalmode = lyntin.EVALMODE_LYNTIN
+      hooks.evalmode_change_hook.spamhook((old, lyntin.EVALMODE_LYNTIN))
       if not quiet:
         exported.write_message("config: %s set to %s." % (name, value))
     else:

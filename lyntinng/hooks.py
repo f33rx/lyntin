@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.25 2002/10/20 16:09:57 willhelm Exp $
+# $Id: hooks.py,v 1.26 2002/10/26 15:17:23 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -187,7 +187,8 @@ mudecho_hook = Hook()
 # Whenever we switch evalmodes, we call everything on this hook.
 # 
 # arg tuple will contain the old value and the new value.  Values will be
-# the constants in the lyntin module (lyntin.TINTIN and lyntin.LYNTIN).
+# the constants in the lyntin module (lyntin.EVALMODE_TINTIN and 
+# lyntin.EVALMODE_LYNTIN).
 # When Lyntin first starts up, it passes a -1 as the old value.
 #
 # arg tuple: (int, int)
