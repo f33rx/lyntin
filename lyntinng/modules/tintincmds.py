@@ -544,8 +544,8 @@ def textin_cmd(ses, args, input):
     filename = lyntin.options['datadir'] + filename
    
   try:
-    file = open(filename, "r")
-    contents = file.readlines()
+    f = open(filename, "r")
+    contents = f.readlines()
     f.close()
     for mem in contents:
       mem = utils.chomp(mem)
@@ -554,8 +554,8 @@ def textin_cmd(ses, args, input):
 
   except IOError:
     exported.write_error("textin: file %s is not readable." % filename, ses)
-  except:
-    exported.write_error("textin: exception thrown.", ses)
+  except Exception, e:
+    exported.write_error("textin: exception thrown %s." % e, ses)
 
 commands_dict["textin"] = (textin_cmd, "file")
 
