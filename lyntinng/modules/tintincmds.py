@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.64 2003/01/18 16:46:16 willhelm Exp $
+# $Id: tintincmds.py,v 1.65 2003/01/22 03:09:28 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -774,9 +774,9 @@ def zap_cmd(ses, args, input):
   category: commands
   """
   if exported.get_engine().closeSession(ses):
-    exported.write_message("zap: session %s zapped!" % ses.getName(), ses)
+    exported.write_message("zap: session %s zapped!" % ses.getName())
   else:
-    exported.write_message("zap: session cannot be zapped!", ses)
+    exported.write_message("zap: session %s cannot be zapped!" % ses.getName())
 
 commands_dict["zap"] = (zap_cmd, "")
 
