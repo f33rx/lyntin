@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.64 2002/12/05 02:08:46 willhelm Exp $
+# $Id: utils.py,v 1.65 2002/12/24 03:25:10 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -491,9 +491,7 @@ def columnize(textlist, screenwidth=72, indent=0):
 
   idx = 0
   for mem in textlist:
-    mem = (mem + (' ' * (maxwidth + (SPACING - 1) - len(mem))))
-
-    rows[idx].append(mem)
+    rows[idx].append(mem.ljust(maxwidth))
     idx = (idx + 1) % numrows
 
   rows = map(string.rstrip, map(string.join, rows))
