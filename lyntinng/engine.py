@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.8 2002/01/20 07:21:02 willhelm Exp $
+# $Id: engine.py,v 1.9 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -25,9 +25,9 @@ To access the engine, access it by 'engine.myengine'.
 It also holds a series of helper functions for making common engine
 calls easier to deal with.
 """
-import Queue, traceback, copy, string, re
+import Queue, traceback, copy, string, re, thread
 import threadmanager, session, ui.ui, alias, lyntin, utils
-import action, alias, gag, highlight, substitute, variable
+import action, alias, gag, highlight, substitute, variable, event
 
 """
 myengine is a singleton.  so when it gets instantiated, this
@@ -65,17 +65,19 @@ def write_test(text):
     'text' -- (string) the message to send
 
   """
-  myengine.writeTest(text)
+  myengine.writeUI(ui.ui.Message(text, ui.ui.TESTDATA))
+  # myengine.writeTest(text)
 
 def write_message(text):
-  """ Calls engine.myengine.writeMessage which writes LYNTINDATA message.
+  """ Calls engine.myengine.writeMessage which writes LTDATA message.
 
   arguments:
 
     'text' -- (string) the message to send
 
   """
-  myengine.writeMessage(text)
+  myengine.writeUI(ui.ui.Message(text, ui.ui.LTDATA))
+  # myengine.writeMessage(text)
 
 def write_error(text):
   """ Calls engine.myengine.writeError which writes ERROR message.
@@ -85,7 +87,8 @@ def write_error(text):
     'text' -- (string) the message to send
 
   """
-  myengine.writeError(text)
+  myengine.writeUI(ui.ui.Message(text, ui.ui.ERROR))
+  # myengine.writeError(text)
 
 def write_user_data(text):
   """ Calls engine.myengine.writeUserData which writes a USERDATA message.
@@ -95,7 +98,8 @@ def write_user_data(text):
     'text' -- (string) the message to send
 
   """
-  myengine.writeUserData(text)
+  myengine.writeUI(ui.ui.Message(text, ui.ui.USERDATA))
+  # myengine.writeUserData(text)
 
 def write_mud_data(text):
   """ Calls engine.myengine.writeMudData which writes a MUDDATA message.
@@ -105,7 +109,8 @@ def write_mud_data(text):
     'text' -- (string) the message to send
 
   """
-  myengine.writeMudData(text)
+  myengine.writeUI(ui.ui.Message(text, ui.ui.MUDDATA))
+  # myengine.writeMudData(text)
 
 
 class Engine:
@@ -118,6 +123,11 @@ class Engine:
     # this is the event queue that holds all the events in
     # the system.
     self._event_queue = Queue.Queue()
+
+    # this is a lock for writing stuff to the ui--makes sure
+    # we're not hosing things by having multiple things write
+    # to the ui simultaneously....  ick.
+    self._ui_lock = thread.allocate_lock()
 
     # this is the master shutdown flag for the event queue
     # handling.
@@ -687,6 +697,9 @@ class Engine:
   def writeUI(self, text):
     """ Writes a message to the ui.
 
+    This method uses a lock so that multiple threads can write
+    to the ui without intersecting and crashing the python process.
+
     arguments:
 
       'text' -- (string or ui.Message) the message to write 
@@ -694,59 +707,11 @@ class Engine:
 
     """
     if self._ui:
+      self._ui_lock.acquire(1)
       self._ui.write(text)
+      self._ui_lock.release()
     else:
       print "error: no ui\n" + repr(text)
-
-  def writeTest(self, text):
-    """ Writes TESTDATA message.
-
-    arguments:
-
-      'text' -- (string) the message to send
-
-    """
-    self._ui.write(ui.ui.Message(text, ui.ui.TESTDATA))
-
-  def writeMessage(self, text):
-    """ Writes LTDATA message.
-
-    arguments:
-
-      'text' -- (string) the message to send
-
-    """
-    self._ui.write(ui.ui.Message(text, ui.ui.LTDATA))
-
-  def writeError(self, text):
-    """ Writes ERROR message.
-
-    arguments:
-
-      'text' -- (string) the message to send
-
-    """
-    self._ui.write(ui.ui.Message(text, ui.ui.ERROR))
-
-  def writeUserData(self, text):
-    """ Writes a USERDATA message.
-
-    arguments:
-
-      'text' -- (string) the message to send
-
-    """
-    self._ui.write(ui.ui.Message(text, ui.ui.USERDATA))
-
-  def writeMudData(self, text):
-    """ Writes a MUDDATA message.
-
-    arguments:
-
-      'text' -- (string) the message to send
-
-    """
-    self._ui.write(ui.ui.Message(text, ui.ui.MUDDATA))
 
   def writePrompt(self):
     """ Tells the ui to print a prompt."""

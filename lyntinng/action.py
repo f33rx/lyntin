@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: action.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -137,7 +137,7 @@ class ActionManager:
       # this is not a gsub!
       str = re.sub('%[0-9]+', '', str, 1)
 
-      match = var_regex.search(str)
+      match = VARREGEXP.search(str)
 
     return keylist
 
