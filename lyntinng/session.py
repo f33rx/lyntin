@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.20 2002/03/29 16:13:59 willhelm Exp $
+# $Id: session.py,v 1.21 2002/03/29 21:17:02 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy, string
-import exported, engine, utils, lyntin, event, ticker
+import data, exported, engine, utils, lyntin, event, ticker
 
 # this is the regular expression that matches speedwalking stuff
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -29,6 +29,8 @@ class Session:
     self._managers = {}
     self._logfile = None
     self._ticker = ticker.Ticker()
+
+    self._databuffer = data.DataBuffer()
 
     # allows users to toggle whether we're handling actions.
     # 0 for handling actions, 1 if we're ignoring actions.
@@ -70,6 +72,10 @@ class Session:
     """ Sets the name of the session."""
     self._name = name
     self.getTicker().setSessionName(name)
+
+  def getDataBuffer(self):
+    """ Returns the DataBuffer instance."""
+    return self._databuffer
 
   def shutdown(self, args):
     """ Shuts down the session."""
@@ -286,6 +292,8 @@ class Session:
     """ Handles input coming from the mud."""
     if self._logfile:
       self.log(input)
+
+    self._databuffer.addData(input)
 
     inputlines = input.splitlines(1)
 

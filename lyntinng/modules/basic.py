@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.45 2002/03/29 18:09:59 willhelm Exp $
+# $Id: basic.py,v 1.46 2002/03/29 21:17:02 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -163,6 +163,37 @@ def cr_cmd(session, words, input):
   """
   session.writeSocket("\n")
 
+
+def datagrep_cmd(session, words, input):
+  """#datagrep {regularexpression}
+
+  Searches this session's databuffer with a regular expression
+  printing all matches in their entirety.
+  """
+  if (len(words) < 2):
+    exported.write_error("syntax: datagrep {pattern}")
+    return
+
+  pattern = utils.strip_braces(input.split(" ", 1)[1])
+  ret = session.getDataBuffer().grepbuffer(pattern)
+  exported.write_message("datagrep %s results:\n%s"
+                         % (pattern, string.join(ret, "")))
+
+def datagreplines_cmd(session, words, input):
+  """#datagreplines {regularexpression}
+
+  Searches the lines in this session's databuffer with 
+  a regular expression printing all matching lines in their 
+  entirety.
+  """
+  if (len(words) < 2):
+    exported.write_error("syntax: datagreplines {pattern}")
+    return
+
+  pattern = utils.strip_braces(input.split(" ", 1)[1])
+  ret = session.getDataBuffer().greplines(pattern)
+  exported.write_message("datagreplines %s results:\n%s"
+                         % (pattern, string.join(ret, "")))
 
 def deed_cmd(session, words, input):
   """#deed [deed|count]
@@ -1037,8 +1068,8 @@ def load():
   exported.add_command("boss", boss_cmd)
   exported.add_command("^char", char_cmd)
   exported.add_command("^cr", cr_cmd)
-  # exported.add_command("datagrep", datagrep_cmd)
-  # exported.add_command("datagreplines", datagreplines_cmd)
+  exported.add_command("datagrep", datagrep_cmd)
+  exported.add_command("datagreplines", datagreplines_cmd)
   exported.add_command("deed", deed_cmd)
   exported.add_command("diagnostics", diagnostics_cmd)
   # exported.add_command("echo", echo_cmd)
