@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.14 2002/08/15 01:26:11 willhelm Exp $
+# $Id: tkui.py,v 1.15 2002/08/18 00:30:26 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -45,22 +45,23 @@ symbol.  For example:
 txt_attribs = {"0": "off",
                "1": "bold"}
 
-fg_color_codes = {"30": "#000000",
-                  "31": "#c00000",
-                  "32": "#008000",
-                  "33": "#808000",
-                  "34": "#0000c0",
-                  "35": "#c000c0",
-                  "36": "#008080",
-                  "37": "#c0c0c0",
-                  "b30": "#808080",
-                  "b31": "#ff4040",
-                  "b32": "#00ff00",
-                  "b33": "#ffff00",
-                  "b34": "#8080ff",
-                  "b35": "#ff40ff",
-                  "b36": "#00ffff",
-                  "b37": "#ffffff" }
+
+fg_color_codes = {"30": "black",
+                  "31": "red",
+                  "32": "green",
+                  "33": "goldenrod",
+                  "34": "#0000aa",
+                  "35": "magenta",
+                  "36": "cyan",
+                  "37": "#dddddd",
+                  "b30": "darkgrey",
+                  "b31": "salmon",
+                  "b32": "springgreen",
+                  "b33": "yellow",
+                  "b34": "#2222ff",
+                  "b35": "violet",
+                  "b36": "lightcyan",
+                  "b37": "white" }
 
 bg_color_codes = {"40": "#000000",
                   "41": "#c00000",
@@ -79,6 +80,7 @@ bg_color_codes = {"40": "#000000",
                   "b46": "#00ffff",
                   "b47": "#ffffff" }
 
+DEFAULT = [0, -1, -1]
 
 myui = None
 
@@ -167,6 +169,7 @@ class Tkui(ui.BaseUI):
     exported.add_help("tkui", HELP_TEXT)
     engine.myengine.startthread("ui", self._tk.mainloop)
     exported.write_message("For tk help type \"#help tkui\".")
+    exported.add_command("colorcheck", colorcheck_cmd)
 
 
   def settitle(self, title = ''):
@@ -323,29 +326,38 @@ class Tkui(ui.BaseUI):
 
     elif message.type == ui.MUDDATA:
       line = message.data
+      ses = message.session
 
       index = 0
       start = 0
 
-      if (message.session != None 
-          and message.session != exported.get_current_session()):
-        pretext = "[" + message.session.getName() + "] "
+      # we prepend the session name to the text if this is not the 
+      # current session sending text.
+      if (ses != None and ses != exported.get_current_session()):
+        pretext = "[" + ses.getName() + "] "
 
         if line[-1] == "\n":
           line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
         else:
           line = pretext + line.replace("\n", "\n" + pretext)
 
-      # first we remove all \\r stuff
+
+      # we remove all \\r stuff because it's icky.
       line = line.replace("\r", "")
 
       tokens = utils.split_ansi_from_text(line)
 
-      ses = message.session
+      # each session has a saved current color for mud data.  we grab
+      # that current color--or user our default if we don't have one
+      # for the session yet.
       if self._currcolors.has_key(ses):
         color = self._currcolors[ses]
       else:
-        color = [-1, "37", "40"]
+        color = DEFAULT
+
+      # some sessions have an unfinished color as well--in case we
+      # got a part of an ansi color code in a mud message, and the other
+      # part is in another message.
       if self._unfinishedcolor.has_key(ses):
         leftover = self._unfinishedcolor[ses]
       else:
@@ -355,6 +367,7 @@ class Tkui(ui.BaseUI):
         if utils.is_color_token(mem):
           color, leftover = utils.figure_color([mem], color, leftover)
         else:
+          # if there's no color, we just insert it.
           if color[1] == -1 and color[2] == -1:
             self._txt.insert('end', mem)
 
@@ -367,7 +380,7 @@ class Tkui(ui.BaseUI):
             if color[0] == 1:
               fg = "b" + fg
 
-            if color[2] != -1:
+            if color[2] == -1:
               self._txt.insert('end', mem, fg)
 
             else:
@@ -381,16 +394,57 @@ class Tkui(ui.BaseUI):
     self._clipText()
     self._yadjust()
 
+  def convertColor(self, name):
+    """
+    Tk has this really weird color palatte.  So I switched to using
+    color names in most cases and rgb values in cases where I couldn't
+    find a good color name.
+
+    This method allows me to specify either an rgb or a color name
+    and it converts the color names to rgb.
+
+    arguments:
+
+      'name' -- (string) either an rgb (ex. #000000) or a name (ex. black)
+
+    returns:
+
+      (string) the rgb color value (ex. #000000)
+    """
+    if name[0] == "#":
+      return name
+
+    rgb = self._tk._getints(self._tk.tk.call('winfo', 'rgb', self._txt, name))
+
+    return "#%02x%02x%02x" % (rgb[0]/256, rgb[1]/256, rgb[2]/256)
+
   def _initColorTags(self):
     """ Sets up Tk tags for the text widget (fg/bg)."""
-
     for ck in fg_color_codes.keys():
-      self._txt.tag_config(ck, foreground=fg_color_codes[ck])
-      self._txtbuffer.tag_config(ck, foreground=fg_color_codes[ck])
+      color = self.convertColor(fg_color_codes[ck])
+      self._txt.tag_config(ck, foreground=color)
+      self._txtbuffer.tag_config(ck, foreground=color)
 
     for ck in bg_color_codes.keys():
       self._txt.tag_config(ck, background=bg_color_codes[ck])
       self._txtbuffer.tag_config(ck, background=bg_color_codes[ck])
+
+  def colorCheck(self):
+
+    fgkeys = ['30','31','32','33','34','35','36','37']
+
+    bgkeys = bg_color_codes.keys()
+    bgkeys.sort()
+
+    self._txt.insert('end', 'color check:\n')
+    for bg in bgkeys:
+      for fg in fgkeys:
+        self._txt.insert('end', str(fg), (fg, bg))
+        self._txt.insert('end', str("b" + fg), ("b" + fg, bg))
+      self._txt.insert('end', '\n')
+
+    self._txt.insert('end', '\n')
+    self._txt.insert('end', '\n')
 
 
 class CommandEntry(Tkinter.Entry):
@@ -721,6 +775,18 @@ def fix_unicode(text):
         return text.encode(UNICODE_ENCODING)
     else:
         return text
+
+def colorcheck_cmd(ses, args, input):
+  """
+  Prints out all the colors so you can verify that things are working
+  properly.
+  """
+  myengine = exported.get_engine()
+  myengine._ui_lock.acquire(1)
+  try:
+    myengine._ui.colorCheck()
+  finally:
+    myengine._ui_lock.release()
 
 # Local variables:
 # mode:python

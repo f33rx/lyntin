@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.4 2002/07/21 04:14:48 willhelm Exp $
+# $Id: highlight.py,v 1.5 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -110,7 +110,7 @@ class HighlightData:
 
     ret = []
     for mem in badhighlights:
-      ret.append((mem, self._highlights[mem][0]))
+      ret.append((self._highlights[mem][0], mem))
       del self._highlights[mem]
 
     return ret
@@ -439,6 +439,11 @@ commands_dict["highlight"] = (highlight_cmd, "style= text= quiet:boolean=false")
 def unhighlight_cmd(ses, args, input):
   """
   Allows you to remove highlights.
+
+  examples:
+
+    #highlight {hello}
+    #highlight {blah*}
 
   category: commands
   """
