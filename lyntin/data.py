@@ -321,7 +321,7 @@ class UserSession(Session):
         if type(exc) == types.StringType:
             player.PutError(exc)
         else:
-            player.Putline(exc[1])
+            player.PutMessage(exc[1])
         # run the death hook; feed self as argument
         hooks.death_hook.run((self,))
 
