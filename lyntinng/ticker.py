@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.20 2002/06/19 03:33:06 willhelm Exp $
+# $Id: ticker.py,v 1.21 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -12,7 +12,9 @@ This module handles ticker data.
 import hooks, lyntin, event, engine, exported
 
 class Ticker:
-  """ Manages ticker data."""
+  """
+  Manages ticker data.
+  """
   def __init__(self):
     # duration between ticks
     self._ticklen = 2
@@ -31,99 +33,77 @@ class Ticker:
     self._enabled = 0
 
   def setTickLen(self, value):
-    """ Sets the tick length.
+    """
+    Sets the tick length.  This is how often a tick occurs.  i.e. if 
+    value was 4, then there would be a tick every 4 seconds.
 
-    This is how often a tick occurs.  i.e. if value was 4, then 
-    there would be a tick every 4 seconds.
-
-    arguments: 
-
-      'value' -- (int) the interval between ticks
-
+    @param value: the interval of seconds between ticks
+    @type  value: int
     """
     self._ticklen = value
 
   def getTickLen(self):
-    """ Returns the ticklength.
+    """
+    Returns the ticklength.
 
-    returns:
-
-      (int) the interval between ticks.
-
+    @returns: the tick length interval
+    @rtype: int
     """
     return self._ticklen
 
   def setTickWarn(self, value):
-    """ Sets the tick warning length.
+    """
+    Sets the tick warning length.  You'll get a warning message this 
+    many seconds before the tick.
 
-    You'll get a warning message this many seconds before
-    the tick.
-
-    arguments:
-
-      'value' -- the number of seconds before the tick to do 
-                 the warning
-
+    @param value: the number of seconds before the tick to do the warning
+    @type  value: int
     """
     self._tickwarn = value
 
   def getTickWarn(self):
-    """ Returns the tick warning length.
+    """
+    Returns the tick warning length.
 
-    returns:
-
-      (int) the number of seconds to warn before
-
+    @returns: the tick warning length
+    @rtype: int
     """
     return self._tickwarn
 
   def getTickStart(self):
-    """ Returns the tick start time.
+    """
+    Returns the tick start time.
 
-    returns:
-
-      (int) when this ticker was started
-
+    @returns: at which tick the ticker was started--this is ticks since
+        Lyntin start, not since the epoch
+    @rtype: int
     """
     return self._tickstart
 
   def setSessionName(self, name):
-    """ Sets the session name.
+    """
+    Sets the session name.
 
-    arguments:
-
-      'name' -- the name of the session that owns this ticker
-
+    @param name: the session name
+    @type  name: string
     """
     self._sessionname = name
-
-  def getSessionName(self):
-    """ Returns the session name.
-
-    returns:
-
-      session name string
-
-    """
-    return self._sessionname
 
   def isEnabled(self):
     """ 
     Allows other parts of Lyntin to query whether the ticker
     is enabled or not.
 
-    returns:
-
-      (int) 0 if no, 1 if yes
+    @returns: 0 if the ticker is not enabled, and 1 if it is enabled
+    @rtype: boolean
     """
     return self._enabled
 
   def enableTicker(self):
-    """ Enables this ticker.
-
-    Has the side-effect of setting the self._tickstart variable
-    as well--this essentially enables tickers as well as resets
-    them.
+    """
+    Enables this ticker if it's not currently enabled.  Has the side-effect 
+    of setting the self._tickstart variable as well--this essentially 
+    enables tickers as well as resets them.
     """
     if self._enabled == 0:
       self._enabled = 1
@@ -134,7 +114,9 @@ class Ticker:
     self._tickstart = engine.myengine.getCurrentTick() - 1
 
   def disableTicker(self):
-    """ Disables this ticker."""
+    """
+    Disables this ticker.
+    """
     if self._enabled == 1:
       self._enabled = 0
       hooks.timer_hook.unregister(self.tickerUpdate)
@@ -145,10 +127,10 @@ class Ticker:
     second.  It figures out if this current second marks a tick
     or a tickwarning and does accordingly.
 
-    arguments:
-
-      'args' -- tuple containing the current tick
-
+    @param args: the args sent by the timer_hook--should contain the
+        current tick so we can figure out if we need to execute things
+        or not.
+    @type  args: tuple
     """
     tick = args[0]
 
@@ -189,6 +171,9 @@ class Ticker:
     """
     Pulls information about the ticker and returns a nice information
     string (if it's enabled).
+
+    @returns: a string giving the Ticker status
+    @rtype: string
     """
     if self._enabled == 1:
       return "(size = %d) (start = %d)" % (self._ticklen, self._tickstart)

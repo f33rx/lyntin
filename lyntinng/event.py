@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.38 2002/07/21 04:14:48 willhelm Exp $
+# $Id: event.py,v 1.39 2002/08/13 02:26:08 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -15,11 +15,10 @@ event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
 import string, os, traceback, sys, glob
-import engine, hooks, ui.ui, lyntin, exported
+import hooks, ui.ui, lyntin, exported
 
 class Event:
-  """ Base Event class.
-
+  """
   This is the basic Event class.  It has an enqueue method
   which enqueues the event in the event queue (in the engine
   module).  It also has an execute method which is executed
@@ -27,40 +26,59 @@ class Event:
   'execute' function for your functionality to get executed.
   """
   def __init__(self):
-    """ Initialize."""
+    """
+    Override this to do your event initialization here.
+    """
     pass
 
   def __str__(self):
-    """ Allows us to print out event objects."""
+    """
+    This allows us to print out event objects for debugging
+    purposes.  Feel free to override this as well.
+    """
     ret = str(self.__class__)
     return ret[ret.find(".") + 1:]
 
   def enqueue(self):
-    """ This enqueues this event into the event queue.  Don't
-    overload this unless you have to.
     """
-    engine.myengine.enqueue(self)
+    This enqueues this event into the event queue.
+    Don't overload this unless you have to.
+    """
+    exported.get_engine()._enqueue(self)
 
   def execute(self):
-    """ Override this.  This gets called by the event handler
-    to execute your event.
+    """
+    Override this.  This gets called by the engine during event handling
+    to execute the event.
     """
     pass
 
 
 class StartupEvent(Event):
-  """ Starts up and initializes Lyntin.
+  """
+  Starts up and initializes Lyntin.
 
   When Lyntin is started, we try to do as much as we can
   inside of the SstartupEvent and through the startup hook.
   """
   def __init__(self):
-    """ Initialize."""
+    """
+    Initialize.  (does nothing)
+    """
     pass
 
   def execute(self):
-    """ Execute."""
+    """
+    This does the following Lyntin startup things:
 
+    1. instantiates and binds the ui.
+    2. loads the dynamically loading Lyntin modules.
+    3. loads the help topics in the help subdir.
+    4. if there's a .lyntinrc adds that to the readfile list.
+    5. reads in all the files in the readfile list.
+    6. starts the timer thread.
+    7. writes the startup message to the ui and the prompt.
+    """
     try:
       # instantiate a ui
       uiname = lyntin.options['ui']
@@ -75,7 +93,7 @@ class StartupEvent(Event):
       if not uiinstance:
         raise ValueError, "Can't start ui."
 
-      engine.myengine.setUI(uiinstance)
+      exported.get_engine().setUI(uiinstance)
 
       exported.write_message("UI started.")
     except Exception, e:
@@ -105,12 +123,16 @@ class StartupEvent(Event):
     # spam the startup hook 
     hooks.startup_hook.spamhook()
 
-    # if we don't have a readfile set by --read flag, then we
-    # try to use ~/.lyntinrc
-    if len(lyntin.options['readfile']) == 0 and lyntin.options['datadir'] != '':
+    # adds the .lyntinrc file to the readfile list if it exists.
+    if lyntin.options['datadir'] != '':
       lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
-      lyntin.options['readfile'].append(lyntinrcfile)
-      exported.write_message("Setting readfile to " + lyntinrcfile)
+      try:
+        test = os.stat(lyntinrcfile)
+        # we want the .lyntinrc file read in first, so then other
+        # files can overwrite the contents therein
+        lyntin.options['readfile'].insert(0, lyntinrcfile)
+      except OSError, e:
+        pass
 
     # handle command files
     for mem in lyntin.options['readfile']:
@@ -121,17 +143,11 @@ class StartupEvent(Event):
       exported.lyntin_command("%sread %s" % (lyntin.commandchar, mem), internal=1)
 
     # start the timer thread
-    engine.myengine.startthread("timer", engine.myengine.runtimer)
+    exported.get_engine().startthread("timer", exported.get_engine().runtimer)
 
     # we're done initialization!
-    message = ("Initialization complete.\n" +
-               "------------------------------------\n" + 
-               "Welcome to Lyntin.\n" + 
-               "For help, type #help general.\n" +
-               "------------------------------------\n")
-
-    exported.write_message(message)
-    engine.myengine.writePrompt()
+    exported.write_message(lyntin.STARTUPTEXT)
+    exported.get_engine().writePrompt()
 
 
 class ShutdownEvent(Event):
@@ -154,12 +170,11 @@ class EchoEvent(Event):
   (echo off) or that the server will not handle echo (echo on).
   """
   def __init__(self, onoff):
-    """ Initialize.
+    """
+    Initializes the EchoEvent.
 
-    arguments:
-
-      'onoff' -- (int) 1 if echo turns on, or 0 if echo turns off
-
+    @param onoff: sets the new echo value.  1 for echo on, 0 for echo off.
+    @type  onoff: int (0 or 1)
     """
     self._state = onoff
 
@@ -175,15 +190,14 @@ class MudEvent(Event):
   spam that data to the mud event hook.
   """
   def __init__(self, session, input):
-    """ Initialize.
+    """
+    Initializes the MudEvent.
 
-    arguments:
+    @param session: the session handling this mud connection
+    @type  session: session.Session instance
 
-      'session' -- (session) the session handling this mud
-                   connection
-
-      'input' -- (string) the data sent from the mud
-
+    @param input: the data sent from the mud that we need to handle
+    @type  input: string
     """
     self._session = session
     self._input = input
@@ -191,7 +205,7 @@ class MudEvent(Event):
   def execute(self):
     """ Execute."""
     hooks.from_mud_hook.spamhook((self._session, self._input))
-    engine.myengine.handleMudData(self._session, self._input)
+    exported.get_engine().handleMudData(self._session, self._input)
 
 
 class InputEvent(Event):
@@ -200,20 +214,19 @@ class InputEvent(Event):
   into their ui and it creates a user event from it.
   """
   def __init__(self, input, internal=0, session=None):
-    """ Initialize.
+    """
+    Initializes the InputEvent.
 
-    arguments:
+    @param input: the data from the user
+    @type  input: string
 
-      'input' -- (string) the data from the user
+    @param internal: whether this is an internally generated user
+        input.  if it is internally generated then we don't record
+        it in history.  1 if it's internal, 0 if not.
+    @type  internal: int (0 or 1)
 
-      'internal=0' -- (int) whether (1) or not (0) this is an 
-                      internally generated user input.  if it 
-                      is internally generated, then we don't 
-                      record it in the history and such.
-
-      'session=None' -- (session.Session instance) which session
-                        to execute the input event in
-
+    @param session: the session execute the input event in
+    @type  session: session.Session
     """
     self._input = input
     self._internal = internal
@@ -224,7 +237,7 @@ class InputEvent(Event):
     if not self._internal:
       exported.write_user_data(self._input)
 
-    engine.myengine.handleUserData(self._input, internal=self._internal, session=self._session)
+    exported.get_engine().handleUserData(self._input, internal=self._internal, session=self._session)
 
 
 class OutputEvent(Event):
@@ -234,12 +247,11 @@ class OutputEvent(Event):
   This event allows you to do that.
   """
   def __init__(self, message):
-    """ Initialize.
+    """
+    Initializes the OutputEvent.
 
-    arguments:
-
-      'message' -- (string) the message
-
+    @param message: the message to go to the ui
+    @type  message: string
     """
     self._message = message
 
@@ -256,16 +268,15 @@ class SpamEvent(Event):
   anything that's listening to the hooks.timer_hook.
   """
   def __init__(self, hook, args):
-    """ Initialize.
+    """
+    Initializes the SpamEvent.
 
-    arguments:
+    @param hook: the hook to spam
+    @type  hook: hooks.Hook
 
-      'hook' -- (hooks.Hook instance) the hook to spam
-
-      'args' -- (list of arguments) the arguments to send to
-                the functions--refer to the documentation on 
-                the hook 
-
+    @param args: the arguments to send to the functions registered
+        with the hook--refer to the hook documentation for details
+    @type  args: tuple
     """
     self._hook = hook
     self._args = args

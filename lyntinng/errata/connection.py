@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: connection.py,v 1.4 2002/07/17 03:56:38 willhelm Exp $
+# $Id: connection.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -109,9 +109,9 @@ class Connection:
     """ Lets you look at things.  syntax: look <at thing>"""
     item = None
     if " " in input:
-      item = input.split(" ", 1)[1].replace("at", "").strip()
-    
-    self.write(world.look(self, item.lower()))
+      item = input.split(" ", 1)[1].replace("at", "").strip().lower()
+
+    self.write(world.look(self, item))
 
   def handle_quit(self, world, input):
     """ Quits out."""

@@ -4,11 +4,18 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.10 2002/05/14 22:46:26 willhelm Exp $
+# $Id: __init__.py,v 1.11 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 
 import glob, os, sys, traceback
 import exported
+"""
+The modules package holds all of the dynamically loaded Lyntin modules.
+Modules get loaded when Lyntin starts up unless:
+
+1. the module throws an exception when getting imported
+2. the module's name starts with an _
+"""
 
 def load_modules():
   """
@@ -32,14 +39,14 @@ def load_modules():
     if mem[0] != "_":
       try:
         name = "modules." + mem
-        exported.write_message("Loading '" + name + "'")
+        exported.write_message("Loading '%s'..." % name)
         _module = getattr(__import__( name ), mem)
         if _module.__dict__.has_key("load"):
           _module.load()
 
         _module.__dict__["lyntin_import"] = 1
       except:
-        exported.write_error("Module '" + name + "' refuses to load.")
+        exported.write_error("Module '%s' refuses to load." % name)
         traceback.print_exc()
 
 # Local variables:

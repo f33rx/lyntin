@@ -5,11 +5,40 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.27 2002/08/13 02:24:00 willhelm Exp $
+# $Id: argparser.py,v 1.28 2002/09/04 05:36:12 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
-automatically into a dictionary.
+automatically into a dictionary as well as a series of Parser classes
+which handle single arguments and TypeCheckers which handle validating
+user input values and converting them into other types (string -> int...).
+
+It's very complex, however, it allows us to nicely centralize a lot
+of the duties involved in parsing user input into one place rather than
+doing it in every single command over and over again.  This way commands
+can specify their syntax line and the ArgParser handles the rest returning
+to the commands a dict with the name/value pairs including argument 
+defaults.
+
+When building an arg spec, you can pass into the ArgumentParser several
+options which change the way it parses the user input.
+
+Supported options::
+
+  stripBraces (default=on): whether all arguments should have 
+            braces stripped before being parsed
+
+  noparsing (default=off): doesn't insure that all arguments are
+            parsed.  works well when matched with limitparsing=0 to 
+            provide a syntax line for commands that parse their own 
+            input
+
+  limitparsing:int (default=-1): only parse this number of tokens 
+            into dict, the rest of the input line goes into 
+            dict["input"]
+
+Refer to the modules.lyntincmds and modules.tintincmds for examples
+on arg specs and commands and how it all intertwines.
 """
 import string, re, time
 import utils
@@ -22,25 +51,26 @@ class ParserException(Exception):
 
 class ArgumentParser:
   """
-  This is the actual argumentparser class
-
-  Supported options:
-
-    stripBraces (default=on) - whether all arguments should have braces
-                               stripped before being parsed.
-
-    noparsing (default=off) - doesn't insure that all arguments are
-                              parsed.  works well when matched with 
-                              limitparsing=0 to provide a syntax line 
-                              for commands that parse their own input
-
-    limitparsing:int (default=-1) - only parse this number of tokens 
-                                    into dict, the rest of the input 
-                                    line goes into dict["input"]
+  This is the actual ArgumentParser class.  Each command gets its
+  own ArgumentParser.  It handles taking in user input and parsing
+  it into a series of arguments which are then placed in a dict and
+  passed to the command function.  This centralizes parsing user
+  input into one place and also enables us to centralize type checking,
+  argument checking, and conversion in one place as well.
   """
-  
   def __init__(self, argspec, argoptions=None):
+    """
+    Initializes the ArgParser instance so it can then parse user
+    input for arguments.  It also generates the syntaxline which
+    is used by the help system to tell the user what the command
+    syntax is.
 
+    @param argspec: the argument specification for the command
+    @type  argspec: string
+
+    @param argoptions: the options to use to parse the argspec
+    @type  argoptions: string
+    """
     # the syntax line is automatically generated from the argspec.
     # we print it out whenever we have a ParserException in the user input.
     self.syntaxline = ""
@@ -53,27 +83,47 @@ class ArgumentParser:
     return
 
   def getOption(self, optionname):
+    """
+    Gets a specific option from the arg options hash as passed into the
+    __init__.
+
+    @param optionname: the name of the option
+    @type  optionname: string
+
+    @return: the value of the option or None
+    @rtype: varies (string or int)
+    """
     if self.options.has_key(optionname):
       return self.options[optionname]
     else:
       return None
 
-  def buildOptions(self,argoptions):
+  def buildOptions(self, argoptions):
     """
     Set the options for this ArgumentParser
     key=value values in argoptions get put directly into self.options
     other values in argoptions get set to 1 in self.options.
 
-    example:  argoptions="ignorall loud:boolean=true"
-              self.options={"ignorall":1,"loud":1}
+    example 1::
 
-              argoptions="lalala wewewewe=hahaha"
-              self.options={"lalala":1,"wewewewe"="hahaha"
+      argoptions="ignorall loud:boolean=true"
+      self.options={"ignorall":1,"loud":1}
 
+    example 2::
+
+      argoptions="lalala wewewewe=hahaha"
+      self.options={"lalala":1,"wewewewe"="hahaha")
+
+    @param argoptions: the argoptions as passed into __init__.
+    @type  argoptions: string
     """
+    # FIXME - this should operate on a locally created dict and pass
+    # that dict back to __init__ which should set self.options and
+    # self.argoptions
     global optionParser
     self.argoptions=argoptions
     self.options=defaultOptions.copy()
+
     if optionParser == None:
       optionParser = ArgumentParser("otherOptions* otherValuedOptions**")
     dict = optionParser.parse(argoptions)
@@ -97,14 +147,14 @@ class ArgumentParser:
     """
     Build up the set of parsers to be used for argument parsing.
 
-    The argspec follows the following format::
+    The argspec follows the following format:
 
-      [argname[:argtype]]+ 
-      [argname[:argtype]=defaultval]+ 
-      [argname:argtype*] 
-      [argname[:argtype]]+ 
-      [argname[:argtype]=defaultval]+ 
-      [argname:argtype**]
+    1. [argname[:argtype]]+ 
+    2. [argname[:argtype]=defaultval]+ 
+    3. [argname:argtype*] 
+    4. [argname[:argtype]]+ 
+    5. [argname[:argtype]=defaultval]+ 
+    6. [argname:argtype**]
 
     Any of the arguments can be specified either by name or populated
     by position, except for arguments after the index collector
@@ -115,6 +165,10 @@ class ArgumentParser:
     default arguments of the empty list and the empty map).
 
     For examples see the test code at the end of argparser.py.
+
+    @param argspec: the argument specification to use to parse future
+        user input
+    @type  argspec: string
     """
     self.parsers = {}
     self.indexparsers = []
@@ -157,11 +211,11 @@ class ArgumentParser:
       else:
         parser = Parser(self,argname)
 
-      typechecker = createChecker(typespec)
+      typechecker = _createTypeChecker(typespec)
       if not typechecker:
         raise ParserException, "Unknown type specifier: %s" % (typespec)
 
-      parser.typechecker = typechecker
+      parser.setTypeChecker(typechecker)
 
       if argdef != None:
         parser.setDefault(parser.parse(argdef))
@@ -186,9 +240,17 @@ class ArgumentParser:
   def parse(self, input):
     """
     Takes an input string and produces the populated dictionary
-    matching self's argspec.  Raises an error if extra arguments are
-    encounterd (without appropriate oollection arguments specified),
-    required arguments are missing or types aren't valid.
+    matching self's argspec.  
+
+    @param input: the user input string
+    @type  input: string
+
+    @return: the populated dictionary of all the args and values
+    @rtype: dict
+
+    @raise ParserException: if extra arguments are encountered without
+        appropriate collection arguments specified, or if required arguments
+        are missing, or if arguments passed in aren't valid
     """    
     dict = {}
 
@@ -243,12 +305,32 @@ class ArgumentParser:
     Any amount of white space between arguments is ignored.  (No empty
     arguments are returned.)
 
-    \ escapes anything, including = and { and } (and, incidentally, \,
-    and any character, so \a becomes a in the argument, and
-    \n\o\t\a\d\r\a\g\o\n is the same as notadragon.
+    "\\" (single backslash) escapes anything, including =, {, }, 
+    \\ (single backslash), and any character, so "\\a" (single 
+    backslash then a) becomes "a" in the argument, and
+    "\\n\\o\\t\\a\\d\\r\\a\\g\\o\\n" (a series of single backslashes 
+    followed by a letter) is the same as "notadragon".
 
-    after maxplit arguments are parsed (or never is maxsplit<0) stops
-    and returns the rest of input as the final item    
+    After maxplit arguments are parsed (all of the arguments if maxsplit 
+    < 0), we'll stop and return the rest of input as the final item.
+
+    @param input: the user input to tokenize
+    @type  input: string
+
+    @param maxsplit: the maximum number of pairs to split
+    @type  maxsplit: int (-1 if no maxplit)
+
+    @param buildsyntaxline: whether or not to build the syntax
+        line as we're going along (this method is used both when
+        the ArgParser is initialized as well as for parsing
+        user input)
+    @type  buildsyntaxline: int (0 or 1)
+
+    @return: the split input
+    @rtype: list of 2-length-tuples
+
+    @raises ParserException: if \\ (single backslash) is found at the end 
+        of the line or if mismatched { or } are found
     """
     bracketdepth = 0
     arg = ""
@@ -340,7 +422,7 @@ class ArgumentParser:
       val = ""
 
     if input:
-      arguments.append( ("input",input) )
+      arguments.append( ("input", input) )
     
     return arguments
 
@@ -350,19 +432,64 @@ class Parser:
   actually populate the dictionary with each argument.
   """
   def __init__(self, argparser, argname):    
+    """
+    Initializes the Parser.
+
+    @param argparser: the argparser instance this belongs to
+    @type  argparser: argparser.ArgParser
+
+    @param argname: the name of the argument this parser handles type
+        and value checking for.
+    @type  argname: string
+    """
     self.argname = argname
     self.default = None
     self.defaultset = 0
     self.typechecker = None
     self.argparser = argparser
 
+  def setTypeChecker(self, typechecker):
+    """
+    Sets the typechecker.  The Parser then uses this to check the
+    values coming in before setting them on the name/value dict.
+
+    @param typechecker: the typechecker to set
+    @type  typechecker: argparser.TypeChecker
+    """
+    self.typechecker = typechecker
+
   def parseInto(self, key, val, dict):
+    """
+    Populates the argument dictionary with the appropriate value.
+
+    @param key: the argument name
+    @type  key: string
+
+    @param val: the argument value
+    @type  val: string
+
+    @param dict: the argument dictionary to populate
+    @type  dict: dict
+
+    @raises ParserException: if multiple values were given for the argument
+    """
     if dict.has_key(self.argname):
-      raise ParserException, "Multiple values for argument %s Given" % (self.argname)
+      raise ParserException, "Multiple values for argument %s given" % (self.argname)
     else:
       dict[self.argname] = self.parse(val)
 
   def parse(self, val):
+    """
+    Parses the value according to this parser and its associated 
+    Typechecker.  We both typecheck it here (making sure it's valid)
+    as well as convert it (i.e. strings -> ints, strings -> regexps...).
+
+    @param val: the value to parse
+    @type  val: string
+
+    @return: the newly adjusted value
+    @rtype: varies
+    """
     if self.argparser.getOption("stripBraces"):
       val = utils.strip_braces(val)
     if self.typechecker:
@@ -370,7 +497,15 @@ class Parser:
     else:
       return val
 
-  def setDefault(self,val):
+  def setDefault(self, val):
+    """
+    Sets the default value for this Parser which is used when no
+    other value is given.  Also sets the "defaultset" member which
+    tells the Parser that it has a default value.
+
+    @param val: the default value
+    @type  val: string or int
+    """
     self.default = val
     self.defaultset = 1
       
@@ -380,12 +515,36 @@ class extraIndexParser(Parser):
   for each call to parseInto an entry is put into the list value in
   the argument dictionary.
   """
-  def __init__(self,argparser,argname):
+  def __init__(self, argparser, argname):
+    """
+    Initializes the Parser.
+
+    @param argparser: the argparser instance this belongs to
+    @type  argparser: argparser.ArgParser
+
+    @param argname: the name of the argument this parser handles type
+        and value checking for.
+    @type  argname: string
+    """
     Parser.__init__(self,argparser,argname)
     self.default = []
     self.defaultset = 1
     
-  def parseInto(self, index, val, dict):
+  def parseInto(self, key, val, dict):
+    """
+    Populates the argument dictionary with the appropriate value.
+
+    @param key: the argument name
+    @type  key: string
+
+    @param val: the argument value
+    @type  val: string
+
+    @param dict: the argument dictionary to populate
+    @type  dict: dict
+
+    @raises ParserException: if multiple values were given for the argument
+    """
     val = self.parse(val)
     if dict.has_key(self.argname):
       dict[self.argname].append(val)
@@ -399,15 +558,39 @@ class extraNamedParser(Parser):
   in the argument dictionary.
   """
   def __init__(self,argparser,argname):
+    """
+    Initializes the Parser.
+
+    @param argparser: the argparser instance this belongs to
+    @type  argparser: argparser.ArgParser
+
+    @param argname: the name of the argument this parser handles type
+        and value checking for.
+    @type  argname: string
+    """
     Parser.__init__(self,argparser,argname)
     self.default = {}
     self.defaultset = 1
     
   def parseInto(self, key, val, dict):
+    """
+    Populates the argument dictionary with the appropriate value.
+
+    @param key: the argument name
+    @type  key: string
+
+    @param val: the argument value
+    @type  val: string
+
+    @param dict: the argument dictionary to populate
+    @type  dict: dict
+
+    @raises ParserException: if multiple values were given for the argument
+    """
     val=self.parse(val)
     if dict.has_key(self.argname):
       if dict.has_key(key) or dict[self.argname].has_key(key):
-        raise ParserException, "multiple values given for argument %s" % (key)
+        raise ParserException, "Multiple values given for argument %s" % (key)
       dict[self.argname][key] = (val)
     else:
       dict[self.argname] = {key:val}
@@ -415,10 +598,10 @@ class extraNamedParser(Parser):
 
 typecheckers = {}
 
-def createChecker(typespec):
+def _createTypeChecker(typespec):
   """
-  This creates a typechecker based on the values in the dictionary
-  typecheckers.
+  Factory method for instantiating TypeChecker subclasses based on the
+  type being passed in.
 
   First the typespec is split at its first colon.
 
@@ -428,6 +611,13 @@ def createChecker(typespec):
 
   The rest of the typespec (the typeargs) is used with the function to
   construct the typechecker desired.
+
+  @param typespec: the type that we're checking.  i.e. "string", "int", ...
+      This translates directly into a specific TypeChecker.
+  @type  typespec: string
+
+  @return: the TypeChecker subclass created
+  @rtype: argparser.TypeChecker
   """
   typespec = typespec.split(":",1)
   if len(typespec) == 1:
@@ -441,55 +631,117 @@ def createChecker(typespec):
 
   return typechecker
 
-class Checker:
+class TypeChecker:
   """
   Trivial base class for argument checkers
   """
   def __init__(self, typename, typeargs):
+    """
+    Initializes the TypeChecker.  Over-ridden by all the TypeChecker 
+    subclasses.
+
+    @param typename: the name of the type
+    @type  typename: string
+
+    @param typeargs: the arguments passed to the TypeChecker to initialize
+        it
+    @type  typeargs: tuple
+    """
     return
 
   def check(self, arg):
+    """
+    Over-ridden by all the TypeChecker subclasses.
+
+    @param arg: the argument to check the type-hood and convert
+    @type  arg: string
+
+    @returns: the converted argument
+    @rtype: varies
+    """
     return arg
 
-class StringChecker(Checker):
+class StringChecker(TypeChecker):
   """
   Essentiallly the same as the trivial base class, but it's explicit
-  that we just return the string we take in. 
+  that we just return the string we take in without any transformation.
   """
   def __init__(self, typename, typeargs):
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
     return
 
-  def check(self,arg):
+  def check(self, arg):
+    """
+    Returns the string we're looking at without any transformation.
+
+    @param arg: the argument to pass back
+    @type  arg: string
+
+    @return: the argument
+    @rtype:  string
+    """
     return arg
 
 typecheckers["string"] = StringChecker
 
-class IntChecker(Checker):
+class IntChecker(TypeChecker):
   """
   Accept only integer values and return integer objects.
   """
   def __init__(self, typename, typeargs):
+    """
+    Initializes the TypeChecker.  Over-ridden by all the TypeChecker 
+    subclasses.
+
+    @param typename: the name of the type
+    @type  typename: string
+
+    @param typeargs: the arguments passed to the TypeChecker to initialize
+        it
+    @type  typeargs: tuple
+
+    @raises ParserException: If typeargs are passed in--this is 
+        non-configurable.
+    """
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
-    return
 
   def check(self,arg):
+    """
+    Verifies the arg is of type int and converts it to an int.
+
+    @param arg: the argument to check the type-hood and convert
+    @type  arg: string
+
+    @returns: the converted argument from string to int
+    @rtype: int
+    """
     return int(arg)
 
 typecheckers["int"] = IntChecker
 
-class BooleanChecker(Checker):
+class BooleanChecker(TypeChecker):
   """
   Accept only boolean values using the utils.convert_boolean function.
   """
   def __init__(self, typename, typeargs):
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
-    return
 
   def check(self,arg):
+    """
+    Verfies the argument is a boolean (using utils.convert_boolean function)
+    and converts it to a boolean value (0 or 1).
+
+    @param arg: the argument to check the type-hood and convert
+    @type  arg: string
+
+    @returns: the converted argument
+    @rtype: int (0 or 1)
+
+    @raises ParserException: if the arg is not a valid boolean
+    """
     ret = utils.convert_boolean(arg)
     if ret == 1 or ret == 0:
       return ret
@@ -498,7 +750,7 @@ class BooleanChecker(Checker):
 
 typecheckers["boolean"] = BooleanChecker
 
-class BooleanOrNoneChecker(Checker):
+class BooleanOrNoneChecker(TypeChecker):
   """
   Accept only boolean values or special "not specified" values.  Booleans
   are handled by utils.convert_boolean.  Values not handled by that
@@ -507,9 +759,21 @@ class BooleanOrNoneChecker(Checker):
   def __init__(self, typename, typeargs):
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
-    return
 
   def check(self,arg):
+    """
+    Verfies the argument is a boolean (using utils.convert_boolean function)
+    and converts it to a boolean value (0 or 1).  Also handles None, "-"
+    and the empty string as None.
+
+    @param arg: the argument to check the type-hood and convert
+    @type  arg: string
+
+    @returns: the converted argument
+    @rtype: int (0 or 1) or None
+
+    @raises ParserException: if the arg is not a valid boolean
+    """
     ret = utils.convert_boolean(arg)
     if ret == 1 or ret == 0:
       return ret
@@ -520,16 +784,27 @@ class BooleanOrNoneChecker(Checker):
 
 typecheckers["booleanornone"] = BooleanOrNoneChecker
 
-class EvalChecker(Checker):
+class EvalChecker(TypeChecker):
   """
   Evaluate its input argument as python code and return the resulting object.
   """
   def __init__(self, typename, typeargs):
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
-    return
 
   def check(self,arg):
+    """
+    Assumes the argument is valid python code.  It evaluates the code
+    and returns the result.
+
+    @param arg: the argument to evaluate
+    @type  arg: string
+
+    @returns: the result of eval(arg)
+    @rtype: varies
+
+    @raises ParserException: if we can't eval the argument
+    """
     try:
       return eval(arg)
     except Exception, e:
@@ -537,25 +812,35 @@ class EvalChecker(Checker):
 
 typecheckers["eval"] = EvalChecker 
 
-class TimeSpanChecker(Checker):
+class TimeSpanChecker(TypeChecker):
   """
   Accepts an amount of time and converts it to a number of seconds.
   """
   def __init__(self, typename, typeargs):
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
-    return
 
   def check(self, arg):
-    time = utils.parse_timespan(arg)
-    if time != None:
+    """
+    Assumes the argument is a time span.
+
+    @param arg: the timespan
+    @type  arg: string
+
+    @returns: the number of seconds in the timespan
+    @rtype: int
+
+    @raise ParserException: if the timespan is invalid
+    """
+    try:
+      time = utils.parse_timespan(arg)
       return time
-    else:
+    except:
       raise ParserException, "Invalid timespan specified %s" % (arg,)
 
 typecheckers["timespan"] = TimeSpanChecker
   
-class TimeChecker(Checker):
+class TimeChecker(TypeChecker):
   """
   Accepts a date specification.
 
@@ -565,9 +850,20 @@ class TimeChecker(Checker):
   def __init__(self, typename, typeargs):
     if typeargs:
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
-    return
 
   def check(self, arg):
+    """
+    Assumes the argument is valid python code.  It evaluates the code
+    and returns the result.
+
+    @param arg: the time argument
+    @type  arg: string
+
+    @returns: the number of seconds since the epoch
+    @rtype: int
+
+    @raise ParserException: if the arg is not a valid time
+    """
     time = utils.parse_time(arg)
     if time != None:
       return time
@@ -576,7 +872,7 @@ class TimeChecker(Checker):
 
 typecheckers["time"] = TimeChecker
   
-class ChoiceChecker(Checker):
+class ChoiceChecker(TypeChecker):
   """
   Allows for a value to come from a selection of different strings.
   Automatically expands to one of them if it is uniquely specified.
@@ -584,24 +880,41 @@ class ChoiceChecker(Checker):
   typeargs should be a |-delimitted list of possibly values
   """
   def __init__(self, typename, typeargs):
+    """
+    Uses the typeargs to set the choices availble.
+    """
     if not typeargs:
       raise ParserException("TypeArgs (%s) not specified for %s type - must allow at least one choice." % (typeargs, typename) )
     self._choices = typeargs.split("|")
-    return
 
   def check(self, args):
+    """
+    Checks the arg against a series of choices that were presented
+    when this checker was instantiated.  So you could say that valid
+    values of this argument are "high" and "low" and if the argument
+    value the user passed in was "blue", then we would raise a 
+    ParserException since that's not a valid value.
+
+    @param arg: the argument
+    @type  arg: string
+
+    @returns: the choice
+    @rtype: int
+
+    @raise ParserException: if the arg is not a valid choice
+    """
     possibilities = []
     for item in self._choices:
       if item.find(args) == 0:
         possibilities.append(item)
     if len(possibilities) == 0 or len(possibilities) > 1:
-      raise ParserException, "Invalid argument, must be one of %s" % (self._choices,)
+      raise ParserException, "Invalid argument, must be one of %s." % (self._choices,)
     else:
       return possibilities[0]
 
 typecheckers["choice"] = ChoiceChecker
 
-class ReChecker(Checker):
+class ReChecker(TypeChecker):
   """
   Compiles the incoming argument as a regular expression.
   """
@@ -610,6 +923,16 @@ class ReChecker(Checker):
       raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
 
   def check(self, arg):
+    """
+    Converts the string into a regular expression.  Raises whatever
+    exceptions re.compile raises.
+
+    @param arg: the argument
+    @type  arg: string
+
+    @return: the compiled regular expression
+    @rtype: Re
+    """
     return re.compile(arg)
 
 typecheckers["re"] = ReChecker

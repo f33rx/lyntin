@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.14 2002/07/07 04:53:45 willhelm Exp $
+# $Id: ui.py,v 1.15 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -31,25 +31,26 @@ class Message:
   """
   Encapsulates a message to be written to the user.
   """
-  def __init__(self, data, messagetype=LTDATA, session=None):
+  def __init__(self, data, messagetype=LTDATA, ses=None):
     """ Initialize.
 
-    arguments:
+    @param data: the message string
+    @type  data: string
 
-      'data' -- the message string
+    @param messagetype: the message type (use a constant defined in ui.ui)
+    @type  messagetype: int
 
-      'messagetype' -- the message type (hopefully a constant
-                       defined in ui.ui.py
-
-      'session' -- the session this message is bound to
-
+    @param ses: the session this message belongs to
+    @type  ses: session.Session
     """
-    self.session = session
+    self.session = ses
     self.data = data
     self.type = messagetype
 
   def __repr__(self):
-    """ Represents the message (returns data + type)."""
+    """
+    Represents the message (returns data + type).
+    """
     return repr(session) + MESSAGETYPES[self.type] + repr(self.data)
 
 

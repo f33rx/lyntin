@@ -4,35 +4,28 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.67 2002/08/27 02:20:14 jmberne Exp $
+# $Id: engine.py,v 1.68 2002/08/30 02:27:05 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
-that do work in lyntin as well as encapsulates the event
-queue and the handler for it.
-
-Most of your stuff should call functions in the engine to do things.
-To get the instance of engine, look at myengine.
+that do work in lyntin as well as encapsulates event queue, the event
+handling methods, and some of the other singleton managers such as
+the HelpManager, the ThreadManager, and the CommandManager.
 
 Engine also holds hooks to the various event types.  Events will call
 all appropriate hooks allowing you to add functionality via the modules
 interface without changing the Lyntin internals.
 
-The engine module holds a variable which is a singleton: 'myengine'.
-To access the engine, access it by 'engine.myengine'.
-
-It also holds a series of helper functions for making common engine
-calls easier to deal with.
+The Engine class is a singleton and the reference to it is stored in
+"engine.myengine".  However, you should use the exported module
+to access the engine using the "get_engine()" function.
 """
 import Queue, traceback, copy, string, re, thread, sys
 
 import session, ui.ui, lyntin, utils, event, argparser
 import exported, hooks, helpmanager, history, threadmanager, commandmanager
 
-"""
-myengine is a singleton.  so when it gets instantiated, this
-variable can be used to retrieve the engine singleton.
-"""
+# this is the singleton reference to the Engine instance.
 myengine = None
 
 class Engine:
@@ -119,14 +112,14 @@ class Engine:
   ### ------------------------------------------
 
   def startthread(self, name, func):
-    """ Starts a thread through the Thread Manager.
+    """
+    Starts a thread through the Thread Manager.
 
-    arguments:
+    @param name: the name of the thread to start
+    @type  name: string
 
-      'name' -- (string) name of the thread
-
-      'func' -- (function) the function to run in the thread
-
+    @param func: the function to run in the thread
+    @type  func: function
     """
     self.getManager("thread").startThread(name, func)
 
@@ -136,10 +129,8 @@ class Engine:
     through and checks the status of all the threads registered
     with the Thread Manager.
 
-    returns:
-
-      (list of strings) of the thread status
-
+    @return: one string for each thread indicating its status
+    @rtype: list of strings
     """
     return self.getManager("thread").checkThreadsStatus()
 
@@ -177,10 +168,8 @@ class Engine:
     Returns the current tick.  It also happens to be the total
     number of seconds since this instance of Lyntin was started.
 
-    returns:
-
-      (int) the current tick
-
+    @return: the current tick
+    @rtype: int
     """
     return self._tick
 
@@ -190,8 +179,8 @@ class Engine:
   ### ------------------------------------------
 
   def handleUserData(self, input, internal=0, session=None ):
-    """ This handles input lines from the user in a session-less context.
-
+    """
+    This handles input lines from the user in a session-less context.
     The engine.handleUserData deals with global stuff and then
     passes the modified input to the session for session-oriented
     handling.  The session can call this method again with
@@ -200,20 +189,20 @@ class Engine:
     internal tells whether to spam the input hook and
     things of that nature.
 
-    arguments:
+    @param input: the data from the user
+    @type  input: string
 
-      'input' -- (string) data from the user
+    @param internal: whether this should be executed internally or not.
+        0 if we should spam the input hook and record
+        the input to the historymanager; 1 if we shouldn't
+    @type  internal: int (0 or 1)
 
-      'internal=0' -- (int) 0 if we should spam the input hook
-                      and record to history, 1 if we shouldn't
+    @param session: the session scoping to execute this user input in
+    @type  session: session.Session instance
 
-      'session=self._current_session' -- (session.Session instance)
-                                         allows you to execute this
-                                         and run all things in a
-                                         specific session
-
-    returns:
-      'executed' -- (string) the commands that were executed
+    @return: the commands that were actually executed (may not be
+        exactly what the user typed--this is for the history manager)
+    @rtype: string
     """ 
     inputlist = utils.split_commands(input)
     if session == None:
@@ -232,7 +221,7 @@ class Engine:
 
       if mem[0] == "!":
         memhistory = self.getManager("history").getHistoryItem(mem)
-        if memhistory != -1:
+        if memhistory != None:
           self.handleUserData(memhistory, 1, session)
           historyitems.append(memhistory)
           continue
@@ -274,7 +263,8 @@ class Engine:
           historyitems.append(mem)
           continue
 
-      #if we get here then it is not a valid !-expression. and it's going to the default session
+      # if we get here then it is not a valid !-expression. and it's going 
+      # to the default session
       historyitems.append(mem)
 
       # no command char, so we pass it on to the session.handleUserData
@@ -290,17 +280,15 @@ class Engine:
     return executed
 
   def handleMudData(self, session, text):
-    """ Handle input coming from the mud.
+    """
+    Handle input coming from the mud.  We toss this to the 
+    current session to deal with.
 
-    We toss this to the current session to deal with.
+    @param session: the session this mud data applies to
+    @type  session: session.Session instance
 
-    arguments:
-
-      'session' -- (session) the session this mud data
-                   applies to
-
-      'text' -- (string) text coming from the mud
-
+    @param text: the text coming from the mud
+    @type  text: string
     """
     if session:
       session.handleMudData(text)
@@ -313,16 +301,15 @@ class Engine:
   ### ------------------------------------------
 
   def createSession(self, name):
-    """ Copies the common session and returns it.
+    """
+    Creates a new session by copying the common session
+    and registers the new session with the engine.
 
-    arguments:
+    @param name: the name of the session
+    @type  name: string
 
-      'name' -- (string) the name of the session
-
-    returns:
-
-      (session.Session)
-
+    @return: the new session
+    @rtype: session.Session instance
     """
     ses = session.Session()
     ses.setName(name)
@@ -330,28 +317,28 @@ class Engine:
     return ses
 
   def isUniqueSessionName(self, name):
-    """ Returns whether a session of that name already exists.
+    """
+    Returns whether a session of that name already exists.
 
-    arguments:
+    @param name: the session name to check
+    @type  name: string
 
-      'name' -- (string) the name to check
-
-    returns:
-
-      (int) 1 if it's unique, 0 if not
-
+    @return: 1 if the name is unique; 0 if not
+    @rtype: int (1 or 0)
     """
     return not self._sessions.has_key(name)
 
   def registerSession(self, session, name):
-    """ Registers a session with the engine.
+    """
+    Registers a session with the engine.
 
-    arguments:
+    @param session: the session to register
+    @type  session: session.Session instance
 
-      'session' -- (session.Session) the session to register
+    @param name: the name of the session
+    @type  name: string
 
-      'name' -- (string) the name of the session
-
+    @raises ValueError: if the session has a non-unique name
     """
     if self._sessions.has_key(name):
       raise ValueError, "Session of that name already exists."
@@ -363,11 +350,11 @@ class Engine:
     self._sessions[name] = session
 
   def unregisterSession(self, ses):
-    """ Unregisters a session from the engine.
+    """
+    Unregisters a session from the engine.
 
-    arguments:
-
-      'ses' -- (session instance)
+    @param ses: the session to unregister
+    @type  ses: session.Session instance
     """
     if not self._sessions.has_key(ses.getName()):
       raise ValueError, "No session of that name."
@@ -384,36 +371,32 @@ class Engine:
       self.changeSession()
 
   def currentSession(self):
-    """ Returns the current session.
+    """
+    Returns the current session.
 
-    returns:
-
-      (session.Session) the current session object
-
+    @return: the current session
+    @rtype: session.Session instance
     """
     return self._current_session
 
   def getSessions(self):
-    """ Returns a list of session names.
+    """
+    Returns a list of session names.
 
-    returns:
-
-      (list of strings) the session names
-
+    @return: all the session names
+    @rtype: list of strings
     """
     return self._sessions.keys()
 
   def getSession(self, name):
-    """ Returns a named session.
+    """
+    Returns a named session.
 
-    arguments:
+    @param name: the name of the session to retrieve
+    @type  name: string
 
-      'name' -- (string) the name of the session to retrieve
-
-    returns:
-
-      (session.Session) or None
-
+    @return: the session of that name or None
+    @rtype: session.Session or None
     """
     if self._sessions.has_key(name):
       return self._sessions[name]
@@ -421,16 +404,14 @@ class Engine:
       return None
 
   def changeSession(self, name=''):
-    """ Changes the current session to another named session.
+    """
+    Changes the current session to another named session.
 
     If they don't pass in a name, we get the next available
     non-common session if possible.
 
-    arguments:
-
-      'name=""' -- (string) the name of the session to switch
-                   to
-
+    @param name: the name of the session to switch to
+    @type  name: string
     """
     if name == '':
       keys = self._sessions.keys()
@@ -452,29 +433,24 @@ class Engine:
       exported.write_error("No session of that name.")
 
   def writeSession(self, message):
-    """ Writes a message to the network socket.
+    """
+    Writes a message to the network socket.  The message should 
+    be a string.  Otherwise, it's unhealthy.
 
-    The message should be a string.  Otherwise, it's unhealthy.
-
-    arguments:
-
-      'message' -- (string) the text to write to the mud.
-
+    @param message: the text to write to the mud
+    @type  message: string
     """
     self._current_session.write(message)
 
   def closeSession(self, session=None):
-    """ Closes down a session.
+    """
+    Closes down a session.
 
-    arguments:
+    @param session: the name of the session to close
+    @type  session: string
 
-      'session=None' -- (string) the name of the session to
-                        close
-
-    returns:
-
-      (int) 1 if successful, 0 if not
-
+    @return: 1 if successful; 0 if not
+    @rtype: int (1 or 0)
     """
     if session == None:
       session = self._current_session
@@ -491,23 +467,21 @@ class Engine:
   ### event-handling/engine stuff
   ### ------------------------------------------
 
-  def dequeue(self):
-    """ Pulls an event off the queue--will block!!!
+  def _dequeue(self):
+    """
+    Pulls an event off the queue--will block!!!
 
-    returns:
-
-      (event.Event)
-
+    @return: the latest event in the queue
+    @rtype: event.Event
     """
     return self._event_queue.get()
          
-  def enqueue(self, event):
-    """ Adds an event to the queue.
+  def _enqueue(self, event):
+    """
+    Adds an event to the queue.
 
-    arguments:
-
-      'event' -- (event.Event) the event to enqueue
-
+    @param event: the new event to enqueue
+    @type  event: event.Event
     """
     self._event_queue.put(event)
 
@@ -518,7 +492,7 @@ class Engine:
     """
     while not self._shutdownflag:
       try:
-        e = self.dequeue()
+        e = self._dequeue()
         e.execute()
       except KeyboardInterrupt:
         return
@@ -530,9 +504,8 @@ class Engine:
       self._num_events_processed += 1
         
   def tallyError(self):
-    """ Adds one to the error count.
-
-    If we see more than 20 errors, we shutdown.
+    """
+    Adds one to the error count.  If we see more than 20 errors, we shutdown.
     """
     lyntin.errorcount = lyntin.errorcount + 1
     exported.write_error("WARNING: Unhandled error encountered (%d out of %d)." 
@@ -554,11 +527,9 @@ class Engine:
     This allows a user to monitor how Lyntin is doing in terms
     of events and other such erata.
 
-    returns:
-
-      (string) the complete diagnostic data for our little happy
-      mud client
-
+    @return: the complete the complete diagnostic data for our little happy
+        mud client
+    @rtype: string
     """
     data = []
     data.append("   events processed: %d" % self._num_events_processed)
@@ -587,28 +558,27 @@ class Engine:
   ### user interface stuff
   ### ------------------------------------------
 
-  def setUI(self, thisui):
-    """ Sets the ui.
-
-    arguments:
-
-      'thisui' -- (ui.BaseUI) the ui to set
-
+  def setUI(self, newui):
     """
-    self._ui = thisui
+    Sets the ui.
+
+    @param newui: the new ui to set
+    @type  newui: ui.BaseUI subclass
+    """
+    self._ui = newui
 
   def getUI(self):
-    """ Returns the ui.
+    """
+    Returns the ui.
 
-    returns:
-
-      (ui.BaseUI)
-
+    @return: the ui
+    @rtype: ui.BaseUI subclass
     """
     return self._ui
 
   def writeUI(self, text):
-    """ Writes a message to the ui.
+    """
+    Writes a message to the ui.
 
     This method uses a lock so that multiple threads can write
     to the ui without intersecting and crashing the python process.
@@ -616,10 +586,8 @@ class Engine:
     Theoretically you should use the exported module to write
     things to the ui--it calls this method.
 
-    arguments:
-
-      'text' -- (string or ui.Message) the message to write 
-                to the ui
+    @param text: the message to write to the ui
+    @type  text: string or ui.Message
     """
     self._ui_lock.acquire(1)
     try:
@@ -642,36 +610,42 @@ class Engine:
   ### ------------------------------------------------
 
   def addManager(self, name, mgr):
-    """ Adds a manager to our list.
+    """
+    Adds a manager to our list.
 
-    arguments:
+    @param name: the name of the manager to add
+    @type  name: string
 
-      'name' -- (string) the name of the manager to add.
-
-      'manager' -- (instance) the manager to add.
+    @param manager: the manager instance to add
+    @type  manager: manager.Manager subclass
     """
     self._managers[name] = mgr
 
   def removeManager(self, name):
-    """ Removes a manager from our list.
-
-    arguments:
-
-      'name' -- (string) the name of the manager to remove.
     """
+    Removes a manager from our list.
+
+    @param name: the name of the manager to remove
+    @type  name: string
+
+    @return: 0 if nothing happened, 1 if the manager was removed
+    @rtype: boolean (0 or 1)
+    """
+    # FIXME - this shouldn't silently fail
     if self._managers.has_key(name):
       del self._managers[name]
+      return 1
+    return 0
 
   def getManager(self, name):
-    """ Retrieves a manager by name.
+    """
+    Retrieves a manager by name.
 
-    arguments:
+    @param name: the name of the manager to retrieve
+    @type  name: string
 
-      'name' -- (string) the name of the manager to retrieve.
-
-    returns:
-
-      the manager instance
+    @return: the manager instance or None
+    @rtype: manager.Manager subclass or None
     """
     if self._managers.has_key(name):
       return self._managers[name]
@@ -681,11 +655,14 @@ class Engine:
   ### Status stuff
   ### ------------------------------------------------
   def getStatus(self, ses):
-    """ Gets the status for a specific session.
+    """
+    Gets the status for a specific session.
 
-    arguments:
+    @param ses: the session to get status for
+    @type  ses: session.Session
 
-      'ses' -- (session instance) the session to get status for.
+    @return: the status of the session
+    @rtype: list of strings
     """
     data = []
     # call session.getStatus() and get status from it too

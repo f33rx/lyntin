@@ -4,11 +4,11 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.3 2002/07/21 04:14:48 willhelm Exp $
+# $Id: test.py,v 1.4 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
-Lyntin.
+Lyntin.  Don't mind it--it just hangs out here.
 """
 failures = 0
 

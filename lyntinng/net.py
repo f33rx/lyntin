@@ -4,19 +4,21 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.22 2002/06/05 18:56:13 jmberne Exp $
+# $Id: net.py,v 1.23 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
 connections with a mud and polling the connection for data.
 """
 import socket, string, select
-import exported, event
+import event, ui.ui
 
 ### --------------------------------------------
 ### CONSTANTS
 ### --------------------------------------------
 
+# reverse lookup allowing us to see what's going on more easily
+# when we're debugging.
 CODES = {255: "IAC",
          254: "DON'T",
          253: "DO",
@@ -33,6 +35,7 @@ CODES = {255: "IAC",
          35:  "<XDISPLAY>",
          39:  "<ENV>"}
 
+# telnet control codes
 IAC  = chr(255)
 DONT = chr(254)
 DO   = chr(253)
@@ -43,10 +46,13 @@ SE   = chr(240)
 SEND = chr(1)
 IS   = chr(0)
 
+# some nice strings to help with the telnet control code
+# negotiation
 DD       = DO + DONT
 WW       = WILL + WONT
 DDWW     = DD + WW
 
+# telnet option codes
 ECHO     = chr(1)
 SGA      = chr(3)
 TERMTYPE = chr(24)
@@ -57,8 +63,8 @@ ENV      = chr(39)
 
 class SocketCommunicator:
   """
-  The SocketCommunicator handles all incoming and outgoing
-  data from and to the mud.
+  The SocketCommunicator handles all incoming and outgoing data from 
+  and to the mud, telnet control codes, and some data transformations.
   """
   def __init__(self):
     self._sessionname = ''
@@ -73,46 +79,52 @@ class SocketCommunicator:
   def __repr__(self):
     return "connection %s %d" % (self._host, self._port)
 
-  def setSession(self, newsession):
-    """ Sets the local session.
-
-    arguments:
-
-      'newsession' -- (session.Session) the session to set to
-
+  def setSessionName(self, name):
     """
-    self._session = newsession
+    Sets the session name.
+
+    @param name: the new session name
+    @type  name: string
+    """
+    self._sessionname = name
+
+  def setSession(self, ses):
+    """
+    Sets the local session.  Each SocketCommunicator is matched
+    up with a Session object.  This sets the Session object for
+    this SocketCommunicator so we know who to pass information from
+    the mud off to.
+
+    @param ses: the session to set
+    @type  ses: Session
+    """
+    # FIXME - maybe we should do dynamic lookup of the session every
+    # time like we do with the ui?
+    self._session = ses
 
   def shutdown(self):
-    """ Shuts down a socket connection and the thread polling it."""
+    """
+    Shuts down the thread polling the socket connection and the socket
+    as well.
+    """
     self._shutdownflag = 1
-    if self._sock:
-      import ui.ui
-      event.OutputEvent(ui.ui.Message("Lost connection to: %s\n" % self._host)).enqueue()
-      try:
-        self._sock.shutdown(2)
-      except:
-        pass
-      self._sock.close()
-      self._sock = None
-      self._session = None
 
   def connect(self, host, port, sessionname):
-    """ Takes in a host and a port and connects the socket.
+    """
+    Takes in a host and a port and connects the socket.
 
-    arguments:
+    @param host: the host to connect to
+    @type  host: string
 
-      'host' -- (string) the host to connect to
+    @param port: the port to connect at
+    @type  port: int
 
-      'port' -- (int) the port to connect at
-
-      'sessionname' -- (string) the name of the session
-
+    @param sessionname: the name of the new session
+    @type  sessionname: string
     """
     if type(port) == type(''):
       port = int(port)
 
-    exported.write_message("Trying to connect to %s. (may take up to 30 seconds)" % host)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, port))
     sock.setblocking(1)
@@ -121,9 +133,11 @@ class SocketCommunicator:
     self._port = port
     self._sock = sock
     self._sessionname = sessionname
-    exported.write_message("Connection made.")
 
-  def pollForData(self):
+  def _pollForData(self):
+    """
+    Polls the socket for data.
+    """
     readers, e, w = select.select([self._sock], [], [], .1)
     if readers:
       return readers[0].recv(1024)
@@ -131,15 +145,17 @@ class SocketCommunicator:
       return None
   
   def run(self):
-    """ Polls a socket and returns any data sitting there."""
+    """
+    Polls a socket and returns any data sitting there.
+    """
     try:
       data = None
       while not self._shutdownflag:
-          newdata = self.pollForData()
+          newdata = self._pollForData()
           if newdata == '':
             if self._shutdownflag == 0 and self._session: 
               self._session.shutdown(())
-            return
+            break
 
           if newdata:
             if data:
@@ -159,69 +175,84 @@ class SocketCommunicator:
               data = None
 
     except SystemExit:
-      if self._shutdownflag == 0 and self._session:
+      if self._session:
         self._session.shutdown(())
 
     except Exception, e:
-      if self._shutdownflag == 0 and self._session:
+      if self._session:
         self._session.shutdown(())
+      print e
 
+    # if we hit this point, we want to shut down the socket
+    try:    self._sock.shutdown(2)
+    except: pass
+
+    try:    self._sock.close()
+    except: pass
+
+    self._sock = None
+    self._session = None
+
+    event.OutputEvent(ui.ui.Message("Lost connection to: %s\n" % self._host)).enqueue()
 
   def write(self, data, convert=1):
-    """ Writes data to the mud.
+    """
+    Writes data to the mud.
 
-    arguments:
+    @param data: the data to write to the socket
+    @type  data: string
 
-      'data' -- (string) the data to write to the socket to the mud
+    @param convert: whether (1) or not (0) we should convert eol stuff to 
+        CRLF
+    @type  data: boolean
 
-      'convert=1' -- (int) 1 if we should convert eol stuff, 0 if not
-
+    @raises Exception: if we have problems sending the data over the
+        socket
     """
     if convert:
       data = data.replace("\n", "\r\n")
 
-    try:
-      self._sock.send(data)
-    except:
-      if self._shutdownflag == 0 and self._session:
-        # FIXME - this might not be prudent--might want to create
-        # an event for shutting down sessions.
-        self._session.shutdown(())
+    if self._shutdownflag == 0:
+      try:
+        self._sock.send(data)
 
+      except Exception, e:
+        if self._shutdownflag == 0 and self._session:
+          self._session.shutdown(())
+          raise Exception, e
+
+      return None
+    return e
 
   def handleData(self, data):
     """
-    Handles incoming data from the mud.
+    Handles incoming data from the mud.  We wrap it in a MudEvent
+    and toss it on the queue.
 
-    arguments:
-
-      'data' -- (string) incoming data
-
+    @param data: the incoming data from the mud
+    @type  data: string
     """
     event.MudEvent(self._session, data).enqueue()
 
 
   def handleNego(self, data):
     """
-    Removes telnet negotiation stuff from the stream and handles 
-    it.
+    Removes telnet negotiation stuff from the stream and handles it.
 
-    arguments:
+    @param data: the incoming data from the mud that we need to parse
+        for telnet control code stuff
+    @type  data: string
 
-      'data' -- (string) incoming data that we need to parse
-                for telnet negotiation stuff
-
-    returns:
-
-      (string) the data without the telnet control codes
-
+    @return: the data without the telnet control codes
+    @rtype:  string
     """
-    # FIXME - this needs to be re-written without the try block
     i = data.find(IAC)
 
     while (i != -1):
-      try:
-        if data[i+1] in DDWW:
+      # handles DO/DONT/WILL/WONT stuff
+      if data[i+1] in DDWW:
+        if len(data) > i + 2:
+
           if data[i+2] == ECHO:
             if data[i+1] == WILL:
               event.EchoEvent(0).enqueue()
@@ -232,22 +263,30 @@ class SocketCommunicator:
 
           data = data[:i] + data[i+3:]
 
-        elif data[i+1] == SB:
-          end = data.find(SE, i)
-          if end == -1:
-            self._nego_buffer = data[i:]
-            data = data[:i]
-            break
-          else:
-            data = data[:i] + data[end+1:]
-
         else:
-          data = data[:i] + data[i+3:]
+          self._nego_buffer = data[i:]
+          data = data[:i]
+          return data
 
-      except IndexError:
-        self._nego_buffer = data[i:]
-        data = data[:i]
-        break
+      # handles SB...SE stuff
+      elif data[i+1] == SB:
+
+        end = data.find(SE, i)
+        if end == -1:
+          self._nego_buffer = data[i:]
+          data = data[:i]
+          return data
+        else:
+          data = data[:i] + data[end+1:]
+
+      # i'm not sure what this clause is for....
+      else:
+        if len(data) > i+2:
+          data = data[:i] + data[i+3:]
+        else:
+          self._nego_buffer = data[i:]
+          data = data[:i]
+          return data
 
       i = data.find(IAC, i)
 

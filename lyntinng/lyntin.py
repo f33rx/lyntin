@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.29 2002/07/21 18:07:44 willhelm Exp $
+# $Id: lyntin.py,v 1.30 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -50,8 +50,8 @@ HELPTEXT = """syntax: lyntin.py [--help] [--read <file>] [--datadir <dir>] [--ui
 
 # the wizlist of folks without whom Lyntin wouldn't exist.
 WIZLIST = """This is the wizlist--people who have worked to bring you Lyntin:
-Lyn Headley, Will Guaraldi, James, Aquarius, Sebastian John, Joshua Berne
-Brian Bell
+Lyn Headley, Will Guaraldi, James, Aquarius, Sebastian John, 
+Joshua Berne, Brian Bell
 """
 
 # bosstext - code derived from the original Lyntin
@@ -88,41 +88,47 @@ BOSSTEXT = """
       if not input:
 """
 
+# Lyntin displays this after it's done initializing and it's
+# ready for user interaction.
+STARTUPTEXT = """Initialization complete.
+--------------------------------------
+Welcome to Lyntin.
+For help, type "#help general".
+--------------------------------------
+"""
 
 
-TINTIN = 0
-LYNTIN = 1
-
-# holds the application options--these are adjusted
-# by command-line arguments only
-options = {'ui': 'textui', 'readfile': [], 'datadir': '', 'evalmode': LYNTIN}
-
-# the character used to denote variables.
+# the character used to denote variables (FIXME - this is only half true)
 variablechar = '$'
 
 # the character used to denote commands
 commandchar = '#'
 
-# whether or not we do speedwalking checks
-# 1 if yes, 0 if no
+# whether (1) or not (0) we do speedwalking checks
 speedwalk = 1
 
-# whether or not we whack all the ansi stuff for incoming
-# mud data.
+# whether (1) or not (0) we whack all the ansi stuff for incoming mud data
 ansicolor = 1
 
-# whether or not we're echoing user input to the ui
+# whether (1) or not (0) we're echoing user input to the ui
 mudecho = 1
 
-# this is the data directory.  if it isn't overriden,
-# then this is the directory that everything will be pulled
-# from.
+# this is the data directory.  if it isn't overriden, then this 
+# is the directory that everything will be pulled from.
 datadir = "./"
 
 # Lyntin counts the total number of errors it's encountered.
 # This enables us to shut ourselves down if we encounter too
-# many indicating a "bigger problem".
+# many which indicates a "bigger problem".
 errorcount = 0
+
+# evalmode constants
+TINTIN = 0
+LYNTIN = 1
+
+# holds the application options--these are adjusted by command-line 
+# arguments only
+options = {'ui': 'textui', 'readfile': [], 'datadir': '', 'evalmode': LYNTIN}
 
 # Lyntin has two modes for user input evaluation.  TINTIN mode
 # will evaluate user input just like TINTIN does.  LYNTIN mode
@@ -130,13 +136,21 @@ errorcount = 0
 # to LYNTIN mode.
 evalmode = LYNTIN
 
+
 def shutdown():
+  """
+  This gets called by the Python interpreter atexit.  The reason
+  we do shutdown stuff here is we're more likely to catch things
+  here than we are to let everything cycle through the 
+  ShutdownEvent.  This should probably get fixed up at some point
+  in the future.
+  """
   import hooks, exported
   try:
     exported.write_message("shutting down...  goodbye.")
   except:
     print "shutting down...  goodbye."
-  hooks.shutdown_hook.spamhook()
+  hooks.shutdown_hook.spamhook(())
 
 if __name__ == '__main__':
   try:

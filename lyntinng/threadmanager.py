@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: threadmanager.py,v 1.7 2002/06/18 04:01:12 willhelm Exp $
+# $Id: threadmanager.py,v 1.8 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 The thread manager allows us to centralize the management of
@@ -16,7 +16,8 @@ from threading import Thread
 import manager
 
 class ThreadManager(manager.Manager):
-  """ Manages threads.
+  """
+  Manages threads in Lyntin.
 
   This centralizes thread creation so that we can keep track
   of which threads are running in Lyntin.
@@ -35,6 +36,12 @@ class ThreadManager(manager.Manager):
     the removal of dead threads from the list that we use to
     keep track of them.  We'll have at most one dead thread
     at any given time.
+
+    @param name: the name of the thread to start
+    @type  name: string
+
+    @param func: the function for the thread to work on
+    @type  func: function
     """
     # clean up the list of threads that we maintain first
     self._threadCleanup()
@@ -47,9 +54,13 @@ class ThreadManager(manager.Manager):
     self._threads.append(t)
 
   def checkThreadsStatus(self):
-    """ Checks the status of all the threads in the thread list.
+    """
+    Checks the status of all the threads in the thread list.
 
     Returns an array of strings that detail our threads and their status.
+
+    @return: the name and status of all the threads we know about
+    @rtype: list of strings
     """
     data = []
     for mem in self._threads:
@@ -58,7 +69,9 @@ class ThreadManager(manager.Manager):
     return data
 
   def _threadCleanup(self):
-    """ Removes threads which have ended."""
+    """
+    Removes threads which have ended.
+    """
     removeme = []
     for i in range(len(self._threads)):
       if self._threads[i].isAlive() == 0:

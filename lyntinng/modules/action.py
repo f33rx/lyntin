@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.8 2002/08/25 17:23:40 willhelm Exp $
+# $Id: action.py,v 1.9 2002/09/04 05:36:36 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -15,6 +15,9 @@ import manager, utils, event, lyntin, hooks, exported, modutils
 
 # the placement variable regular expression
 VARREGEXP = re.compile('%_?(\d+)')
+
+# for finding placement variable holders in the action triggers
+COMPILEVARREGEXP = re.compile('%_?[0-9]+')
 
 class ActionData:
   def __init__(self, ses):
@@ -319,6 +322,7 @@ def compile_action(trigger):
 
     (SRE_Pattern) returns a compiled regexp pattern ob
   """
+  # COMPILEVARREGEXP = re.compile('%_?[0-9]+')
   regexp = re.sub('%[0-9]+', '(.+?)', trigger)
   regexp = re.sub('%_[0-9]+', '(\S+?)', regexp)
   return re.compile(regexp)

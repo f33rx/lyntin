@@ -5,7 +5,7 @@
 VERSION
 =======
 
-$Id: HACKING,v 1.16 2002/08/13 02:30:12 willhelm Exp $
+$Id: HACKING,v 1.17 2002/09/04 05:36:12 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -20,6 +20,11 @@ may not be accurate--when in doubt read the code.  The code is very
 well documented and will provide much insight as to how things work.
 If you have questions after analyzing the code, ask on the lyntin-devl
 mailing list.
+
+In general, in depth knowledge of Python programming is required to
+really hack Lyntin.  If you don't know Python, you should go to
+http://www.python.org/ and familiarize yourself with the language, its
+constructs, and the Python community.
 
 
 

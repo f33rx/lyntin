@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.46 2002/08/29 17:55:05 jmberne Exp $
+# $Id: utils.py,v 1.47 2002/08/31 16:36:17 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -14,8 +14,10 @@ not dependent on application things, so they're highly unit tested.
 import string, re, time
 import lyntin
 
+# for finding non-escaped semi-colons in user input
 SEMI_REGEXP = re.compile(r'(?<!\\);')
 
+# for finding ANSI color sequences
 ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
 
 TIMESPAN_REGEXP = re.compile(r"^(?P<days>\d+d)?(?P<hours>\d+h)?(?P<minutes>\d+m)?(?P<seconds>\d+s?)?$")
@@ -23,49 +25,57 @@ TIME_REGEXP1=re.compile(r"^(?P<hour>[1-9]|1[0-2])(?P<ampm>a|p)$")
 TIME_REGEXP2=re.compile(r"^(?P<hour>[1-9]|1[0-2]):(?P<minute>[0-5][0-9])(:(?P<second>[0-5]\d))?(?P<ampm>a|p)?$")
 TIME_REGEXP3=re.compile(r"^(?P<hour>0|1[3-9]|2[0-3]):(?P<minute>[0-5][0-9])(:(?P<second>[0-5]\d))?$")
 
+# for finding %... variables
 PVAR_REGEXP = re.compile(r'%+(-?(\d+):?-?(\d*)|:-?(\d+))')
+
+# for finding $... variables
 DVAR_REGEXP = re.compile(r'\$+(-?(\d+):?-?(\d*)|:-?(\d+))')
 
 
 def filter_ansi(text):
-  """ Filters out ansi codes."""
+  """
+  Takes in text and filters out the ANSI color codes.
+
+  @returns: text without ANSI color codes
+  @rtype: string
+  """
   return re.sub(chr(27) + '\[[0-9;]*[mJ]', '', text)
 
 
 def filter_cm(text):
-  """ Filters out ^M.  Useful for logging."""
+  """
+  Filters out ^M.  Useful for logging.
+
+  @returns: text without ^M stuff
+  @rtype: string
+  """
   return re.sub('\r', '', text)
 
 
 def chomp(text):
-  """ Removes all cr and nl from the input string.
+  """
+  Removes all CR and LF from the input string.
 
-  arguments:
+  @param text: the text to chomp
+  @type  text: string
 
-    'text' -- (string) the text to chomp
-
-  returns:
-
-    (string) chomped text
-
+  @returns: the chomped text
+  @rtype: string
   """
   return re.sub("\n|\r", '', text)
 
 
 def http_get(url):
-  """ Retrieves the data at a given url and returns it as a big string.
+  """
+  Retrieves the data at a given url and returns it as a big string.
 
-  arguments:
+  @param url: the url of the resource to retrieve
+  @type  url: string
 
-    'url' -- (string) the url of the resource to retrieve
+  @return: the resource at the given url
+  @rtype: string
 
-  returns:
-
-    one big string of the resource
-
-  raises:
-
-    ValueError if the url is not valid or if the resource doesn't exist
+  @raises ValueError: if the url is not valid or if the resource doesn't exist
   """
   import httplib
   if url.find("http://") == -1:
@@ -91,15 +101,14 @@ def http_get(url):
 
 
 def is_color_token(token):
-  """ Returns whether or not this is a color token.
+  """
+  Returns whether or not this is a color token.
 
-  arguments:
+  @param token: the token in question
+  @type  token: string
 
-    'token' -- (string) the token to test
-
-  returns:
-
-    1 if it's a color token, 0 if not
+  @return: 1 if it's color, 0 if not
+  @rtype: boolean
   """
   if len(token) == 0:
     return 0
@@ -112,27 +121,24 @@ def fix_color(color):
   Helper function for debugging--it'll fix a color token
   so it's readable in ascii.
 
-  arguments:
+  @param color: the color token
+  @type  color: string
 
-    'color' -- (string) the color token
-
-  returns:
-
-    string
+  @return: the pretty string
+  @rtype: string
   """
   return color.replace(chr(27), "ESC")
 
 
 def split_ansi_from_text(text):
-  """ Takes in a string and returns a list of text and ansi tokens.
+  """
+  Takes in a string and returns a list of text and ansi tokens.
 
-  arguments:
+  @param text: the full string to split up
+  @type  text: string
 
-    'text' -- (string)
-
-  returns:
-
-    list of text and ansi tokens (all strings)
+  @return: list of text and ansi color tokens
+  @rtype: list of strings
   """
   global ANSI_COLOR_REGEXP
 
@@ -179,44 +185,42 @@ def split_ansi_from_text(text):
   return [text]
 
 
-def expand_text(str, list):
-  """ Returns a subset of the list that matches the given string.
+def expand_text(filter, fulllist):
+  """
+  Returns a subset of the list that matches the given string.
 
-  Takes a list and a string and returns a list of items
-  in the original list that match the given string.  
-  Handles * and anchors too.
+  Takes a list and a string and returns a list of items in the 
+  original list that match the given string.  Handles * and 
+  anchors too.
 
-  arguments:
+  @param filter: the string to match
+  @type  filter: string
 
-    'str' -- (string) the string to match
+  @param fulllist: the list of strings to match in
+  @type  fulllist: list of strings
 
-    'list' -- (list of strings) the list of strings to match on
-
-  returns:
-
-    (list of strings) the list of matches
-
+  @returns: the matching strings from the full list
+  @rtype: list of strings
   """
   ret = []
 
   # if they didn't have wildcards....
-  if not "*" in str:
-    for mem in list:
-      if mem == str:
+  if not "*" in filter:
+    for mem in fulllist:
+      if mem == filter:
         ret.append(mem)
 
   # if they had wildcards....
   else:
-    str = re.escape(str)
+    filter = re.escape(filter)
 
     # escaping the string will replace * with \* so we unreplace
     # it with .*
-    str = str.replace("\\*", ".*")
+    # FIXME - this isn't quite right--we need to account for escaped
+    # * stuff
+    regex = re.compile("^" + filter.replace("\\*", ".*") + "$")
 
-    str = '^' + str + '$'
-    regex = re.compile(str)
-
-    for mem in list:
+    for mem in fulllist:
       if regex.match(mem):
         ret.append(mem)
 
@@ -224,10 +228,15 @@ def expand_text(str, list):
 
    
 def split_commands(text):
-  """ Takes text and splits it into separate commands.
-
+  """
   This method takens in text and parses it into separate commands
   on the ;.
+
+  @param text: the text to split
+  @type  text: string
+
+  @return: the split text
+  @rtype: list of strings
   """
   global SEMI_REGEXP
   marker = 0
@@ -261,21 +270,19 @@ def split_commands(text):
 
 
 def strip_braces(text):
-  """ Returns text after stripping the braces around the text.
-
+  """
+  Returns text after stripping the braces around the text.
   If the incoming text has a { at the beginning and a } at the
   end, it removes the braces.
 
-  arguments:
+  @param text: the string to remove braces from
+  @type  text: string
 
-    'text' -- (string) the string to remove the braces from
-
-  returns:
-
-    (string) text with the braces (if matched) removed
+  @return: the text with braces (if matched) removed
+  @rtype: string
   """
   text = text.strip()
-  if len(text) == 0:
+  if len(text) < 1:
     return text
 
   if text[0] == '{' and text[-1] == '}':
@@ -285,16 +292,14 @@ def strip_braces(text):
 
 def parse_args(args):
   """
-  Takes in a list of args and parses it out into a hashmap
-  of arg-name to value(s).
+  Takes in a list of args and parses it out into a hashmap of arg-name 
+  to value(s).
 
-  arguments:
+  @param args: the list of command-line arguments
+  @type  args: list of strings
 
-    'args' -- The list of command-line arguments.
-
-  returns:
-
-    list of tuples of (arg, value) pairings
+  @return: list of tuples of (arg, value) pairings
+  @rtype: list of tuples of (string, string)
   """
   i = 0
   optlist = []
@@ -317,29 +322,7 @@ def parse_args(args):
   return optlist
 
 
-def insert_cr(text, index, indent=0):
-  """
-  Inserts a carriage return into the line and deals with indenting
-  the next line (if need be).
-
-  arguments:
-
-    'text' -- (string) the text in question
-
-    'index' -- (int) the place to stick the cr
-
-    'indent=0' -- (int) how much to indent the next line
-
-  returns:
-
-    (string) the text with the cr at the index and the next line
-    indented so many spaces
-
-  """
-  return (text[:index] + '\n' + (indent * ' ') + text[index+1:].lstrip())
-
-
-def find_next_break(token, marker, wrapcount, wraplength):
+def _find_next_break(token, marker, wrapcount, wraplength):
   # first we check to see to see if we need to find a break
   if len(token) < marker - wrapcount + wraplength:
     return -1
@@ -360,24 +343,33 @@ def find_next_break(token, marker, wrapcount, wraplength):
 
 def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
   """
-  It takes a block of text and wraps it nicely.
+  It takes a block of text and wraps it nicely.  It accounts for
+  indenting lines of text, wraplengths, and wrapping around ANSI 
+  colors.
 
-  arguments:
+  We break on carriage returns (those are easy) and if no carriage
+  returns are available we break on spaces.
 
-    'textlist' -- (string) or (list of strings) either a string of 
-                  text needing to be formatted and 
-                  wrapped or a textlist--preferably the former.
+  If the actual line is longer than the wraplength, then we'll break
+  in the line at the wraplength--this will cut words in two.
 
-    'wraplength' -- (int) how many characters to wrap at
+  @param textlist: either a string of text needing to be formatted and
+      wrapped, or a textlist needing to be formatted and wrapped.
+  @type  textlist: string or list of strings
 
-    'indent=0' -- (int) how many spaces to indent each line
+  @param wraplength: the maximum length any line can be.  we'll wrap
+      at an index equal to or less than this length.
+  @type  wraplength: int
 
-    'firstline=0' -- (int) 0 if we don't indent the first line, 1 if we do
+  @param indent: how many spaces to indent every line.
+  @type  indent: int
 
+  @param firstline: 0 if we shouldn't indent the first line, 1 if we 
+      should
+  @type  firstline: boolean
 
-  returns:
-
-    (string) the wrapped text 
+  @returns: the wrapped text string
+  @rtype: string
   """
   wrapcount = 0           # how much we've got on the line so far
   linecount = 0           # which line we're on
@@ -397,17 +389,22 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
     # TEXT TOKEN
     marker = 0
 
+    # this handles the offset for not indenting the first line (if that's
+    # the sort of thing we're into).
     if firstline:
-      x = find_next_break(textlist[i], marker, wrapcount, wraplength - indent)
+      x = _find_next_break(textlist[i], marker, wrapcount, wraplength - indent)
     else:
-      x = find_next_break(textlist[i], marker, wrapcount, wraplength)
+      x = _find_next_break(textlist[i], marker, wrapcount, wraplength)
 
+    # go through finding breaks and sticking in carriage returns and indents
+    # and things for this text token
     while x != -1:
-      textlist[i] = insert_cr(textlist[i], x, indent)
+      # insert the carriage return, any indent, and lstrip the line as well
+      textlist[i] = (textlist[i][:x] + '\n' + (indent * ' ') + textlist[i][x+1:].lstrip())
       marker = x + indent + 1
       wrapcount = 0
 
-      x = find_next_break(textlist[i], marker, wrapcount, wraplength - indent)
+      x = _find_next_break(textlist[i], marker, wrapcount, wraplength - indent)
 
     wrapcount = len(textlist[i]) - marker + wrapcount
 
@@ -421,20 +418,19 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
 
 def columnize(textlist, screenwidth=72, indent=0):
   """
-  Takes a list of data and converts it into a series of columns
-  and rows that are evenly spaced and pretty and stuff.
+  Takes a list of data and converts it into a series of columns and rows 
+  that are evenly spaced and pretty and stuff.
 
-  arguments:
+  @param textlist: the list of strings to columnize
+  @type  textlist: list of strings
 
-    'textlist' -- (list of strings) the list to columnize
+  @param screenwidth: the maximum width to wrap against
+  @type  screenwidth: int
 
-    'screenwidth=72' -- (int) the width to wrap against
+  @param indent: the amount of spaces to indent each line
+  @type  indent: int
 
-    'indent=0' -- (int) the amount to indent each line
-
-  returns:
-
-    the final formatted string
+  @return: the final formatted columnized string
   """
   if screenwidth > 2 + indent:
     screenwidth = screenwidth - 2 - indent
@@ -468,23 +464,23 @@ def parse_timespan(timespan):
   """
   Parses a timsspan into a number of seconds.  
 
-  arguments:
+  @param timespan: the timespan string to parse
+  @type  timespan: string
 
-    'timespan' -- (string) the timespan to parse
+  @returns: the number of seconds in the timespan
+  @rtype: int
 
-  returns:
-
-    None if the timespan was unparseable, the number of seconds otherwise. 
+  @raises ValueError: if the timespan is unparseable
   """
   match=TIMESPAN_REGEXP.match(timespan)
 
   if not match:
-    return None
+    raise ValueError, "Invalid timespan string."
     
-  timespec=match.groupdict()
+  timespec = match.groupdict()
 
   if not timespec["days"] and not timespec["hours"] and not timespec["minutes"] and not timespec["seconds"]:
-    return None
+    raise ValueError, "Invalid timespan string."
 
   days = timespec["days"]
   if not days:
@@ -525,22 +521,22 @@ def parse_time(timearg):
   to parse as a timespan.  Timespans are interpretted as times from
   time.time() (now). 
 
-  arguments:
+  @param timearg: the time string to parse
+  @type  timearg: string
 
-    'timearg' -- (string) the timespan to parse
+  @return: the number of seconds
+  @rtype: int
 
-  returns:
-
-    None if the time was unparseable, the number of seconds otherwise. 
+  @raises ValueError: if the time string was unparseable
   """
   match = TIME_REGEXP1.match(timearg) or TIME_REGEXP2.match(timearg) or TIME_REGEXP3.match(timearg)
 
   if not match:
-    timespan = parse_timespan(timearg)
-    if timespan != None:
+    try:
+      timespan = parse_timespan(timearg)
       return time.time() + timespan
-    else:
-      return None
+    except:
+      raise ValueError, "Invalid time string."
 
   timespec = match.groupdict()
   currenttime = time.localtime()
@@ -551,7 +547,8 @@ def parse_time(timearg):
   ampm=timespec.get("ampm",None)
   if hour > 12:
     if ampm:
-      return None
+      # FIXME - should raise a ValueError
+      raise ValueError, "Invalid time string: ampm specified with hours > 12."
     else:
       ampm="p"
   else:
@@ -559,7 +556,7 @@ def parse_time(timearg):
       hour = hour + 12
 
   if hour < 1 or hour > 24:
-    return None
+    raise ValueError, "Invalid time string: hours are out of range."
 
   minute = timespec.get("minute",None)
   if minute == None:
@@ -585,8 +582,7 @@ def parse_time(timearg):
   try:
     return time.mktime(timetuple)
   except Exception, e:
-    # print e
-    return None
+    raise ValueError, "Invalid time string: %s" % e
 
 
 def figure_color(textlist, currentcolor, leftover=""):
@@ -594,22 +590,20 @@ def figure_color(textlist, currentcolor, leftover=""):
   Takes a textlist of text and color tokens and figures out
   the latest current color.
 
-  arguments:
+  @param textlist: the list of string and ansi color code tokens
+  @type  textlist: list of strings
 
-    'textlist' -- the list of strings and ansi color codes
+  @param currentcolor: a tuple of (options, foreground, background) 
+      that represent the current color
+  @type  currentcolor: (int, int, int)
 
-    'currentcolor' -- a tuple of three items that represent
-                      the current color.  
-                      (attribute, foreground, background)
+  @param leftover: if we encounter a half done color code, we throw
+      it in the leftover string.  the leftover gets prepended
+      to the textlist element on the next run of figure_color
+  @type  leftover: string
 
-    'leftover=""' -- if we encounter a half done color code
-                     we throw it in the leftover.  the leftover
-                     gets prepended to the first textlist element
-                     on the next run of figureColor
-
-  returns:
-
-    the new currentcolor and leftover as a tuple
+  @return: the new currentcolor and leftover as a tuple
+  @rtype: ((int, int, int), string)
   """
   if leftover:
     ind = textlist[0].find("m")
@@ -668,13 +662,11 @@ def convert_boolean(text):
   """
   Returns 1 if true, 0 if false, or -1 if it's not a boolean.
 
-  arguments:
+  @param text: the text to convert to a boolean value
+  @type  text: string
 
-    'text' -- (string) the incoming test
-
-  returns:
-
-    1 if true, 0 if false, -1 if not a boolean
+  @returns: 1 if true, 0 if false, -1 if not a boolean
+  @rtype: int
   """
   if text in TRUE_VALUES:
     return 1
@@ -701,14 +693,14 @@ def expand_vars(text, varmap):
   at different points and are implemented differently for tintin and
   lyntin modes:
 
-  1) expand_vars - This expands variables in a function arbitrarily
+  1. expand_vars - This expands variables in a function arbitrarily
      according to the desired expansion policy.  It should be safe to
      recusively evaluate this string and not have strings re-expanded.
 
-  2) denest_vars - This finishes expansion of a string and should be
+  2. denest_vars - This finishes expansion of a string and should be
      called after all expansions are done.
 
-  3) expand_arguments - This should be called by commands that want to
+  3. expand_arguments - This should be called by commands that want to
      explicitly expand their arguments.  Note that in lyntin mode
      arguments are already expanded and so nothing is done by this function.
 
@@ -719,15 +711,14 @@ def expand_vars(text, varmap):
   chaining expand_vars and denest_vars together.
 
 
-  arguments:
+  @param text: the text to expand variables in
+  @type  text: string
 
-    'text' -- (string) the text to expand variables on
+  @param varmap: the varname to expansion mapping to use
+  @type  varmap: dict
 
-    'varmap' -- (dict) the varname to expansion mapping
-
-  returns:
-
-    the text with all variables expanded
+  @return: the text with all variables expanded
+  @rtype: string
   """
   if lyntin.evalmode == lyntin.TINTIN:
     return tintin_expand_vars(text, varmap)
@@ -737,18 +728,16 @@ def expand_vars(text, varmap):
 
 def expand_arguments(text, varmap):
   """
-  Figures out which evalmode we're in and calls the appropriate
-  variable argument expansion function.
+  Figures out which evalmode we're in and calls the appropriate variable 
+  argument expansion function.
 
-  arguments:
+  @param text: the text to expand variables in
+  @type  text: string
 
-    'text' -- (string) the text to expand variables on
+  @param varmap: the varname to expansion mapping
+  @type  varmap: dict
 
-    'varmap' -- (dict) the varname to expansion mapping
-
-  returns:
-
-    the text with all variables expanded
+  @return: the text with all variables expanded
   """
   if lyntin.evalmode == lyntin.TINTIN:
     return tintin_expand_arguments(text, varmap)
@@ -760,17 +749,16 @@ def denest_vars(text, varmap):
   Figures out which evalmode we're in and calls the appropriate
   variable denesting function.
 
-  arguments:
+  @param text: the string to expand variables in
+  @type  text: string
 
-    'text' -- (string) the text to expand variables on
+  @param varmap: the varname to expansion mapping (here only in case
+      a mode needs it in the future, and for consistency with the other
+      var expansion commands.)
+  @type varmap: dict
 
-    'varmap' -- (dict) the varname to expansion mapping (here only in
-    case a mode needs it in the future, and for consistency with the
-    other var expansion commands.)
-
-  returns:
-
-    the text with all variables expanded
+  @return: the text with all variables expanded
+  @rtype: string
   """
   if lyntin.evalmode == lyntin.TINTIN:
     return text
@@ -799,15 +787,14 @@ def lyntin_expand_vars(text, varmap):
 
   It returns the (un)adjusted text.
 
-  arguments:
+  @param text: the text to expand variables in
+  @type  text: string
 
-    'text' -- (string) the text to expand variables on
+  @param varmap: the varname to expansion mapping
+  @type  varmap: dict
 
-    'varmap' -- (dict) the varname to expansion mapping
-
-  returns:
-
-    the text with all variables expanded
+  @return: the text with all variables expanded
+  @rtype: string
   """
   if not ("%" in text or "$" in text) or len(text) == 0:
     return text
@@ -853,15 +840,14 @@ def lyntin_expand_vars(text, varmap):
   return text
 
 def lyntin_denest_vars(text):
-  """ Replaces all the nested variables with appropriate variables.
+  """
+  Replaces all the nested variables with appropriate variables.
 
-  arguments:
+  @param text: the text to denest nested vars in
+  @type  text: string
 
-    'text' -- (string) the text to replace nested vars with
-
-  returns:
-
-    (string) the adjusted text
+  @return: the adjusted text with variables denested
+  @rtype: string
   """
   text = lyntin_denest_vars_worker("$", text)
   return text
@@ -891,15 +877,14 @@ def tintin_expand_vars(text, varmap):
   Looks at user input and expands any variables involved
   according to Tintin variable expansion heuristics.
 
-  arguments:
+  @param text: the text to expand variables in
+  @type  text: string
 
-    'text' -- (string) the text to expand variables on
+  @param varmap: the varname to expansion mapping
+  @type  varmap: dict
 
-    'varmap' -- (dict) the varname to expansion mapping
-
-  returns:
-
-    the text with all variables expanded
+  @return: the text with all variables expanded
+  @rtype: string
   """
   if not (text.find("%") != -1 or text.find("$") != -1) or len(text) == 0:
     return text

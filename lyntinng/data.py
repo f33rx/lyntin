@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.8 2002/04/29 23:14:13 willhelm Exp $
+# $Id: data.py,v 1.9 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -33,9 +33,8 @@ class DataBuffer:
     Adds data to the buffer by thinking about everything
     in terms of lines.
     
-    arguments:
-    
-      'text' -- (string) the text to add to the buffer
+    @param text: the text to add to the buffer
+    @type  text: string
     """
     text = utils.filter_ansi(utils.filter_cm(text))
     lines = text.splitlines(1)
@@ -52,12 +51,11 @@ class DataBuffer:
     """ Removes all the deeds."""
     self._buffer = []
   
-  def resize(self, newsize=50):
+  def resize(self, newsize=60):
     """ Changes the buffer max.
 
-    arguments:
-
-      'newsize=50' -- (int) the new buffer max size
+    @param newsize: the new buffer max size
+    @type  newsize: int
     """
     self._size = newsize
 
@@ -66,17 +64,16 @@ class DataBuffer:
     Returns a list of all the lines in the databuffer that
     match the given pattern.
 
-    arguments:
+    @param pattern: the match pattern
+    @type  pattern: string
 
-      'pattern' -- (string) the match pattern
- 
-      'numlines' -- (int) number of lines to search back through.  0
-                    will get all lines in buffer 
+    @param numlines: the number of lines to search back through.
+        0 will get all lines in the buffer.
+    @type  numlines: int
 
-    returns:
-
-      (list of strings) a list of the lines that matched the
-      pattern
+    @return: a list of the lines that matched the
+        pattern
+    @rtype: list of strings
     """
     ret = []
     cpattern = re.compile(pattern)
@@ -90,9 +87,8 @@ class DataBuffer:
     """
     Grabs the whole buffer.
 
-    returns:
-
-      string
+    @return: the whole buffer
+    @rtype:  string
     """
     return string.join(self._buffer, "")
 
@@ -101,16 +97,15 @@ class DataBuffer:
     Similar to greplines, except this greps the buffer
     as a whole allowing you to match across multiple lines.
 
-    arguments:
+    @param pattern: the pattern to search for
+    @type  pattern: string
 
-      'pattern' -- (string) the match pattern
+    @param numlines: the number of lines to search back through.
+        0 will get all lines in the buffer.
+    @type  numlines: int
 
-      'numlines' -- (int) number of lines to search back through.  0
-                    will get all lines in buffer 
-
-    returns:
-
-      (list of strings) all the matches from the buffer
+    @return: all the matches from the buffer
+    @rtype:  list of strings
     """
     buffer = string.join(self._buffer[-numlines:], "")
 

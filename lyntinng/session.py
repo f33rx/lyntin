@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.65 2002/08/20 02:39:04 willhelm Exp $
+# $Id: session.py,v 1.66 2002/10/05 22:29:05 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -16,14 +16,17 @@ import argparser
 ESC = chr(27)
 
 class Session:
-  """ A session is a nice container of all the stuff that
-  encompasses a user session: aliases, actions, commands...
+  """
+  A session is a nice container of all the stuff that encompasses a 
+  user session: aliases, actions, commands...
 
   All input and output goes through the Session object.
-  Almost everything happens throughthe Session.
+  Almost everything happens through the Session.
   """
   def __init__(self):
-    """ Initialize."""
+    """
+    Initialize.
+    """
     self._socket = None
     self._name = ""
     self._host = "none"
@@ -55,35 +58,43 @@ class Session:
     return "session.Session %s" % self._name
 
   def getName(self):
-    """ Returns the name of the session.
+    """
+    Returns the name of the session.
 
-    returns:
-
-      (string)
+    @returns: the name of the session
+    @rtype: string
     """
     return self._name
 
   def setName(self, name):
-    """ Sets the name of the session.
+    """
+    Sets the name of the session.
 
-    arguments:
-      
-      'name' -- (string)
+    @param name: the new name
+    @type  name: string
     """
     self._name = name
     self.getTicker().setSessionName(name)
+    if self._socket:
+      self._socket.setSessionName(name)
 
   def getDataBuffer(self):
-    """ Returns the DataBuffer instance.
+    """
+    Returns the DataBuffer instance for this session.
 
-    returns:
-      
-      data.DataBuffer instance
+    @returns: the DataBuffer instance
+    @rtype: DataBuffer
     """
     return self._databuffer
 
   def shutdown(self, args):
-    """ Shuts down the session."""
+    """
+    Shuts down the session, shuts down the underlying SocketCommunicator,
+    clears the ticker, and also closes the logfile.
+
+    @param args: the args tuple for the shutdown_hook.
+    @type  args: tuple
+    """
     if len(args) > 0:
       quiet = 1
     else:
@@ -103,45 +114,53 @@ class Session:
     if quiet == 0:
       event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
     self._ticker.clear()
+    self.closeLogfile()
     hooks.disconnect_hook.spamhook((self, self._host, self._port))
 
   def getStatus(self):
-    """ Returns status of the session.
+    """
+    Returns status of the session.  Most specifically the session name,
+    the socket we're connected to, the ticker status, and the logfile
+    status.
 
-    returns:
-      
-      (string)
+    @returns: the status string
+    @rtype: string
     """
     data = []
     
     data.append("Session name: %s" % self._name)
     data.append("   socket: %s" % repr(self._socket))
-
     data.append("   ticker: %s" % self.getTicker().getInfo())
     data.append("   logfile: %s" % self.getLogfileName())
 
     return data
 
   def setTicker(self, ticker):
-    """ Sets the ticker.
+    """
+    Sets the ticker.
 
-    arguments:
-      
-      'ticker' -- (ticker.Ticker instance)
+    @param ticker: the new Ticker instance for this session
+    @type  ticker: ticker.Ticker
     """
     self._ticker = ticker
 
   def getTicker(self):
-    """ Returns the ticker.
+    """
+    Returns the ticker instance.
 
-    returns:
-      
-      (ticker.Ticker instance)
+    @returns: the ticker instance for this session
+    @rtype: ticker.Ticker
     """
     return self._ticker
 
   def getWriteFileInfo(self, args):
-    """ Implements the write_hook."""
+    """
+    Implements the write_hook.  Persists information about whether
+    speedwalking and ansicolor are active.
+
+    @param args: the args tuple for the write_hook
+    @type  args: tuple
+    """
     ses = args[0]
 
     if not ses == self:
@@ -171,12 +190,19 @@ class Session:
     file.write(string.join(data, "\n") + "\n")
 
   def clear(self):
-    """ Clears the session (except for connections)."""
+    """
+    Clears the session (except for connections).  Goes through
+    the list of managers registered with the engine and calls
+    the clear method with itself.
+
+    Also clears the ticker and the databuffer.
+    """
     engine = exported.get_engine()
     for mem in engine._managers.values():
       mem.clear(self)
 
     self._ticker.clear()
+    self._databuffer.clear()
 
 
   ### ------------------------------------------------
@@ -184,48 +210,51 @@ class Session:
   ### ------------------------------------------------
 
   def setSocketCommunicator(self, sc):
-    """ Sets the socket communicator.
+    """
+    Sets the socket communicator.
 
-    arguments:
-      
-      'sc' -- (net.SocketCommunicator instance)
+    @param sc: the new SocketCommunicator instance
+    @type  sc: SocketCommunicator
     """
     self._socket = sc
 
   def getSocketCommunicator(self):
-    """ Returns the socket communicator.
+    """
+    Returns the socket communicator.
 
-    returns:
-      
-      net.SocketCommunicator instance
+    @returns: SocketCommunicator instance
+    @rtype: SocketCommunicator
     """
     return self._socket
 
   def isConnected(self):
-    """ Tells you whether or not a session has a connection.
+    """
+    Tells you whether (1) or not (0) a session has a connection.
 
-    returns:
-      
-      1 if connected, 0 if not
+    @returns: 1 if connected, 0 if not
+    @rtype: boolean
     """
     return self._socket != None
 
   def writeSocket(self, message, tag = None):
-    """ Writes data to the socket.
+    """
+    Writes data to the socket.
 
-    arguments:
-      
-      'message' -- (string) what is to be written to the mud
+    @param message: the data to be written to the mud
+    @type  message: string
 
-      'tag=None' -- (object) Used to tag data being sent to the mud
-                    for identification when it comes out of the
-                    to_mud_hook.  Simply passed through as-is by
-                    lyntin internals.
+    @param tag: Used to tag data being sent to the mud for 
+        identification when it comes out of the to_mud_hook.  
+        Simply passed through as-is by lyntin internals.
+    @type  tag: varies
     """
     for line in message.strip().split("\n"):
       hooks.to_mud_hook.spamhook((self, line, tag))
+
     if self._socket:
-      self._socket.write(str(message))
+      retval = self._socket.write(str(message))
+      if retval:
+        exported.write_error("socket write: %s" % retval)
 
 
   ### ------------------------------------------------
@@ -233,16 +262,23 @@ class Session:
   ### ------------------------------------------------
 
   def prompt(self):
-    """ Deals with printint a prompt if this is the common session."""
+    """
+    Deals with printing a prompt if this is the common session.
+    """
     if self.getName() == "common":
       engine.myengine.writePrompt()
 
   def handleUserData(self, input, internal=0 ):
-    """ Handles input in the context of this session specifically.
+    """
+    Handles input in the context of this session specifically.
 
-    internal says whether the command came from interally.
-    we won't spam hooks and may at some point prevent
-    output for internal stuff too.  1 if internal, 0 if not.
+    @param input: the user data
+    @type  input: string
+
+    @param internal: whether the command came from interally.
+        we won't spam hooks and may at some point prevent
+        output for internal stuff too.  1 if internal, 0 if not.
+    @type  internal: boolean
     """
 
     # this is the point of much recursion.  everything is registered
@@ -253,7 +289,6 @@ class Session:
       return
     else:
       input = spamtuple[-1]
-
 
     # after this point we don't do any more recursion.  so it's
     # safe to unescape things and such.
@@ -278,11 +313,11 @@ class Session:
   ### ------------------------------------------------
 
   def handleMudData(self, input):
-    """ Handles input coming from the mud.
+    """
+    Handles input coming from the mud.
 
-    arguments:
-      
-      'input' -- (string) the data from the mud
+    @param input: the data coming from the mud
+    @type  input: string
     """
     # this sort of handles ansi color codes that get broken 
     # mid-transmission when mud data is chunked and sent across
@@ -323,12 +358,11 @@ class Session:
 
 
   def log(self, input):
-    """ Logs text to a file instance in self._logfile.
+    """
+    Logs text to a file instance self._logfile.
 
-    arguments:
-
-      'input' -- (string) the string to log to the logfile for this session
-
+    @param input: the string to log to the logfile for this session
+    @type  input: string
     """
     try:
       # FIXME - this assumes unix files
@@ -339,21 +373,48 @@ class Session:
       self._logfile = None
 
   def getLogfile(self):
-    """ Returns the logfile file instance or None."""
+    """
+    Returns the logfile file instance or None.
+
+    @returns: the file object representing the logfile
+    @rtype: File
+    """
     return self._logfile
 
   def closeLogfile(self):
+    """
+    Closes the logfile if it's currently open.
+    """
     if self._logfile:
       self._logfile.close()
       self._logfile = None
 
   def openLogfile(self, filename):
+    """
+    Opens a new logfile.
+
+    @param filename: the name of the new file to open in append mode.
+    @type  filename: string
+    """
+    # FIXME - what happens if we already have a logfile open?
     self._logfile = open(filename, "a")
 
   def setLogfile(self, fileob):
+    """
+    Sets the logfile.
+
+    @param fileob: the new File instance
+    @type  fileob: File
+    """
     self._logfile = fileob
 
   def getLogfileName(self):
+    """
+    If we have a logfile, this returns the logfile name.
+
+    @return: the logfile name or "<none>"
+    @rtype: string
+    """
     if self._logfile:
       return self._logfile.name
     else:

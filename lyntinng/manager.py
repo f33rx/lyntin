@@ -4,52 +4,66 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.7 2002/07/07 04:53:45 willhelm Exp $
+# $Id: manager.py,v 1.8 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
-This module defines the basic manager which handles various things
-in the system.
+This module defines the Manager superclass.  Subclasses of Manager handle
+managing the various data things in the system such as History, Threads,
+Aliases....
 
-To build a new manager, you need to 
+To build a new manager, you need to:
 
-1. extend the manager.Manager class below
+1. extend the manager.Manager class
 
-2. create a load() method which adds the manager to the engine
+2. create a 'load()' method which adds the manager to the engine
    via exported.add_manager(...)
 
-3. implement all the methods herein that you need to implement
+3. implement all the methods of manager.Manager that are marked as needing
+   to be overridden
+
+
+Then to instantiate your new Manager subclass you can do one of two things:
+
+1. put the .py file in the modules/ subdirectory where it will be loaded
+   automatcially
+
+2. execute an "#import modulenamehere" inside of Lyntin which will import
+   the module
 
 """
 class Manager:
-  """ Base manager class for managing things in Lyntin."""
+  """
+  Base manager class for managing things in Lyntin.  The Manager class
+  gives all managers a standard way of interacting with sessions and user
+  queries for information, 
+  """
   def __init__(self):
     pass
 
   def clear(self, ses=None):
     """
     Removes everything the manager was managing--essentially reinitializes it.
+    Override this to clear out the data your manager is managing.  This is
+    typically session oriented and gets called by the "#clear" command.
 
-    arguments:
-
-      'ses' -- (session instance) the session this applies to.  None
-               if it's non applicable.
+    @param ses: the session this applies to--None if it applies to all
+        sessions
+    @type  ses: session.Session
     """
     pass
 
   def getInfo(self, ses, text=''):
-    """ Returns information managed by this class.
+    """
+    Returns information managed by this class.  This is mostly for 
+    display to the user--we shouldn't be using this method for Lyntin 
+    introspection.
 
-    This is mostly for display to the user--we shouldn't be using this
-    method for Lyntin examining Lyntin.
+    @param text: allows the user to pass in a name filter which should
+        show a subset of the data based on what names match the filter
+    @type  text: string
 
-    arguments:
-
-      'text' -- (string) allows us to filter which information we're
-                looking for based on names of things
-
-    returns:
-
-      a string of everything involved.
+    @return: a string of everything involved
+    @rtype: string
     """
     return ''
 
@@ -60,13 +74,15 @@ class Manager:
     the managers to clone the common session to the new session created
     thus populating the new session.
 
-    arguments:
+    @param newsession: the new session just created
+    @type  newsession: Session
 
-      'newsession' -- (session instance) the new session just created.
-
-      'basesession=None' -- (session instance) the session to clone from.
-                            Use None if you don't want to clone from 
-                            anything.
+    @param basesession: the session to use as a template for the new
+        session.  most managers just copy the data from the basesession
+        to the newsession.  if this is None, then we don't want to clone
+        from anything--we use None when Lyntin starts up and we create
+        the common session.
+    @type  basesession: Session
     """
     pass
 
@@ -74,9 +90,9 @@ class Manager:
     """
     Tells the manager to remove information regarding the session.
 
-    arguments:
-
-      'ses' -- (session instance) the session to remove.
+    @param ses: the session we no longer need to hold information for
+        because the session has gone away
+    @type  ses: Session
     """
     pass
 
@@ -85,34 +101,37 @@ class Manager:
     Returns the state of something as a list of command strings
     without the command char (which is added by #write).
 
-    For example, getState on the AliasManager might return:
+    For example, getState on the AliasManager might return::
 
-      ["alias {t3k} {#ses a localhost 3000}",
-      "alias {toch} {nwnnen;vortex}"]
+      ["alias {t3k} {#ses a localhost 3000}", "alias {toch} {nwnnen;vortex}"]
       
-    arguments:
+    @param ses: the session to persist
+    @type  ses: Session
 
-      'ses' -- (session instance) the ses to persist
-
-    returns:
-
-      list of command strings
+    @return: the command strings representing all the data for this session
+        being held by this manager
+    @rtype: list of strings
     """
     
   def getStatus(self, ses):
     """
     Returns a one-liner status of the state of this manager for
     a given session.  If this manager does not apply to sessions
-    (i.e. it's a global manager like ThreadManager), then it
-    should return an empty string.
+    then it should return an empty string.
 
-    arguments:
+    For example, the SubstituteManager which is holding 5 substitutes
+    and 2 gags for a session named "3k" would return the string::
 
-      'ses' -- (session instance) the session to look at
+      "5 substitute(s). 2 gag(s)."
 
-    returns:
+    But the ThreadManager which is a globally scoped manager and doesn't 
+    apply to the "3k" session would return an empty string.
 
-      a one-liner string of the status or an empty string
+    @param ses: the session to get status for
+    @type  ses: Session
+
+    @return: a one-liner string of the status or an empty string
+    @rtype: string
     """
     return ''
 

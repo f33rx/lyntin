@@ -4,23 +4,24 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.11 2002/06/18 04:01:12 willhelm Exp $
+# $Id: history.py,v 1.12 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
-The history manager keeps track of the last 30 commands entered
-by the user in Lyntin.  It is on a global scoping--we don't keep
-track of a history per session.
+The HistoryManager keeps track of the last 1000 history lines.  This
+is often lines entered by the user, but also may include some other
+things.  The HistoryManager is a singleton and it's on an engine scoping
+thus we don't keep track of history per session.
 """
 import manager
 
 class HistoryManager(manager.Manager):
-  """ Manages user data history.
+  """
+  Manages user data history.
 
-  The user enters commands--this is how they interact with Lyntin.
-  We keep track of the last 30 of those commands in this module.
-  We also give the user the ability to recall and edit those
-  commands--allowing them to fix mistakes they may have typed
-  and things of that nature.
+  This manages the user input history by storing the commands the
+  user entered.  This module also handles manipulating that history
+  letting the user to recall and edit those commands to fix mistakes
+  they may have typed.
   """
   def __init__(self):
     self._history = []
@@ -30,16 +31,13 @@ class HistoryManager(manager.Manager):
     This retrieves the item (if it exists) and performs the 
     substitutions (if we need to).
 
-    arguments:
+    @param userinput: what the user typed--we'll use this to figure
+        out which item they're referring to and whether to apply a 
+        substitution
+    @type  userinput: string
 
-      'userinput' -- what the user typed--we'll use this to figure
-                     out which item they're referring to and
-                     whether to apply a substitution
-
-    returns:
-
-      -1 if we didn't discover anything or the command string at
-      the history index
+    @returns: None if we didn't discover anything or the command 
+        string at the history index
     """
     tokens = userinput.split(" ", 1)
 
@@ -54,43 +52,33 @@ class HistoryManager(manager.Manager):
       try:
         returninput = self._history[int(index)]
       except:
-        return -1
+        return None
 
     # check to see if they want to do a substitution
     if len(tokens) > 1:
-      # this is kind of sketchy--we do a substitution but
-      # split the thing based on the first = sign
-      try:
-        i = tokens[1].find("=")
+      i = tokens[1].find("=")
+      if i != -1:
         returninput = returninput.replace(tokens[1][:i], tokens[1][i+1:])
-      except:
-        # something's wrong with what they typed, so we don't
-        # do a substitution
-        # FIXME - we should probably error out...  need to think about this
-        pass
 
     return returninput
 
   def getHistory(self,count):
-    """ Returns everything in the history buffer as a list.
+    """
+    Returns everything in the history buffer as a list of strings
 
-    returns:
-
-      list of strings
-
+    @return: everything in the history buffer
+    @rtype: list of strings
     """
     return self._history[:count]
 
   def recordHistory(self, input):
-    """ Records an item in the history (which is a queue).
-
-    arguments:
-
-      'input' -- the line to record
-
     """
-    # we don't record nothings
-    if len(input) == 0:
+    Records an item in the history (which is a queue).
+
+    @param input: the line to record
+    @type  input: string
+    """
+    if not input:
       return
 
     self._history.insert(0, input)

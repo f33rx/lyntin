@@ -4,15 +4,23 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.3 2002/07/11 04:11:19 willhelm Exp $
+# $Id: commandmanager.py,v 1.4 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 Handles managing commands and also holds the filter for handling commands.
+
+All commands in Lyntin are in Lyntin modules and added the same way
+with the exception of #@ which has some special handling.
+
+Commands are global to Lyntin.  Adding a command to Lyntin makes that
+command available to all sessions.  When creating commands use the
+functions in the exported module.  Look at the modules.lyntincmds
+and modules.tintincmds modules for command examples.
 """
 import inspect, re
 import manager, lyntin, exported, argparser
 
-class CommandData:
+class _CommandData:
   """
   Holds data relating to a command.  It's a helper class.
   """
@@ -38,8 +46,13 @@ class CommandData:
 
 class CommandManager(manager.Manager):
   """ 
-  The CommandManager holds a series of CommandData objects
-  and methods to manipulate and use them.
+  The CommandManager holds a series of _CommandData objects
+  and methods to manipulate and use them.  Lyntin developers
+  can add their own commands to Lyntin.
+
+  There should be one instance of the CommandManager and
+  the engine should have it.  All CommandManager interaction
+  should be done through the exported module.
   """
   def __init__(self):
     self._commands = {}
@@ -48,10 +61,8 @@ class CommandManager(manager.Manager):
     """
     Returns a list of the commands we have registered.
 
-    returns:
-
-      (list of strings) all the commands that have been registered
-
+    @return: all the commands that have been registered
+    @rtype:  list of strings
     """
     return self._commands.keys()
 
@@ -59,25 +70,28 @@ class CommandManager(manager.Manager):
     """
     Registers a command.
 
-    arguments:
+    @param name: the name of the command to add
+    @type  name: string
 
-      'name' -- (string) the command to add
+    @param func: the function that handles the command
+    @type  func: function
 
-      'func' -- (function) the function that handles it
+    @param arguments: the argument spec to create the argparser
+    @type  arguments: string
 
-      'arguments=None' -- (string) argument specification to create 
-                          the argparser
+    @param argoptions: options for how the argument spec should be parsed
+    @type  argoptions: string
 
-      'argoptions=None' -- (string) options for how the argument spec
-                           should be parsed
+    @param helptext: the help text for this command for the user
+    @type  helptext: string
 
-      'helptext=""' -- (string) the help text for this command
-      
+    @raise ValueError: if the function is uncallable
+    @raise Exception: if the argument spec for the command is unparseable
     """
     if not callable(func):
       raise ValueError, "%s is uncallable." % name
 
-    cd = CommandData()
+    cd = _CommandData()
 
     syntaxline = ""
 
@@ -119,9 +133,12 @@ class CommandManager(manager.Manager):
     """
     Removes a command (and the help text) for whatever reasons.
 
-    arguments:
+    @param name: the name of the command to remove
+    @type  name: string
 
-      'name' -- (string) the name of the command to remove
+    @return: 0 if no command was found, 1 if the command was removed
+        succesfully.
+    @rtype: boolean
     """
     if self._commands.has_key(name):
       cd = self._commands[name]
@@ -130,19 +147,18 @@ class CommandManager(manager.Manager):
         exported.remove_help(cd.getFQN())
       except:
         pass
+      return 1
+    return 0
 
   def getCommand(self, name):
     """
     Returns the function for a given command name.
 
-    arguments:
+    @param name: the name of the command to retrieve
+    @type  name: string
 
-      'name' -- (string) the name of the command to retrieve
-
-    returns:
-
-      (function) the function in question or None
-
+    @return: the function in question or None
+    @rtype:  function
     """
     if self._commands.has_key(name):
       return self._commands[name].getFunc()
@@ -161,15 +177,13 @@ class CommandManager(manager.Manager):
     """
     Returns the arguments parser for a given command name.
 
-    arguments:
+    @param name: the name of the command whose arguments should be
+        retrieved
+    @type  name: string
 
-      'name' -- (string) the name of the command whose arguments should 
-                be retrieved
-
-    returns:
-
-      (ArgParser) -- argument parsing object with parse(string) command 
-                     to convert incoming arguments into a dictionary
+    @return: argument parsing object to convert incoming arguments
+        into a dictionary to pass to the command function
+    @rtype: ArgParser instance
       
     """
     if self._commands.has_key(name):
@@ -178,6 +192,19 @@ class CommandManager(manager.Manager):
     return None
 
   def filter(self, args):
+    """
+    Takes in user command lines and handles commands that start
+    with a Lyntin command character.
+
+    @see: this is registered with the L{user_filter_hook<hooks.user_filter_hook>}
+
+    @param args: (session, internal boolean, ..., current input text)
+    @type  args: tuple
+
+    @return: None if we handled the input, or the current input text if 
+        we didn't
+    @rtype:  None or string
+    """
     ses = args[0]
     internal = args[1]
     input = args[-1]
