@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.64 2002/07/21 04:14:48 willhelm Exp $
+# $Id: engine.py,v 1.65 2002/07/30 03:14:41 jmberne Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -306,7 +306,7 @@ class Engine:
     if session:
       session.handleMudData(text)
     else:
-      exported.write_message("Unhandled data: %s" % text)
+      exported.write_message("Unhandled data:\n%s" % text)
 
 
   ### ------------------------------------------
