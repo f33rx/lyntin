@@ -2,6 +2,10 @@ For a more up-to-date TODO, please check the web-site:
 http://lyntin.sourceforge.net
 
 -------------------------------------------------------------
+re-route Put* functions through the session so then
+we can turn quell them on a session by session basis--they're 
+really session oriented.
+
 finish cleaning up modules
 
 fix spacing problems in tkgui

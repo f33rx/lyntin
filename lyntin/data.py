@@ -236,6 +236,10 @@ class Session:
         except socket.error, x:
             self.Die(x)
 
+    def Die(self, exc=''):
+        pass
+
+
     
 class UserSession(Session):
     """
@@ -262,7 +266,10 @@ class UserSession(Session):
         self.ticker = 0
         self.tickaction = ''
         self.warnedtick = 0
-        self.verbose = 1      # verbose mode        
+        self.verbose = 1      # verbose mode--do we want to print
+                              # lots of silly messages 1/0
+
+        self.quietmode = 0    # quells PutMessage totally
 
         self.handlers.append(handler.AppHandler())
 

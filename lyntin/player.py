@@ -634,6 +634,10 @@ def ParseFile(ofile, input, seslist):
             thelist = thefile.readlines()
             other_count = al_count = ac_count = sub_count = gag_count = var_count = 0
 
+            # set quiet mode which prevents PutMessage from printing
+            # stuff--because it'd print a lot of stuff here.
+            ses.quiet_mode = 1
+
             # go through the file, adding actions, aliases
             # etc where appropriate
             for s in thelist:
@@ -658,6 +662,8 @@ def ParseFile(ofile, input, seslist):
                         var_count = var_count + 1
                     else:
                         other_count = other_count + 1
+
+            ses.quiet_mode = 0
 
             PutMessage('read: ok.')
             PutMessage(string.join([str(al_count), "aliases loaded."]))
