@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Lyn Headley and Will Guaraldi 1999 - 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.19 2002/03/29 06:23:29 willhelm Exp $
+# $Id: tkgui.py,v 1.20 2002/03/29 06:57:02 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on

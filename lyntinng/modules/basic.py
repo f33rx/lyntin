@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.43 2002/03/29 06:57:02 willhelm Exp $
+# $Id: basic.py,v 1.44 2002/03/29 16:13:59 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -170,6 +170,7 @@ def deed_cmd(session, words, input):
   This adds a deed or prints all the deeds stored till now.
   """
   
+  # begin copyright 2002 Sebastian John
   if len(words) == 1:
     data = session.getManager("deed").getInfo()
     if data == "":
@@ -190,7 +191,7 @@ def deed_cmd(session, words, input):
   
   session.getManager("deed").addDeed(deedtext)
   exported.write_message("deed: '%s' added." % deedtext)
-
+  # end copyright 2002 Sebastian John
 
 def diagnostics_cmd(session, words, input):
   """#diagnostics
