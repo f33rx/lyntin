@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.36 2002/11/09 01:06:17 willhelm Exp $
+# $Id: lyntin.py,v 1.37 2002/12/04 03:46:28 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -25,42 +25,46 @@ architecture docs, et al, see http://lyntin.sourceforge.net/
 HELPTEXT = """syntax: lyntin.py [[OPTIONS] | [--help] | [--version]]
 
   --help
-         displays this text and exits.
+       displays this text and exits.
 
-  --version or -v
-         prints out the version information and exits.
+  -v or --version
+       prints out the version information and exits.
 
 
 OPTIONS:
 
-  --datadir or -d
-         If you don't set your datadir, Lyntin will set the datadir to
-         the HOME environment variable.  Using this option allows you to
-         set it manually.  You can specify only one --datadir flag.
-         Specifying additional ones will just overwrite the last one.
+  -d or --datadir
+       If you don't set your datadir, Lyntin will set the 
+       datadir to the HOME environment variable.  Using this 
+       option allows you to set it manually.  You can specify 
+       only one --datadir flag.  Specifying additional ones 
+       will overwrite the last one.
 
-  --evalmode or -e
-         Lyntin has two user input evaluation modes: lyntin and tintin.
-         This allows you to set the mode at the command line.
+  -e or --evalmode
+       Lyntin has two user input evaluation modes: lyntin and 
+       tintin.  This allows you to set the mode at the command 
+       line.
 
-  --moduledir or -m
-         Lyntin dynamically loads everything in the lyntin/modules dir,
-         but will additionally dynamically load modules in dirs specified
-         by this flag.  You can specify multiple --moduledir flags.
+  -m or --moduledir
+       Lyntin dynamically loads everything in the lyntin/modules 
+       dir, but will additionally dynamically load modules in dirs 
+       specified by this flag.  You can specify multiple --moduledir 
+       flags.
          
-  --read or --readfile or -r
-         Reads a file in at startup populating the common
-         session with aliases, actions, and whatnot.  You can specify
-         multiple files to read with multiple --read flags.
+  -r or --read or --readfile
+       Reads a file in at startup populating the common session 
+       with aliases, actions, and whatnot.  You can specify multiple 
+       files to read with multiple --read flags.
 
   --nosnoop
-         Lyntin defaults to snooping.  This sets it so Lyntin will
-         default to no snooping.
+       Lyntin defaults to snooping.  This sets it so Lyntin will
+       default to no snooping.
 
-  --ui or -u
-         Launches a specific ui for Lyntin.  Lyntin comes with two ui's:
-         'text' and 'tk'.  Other ui's can be dropped into the ui/ 
-         subdirectory and this switch can be used for starting them.
+  -u or --ui
+       Launches a specific ui for Lyntin.  Lyntin comes with two 
+       ui's: 'text' and 'tk'.  Other ui's can be dropped into the 
+       ui/ subdirectory and this switch can be used for starting 
+       them as well.
 """
 
 # the wizlist of folks without whom Lyntin wouldn't exist.

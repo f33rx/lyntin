@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.30 2002/11/21 02:04:19 willhelm Exp $
+# $Id: hooks.py,v 1.31 2002/12/31 00:03:59 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -376,7 +376,7 @@ from_user_hook = get_hook_manager().getHook("from_user_hook")
 # When the mud sends data, this will trigger the from_mud_hook.
 # 
 # If you're looking for a line by line idea of things, use the
-# databuffer hook.
+# mud_filter_hook.
 #
 # arg tuple: (string)
 #  - the raw data we just got from the mud

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.37 2002/12/06 00:33:32 willhelm Exp $
+# $Id: exported.py,v 1.38 2003/01/05 22:55:18 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -373,14 +373,6 @@ def get_history(count=30):
   @rtype: list of strings
   """
   return get_manager("history").getHistory(count)
-
-def grep_databuffer(text, ses):
-  """ Not yet implemented."""
-  pass
-
-def grep_databuffer_lines(text, ses):
-  """ Not yet implemented."""
-  pass
 
 def get_engine():
   """
