@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.44 2002/10/26 15:17:23 willhelm Exp $
+# $Id: event.py,v 1.45 2002/11/06 03:03:19 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -119,8 +119,6 @@ class StartupEvent(Event):
 
     # adds the .lyntinrc file to the readfile list if it exists.
     if lyntin.options['datadir']:
-      # FIXME - we look in the first datadir for the .lyntinrc file--
-      # should we look in all of them?
       lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
       try:
         test = os.stat(lyntinrcfile)

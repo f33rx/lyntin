@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.14 2002/10/23 23:59:09 willhelm Exp $
+# $Id: substitute.py,v 1.15 2002/11/08 02:35:13 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -349,9 +349,6 @@ def load():
   sm = SubstituteManager()
   exported.add_manager("substitute", sm)
 
-  # FIXME - the number controls the order this gets called in the grand
-  # scheme of things.  we should probably do something to make this
-  # more obvious.
   hooks.mud_filter_hook.register(sm.mudfilter, 50)
   hooks.write_hook.register(sm.persist)
 

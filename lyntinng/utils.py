@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.60 2002/11/06 02:09:08 willhelm Exp $
+# $Id: utils.py,v 1.61 2002/11/06 03:03:19 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -544,7 +544,6 @@ def parse_time(timearg):
   ampm=timespec.get("ampm",None)
   if hour > 12:
     if ampm:
-      # FIXME - should raise a ValueError
       raise ValueError, "Invalid time string: ampm specified with hours > 12."
     else:
       ampm="p"
