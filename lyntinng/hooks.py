@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.27 2002/11/06 02:09:07 willhelm Exp $
+# $Id: hooks.py,v 1.28 2002/11/06 03:03:19 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -20,10 +20,10 @@ user listener thread.
 
 Hooks and the Hook class are defined in the "hooks" module as is
 a whole lot of documentation on which hooks exist, and what is
-passed to them.
+passed to them.  Registering, unregistering, and retrieving Hooks
+should be done through the exported module.
 """
-
-import session
+import session, manager
 
 # These are priority constants.  They should rarely be used.
 FIRST = 0
@@ -31,6 +31,81 @@ LAST = 99
 
 class StopSpammingException(Exception):
   pass
+
+class HookManager(manager.Manager):
+  """
+  Manages creating hooks on demand as well as retrieving
+  hooks and such.
+  """
+  def __init__(self):
+    self._hook_map = {}
+
+  def register(self, hookname, func, place=LAST):
+    """
+    Registers a function with a given hook.  If the hook doesn't
+    exist, then it instantiates the hook.
+
+    @param hookname: the name of the hook
+    @type  hookname: string
+
+    @param func: the function to call when that hook is spammed
+    @type  func: function
+
+    @param place: the function will get this place in the call
+        order.  functions with the same place specified will get
+        arbitrary ordering.  defaults to LAST.
+    @type  place: int
+    """
+    if not self._hook_map.has_key(hookname):
+      self._hook_map[hookname] = Hook()
+
+    self._hook_map[hookname].register(func, place)
+
+  def unregister(self, hookname, func):
+    """
+    If the hook exists, unregisters the func from the hook.
+
+    @param hookname: the name of the hook
+    @type  hookname: string
+
+    @param func: the function to remove from the hook
+    @type  func: function
+    """
+    if self._hook_map.has_key(hookname):
+      self._hook_map[hookname].unregister(func)
+
+  def getHook(self, hookname):
+    """
+    Retrieves a hook by the name of hookname.  If the hook does
+    not exist, then it creates the hook.
+
+    @param hookname: the name of the hook
+    @type  hookname: string
+
+    @returns: the existing or newly created Hook instance
+    @rtype: Hook
+    """
+    if self._hook_map.has_key(hookname):
+      return self._hook_map[hookname]
+
+    self._hook_map[hookname] = Hook()
+    return self._hook_map[hookname]
+
+  def addHook(self, hookname, newhook):
+    """
+    Adds a pre-existing hook to the manager so we can
+    manage it.
+
+    @param hookname: the name for the hook
+    @type  hookname: string
+
+    @param newhook: the hook to add
+    @type  newhook: Hook
+    """
+    if self._hook_map.has_key(hookname):
+      raise ValueError, "Already have a hook by that name."
+    self._hook_map[hookname] = newhook
+
 
 class Hook:
   """
@@ -43,23 +118,35 @@ class Hook:
   hooks that come with Lyntin as well as which arguments they 
   take in the arg tuple.
   """
-  def __init__(self,mapper= lambda x,y:x):
+  def __init__(self, mapper=lambda x,y:x):
     """
     Initializes.
 
     @param mapper: function whose output will be passed to the next
-        function in the hook.  Must take two arguments, the previous 
+        function in the hook.  Must take two arguments: the previous 
         arglist and the return from the previous function.
     @type  mapper: function
     """
     # this is the master priority list
-    self.functionlist = {}
+    self._functionlist = {}
 
     # this gets recomputed everytime someone registers or
     # unregisters a hook
-    self.orderedlist = []
+    self._orderedlist = []
 
-    self.mapper = mapper
+    self._mapper = mapper
+
+  def setFilterMapper(self, newmapper):
+    """
+    Sets the filter mapper to a new mapper.
+
+    @param newmapper: the function whose output will be passed
+        to the next function in the hook.  Takes two arguments:
+        the previous arglist and the return from the previous 
+        function.
+    @type  newmapper: function
+    """
+    self._mapper = newmapper
 
   def createOrderedList(self):
     """
@@ -67,14 +154,14 @@ class Hook:
     orderedlist.  This helps save some cycles every time
     we spam the hook.
     """
-    priorities = self.functionlist.keys();
+    priorities = self._functionlist.keys();
     priorities.sort()
 
-    self.orderedlist = []
+    self._orderedlist = []
 
     for priority in priorities:
-      for mem in self.functionlist[priority]:
-        self.orderedlist.append(mem)
+      for mem in self._functionlist[priority]:
+        self._orderedlist.append(mem)
     
     
   def spamhook(self, arglist=(), mappingFunction=None):
@@ -87,19 +174,19 @@ class Hook:
     @type  arglist: tuple of arguments
 
     @param mappingFunction: function whose output will be passed to the next
-        function in the hook.  Must take two arguments, the previous 
+        function in the hook.  Must take two arguments: the previous 
         arglist and the return from the previous function.
     @type  mappingFunction: function
 
     @return: arglist
     @rtype:  tuple of arguments
     """
-    mappingFunction = mappingFunction or self.mapper
+    mappingFunction = mappingFunction or self._mapper
 
     try:
-      for mem in self.orderedlist:
+      for mem in self._orderedlist:
         output = mem(arglist)
-        arglist = mappingFunction(arglist,output)
+        arglist = mappingFunction(arglist, output)
     except StopSpammingException, e:
       return None
 
@@ -112,11 +199,11 @@ class Hook:
     @param func: the function to unregister
     @type  func: function
     """
-    for priority in self.functionlist.keys():
-      if func in self.functionlist[priority]:
-        self.functionlist[priority].remove(func)
-        if len(self.functionlist[priority]) == 0:
-          del self.functionlist[priority]
+    for priority in self._functionlist.keys():
+      if func in self._functionlist[priority]:
+        self._functionlist[priority].remove(func)
+        if len(self._functionlist[priority]) == 0:
+          del self._functionlist[priority]
 
     self.createOrderedList()
         
@@ -141,25 +228,20 @@ class Hook:
       exported.write_error("Function %s not callable." % repr(func))
       return
 
-    if self.functionlist.has_key(place):
-      self.functionlist[place].append(func)
+    if self._functionlist.has_key(place):
+      self._functionlist[place].append(func)
     else:
-      self.functionlist[place] = [func]
+      self._functionlist[place] = [func]
 
     self.createOrderedList()
 
   def clear(self):
-    """ Clears the functionlist."""
-    self.functionlist = {}
-    self.orderedlist = []
+    """
+    Clears the functionlist.
+    """
+    self._functionlist = {}
+    self._orderedlist = []
 
-
-
-##################################################################
-# the hooks available in Lyntin
-# (if you think of a hook you would like me to add, by all means
-# do a feature request at http://lyntin.sourceforge.net)
-##################################################################
 
 
 ##################################################################
@@ -358,6 +440,33 @@ mud_filter_hook = Hook(filter_mapper)
 # For example, the AliasManager returns text with aliases expanded.
 user_filter_hook = Hook(filter_mapper)
 
+def initialize_hooks(hm):
+  """
+  Initializes all the hooks in this module--do NOT call this on your
+  own.
+
+  @param hm: the HookManager instance to register the hooks with
+  @type  hm: HookManager
+  """
+  hm.addHook("startup_hook", startup_hook)
+  hm.addHook("shutdown_hook", shutdown_hook)
+  hm.addHook("mudecho_hook", mudecho_hook)
+  hm.addHook("evalmode_change_hook", evalmode_change_hook)
+  hm.addHook("variable_change_hook", variable_change_hook)
+  hm.addHook("death_hook", death_hook)
+  hm.addHook("connect_hook", connect_hook)
+  hm.addHook("disconnect_hook", disconnect_hook)
+  hm.addHook("from_user_hook", from_user_hook)
+  hm.addHook("from_mud_hook", from_mud_hook)
+  hm.addHook("to_mud_hook", to_mud_hook)
+  hm.addHook("to_user_hook", to_user_hook)
+  hm.addHook("timer_hook", timer_hook)
+  hm.addHook("write_hook", write_hook)
+  hm.addHook("error_occurred_hook", error_occurred_hook)
+  hm.addHook("too_many_errors_hook", too_many_errors_hook)
+
+  hm.addHook("mud_filter_hook", mud_filter_hook)
+  hm.addHook("user_filter_hook", user_filter_hook)
 
 # Local variables:
 # mode:python

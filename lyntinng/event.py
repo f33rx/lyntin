@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.45 2002/11/06 03:03:19 willhelm Exp $
+# $Id: event.py,v 1.46 2002/11/09 04:21:59 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -15,7 +15,7 @@ event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
 import string, os, sys, glob
-import hooks, ui.ui, lyntin, exported
+import ui.ui, lyntin, exported
 
 class Event:
   """
@@ -148,7 +148,7 @@ class StartupEvent(Event):
       ShutdownEvent().enqueue()
 
     # spam the startup hook 
-    hooks.startup_hook.spamhook()
+    exported.get_hook("startup_hook").spamhook()
 
     # handle command files
     for mem in lyntin.options['readfile']:
@@ -196,7 +196,7 @@ class EchoEvent(Event):
 
   def execute(self):
     """ Runs the echo event through anything listening."""
-    hooks.mudecho_hook.spamhook((self._state,))
+    exported.get_hook("mudecho_hook").spamhook((self._state,))
     lyntin.mudecho = self._state
 
 
@@ -220,7 +220,7 @@ class MudEvent(Event):
 
   def execute(self):
     """ Execute."""
-    hooks.from_mud_hook.spamhook((self._session, self._input))
+    exported.get_hook("from_mud_hook").spamhook((self._session, self._input))
     exported.get_engine().handleMudData(self._session, self._input)
 
 
@@ -229,7 +229,7 @@ class InputEvent(Event):
   A user input event is created whenever the user types something
   into their ui and it creates a user event from it.
   """
-  def __init__(self, input, internal=0, session=None):
+  def __init__(self, input, internal=0, ses=None):
     """
     Initializes the InputEvent.
 
@@ -241,19 +241,19 @@ class InputEvent(Event):
         it in history.  1 if it's internal, 0 if not.
     @type  internal: int
 
-    @param session: the session execute the input event in
-    @type  session: session.Session
+    @param ses: the session execute the input event in
+    @type  ses: session.Session
     """
     self._input = input
     self._internal = internal
-    self._session = session
+    self._ses = ses
 
   def execute(self):
     """ Execute."""
     if not self._internal:
       exported.write_user_data(self._input)
 
-    exported.get_engine().handleUserData(self._input, internal=self._internal, session=self._session)
+    exported.get_engine().handleUserData(self._input, internal=self._internal, session=self._ses)
 
 
 class OutputEvent(Event):
@@ -281,14 +281,14 @@ class SpamEvent(Event):
   Certain things can kick off a call to spam a hook.  Rather
   than doing it "inline" so to speak, it's sometimes nice to kick
   it off in its own event.  The timer uses this to handle kicking
-  anything that's listening to the hooks.timer_hook.
+  anything that's listening to the timer_hook.
   """
   def __init__(self, hook, args):
     """
     Initializes the SpamEvent.
 
     @param hook: the hook to spam
-    @type  hook: hooks.Hook
+    @type  hook: Hook
 
     @param args: the arguments to send to the functions registered
         with the hook--refer to the hook documentation for details

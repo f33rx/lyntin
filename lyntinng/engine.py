@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.73 2002/11/06 02:09:07 willhelm Exp $
+# $Id: engine.py,v 1.74 2002/11/06 03:03:19 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -69,6 +69,10 @@ class Engine:
     # our command manager
     self._managers["command"] = commandmanager.CommandManager()
 
+    # our hook manager
+    self._managers["hook"] = hooks.HookManager()
+    hooks.initialize_hooks(self._managers["hook"])
+
     # there is only one ui in the system.
     self._ui = None
 
@@ -85,10 +89,10 @@ class Engine:
     self._current_session = None
 
     # we register ourselves with the shutdown hook
-    hooks.shutdown_hook.register(self.shutdown)
+    self.getManager("hook").register("shutdown_hook", self.shutdown)
 
     # we register ourselves with the evalmode_change hook
-    hooks.evalmode_change_hook.register(_evalmodechange)
+    self.getManager("hook").register("evalmode_change_hook", _evalmodechange)
 
 
   def initialize(self):
@@ -154,7 +158,7 @@ class Engine:
     while not self._shutdownflag:
       try:
         time.sleep(1)
-        event.SpamEvent(hooks.timer_hook, (self._tick,)).enqueue()
+        event.SpamEvent(exported.get_hook("timer_hook"), (self._tick,)).enqueue()
         self._tick += 1
       except KeyboardInterrupt:
         return
@@ -217,7 +221,7 @@ class Engine:
 
       # if it's not internal we spam the hook with the raw input
       if internal == 0:
-        hooks.from_user_hook.spamhook((mem,))
+        exported.get_hook("from_user_hook").spamhook((mem,))
 
       if mem[0] == "!":
         memhistory = self.getManager("history").getHistoryItem(mem)
@@ -510,9 +514,9 @@ class Engine:
     lyntin.errorcount = lyntin.errorcount + 1
     exported.write_error("WARNING: Unhandled error encountered (%d out of %d)." 
                          % (lyntin.errorcount, 20))
-    hooks.error_occurred_hook.spamhook((lyntin.errorcount,))
+    exported.get_hook("error_occurred_hook").spamhook((lyntin.errorcount,))
     if lyntin.errorcount > 20:
-      hooks.too_many_errors_hook.spamhook()
+      exported.get_hook("too_many_errors_hook").spamhook()
       exported.write_error("Error count exceeded--shutting down.")
       sys.exit("Error count exceeded--shutting down.")
 
@@ -591,7 +595,7 @@ class Engine:
     """
     self._ui_lock.acquire(1)
     try:
-      hooks.to_user_hook.spamhook((text,))
+      exported.get_hook("to_user_hook").spamhook((text,))
     finally:
       self._ui_lock.release()
 
@@ -699,19 +703,25 @@ def _evalmodechange(args):
   if (old == -1):
     # just started up
     if new == lyntin.EVALMODE_TINTIN:
-      hooks.user_filter_hook.register(cm.filter, 1)
+      # FIXME hooks.user_filter_hook.register(cm.filter, 1)
+      exported.hook_register("user_filter_hook", cm.filter, 1)
     else:
-      hooks.user_filter_hook.register(cm.filter, 100)
+      # FIXME hooks.user_filter_hook.register(cm.filter, 100)
+      exported.hook_register("user_filter_hook", cm.filter, 100)
 
   elif old == lyntin.EVALMODE_LYNTIN and new == lyntin.EVALMODE_TINTIN:
     # just switched into EVALMODE_TINTIN mode
-    hooks.user_filter_hook.unregister(cm.filter)
-    hooks.user_filter_hook.register(cm.filter, 1)
+    exported.hook_unregister("user_filter_hook", cm.filter)
+    exported.hook_register("user_filter_hook", cm.filter, 1)
+    # FIXME hooks.user_filter_hook.unregister(cm.filter)
+    # FIXME hooks.user_filter_hook.register(cm.filter, 1)
 
   elif old == lyntin.EVALMODE_TINTIN and new == lyntin.EVALMODE_LYNTIN:
     # just switched into EVALMODE_LYNTIN mode
-    hooks.user_filter_hook.unregister(cm.filter)
-    hooks.user_filter_hook.register(cm.filter, 100)
+    exported.hook_unregister("user_filter_hook", cm.filter)
+    exported.hook_register("user_filter_hook", cm.filter, 100)
+    # FIXME hooks.user_filter_hook.unregister(cm.filter)
+    # FIXME hooks.user_filter_hook.register(cm.filter, 100)
 
 # Local variables:
 # mode:python

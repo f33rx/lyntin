@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.33 2002/11/06 03:03:19 willhelm Exp $
+# $Id: exported.py,v 1.34 2002/11/09 04:21:59 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -392,6 +392,51 @@ def tally_error():
   event which will shutdown Lyntin.
   """
   get_engine().tallyError()
+
+def hook_register(hookname, func, place=None):
+  """
+  Registers a function with a hook.
+
+  @param hookname: the name of the hook
+  @type  hookname: string
+
+  @param func: the function to register with the hook
+  @type  func: function
+
+  @param place: the function will get this place in the call
+      order.  functions with the same place specified will get
+      arbitrary ordering.  defaults to hooks.LAST.
+  @type  place: int
+  """
+  if place == None:
+    get_manager("hook").register(hookname, func)
+  else:
+    get_manager("hook").register(hookname, func, place)
+    
+def hook_unregister(hookname, func):
+  """
+  If the hook exists, unregisters the func from the hook.
+
+  @param hookname: the name of the hook
+  @type  hookname: string
+
+  @param func: the function to remove from the hook
+  @type  func: function
+  """
+  get_manager("hook").unregister(hookname, func)
+
+def get_hook(hookname):
+  """
+  If the hook exists, returns the hook.  Otherwise it creates
+  a new hook and returns that.
+
+  @param hookname: the name of the hook to retrieve
+  @type  hookname: string
+
+  @returns: the Hook by the name of hookname
+  @rtype: Hook
+  """
+  return get_manager("hook").getHook(hookname)
 
 # Local variables:
 # mode:python

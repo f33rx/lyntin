@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.71 2002/11/10 20:02:58 willhelm Exp $
+# $Id: session.py,v 1.72 2002/11/15 02:36:24 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -13,7 +13,7 @@ to a mud--though it should be noted that sessions could also connect
 to any other TCP/IP service.
 """
 import re, copy, string, os
-import data, exported, engine, hooks, utils, ansi, lyntin, event, ticker
+import data, exported, engine, utils, ansi, lyntin, event, ticker
 import argparser
 
 ESC = chr(27)
@@ -53,8 +53,8 @@ class Session:
     self._verbatim = 0
 
     # register with the shutdown hook 
-    hooks.shutdown_hook.register(self.shutdown)
-    hooks.write_hook.register(self.getWriteFileInfo)
+    exported.hook_register("shutdown_hook", self.shutdown)
+    exported.hook_register("write_hook", self.getWriteFileInfo)
 
   def __repr__(self):
     return "session.Session %s" % self._name
@@ -103,12 +103,12 @@ class Session:
       quiet = 0
 
     # unregister with the shutdown hook
-    hooks.shutdown_hook.unregister(self.shutdown)
+    exported.hook_unregister("shutdown_hook", self.shutdown)
     if self.getName() != "common":
       if quiet == 0:
         event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
       self._ticker.clear()
-      hooks.disconnect_hook.spamhook((self, self._host, self._port))
+      exported.get_hook("disconnect_hook").spamhook((self, self._host, self._port))
 
       try:
         exported.get_engine().unregisterSession(self)
@@ -248,7 +248,7 @@ class Session:
     @type  tag: varies
     """
     for line in message.strip().split("\n"):
-      hooks.to_mud_hook.spamhook((self, line, tag))
+      exported.get_hook("to_mud_hook").spamhook((self, line, tag))
 
     if self._socket:
       retval = self._socket.write(str(message))
@@ -283,7 +283,7 @@ class Session:
     # this is the point of much recursion.  everything is registered
     # as a filter and recurses accordingly.
     spamtuple = self,internal,self._verbatim,input,input
-    spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
+    spamtuple = exported.get_hook("user_filter_hook").spamhook(spamtuple)
     if spamtuple == None:
       return
     else:
@@ -341,7 +341,7 @@ class Session:
       mem = inputlines[i]
       # call the pre-filter hook
       spamtuple = self,mem,mem
-      spamtuple = hooks.mud_filter_hook.spamhook(spamtuple)
+      spamtuple = exported.get_hook("mud_filter_hook").spamhook(spamtuple)
       if spamtuple != None:
         mem = spamtuple[-1]
       else:
@@ -349,8 +349,7 @@ class Session:
 
       inputlines[i] = mem
 
-    input = string.join(inputlines, "")
-    exported.write_mud_data(input, self)
+    exported.write_mud_data("".join(inputlines), self)
 
 
 # Local variables:

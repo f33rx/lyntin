@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.22 2002/10/12 22:14:47 willhelm Exp $
+# $Id: ticker.py,v 1.23 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This module handles ticker stuff.  A session can have an associated
 ticker which kicks off a ticker event every x seconds.  The ticker
 works off of the "timer_hook".
 """
-import hooks, lyntin, event, engine, exported
+import lyntin, event, engine, exported
 
 class Ticker:
   """
@@ -111,7 +111,7 @@ class Ticker:
       self._enabled = 1
 
       # register with the ticker hook 
-      hooks.timer_hook.register(self.tickerUpdate)
+      exported.hook_register("timer_hook", self.tickerUpdate)
 
     self._tickstart = engine.myengine.getCurrentTick() - 1
 
@@ -121,7 +121,7 @@ class Ticker:
     """
     if self._enabled == 1:
       self._enabled = 0
-      hooks.timer_hook.unregister(self.tickerUpdate)
+      exported.hook_unregister("timer_hook", self.tickerUpdate)
 
   def tickerUpdate(self, args):
     """
@@ -147,7 +147,7 @@ class Ticker:
           tickaction = am.getAlias(ticksession, "TICK!!!")
 
         if tickaction:
-          event.InputEvent(tickaction, internal=1, session=ticksession).enqueue()
+          event.InputEvent(tickaction, internal=1, ses=ticksession).enqueue()
         else:
           exported.write_message("TICK!!!")
 

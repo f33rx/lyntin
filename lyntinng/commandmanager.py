@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.5 2002/10/12 22:14:47 willhelm Exp $
+# $Id: commandmanager.py,v 1.6 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 Lyntin comes with a series of X{command}s for manipulating aliases, 
@@ -208,8 +208,6 @@ class CommandManager(manager.Manager):
     """
     Takes in user command lines and handles commands that start
     with a Lyntin command character.
-
-    @see: this is registered with the L{user_filter_hook<hooks.user_filter_hook>}
 
     @param args: (session, internal boolean, ..., current input text)
     @type  args: tuple
