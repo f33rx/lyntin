@@ -30,3 +30,41 @@ def count_then_say(count, str):
         lyntin_command('say %d...'%i)
     lyntin_command('say %s'%str)
 ##################################################################
+
+
+##################################################################
+# use timedfileexecution to execute a file over a period of time
+# time_scheduler.add(timedfileexecution('wearstuff.txt',1,3))
+# the line above would cause you to read wearstuff.txt to the
+# session in one second intervals sending 3 lines at a time
+class timedfileexecution(TimeEvent):
+    def __init__(self, filename, interval=1, linesatatime=1):
+        self.linesatatime=linesatatime
+        try:
+            self.file = open(filename,'r')
+        except:
+            return 0
+        else:
+            TimeEvent.__init__(self, interval, -1)
+
+    def internal_perform(self, scheduler):
+        for i in range(self.linesatatime):
+            line=self.file.readline()
+            if line=='':
+                scheduler.remove(self)
+            else:
+                lyntin_command(line)
+
+##################################################################
+# This is a very simple auto saver but can be dangerous to use if 
+# a mud dies before you read in the old saved data.  A better 
+# version will be available shortly :) -- James
+
+def autosave_session_data(tuple):
+    ses=tuple[0]
+    n=ses.name
+    lyntin_command("#showme Writing to %s;#write %s" % (n,n))
+
+#uncomment the line below to add auto saving
+#hooks.death_hook.add(autosave_session_data)
+

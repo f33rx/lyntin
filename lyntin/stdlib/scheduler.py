@@ -76,7 +76,7 @@ class TimeEvent:
     # this is just a wrapper around the real functionality
     # which checks times and deschedules if times is up
     def perform(self, scheduler):
-        self.internal_perform() # override
+        self.internal_perform(scheduler) # override
         if(self.times > 0):
             self.times = self.times - 1
             if self.times == 0: # all used up

@@ -9,6 +9,7 @@ etc here.
 
 # import predefined user functions into our own namespace
 from exported import *
+from scheduler import *
 import hooks
 
 ##################################################################
@@ -31,10 +32,3 @@ user_custom = {
 
 # uncomment this line to use the examples
 #from examples import *
-
-def autosave_session_data(tuple):
-    ses=tuple[0]
-    n=ses.name
-    lyntin_command("#showme Writing to %s;#write %s" % (n,n))
-
-hooks.death_hook.add(autosave_session_data)
