@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.30 2002/04/21 03:49:31 willhelm Exp $
+# $Id: tkgui.py,v 1.31 2002/04/24 04:38:24 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -298,6 +298,7 @@ class TkGui(ui.BaseUI):
       # then we handle unfinished colors--ansi color codes can
       # be split between calls to write.
       if self._unfinishedcolor[0] == 1:
+      
         index = line.find("m")
 
         if index == -1:
@@ -359,6 +360,7 @@ class TkGui(ui.BaseUI):
 
       for num in numlist:
         if txt_attribs.has_key(num):
+        
           if num == "1":
             self._currcolors[0] = 1
 
@@ -366,12 +368,14 @@ class TkGui(ui.BaseUI):
           if self._currcolors[0] == 1:
             self._currcolors[1] = "b" + num
           else:
+            self._currcolors[0] = 0
             self._currcolors[1] = num
 
         elif bg_color_codes.has_key(num):
           if self._currcolors[0] == 1:
             self._currcolors[2] = "b" + num
           else:
+            self._currcolors[0] = 0
             self._currcolors[2] = num
 
 

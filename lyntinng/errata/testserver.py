@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: testserver.py,v 1.3 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This testserver just allows someone to test Lyntin without
@@ -14,21 +14,38 @@ actually connecting to a mud.  It's terribly non-interesting.
 import socket, string
 
 RESPONSES = {'hello': 'Hello.',
-             'commands': 'COMMANDS' }
+             'commands': 'COMMANDS',
+             'colors' : 'Colors' }
 
-def color(data):
-  return chr(27) + "[33m" + data + chr(27) + "[0m"
+def color(data, pcolor=33, backcolor=40):
+  if pcolor < 100: 
+    return ("%s[%s;%sm%s" % (chr(27), str(pcolor), str(backcolor), data))
+  else:
+    return ("%s[1;%s;%sm%s" % (chr(27), str(pcolor), str(backcolor), data))
 
+  
 def handle(addr, data):
   print "incoming: '" + data + "'"
   data = string.replace(data, "\r", "")
   data = string.replace(data, "\n", "")
    
+
   try:
     response = RESPONSES[data]
     response = string.replace(response, 
                "COMMANDS", 
                "commands available are: \r\n   " + string.join(RESPONSES.keys(), "\r\n   "))
+
+    #sends out a rainbow of all possible colors and backgrounds
+    #with number of color called as text
+    if response == "Colors":
+     for background in range(40,48):
+        response = response + "\n"
+        for foreground in range(30,38):
+          response += color(str(foreground), foreground, background)
+          response += color(str((foreground + 100)), (foreground + 100), background)
+        response += color("",37,40)
+    
   except KeyError:
     response = "huh?"
 
