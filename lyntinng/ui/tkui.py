@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.22 2002/12/06 02:19:40 willhelm Exp $
+# $Id: tkui.py,v 1.23 2002/12/08 18:49:51 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
 Lyntin, but largely re-coded in various areas.
 """
 
-import string, os, Tkinter, tkFont, ScrolledText
+import string, os, Tkinter, tkFont, ScrolledText, copy
 import ansi, ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
@@ -358,7 +358,7 @@ class Tkui(ui.BaseUI):
       if self._currcolors.has_key(ses):
         color = self._currcolors[ses]
       else:
-        color = DEFAULT
+        color = copy.copy(DEFAULT)
 
       # some sessions have an unfinished color as well--in case we
       # got a part of an ansi color code in a mud message, and the other
