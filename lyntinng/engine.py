@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.23 2002/03/30 16:33:48 willhelm Exp $
+# $Id: engine.py,v 1.24 2002/04/01 18:24:36 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -157,8 +157,9 @@ class Engine:
     This timer thread sleeps for a second, then calls everything
     in the queue with the current tick.
 
-    FIXME - this will always be slightly behind and will get
-            worse as there are more tick things.
+    Note: This will almost always be slightly behind and will
+    get worse as there are more things that get executed each
+    tick.
     """
     import time, event
 

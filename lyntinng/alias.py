@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.6 2002/02/27 02:25:21 willhelm Exp $
+# $Id: alias.py,v 1.7 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -25,14 +25,8 @@ class AliasManager(manager.Manager):
       'name' -- (string) the alias name
 
       'expansion' -- (string) the alias expansion
-
-    returns:
-
-      (int) 1
-
     """
     self._aliases[name] = expansion
-    return 1
 
   def clear(self):
     """ Removes all the aliases."""
@@ -95,6 +89,16 @@ class AliasManager(manager.Manager):
 
     It'll return the expansion if there is one.  Otherwise
     it returns None.
+
+    arguments:
+
+      'input' -- the user input
+
+    returns:
+
+      the alias expansion for the given input if it's an
+      alias, or None if it is not.
+
     """
     if len(input) > 0:
       # pull out the first word of the input
@@ -106,12 +110,21 @@ class AliasManager(manager.Manager):
 
     return None
 
-  def getInfo(self, text=''):
+  def getInfo(self, text=""):
     """ Returns information about the aliases in here.
 
     This is used by #alias to tell all the aliases involved
     as well as #write which takes this information and dumps
     it to the file.
+
+    arguments:
+
+      'text=""' -- (string) the text to match
+
+    arguments:
+
+      a string telling about all the aliases and expansions
+      in this manager.
     """
     if len(self._aliases.keys()) == 0:
       return ''
@@ -130,5 +143,10 @@ class AliasManager(manager.Manager):
     return data[:-1]
 
   def getCount(self):
-    """ Returns the alias count."""
+    """ Returns the alias count.
+
+    returns:
+
+      (int) the number of aliases managed
+    """
     return len(self._aliases.keys())

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.13 2002/03/29 06:57:02 willhelm Exp $
+# $Id: action.py,v 1.14 2002/03/29 18:09:59 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -151,8 +151,9 @@ class ActionManager(manager.Manager):
       'text' -- (string) the data coming from the mud to check
                 for triggers on
 
-    FIXME - make sure this works even when lines are broken up.
     """
+    # FIXME - make sure this works even when lines are broken up.
+
     matched = []
 
     # go through all the lines in the data and see if we have
@@ -232,5 +233,10 @@ class ActionManager(manager.Manager):
     return data[:-1]
 
   def getCount(self):
-    """ Returns how many aliases we're managing."""
+    """ Returns how many aliases we're managing.
+
+    returns:
+
+      (int) the number of aliases being managed.
+    """
     return len(self._actions.keys())
