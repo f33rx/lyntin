@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.12 2002/07/22 22:33:04 willhelm Exp $
+# $Id: tkui.py,v 1.13 2002/07/27 03:03:34 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -186,6 +186,18 @@ class Tkui(ui.BaseUI):
       return
 
     self._entry.focus()
+    if tkevent.char:
+      # we do this little song and dance so as to pass events
+      # we don't want to deal with to the entry widget essentially
+      # by creating a new event and tossing it in the event list.
+      args = ('event', 'generate', self._entry, "<KeyPress>")
+      args = args + ('-rootx', tkevent.x_root)
+      args = args + ('-rooty', tkevent.y_root)
+      args = args + ('-keycode', tkevent.keycode)
+      args = args + ('-keysym', tkevent.keysym)
+
+      self._tk.tk.call(args)
+
     return "break"
 
 

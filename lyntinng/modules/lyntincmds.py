@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.15 2002/07/30 23:07:42 willhelm Exp $
+# $Id: lyntincmds.py,v 1.16 2002/08/13 02:30:12 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -168,6 +168,9 @@ def diagnostics_cmd(session, args, input):
   to that file.  This allows you easier method of submitting diagnostics
   output along with bug reports.
 
+  Note: Windows users should either use two \\'s or use / to separate
+  directory names.
+
   category: commands
   """
   import os, sys
@@ -204,8 +207,9 @@ def diagnostics_cmd(session, args, input):
     import time
     try:
       f = open(logfile, "w")
-      f.write("This file was created on: %s\n\n" % time.asctime())
-      f.write(message)
+      f.write("This file was created on: %s" % time.asctime())
+      f.write(os.linesep + os.linesep)
+      f.write(string.join(message, os.linesep))
       f.close()
       exported.write_message("diagnostics: written out to file %s." % logfile)
     except Exception, e:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.39 2002/07/21 04:14:48 willhelm Exp $
+# $Id: tintincmds.py,v 1.40 2002/08/13 02:30:12 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -689,6 +689,9 @@ def write_cmd(session, args, input):
   The quiet argument lets you specify whether you want things to
   be persisted in such a way that when you #read the command file
   they are quiet as opposed to verbose in their messages.
+
+  Note: Windows users should either use two \\'s or use / to separate
+  directory names.
 
   category: commands
   """
