@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.1 2002/05/09 00:10:41 willhelm Exp $
+# $Id: helpmanager.py,v 1.2 2002/05/09 03:53:06 jmberne Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -43,13 +43,13 @@ class HelpManager:
                            text. 
 
     """
+    if not helpname or not helptext:
+      return
+
     # If we want to add other directives, we should build in a
     # "readDirectives" method which sets various variables.
     # The categorylist argumnet, however, should always override
     # the directive (if there is one).
-    if not helpname or not helptext:
-      return
-
     if not categorylist:
       lines = helptext.strip().splitlines()
       if lines[-1].find("category: ") == 0:
@@ -81,7 +81,21 @@ class HelpManager:
     # FIXME - finish this
     
   def getHelp(self, fqn):
-    """ Retrieves the help topic requested."""
+    """ Retrieves the help topic requested.
+
+    arguments:
+
+      'fqn' -- (string) a . delimited string of categories
+               and finally a helpname
+
+    returns:
+
+      A tuple composed of three strings.  The first string is
+      error text (if any or empty string if none).  The second
+      string is the breadcrumbs trail.  The third string is the
+      help text found or a columnized text of what tree elements
+      exist at that level.
+    """
     if not fqn:
       fqn = ""
 
@@ -105,7 +119,7 @@ class HelpManager:
         break
     
     if found == 0 and fqn != "": 
-      #first find all instances of keys[0] in the help tree.
+      # first find all instances of keys[0] in the help tree.
       potentialroots = []
       start = keys[0]
 
@@ -122,8 +136,8 @@ class HelpManager:
 
       foundnodes = []
 
-      #Now walk through all of the nodes named keys[0] and see if they
-      #have they have keys[1:] under them.
+      # Now walk through all of the nodes named keys[0] and see if they
+      # have they have keys[1:] under them.
       for bc,node in potentialroots:
         for key in keys[1:]:
           if type(node) != type({}) or not node.has_key(key):

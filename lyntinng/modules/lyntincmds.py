@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: lyntincmds.py,v 1.1 2002/05/05 15:20:16 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -215,6 +215,7 @@ def swdir_cmd(session, args, input):
 This adds speedwalking aliases and tells you the current speedwalking dirs
 already registered.
   """
+  # originally written by Sebastian John
   alias = args["alias"]
   dir = args["dir"]
   quiet = args["quiet"]
@@ -254,6 +255,7 @@ already registered. Excludes are a bit like antisubstitutes, but for
 speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
 get speedwalk-parsing.
   """
+  # originally written by Sebastian John
   excludes = args["exclude"]
   quiet = args["quiet"]
 

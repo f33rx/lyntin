@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.8 2002/04/22 02:59:27 willhelm Exp $
+# $Id: __init__.py,v 1.1 2002/05/09 00:53:29 willhelm Exp $
 #######################################################################
 
 import glob, os, string
@@ -26,7 +26,6 @@ def load_help():
   _help_list.sort()
 
   for mem in _help_list:
-    print "loading '%s'" % mem
     try:
       file = open(mem, "r")
       memtext = string.join(file.readlines(), "")

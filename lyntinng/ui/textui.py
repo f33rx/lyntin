@@ -4,13 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.15 2002/04/26 00:54:16 willhelm Exp $
+# $Id: textui.py,v 1.16 2002/04/26 01:24:11 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
 """
 import string, re, sys, traceback
 import engine, hooks, event, utils, ui, exported
+
+def get_ui_instance():
+  return Textui()
 
 class Textui(ui.BaseUI):
   """

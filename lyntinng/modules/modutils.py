@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: modutils.py,v 1.1 2002/05/05 13:30:31 willhelm Exp $
 #######################################################################
 import exported
 
@@ -22,15 +22,10 @@ def load_commands(commands_dict):
 
     'commands_dict' -- (map) of command name -> tuple
   """
-  for mem in commands_dict.keys():
+  for mem in commands_dict.keys(): 
     args = commands_dict[mem]
     if type(args) == type(()):
-      if len(args) == 2:
-        exported.add_command(mem, args[0], args[1])
-      elif len(args) == 3:
-        exported.add_command(mem, args[0], args[1], args[2])
-      elif len(args) == 4:
-        exported.add_command(mem, args[0], args[1], args[2], args[3])
+      exported.add_command(*((mem,)+args))
     else:
       exported.add_command(mem, args)
 

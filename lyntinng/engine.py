@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.43 2002/05/09 03:53:06 jmberne Exp $
+# $Id: engine.py,v 1.44 2002/05/09 16:57:57 jmberne Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -24,7 +24,7 @@ To access the engine, access it by 'engine.myengine'.
 It also holds a series of helper functions for making common engine
 calls easier to deal with.
 """
-import Queue, traceback, copy, string, re, thread
+import Queue, traceback, copy, string, re, thread, inspect
 
 import session, ui.ui, alias, lyntin, utils, event, argparser
 import action, alias, gag, highlight, history, substitute, variable, speedwalk
@@ -639,7 +639,7 @@ class Engine:
 
     # third, deal with the help text
     if func.__doc__:
-      helptext = func.__doc__
+      helptext = inspect.getdoc(func)
     else:
       helptext = "\nThis command has no help."
 

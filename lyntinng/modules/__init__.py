@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.7 2002/04/12 21:24:06 willhelm Exp $
+# $Id: __init__.py,v 1.8 2002/04/22 02:59:27 willhelm Exp $
 #######################################################################
 
 import glob, os, sys, traceback
@@ -21,7 +21,7 @@ def load_modules():
   else:
     path = __file__[:index]
 
-  ospathjoin = apply( os.path.join, (path, "*py",))
+  ospathjoin = apply( os.path.join, (path, "*.py",))
 
   _module_list = glob.glob( ospathjoin )
   _module_list.sort()

@@ -5,9 +5,8 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.7 2002/04/30 02:53:46 willhelm Exp $
+# $Id: testserver.py,v 1.8 2002/04/30 23:13:40 willhelm Exp $
 #######################################################################
-# originally written by Brian Bell <bmbell@yahoo.com> 
 """
 This runs a multithreaded server on port 3000.
 It used to test mud clients.  It currently take no arguments.
@@ -148,7 +147,7 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     text = text.split()
     
     try:
-      newval = int(text[1])
+      newval = float(text[1])
 
       if self._spamFreq == 0 and newval > 0:
         self._spamThread = thread.start_new_thread(self.spam, ())

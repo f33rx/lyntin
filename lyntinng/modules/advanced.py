@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.13 2002/04/22 02:58:32 willhelm Exp $
+# $Id: advanced.py,v 1.14 2002/05/05 15:20:16 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -28,12 +28,14 @@ ex:
   #@ print "hello"
   #@ print string.join(exported.get_commands(), "\\n")
   """
+  # NOTE: if we ever get to handling multiple-lines, we'll need
+  # to change this function completely.
   try:
     if usermodule == None:
       exported.write_error("modules.user is either bad or non-existent.  Executing in advanced.py..")
-      exec input[1:]
+      exec input[1:].lstrip()
     else:
-      exec input[1:] in usermodule.__dict__
+      exec input[1:].lstrip() in usermodule.__dict__
   except:
     exported.write_error("Error in raw python stuff.")
     exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
