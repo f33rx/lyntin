@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.28 2002/03/10 05:12:28 willhelm Exp $
+# $Id: basic.py,v 1.29 2002/03/14 16:30:06 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -30,7 +30,8 @@ def action_cmd(session, words, input):
 
   # they typed '#action dd*' and are looking for matching actions
   if len(words) == 2:
-    data = session.getManager("action").getInfo(words[1])
+    filter = utils.strip_braces(words[1])
+    data = session.getManager("action").getInfo(filter)
     if data == '':
       data = "action: no actions defined."
 
@@ -68,7 +69,8 @@ def alias_cmd(session, words, input):
 
   # they typed '#alias dd*' and are looking for matching aliases
   if len(words) == 2:
-    data = session.getManager("alias").getInfo(words[1])
+    filter = utils.strip_braces(words[1])
+    data = session.getManager("alias").getInfo(filter)
     if data == '':
       data = "alias: no aliases defined."
 
@@ -318,7 +320,8 @@ def highlight_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getManager("highlight").getInfo(words[1])
+    filter = utils.strip_braces(words[1])
+    data = session.getManager("highlight").getInfo(filter)
     if data == '':
       data = "highlight: no highlights defined."
 
@@ -666,7 +669,8 @@ def substitute_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getManager("substitute").getInfo(words[1])
+    filter = utils.strip_braces(words[1])
+    data = session.getManager("substitute").getInfo(filter)
     if data == '':
       data = "substitute: no substitutes defined."
 
@@ -786,7 +790,7 @@ def unsomething_cmd(session, words, input):
   singular = ''
   plural = ''
 
-  text = input.split(' ', 1)[1]   
+  text = utils.strip_braces(input.split(' ', 1)[1])
   if "unaction".find(words[0]) == 0:
     removedthings = session.getManager("action").removeActions(text)
     singular = "action"
@@ -843,7 +847,8 @@ def variable_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getManager("variable").getInfo(words[1])
+    filter = utils.strip_braces(words[1])
+    data = session.getManager("variable").getInfo(filter)
     if data == '':
       data = "variable: no variables defined."
 
