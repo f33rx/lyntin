@@ -10,7 +10,6 @@ the distribution.
 TODO:
  - fix ticker
  - fix substitutes (they're not implemented right)
- - overhaul tkgui color stuff
  - overhaul help files and write documentation
  - stack traces, messages and error messages (all errors should be logged)
 
@@ -26,7 +25,6 @@ TODO:
    (this would go first in the command file) (defaults to current dir)
  - add a #reload, #load, and #unload commands
  - add autotyper to the tkgui (may want to overhaul the TkGui too)
- - first char in command file is the command char when using #read
  - make sure all commands can handle braces for arguments
    probably by changing the breakup of a command into words to
    breaking it into components via braces
@@ -54,19 +52,6 @@ TODO:
 
  - allow for command files to be retrieved via HTTP....  that'd be
    waaaay cool.
-
- - TinTin++ commands we will not support:
-     map
-     mark
-     path
-     pathdir
-     snoop
-     split
-     tickset - (it's silly)
-     unsplit
-     unpath
-     suspend
-     system
 
  - an interesting thing is that Lyntin is a super tool for debugging HTTP
    communications.  :)
