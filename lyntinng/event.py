@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.41 2002/10/20 16:09:57 willhelm Exp $
+# $Id: event.py,v 1.42 2002/10/23 23:59:08 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -71,26 +71,15 @@ class StartupEvent(Event):
     """
     This does the following Lyntin startup things:
 
-    1. if there's a .lyntinrc adds that to the readfile list.
-    2. instantiates and binds the ui.
+    1. instantiates and binds the ui.
+    2. if there's a .lyntinrc adds that to the readfile list.
     3. loads the dynamically loading Lyntin modules.
     4. loads the help topics in the help subdir.
     5. reads in all the files in the readfile list.
     6. starts the timer thread.
     7. writes the startup message to the ui and the prompt.
     """
-    # adds the .lyntinrc file to the readfile list if it exists.
-    if lyntin.options['datadir']:
-      # FIXME - we look in the first datadir for the .lyntinrc file--
-      # should we look in all of them?
-      lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
-      try:
-        test = os.stat(lyntinrcfile)
-        # we want the .lyntinrc file read in first, so then other
-        # files can overwrite the contents therein
-        lyntin.options['readfile'].insert(0, lyntinrcfile)
-      except OSError, e:
-        pass
+    import utils
 
     try:
       # instantiate a ui
@@ -112,6 +101,35 @@ class StartupEvent(Event):
     except Exception, e:
       print "Cannot start ui: %s" % e
       sys.exit(0)
+
+
+    # tests to see if dirs provided exist
+    if lyntin.options['datadir']:
+      if utils.exists_dir(lyntin.options['datadir']) == 0:
+        exported.write_error("datadir '%s' does not exist." % lyntin.options['datadir'])
+        lyntin.options['datadir'] == ''
+
+    if lyntin.options['moduledir']:
+      modlist = lyntin.options['moduledir']
+      for mem in modlist:
+        if utils.exists_dir(mem) == 0:
+          exported.write_error("moduledir '%s' does not exist." % mem)
+          lyntin.options['moduledir'].remove(mem)
+
+
+    # adds the .lyntinrc file to the readfile list if it exists.
+    if lyntin.options['datadir']:
+      # FIXME - we look in the first datadir for the .lyntinrc file--
+      # should we look in all of them?
+      lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
+      try:
+        test = os.stat(lyntinrcfile)
+        # we want the .lyntinrc file read in first, so then other
+        # files can overwrite the contents therein
+        lyntin.options['readfile'].insert(0, lyntinrcfile)
+      except OSError, e:
+        pass
+
 
     # import modules listed in modulesinit
     exported.write_message("Importing modules in modules directory.")

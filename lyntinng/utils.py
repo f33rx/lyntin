@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.53 2002/10/19 19:19:43 willhelm Exp $
+# $Id: utils.py,v 1.54 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
 in the application, but are useful in a variety of places.  They're 
 not dependent on application things, so it's easier to test them.
 """
-import string, re, time
+import os, string, re, time
 import ansi, lyntin
 
 # for finding non-escaped semi-colons in user input
@@ -37,6 +37,23 @@ def filter_cm(text):
   @rtype: string
   """
   return re.sub('\r', '', text)
+
+
+def exists_dir(dir):
+  """
+  Tests whether a directory exists.
+
+  @param dir: the directory to test
+  @type  dir: string
+
+  @returns: 1 if it exists, 0 if it doesn't
+  @rtype: boolean
+  """
+  try:
+    stats = os.stat(dir)
+    return 1
+  except Exception, e:
+    return 0
 
 
 def chomp(text):

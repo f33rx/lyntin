@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.24 2002/07/27 03:03:34 willhelm Exp $
+# $Id: textui.py,v 1.25 2002/10/16 23:59:07 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -37,11 +37,11 @@ class Textui(ui.BaseUI):
     """ Initialize the textui."""
     ui.BaseUI.__init__(self)
     hooks.startup_hook.register(self.startui)
+    hooks.to_user_hook.register(self.write)
 
   def startui(self, args):
     """ Sets up the UI."""
     global HELP_TEXT
-    hooks.to_user_hook.register(self.write)
     exported.add_help("textui", HELP_TEXT)
     engine.myengine.startthread("ui", self.run)
     exported.write_message("For textui help, type \"#help textui\".")

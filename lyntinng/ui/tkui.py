@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.18 2002/09/30 18:27:09 willhelm Exp $
+# $Id: tkui.py,v 1.19 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -164,12 +164,12 @@ class Tkui(ui.BaseUI):
     self._initColorTags()
     hooks.mudecho_hook.register(self.echo)
     hooks.startup_hook.register(self.startui)
+    hooks.to_user_hook.register(self.write)
 
 
   def startui(self, args):
     """ Starts up the main thread."""
     global HELP_TEXT
-    hooks.to_user_hook.register(self.write)
     exported.add_help("tkui", HELP_TEXT)
     engine.myengine.startthread("ui", self._tk.mainloop)
     exported.write_message("For tk help type \"#help tkui\".")

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.17 2002/08/15 01:26:11 willhelm Exp $
+# $Id: lyntincmds.py,v 1.18 2002/10/23 23:59:09 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -234,13 +234,11 @@ commands_dict["raw"] = (raw_cmd, "input=", "limitparsing=0")
 
 def load():
   """ Initializes the module by binding all the commands."""
-  exported.write_message("binding commands.")
   modutils.load_commands(commands_dict)
 
 
 def unload():
   """ Unloads the module by calling any unload/unbind functions."""
-  exported.write_message("unbinding commands.")
   modutils.unload_commands(commands_dict.keys())
 
 # Local variables:

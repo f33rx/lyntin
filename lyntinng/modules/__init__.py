@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.13 2002/10/16 23:59:07 willhelm Exp $
+# $Id: __init__.py,v 1.14 2002/10/23 23:59:08 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -39,7 +39,6 @@ def load_modules():
           continue
 
         try:
-          exported.write_message("Loading '%s'..." % mem2)
           _module = __import__(mem2)
 
           if _module.__dict__.has_key("load"):
@@ -47,7 +46,6 @@ def load_modules():
 
           _module.__dict__["lyntin_import"] = 1
           lyntin.lyntinmodules.append(mem)
-          exported.write_message("Loaded: '%s'" % mem)
         except:
           exported.write_error("Module '%s' refuses to load." % name)
           # FIXME - need to print this to the ui
@@ -74,7 +72,6 @@ def load_modules():
 
     try:
       name = "modules." + mem2
-      exported.write_message("Loading '%s'..." % name)
       _module = getattr(__import__( name ), mem2)
 
       if _module.__dict__.has_key("load"):
@@ -82,7 +79,6 @@ def load_modules():
 
       _module.__dict__["lyntin_import"] = 1
       lyntin.lyntinmodules.append(mem)
-      exported.write_message("Loaded: '%s'" % mem)
     except:
       exported.write_error("Module '%s' refuses to load." % name)
       # FIXME - need to print this to the ui
