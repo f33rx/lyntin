@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.54 2002/06/18 04:01:12 willhelm Exp $
+# $Id: engine.py,v 1.55 2002/06/18 04:17:45 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -299,7 +299,10 @@ class Engine:
       'text' -- (string) text coming from the mud
 
     """
-    session.handleMudData(text)
+    if session:
+      session.handleMudData(text)
+    else:
+      exported.write_message("Unhandled data: %s" % text)
 
 
   ### ------------------------------------------
@@ -529,7 +532,7 @@ class Engine:
     lyntin.errorcount = lyntin.errorcount + 1
     exported.write_error("WARNING: Unhandled error encountered (%d out of %d)." 
                          % (lyntin.errorcount, 20))
-    hooks.error_occurred_hook.spamhook(lyntin.errorcount)
+    hooks.error_occurred_hook.spamhook((lyntin.errorcount,))
     if lyntin.errorcount > 20:
       hooks.too_many_errors_hook.spamhook()
       exported.write_error("Error count exceeded--shutting down.")
@@ -684,13 +687,14 @@ class Engine:
     else:
       helptext = "\nThis command has no help."
 
-    if syntaxline != None:
-      helptext = "syntax: %s%s %s\n" % (lyntin.commandchar, name, syntaxline) + helptext
-
     if name[0] == "^":
-      exported.add_help(name[1:], helptext)
+      nameadjusted = name[1:]
     else:
-      exported.add_help(name, helptext)
+      nameadjusted = name
+    if syntaxline != None:
+      helptext = "syntax: %s%s %s\n" % (lyntin.commandchar, nameadjusted, syntaxline) + helptext
+
+    exported.add_help(nameadjusted, helptext)
         
   def removeCommand(self, name):
     """

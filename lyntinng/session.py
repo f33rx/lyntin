@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.56 2002/06/07 23:43:30 willhelm Exp $
+# $Id: session.py,v 1.57 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -428,6 +428,7 @@ class Session:
       return "<none>"
 
 
+"""
 class ManagerFilterAdapter:
   def __init__(self, managername, function=None):
     self.managername=managername
@@ -441,7 +442,6 @@ class ManagerFilterAdapter:
       return ses.getManager(self.managername).filter(args)
 
 
-"""
 # hooks.user_filter_hook.register(ManagerFilterAdapter("variable"),0)
 # hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
 hooks.user_filter_hook.register(ManagerFilterAdapter("speedwalk"),80)

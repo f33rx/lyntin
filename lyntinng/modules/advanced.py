@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.16 2002/05/13 17:34:45 jmberne Exp $
+# $Id: advanced.py,v 1.17 2002/05/13 17:43:28 jmberne Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -44,20 +44,15 @@ def python_cmd(session, words, input):
     exported.tally_error()
 
 
-def import_cmd(session, words, input):
-  """#import <modulename>
-
+def import_cmd(session, args, input):
+  """
   Imports/reloads a module.  In the case of a Lyntin module, it also
   executes the load and unload functions where appropriate.
   category: commands
   """
   import sys
 
-  if len(words) == 1:
-    exported.write_error("syntax: #import <modulename>")
-    return
-
-  mod = utils.strip_braces(words[1])
+  mod = args["modulename"]
   modarray = mod.split(".")
 
   if sys.modules.has_key(mod):
@@ -114,7 +109,7 @@ def load():
   import modules.advanced
   modules.advanced.usermodule = _import_user_module()
   exported.add_command("@", python_cmd)
-  exported.add_command("^import", import_cmd)
+  exported.add_command("^import", import_cmd, "modulename")
 
 def unload():
   pass

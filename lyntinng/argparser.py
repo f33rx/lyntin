@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.22 2002/06/15 02:45:42 jmberne Exp $
+# $Id: argparser.py,v 1.23 2002/06/17 20:26:27 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -19,6 +19,9 @@ defaultOptions={ "stripBraces": 1,
                  "limitparsing": -1
                }
 optionParser = None
+
+TRUE_VALUES = ["yes", "true", "1", "on"]
+FALSE_VALUES = ["no", "false", "0", "off"]
 
 class ParserException(Exception):
   pass
@@ -489,9 +492,9 @@ class BooleanChecker(Checker):
     return
 
   def check(self,arg):
-    if arg == "on" or arg == "yes" or arg == "true" or arg == "1":
+    if arg in TRUE_VALUES:
       return 1
-    elif arg == "off" or arg == "no" or arg == "false" or arg == "0":
+    elif arg in FALSE_VALUES:
       return 0
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
@@ -512,9 +515,9 @@ class BooleanOrNoneChecker(Checker):
     return
 
   def check(self,arg):
-    if arg == "on" or arg == "true" or arg == "1":
+    if arg in TRUE_VALUES:
       return 1
-    elif arg == "off" or arg == "false" or arg == "0":
+    elif arg in FALSE_VALUES:
       return 0
     elif arg == "None" or arg == "-" or arg == "":
       return None
