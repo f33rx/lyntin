@@ -1,5 +1,3 @@
-* GENERAL:
-
 The "#session" command will allow you to start a session.  When you're
 done, "#end" will close Lyntin.
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
+# $Id: speedwalk.py,v 1.4 2002/07/07 17:44:42 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -493,3 +493,9 @@ def unload():
   exported.remove_manager("speedwalk")
   hooks.user_filter_hook.unregister(sm.filter)
   hooks.write_hook.unregister(sm.persist)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

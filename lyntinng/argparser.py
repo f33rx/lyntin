@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.24 2002/06/20 01:20:10 willhelm Exp $
+# $Id: argparser.py,v 1.25 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -14,12 +14,8 @@ automatically into a dictionary.
 import string, re, time
 import utils
 
-defaultOptions={ "stripBraces": 1,
-                 "noparsing": 0,
-                 "limitparsing": -1
-               }
+defaultOptions={ "stripBraces": 1, "noparsing": 0, "limitparsing": -1 }
 optionParser = None
-
 
 class ParserException(Exception):
   pass
@@ -29,13 +25,18 @@ class ArgumentParser:
   This is the actual argumentparser class
 
   Supported options:
-  stripBraces (default=on) - whether all arguments should have braces
-      stripped before being parsed.
-  noparsing (default=off) - doesn't insure that all arguments are
-      parsed.  works well when matched with  limitparsing=0 to provide
-      a syntax line for commands that parse their own input
-  limitparsing:int (default=-1) - only parse this number of tokens into dict,
-      the rest of the input line goes into dict["input"]
+
+    stripBraces (default=on) - whether all arguments should have braces
+                               stripped before being parsed.
+
+    noparsing (default=off) - doesn't insure that all arguments are
+                              parsed.  works well when matched with 
+                              limitparsing=0 to provide a syntax line 
+                              for commands that parse their own input
+
+    limitparsing:int (default=-1) - only parse this number of tokens 
+                                    into dict, the rest of the input 
+                                    line goes into dict["input"]
   """
   
   def __init__(self, argspec, argoptions=None):
@@ -630,3 +631,9 @@ if __name__ == '__main__':
     for args in testargs[(argspec,argoptions)]:
       print "Args   : %s" % (args)
       print "Dict   : %s" % (`argparser.parse(args)`)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.13 2002/06/07 23:43:31 willhelm Exp $
+# $Id: ui.py,v 1.14 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -135,3 +135,9 @@ class BaseUI:
     if input == '':
       input = lyntin.commandchar + "cr"
     event.InputEvent(input).enqueue()
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

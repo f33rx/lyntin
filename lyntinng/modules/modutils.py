@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.3 2002/05/12 04:40:39 willhelm Exp $
+# $Id: modutils.py,v 1.4 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 import string
 import exported
@@ -80,3 +80,9 @@ def unsomething_helper(args, func, ses, sing, plur):
       data = string.join(data, "\n")
     exported.write_message(data)
 
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

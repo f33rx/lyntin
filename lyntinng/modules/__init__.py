@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.9 2002/05/09 23:20:12 willhelm Exp $
+# $Id: __init__.py,v 1.10 2002/05/14 22:46:26 willhelm Exp $
 #######################################################################
 
 import glob, os, sys, traceback
@@ -41,3 +41,9 @@ def load_modules():
       except:
         exported.write_error("Module '" + name + "' refuses to load.")
         traceback.print_exc()
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

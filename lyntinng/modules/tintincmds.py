@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.37 2002/07/12 03:46:12 jmberne Exp $
+# $Id: tintincmds.py,v 1.38 2002/07/14 15:14:00 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -724,3 +724,9 @@ def unload():
   """ Unloads the module by calling any unload/unbind functions."""
   exported.write_message("unbinding commands.")
   modutils.unload_commands(commands_dict.keys())
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

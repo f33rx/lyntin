@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.6 2002/07/11 04:11:20 willhelm Exp $
+# $Id: variable.py,v 1.7 2002/07/11 23:40:29 jmberne Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -408,3 +408,9 @@ def unload():
 
   hooks.evalmode_change_hook.unregister(evalmodechange)
   evalmodechange((lyntin.evalmode, -1))
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

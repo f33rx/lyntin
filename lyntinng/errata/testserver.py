@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.14 2002/06/26 23:59:30 willhelm Exp $
+# $Id: testserver.py,v 1.16 2002/07/06 04:02:42 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -307,3 +307,9 @@ if __name__ == '__main__':
   except Exception, e:
     print "Outer loop exception: %s" % e
   testserver.my_world.shutdown()
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

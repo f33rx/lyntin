@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.6 2002/06/18 04:01:12 willhelm Exp $
+# $Id: manager.py,v 1.7 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the basic manager which handles various things
@@ -115,3 +115,9 @@ class Manager:
       a one-liner string of the status or an empty string
     """
     return ''
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

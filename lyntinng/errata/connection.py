@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: connection.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
+# $Id: connection.py,v 1.4 2002/07/17 03:56:38 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -156,3 +156,9 @@ class Connection:
              "interface.\n")
     output = utils.wrap_text(output, 70, 0, 0)
     self.write(output)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

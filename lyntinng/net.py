@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.21 2002/05/29 23:58:03 willhelm Exp $
+# $Id: net.py,v 1.22 2002/06/05 18:56:13 jmberne Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -112,7 +112,7 @@ class SocketCommunicator:
     if type(port) == type(''):
       port = int(port)
 
-    exported.write_message("Trying to connect to %s." % host)
+    exported.write_message("Trying to connect to %s. (may take up to 30 seconds)" % host)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, port))
     sock.setblocking(1)
@@ -252,3 +252,9 @@ class SocketCommunicator:
       i = data.find(IAC, i)
 
     return data
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

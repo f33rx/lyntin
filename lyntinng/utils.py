@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.38 2002/07/13 20:34:29 willhelm Exp $
+# $Id: utils.py,v 1.39 2002/07/17 01:21:58 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -1100,4 +1100,9 @@ def lyntin_expand_placement_vars(input, expansion):
       expansion = expansion + ' ' + input.split(' ', 1)[1]
 
   return expansion
-  return expansion
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

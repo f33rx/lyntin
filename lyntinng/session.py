@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.61 2002/07/07 17:44:42 willhelm Exp $
+# $Id: session.py,v 1.62 2002/07/13 20:34:29 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -344,3 +344,9 @@ class Session:
       return self._logfile.name
     else:
       return "<none>"
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

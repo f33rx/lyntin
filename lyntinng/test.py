@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.1 2002/07/07 04:53:45 willhelm Exp $
+# $Id: test.py,v 1.2 2002/07/17 01:21:58 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -94,3 +94,9 @@ if __name__ == '__main__':
   _pass_fail(expand_vars(r"$var1 $var2 $var3", varmap), "value1 value2 value3")
   _pass_fail(expand_vars(r"$var1 $$var2 \$var3", varmap), r"value1 $$var2 \$var3")
   """
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

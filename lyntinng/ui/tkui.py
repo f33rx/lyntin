@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.9 2002/07/14 15:14:00 willhelm Exp $
+# $Id: tkui.py,v 1.10 2002/07/17 03:56:38 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -698,3 +698,9 @@ def fix_unicode(text):
         return text.encode(UNICODE_ENCODING)
     else:
         return text
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.8 2002/06/18 04:01:12 willhelm Exp $
+# $Id: helpmanager.py,v 1.9 2002/06/20 03:23:27 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -264,3 +264,9 @@ class HelpManager(manager.Manager):
       return (categories, name)
     else:
       return ([], "")
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.2 2002/07/07 17:44:41 willhelm Exp $
+# $Id: commandmanager.py,v 1.3 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 Handles managing commands and also holds the filter for handling commands.
@@ -238,3 +238,8 @@ class CommandManager(manager.Manager):
       return
     return args[-1]
 
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

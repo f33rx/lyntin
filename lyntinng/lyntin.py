@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.26 2002/07/11 04:11:19 willhelm Exp $
+# $Id: lyntin.py,v 1.27 2002/07/12 00:11:56 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -119,10 +119,6 @@ mudecho = 1
 # from.
 datadir = "./"
 
-# this is the lyntin directory--where all the help files and
-# such are located.
-lyntindir = "."
-
 # Lyntin counts the total number of errors it's encountered.
 # This enables us to shut ourselves down if we encounter too
 # many indicating a "bigger problem".
@@ -146,12 +142,6 @@ if __name__ == '__main__':
   try:
     import sys, os
     import lyntin, engine, event, utils
-
-    # figure out where the lyntin files are
-    tmp = sys.argv[0]
-    if len(tmp) == 0:
-      raise Exception, "Lyntin root dir cannot be determined."
-    lyntin.lyntindir = tmp[:tmp.rfind("/")+1].replace("/", os.sep)
 
     # read through options and arguments
     optlist = utils.parse_args(sys.argv[1:])
@@ -234,3 +224,9 @@ if __name__ == '__main__':
     import traceback
     traceback.print_exc()
     sys.exit(1)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

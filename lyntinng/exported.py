@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.24 2002/07/07 17:28:43 willhelm Exp $
+# $Id: exported.py,v 1.25 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -340,3 +340,9 @@ def tally_error():
   event which will shutdown Lyntin.
   """
   get_engine().tallyError()
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: utils.py,v 1.1 2002/06/26 22:50:42 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -292,3 +292,9 @@ def columnize(textlist, screenwidth=72, indent=0):
 
   rows = map(string.rstrip, map(string.join, rows))
   return (indent * " ") + string.join(rows, "\n" + (indent * " "))
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

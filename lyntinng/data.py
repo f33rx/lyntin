@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.7 2002/04/26 23:34:17 jmberne Exp $
+# $Id: data.py,v 1.8 2002/04/29 23:14:13 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -22,6 +22,7 @@ class DataBuffer:
   """
   
   def __init__(self):
+
     # buffer is organized oldest to newest.  so _buffer[0] is
     # the most stale and _buffer[-1] is the most new.
     self._buffer = []
@@ -121,3 +122,9 @@ class DataBuffer:
       ret.append(match)
 
     return ret
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

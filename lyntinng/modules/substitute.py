@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.3 2002/06/26 22:52:14 willhelm Exp $
+# $Id: substitute.py,v 1.4 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -301,3 +301,9 @@ def unload():
   exported.remove_manager("substitute")
   hooks.mud_filter_hook.unregister(sm.filter)
   hooks.write_hook.unregister(sm.persist)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

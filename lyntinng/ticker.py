@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.19 2002/06/12 03:00:11 jmberne Exp $
+# $Id: ticker.py,v 1.20 2002/06/19 03:33:06 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -194,3 +194,9 @@ class Ticker:
       return "(size = %d) (start = %d)" % (self._ticklen, self._tickstart)
     else:
       return "<none>"
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

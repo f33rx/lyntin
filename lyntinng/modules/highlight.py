@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.2 2002/06/19 03:19:43 willhelm Exp $
+# $Id: highlight.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -464,3 +464,9 @@ def unload():
   exported.remove_manager("highlight")
   hooks.mud_filter_hook.unregister(hm.filter)
   hooks.write_hook.unregister(hm.persist)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.14 2002/06/07 23:43:31 willhelm Exp $
+# $Id: cursesui.py,v 1.15 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -455,3 +455,9 @@ class Cursesui(ui.BaseUI):
     either a 1 or 0).
     """
     self._echoon = yesno
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

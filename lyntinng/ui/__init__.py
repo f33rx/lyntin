@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.3 2002/04/11 03:58:22 willhelm Exp $
+# $Id: __init__.py,v 1.4 2002/05/14 22:46:26 willhelm Exp $
 #######################################################################
 import glob, os
 
@@ -38,3 +38,9 @@ def get_ui(uiname):
   except Exception, e:
     print "get_ui: %s" % e
     return None
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

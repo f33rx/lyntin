@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.62 2002/07/11 04:11:19 willhelm Exp $
+# $Id: engine.py,v 1.63 2002/07/12 00:11:56 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -726,3 +726,9 @@ def evalmodechange(args):
     # just switched into LYNTIN mode
     hooks.user_filter_hook.unregister(cm.filter)
     hooks.user_filter_hook.register(cm.filter, 100)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

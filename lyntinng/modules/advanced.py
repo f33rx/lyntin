@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.17 2002/05/13 17:43:28 jmberne Exp $
+# $Id: advanced.py,v 1.18 2002/06/20 01:20:11 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -113,3 +113,9 @@ def load():
 
 def unload():
   pass
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

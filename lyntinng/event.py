@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.36 2002/07/11 04:11:19 willhelm Exp $
+# $Id: event.py,v 1.37 2002/07/12 00:11:56 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -170,37 +170,6 @@ class EchoEvent(Event):
     lyntin.mudecho = self._state
 
 
-class ReloadEvent(Event):
-  """
-  Reload events are kind of non-self-explanatory until you understand
-  that what is being reloaded is a module and it's being reloaded
-  by some kind of user direction.  i.e. the user types "reload modulex"
-  will kick of a reload event.
-  """
-  def __init__(self, name, mod):
-    """ Initialize.
-
-    arguments:
-
-      'name' -- (string) i don't know what this is
-
-      'mod' -- (module) the module to reload
-
-    """
-    self._name = name
-    self._mod = mod
-
-  def execute(self):
-    """ Execute."""
-    try:
-      reload(self._mod)
-      message = "reload successful: %s" % self._name
-    except:
-      message = "reload unsuccessful: %s" % self._name
-
-    exported.write_message(message)
- 
-
 class MudEvent(Event):
   """
   A mud event is when the connected mud sends data to us.  We
@@ -305,3 +274,9 @@ class SpamEvent(Event):
   def execute(self):
     """ Execute."""
     self._hook.spamhook(self._args)
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

@@ -6,10 +6,11 @@ OVERVIEW
 
 This document started out as a specification for how Tintin handles
 commands and variable expansion so that I could then emulate it in
-Lyntin.  However, outside of that original mission, it may also be
-a good guide to Tintin behavior and help in writing Tintin macros.
+the Tintin evalmode in Lyntin.  However, outside of that original mission, 
+it may also be a good guide to Tintin behavior and help in writing 
+Tintin macros.
 
-User input is handled thusly:
+User input is handled in this order:
 
 1. User input is checked to see if it's a command.  If it's a command
    then it gets handled by the function that handles that command

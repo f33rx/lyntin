@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
+# $Id: deed.py,v 1.2 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
@@ -191,3 +191,9 @@ def unload():
   global dm
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("deed")
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:

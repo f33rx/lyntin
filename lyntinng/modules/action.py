@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
+# $Id: action.py,v 1.4 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -475,3 +475,9 @@ def unload():
 
   hooks.evalmode_change_hook.unregister(evalmodechange)
   evalmodechange((lyntin.evalmode, -1))
+
+# Local variables:
+# mode:python
+# py-indent-offset:2
+# tab-width:2
+# End:
