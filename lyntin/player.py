@@ -20,6 +20,7 @@ user = None
 # exceptions
 class SesError: pass
 
+command_table = {}
 
 # parse command intended for client, (i.e. one prefaced by data.ltchar)
 # allow abbreviations for most commands
@@ -33,6 +34,10 @@ def DispatchCommand(input, seslist):
     data.ltchar)
     allows abbreviations for most commands.
     """
+
+## 2.0-JA  Because input is needed to run the hook anyway, we're sending
+##         both input and words to the functions.
+
     if not input: return
     # strip any data.ltchar from the front
     if input[0] == data.ltchar:
@@ -50,180 +55,155 @@ def DispatchCommand(input, seslist):
 
     # define/query an action?
     if string.find("action", words[0]) == 0:
-        hooks.action_command_hook.run((input, seslist))
-        Action(input, seslist)
+        Action(words, input, seslist)
         return
 
     # define/query an alias?
     if string.find("alias", words[0]) == 0:
-        hooks.alias_command_hook.run((input, seslist))
-        Alias(words, seslist)
+        Alias(words, input, seslist)
         return
 
     # clear session?
     if regex.search("^clear", input) != -1:
-        hooks.clear_command_hook.run((seslist,))
-        Clear(seslist)
+        Clear(words, input, seslist)
         return
 
     # set/query the lyntin character?
     if string.find("char", words[0]) == 0:
-        hooks.char_command_hook.run((input, seslist))
-        Char(words, seslist)
+        Char(words, input, seslist)
         return
 
     # send a carriage return?
     if string.find("cr", words[0]) == 0:
-        hooks.cr_command_hook.run((seslist,))
-        CR(seslist)
+        CR(words, input, seslist)
         return
 
     # resize the databuffer?
     if string.find("databuffer", words[0]) == 0:
-        hooks.databuffer_command_hook.run((input, seslist))
         DataBuffer(words, seslist)
         return
     
     # grep the databuffer?
     if string.find("datagrep", words[0]) == 0:
-        hooks.datagrep_command_hook.run((input, seslist))
-        DataGrep(words, seslist)
+        DataGrep(words, input, seslist)
         return
     
     # linegrep the databuffer?
     if string.find("datagreplines", words[0]) == 0:
-        hooks.datagreplines_command_hook.run((input, seslist))
-        DataGrepLines(words, seslist)
+        DataGrepLines(words, input, seslist)
         return
     
     # gag some poor fool?
     if string.find("gag", words[0]) == 0:
-        hooks.gag_command_hook.run((input, seslist))
-        Gag(words, seslist)
+        Gag(words, input, seslist)
         return
     
     # help?
     if string.find("help", words[0]) == 0:
-        Help(words, seslist)
+        Help(words, input, seslist)
         return
 
     # do the history thing?
     if string.find("history", words[0]) == 0:
-        hooks.history_command_hook.run((input, seslist))
-        History(words, seslist)
+        History(words, input, seslist)
         return
     
     # info command
     if string.find("info", words[0]) == 0:
-        Info(seslist)
+        Info(words, input, seslist)
         return
 
     # clear all sessions?
     if string.find("killall", words[0]) == 0:
-        hooks.killall_command_hook.run((input, seslist))
-        KillAll()
+        KillAll(words, input, seslist,)
         return
 
     # start logging?
     if string.find("log", words[0]) == 0:
-        hooks.log_command_hook.run((input, seslist))
-        Log(words, seslist)
+        Log(words, input, seslist)
         return
 
     # quit? (this can't be abbreviated)
     if regex.search("^quit", input) != -1:
-        Quit()
+        Quit(words, input, seslist)
 
     # load aliases?
     if string.find("read", words[0]) == 0:
-        hooks.read_command_hook.run((input, seslist))
-        ParseFile(words, seslist)
+        ParseFile(words, input, seslist)
         return
 
     # set up a report trigger?
     if string.find("report", words[0]) == 0:
-        hooks.report_command_hook.run((input, seslist))
-        Report(words, seslist)
+        Report(words, input, seslist)
         return
     
     # connect to a mud?
     if string.find("session", words[0]) == 0:
-        hooks.session_command_hook.run((input, seslist))
-        Ses(words[1:])
+        Ses(words, input, seslist)
         return
 
     # display something?
     if string.find("showme", words[0]) == 0:
-        hooks.showme_command_hook.run((input, seslist))
-        Showme(words, seslist)
+        Showme(words, input, seslist)
         return
 
     # define a substitute?
     if string.find("substitute", words[0]) == 0:
-        hooks.substitute_command_hook.run((input, seslist))
-        Substitute(words, seslist)
+        Substitute(words, input, seslist)
         return
 
     # toggle speedwalk?
     if string.find("speedwalk", words[0]) == 0:
-        hooks.speedwalk_command_hook.run((seslist,))
-        SpeedWalk(seslist)
+        SpeedWalk(words, input, seslist)
         return
 
     # delete an action?
     if string.find('unaction', words[0]) == 0:
-        hooks.unaction_command_hook.run((input, seslist))
-        UnAction(words, seslist)
+        UnAction(words, input, seslist)
         return
 
     # send text from a file to the mud?
     if string.find('textin', words[0]) == 0:
-        hooks.textin_command_hook.run((input, seslist))
-        Textin(words, seslist)
+        Textin(words, input, seslist)
         return
 
     # delete an alias?
     if string.find('unalias', words[0]) == 0:
-        hooks.unalias_command_hook.run((input, seslist))
-        UnAlias(words, seslist)
+        UnAlias(words, input, seslist)
         return
 
     # ungag said poor fool?
     if string.find("ungag", words[0]) == 0:
-        hooks.ungag_command_hook.run((input, seslist))
-        UnGag(words, seslist)
+        UnGag(words, input, seslist)
         return
 
     # remove a substitute?
     if string.find("unsubstitute", words[0]) == 0:
-        hooks.unsubstitute_command_hook.run((input, seslist))
-        UnSubstitute(words, seslist)
+        UnSubstitute(words, input, seslist)
         return
 
     # define/query variables?
     if string.find("variable", words[0]) == 0:
-        hooks.variable_command_hook.run((input, seslist))
-        Variable(words, seslist)
+        Variable(words, input, seslist)
         return
 
     # save aliases?
     if string.find("write", words[0]) == 0:
-        hooks.write_command_hook.run((input, seslist))
-        WriteFile(words, seslist)
+        WriteFile(words, input, seslist)
         return
 
     # report time remaining to tick
     if string.find("tick", words[0]) == 0:
-        hooks.tick_command_hook.run((input, seslist))
-        Tick(words, seslist)
+        Tick(words, input, seslist)
         return
 
     #  reset the ticker (synchronize) or set ticklength
     if string.find("tickset", words[0]) == 0:
-        hooks.tickset_command_hook.run((input, seslist))
-        Tickset(words, seslist)
+        Tickset(words, input, seslist)
         return
 
+
+# This function must be created -- JA FIXME
     # print the version
     if string.find("version", words[0]) == 0:
         PutUntouchedLine(data.version)
@@ -231,7 +211,7 @@ def DispatchCommand(input, seslist):
 
     # toggle verbose mode
     if string.find("verbose", words[0]) == 0:
-	Verbose(seslist)
+	Verbose(words, input, seslist)
         return
 
     # unrecognized command
@@ -240,11 +220,12 @@ def DispatchCommand(input, seslist):
 
 
 
-def Showme(words, seslist):
+def Showme(words, input, seslist):
     """Showme(words, seslist) -> None
 
     Prints the words to the clients display
     """
+    hooks.showme_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
             Putline('showme: showme what?')
@@ -265,7 +246,7 @@ def SetSes(ses):
     ans = 'ok, session "' + ses.name + '" activated.'
     Putline(ans)
 
-def Ses(to):
+def Ses(toaux, input,seslist):
     """Ses(to) -> None
 
     to - 3 argument tuple: (name, host, port number)
@@ -274,6 +255,8 @@ def Ses(to):
     Increment global session count and add new session to global
     session list.
     """
+    hooks.session_command_hook.run((input, seslist))
+    to=toaux[1:]
     if len(to) == 0:
         Putline("sessions: ")
     elif len(to) >= 3:
@@ -316,11 +299,12 @@ def Ses(to):
         Putline("ses: requires 3 arguments")
         Putline("ses <name> <address> <port>")
 
-def SpeedWalk(seslist):
+def SpeedWalk(words, input, seslist):
     """SpeedWalk(seslist) -> None
 
     Toggles speedwalking.
     """
+    hooks.speedwalk_command_hook.run((seslist,))
     for ses in seslist:
         ses.speedwalk = not ses.speedwalk
         if ses.speedwalk:
@@ -328,12 +312,13 @@ def SpeedWalk(seslist):
         else:
             Putline('speedwalk: speedwalking is now OFF')
 
-def DataBuffer(words, seslist):
+def DataBuffer(words, input, seslist):
     """DataBuffer(words, seslist) -> None
 
     With one argument, sets the size of the session's databuffer.
     With no arguments, it displays the databuffer.
     """
+    hooks.databuffer_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             Putline('databuffer: databuffer size is %d'%ses.databuf.size)
@@ -346,12 +331,13 @@ def DataBuffer(words, seslist):
             ses.databuf.resize(num)
             Putline('databuffer: databuffer size set to %d'%num)
 
-def Char(words, seslist):
+def Char(words, input, seslist):
     """Char(words, seslist) -> None
 
     with no arguments, prints the lyntin character.
     With one argument, sets the lyntin character.
     """
+    hooks.char_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
             PutReallyUntouchedLine("CURRENT LYNTIN CHARACTER: '%s'\n"%data.ltchar)
@@ -371,12 +357,13 @@ def Char(words, seslist):
             Putline("char")
             Putline("char <newchar>")
 
-def DataGrep(words, seslist):
+def DataGrep(words, input, seslist):
     """DataGrep(words, seslist) -> None
 
     Searches through the databuffer for a regex, printing all matches
     in their entirety.
     """
+    hooks.datagrep_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             Putline('datagrep: command requires one argument')
@@ -388,12 +375,13 @@ def DataGrep(words, seslist):
             PutReallyUntouchedLine(g)
         Putline('datagrep: %d match(es) found.'%len(got))
 
-def DataGrepLines(words, seslist):
+def DataGrepLines(words, input, seslist):
     """DataGrepLines(words, seslist) -> None
 
     Searches through the databuffer for a regex, printing out only
     the _lines_ which contain a match.
     """
+    hooks.datagreplines_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             Putline("datagreplines: command requires (at least) one argument")
@@ -405,7 +393,7 @@ def DataGrepLines(words, seslist):
             PutUntouchedLine(b)
         Putline('datagreplines: %d match(es) found.'%len(build))
 
-def Report(words, seslist):
+def Report(words, input, seslist):
     """Report(words, seslist) -> None
 
     With no args, prints all reports
@@ -413,6 +401,7 @@ def Report(words, seslist):
     args 2+ to the file given by arg1, whenever said line is seen
     in mud output.
     """
+    hooks.report_command_hook.run((input, seslist))
     for eachses in seslist:
         if len(words) == 1:
             # print all defined reports
@@ -435,11 +424,12 @@ def Report(words, seslist):
             except IOError:
                 Putline('report: unable to open file %s'%filename)
                     
-def Variable(words, seslist):
+def Variable(words, input, seslist):
     """Variable(words, seslist) -> None
 
     Defines a variable
     """
+    hooks.variable_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
             # display all variables
@@ -477,13 +467,14 @@ def Variable(words, seslist):
 
 # write aliases/actions, etc to a file
 # this saves the local session and the global session in one fell swoop
-def WriteFile(words, seslist):
+def WriteFile(words, input, seslist):
     """WriteFile(words, seslist) -> None
     
     Writes aliases/actions/gags, etc to a file.
     This saves the local session and the global session in one fell
     swoop.
     """
+    hooks.write_command_hook.run((input, seslist))
     for ses in seslist:
         try:
             if len(words) != 2:
@@ -516,11 +507,12 @@ def WriteFile(words, seslist):
         except IOError:
             Putline('write: unable to open file %s'%thefile)
 
-def Textin(words, seslist):
+def Textin(words, input, seslist):
     """Textin(words, seslist) -> None
 
     Sends the text to the mud from a file.
     """
+    hooks.textin_command_hook.run((input, seslist))
     oldses = data.currsession
     
     for ses in seslist:
@@ -553,11 +545,12 @@ def Textin(words, seslist):
     data.currsession = oldses
     
 # read in aliases/actions/gags/substitutes from a file
-def ParseFile(ofile, seslist):
+def ParseFile(ofile, input, seslist):
     """ParseFile(ofile, seslist) -> None
 
     Read in aliases/actions/gags/substitutes from a file.
     """
+    hooks.read_command_hook.run((input, seslist))
     for ses in seslist:
         try:
 
@@ -620,22 +613,24 @@ def ParseFile(ofile, seslist):
             Putline(string.join(["read: unable to open input file:",
                                  ofile[1], str(arg)]))
 
-def CR(seslist):
+def CR(words, input, seslist):
     """CR(seslist) -> None
 
     Sends a carriage return from teh current session to its connection.
     Useful for aliases that want to send carriage returns.
     """
+    hooks.cr_command_hook.run((seslist,))
     for ses in seslist:
         if ses.connected:
             ses.WriteTo('\n')
 
 
-def Log(words, seslist):
+def Log(words, input, seslist):
     """Log(words, seslist) -> None
 
     Starts a log file for the current session.
     """
+    hooks.log_command_hook.run((input, seslist))
     # check for bad argument like #all #log myfile
     if len(seslist) > 1:
         Putline( 'can\'t log more than one session to the same file!')
@@ -675,7 +670,7 @@ def Log(words, seslist):
             ses.logging = 1
             ses.logfile = f
 
-def Quit():
+def Quit(words, input, seslist):
     """Quit() -> None
 
     Quits lyntin.
@@ -691,11 +686,12 @@ def Quit():
 
     sys.exit(0)
 
-def KillAll():
+def KillAll(words,input,seslist):
     """KillAll() -> None
 
     Wipes clean all active session removing actions/gags/subs...
     """
+    hooks.killall_command_hook.run((input, seslist))
     for ses in data.sessionlist:
         ses.Clear()
         Putline('killall: session "'+ses.name+'" cleared.')
@@ -708,7 +704,7 @@ def Prompt():
     """
     data.theapp.ui.Prompt()
 
-def Action(input, seslist):
+def Action(words, input, seslist):
     """Action(input, seslist) -> None
 
     With no arguments, prints all the actions.
@@ -716,6 +712,7 @@ def Action(input, seslist):
     Otherwise, creates an action named arg1 which expands to the
     rest of the args.
     """
+    hooks.action_command_hook.run((input, seslist))
     for eachses in seslist:
         count = 0
         trigger, response = cmdparse.SplitAction(input) 
@@ -742,11 +739,12 @@ def Action(input, seslist):
             if count == 0:
                 Putline("action: No actions defined.")
 
-def UnAction(words, seslist):
+def UnAction(words, input, seslist):
     """UnAction(words, seslist) -> None
 
     Removes all matching actions.
     """
+    hooks.unaction_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             Putline('unaction: command requires one argument')
@@ -772,7 +770,7 @@ def UnAction(words, seslist):
         else:
             Putline('unaction: that action is not defined')
 
-def Alias(words, seslist):
+def Alias(words, input, seslist):
     """Alias(words, seslist) -> None
 
     With no arguments, prints all the aliases.
@@ -780,6 +778,7 @@ def Alias(words, seslist):
     With many arguments, defines an alias named the first argument
     which expands to the rest of the arguments.
     """
+    hooks.alias_command_hook.run((input, seslist))
     for ses in seslist:
         count = 0
 
@@ -809,7 +808,7 @@ def Alias(words, seslist):
 
 
 
-def Help(words, seslist):
+def Help(words, input, seslist):
     """Help(words, seslist) -> None
 
     Eventually, this should call hooks for things that aren't
@@ -847,12 +846,13 @@ def Help(words, seslist):
             PutUntouchedLine(mem + " is not a valid help topic.")
 
     
-def History(words, seslist):
+def History(words, input, seslist):
     """History(words, seslist) -> None
 
     With one numeric argument, set history size.
     With no arguments, prints last histsize commands.
     """
+    hooks.history_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) > 2:
             Putline('history: too many arguments')
@@ -880,7 +880,7 @@ def History(words, seslist):
             for i in range(m - 1, -1, -1):
                 PutReallyUntouchedLine(str(i)+' '+str(data.history[i]))
                 
-def Info(seslist):
+def Info(words,input,seslist):
     """Info(seslist) -> None
 
     Prints session info to the client.
@@ -898,11 +898,12 @@ def Info(seslist):
         if ses.ticker: Putline('Ticker is on; ' + repr(ses.ticklen) + ses.tickaction)
 	else:          Putline('Ticker is off.')
     
-def UnAlias(words, seslist):
+def UnAlias(words, input, seslist):
     """UnAlias(words, seslist) -> None
 
     Removes all matching aliases.
     """
+    hooks.unalias_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) != 2:
             Putline('unalias: command requires one argument')
@@ -918,13 +919,14 @@ def UnAlias(words, seslist):
         else:
             Putline('unalias: that alias is not defined')
 
-def Gag(words, seslist):
+def Gag(words, input, seslist):
     """Gag(words, seslist) -> None
 
     Cease displaying any text from the mud which contains the
     given string.  Useful for shutting up spammers or spammy
     events.
     """
+    hooks.gag_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             # print all gags
@@ -939,11 +941,12 @@ def Gag(words, seslist):
         ses.gags = ses.gags + [gagwhat]
         Putline('gag: ok, "' + gagwhat + '" is now gagged')
 
-def UnGag(words, seslist):
+def UnGag(words, input, seslist):
     """UnGag(words, seslist) -> None
 
     Removes the given string from the session's gags.
     """
+    hooks.ungag_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             Putline('ungag: command requires at least one argument')
@@ -959,12 +962,13 @@ def UnGag(words, seslist):
         if not ungagwhatlist:
             Putline('gag: that gag is not defined')
 
-def Substitute(words, seslist):
+def Substitute(words, input, seslist):
     """Substitute(words, seslist) -> None
 
     Anytime we see a certain string from the mud,
     substitute an alternate string for it.
     """
+    hooks.substitute_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 3:
             Putline('substitute: command requires at least two arguments')
@@ -973,11 +977,12 @@ def Substitute(words, seslist):
         ses.subs[pattern] = replacement
         Putline('ok, ' + pattern + ' is now replaced by ' + replacement)
 
-def UnSubstitute(words, seslist):
+def UnSubstitute(words, input, seslist):
     """UnSubstitute(words, seslist) -> None
 
     Removes the substitute from the current session.
     """
+    hooks.unsubstitute_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
             Putline('command requires at least one argument')
@@ -987,11 +992,12 @@ def UnSubstitute(words, seslist):
             del ses.subs[sub]
         Putline(str(len(unlist)) + ' substitutes removed')
 
-def Clear(seslist):
+def Clear(words, input, seslist):
     """Clear(seslist) -> None
 
     Clears the session of aliases, actions, subs, vars, and gags.
     """
+    hooks.clear_command_hook.run((seslist,))
     for ses in seslist:
         ses.aliases = {}
         ses.actions = {}
@@ -1002,12 +1008,13 @@ def Clear(seslist):
         Putline('session ' + ses.name + ' cleared')
 
 
-def Tickset(words, seslist):
+def Tickset(words, input, seslist):
     """Tickset(words, seslist) -> None
 
     With no arguments, synchronize tick start ot current time.
     With arg "on" set ticker on.  With arg "off" set ticker off.
     """
+    hooks.tickset_command_hook.run((input, seslist))
     if len(words) == 1:
         # synchronize
         for ses in seslist:
@@ -1068,11 +1075,12 @@ def Tickset(words, seslist):
                     Putline('tickaction set to %s'%ses.tickaction)
 
 
-def Tick(words, seslist):
+def Tick(words, input, seslist):
     """Tick(words, seslist) -> None
 
     display tick status.
     """
+    hooks.tick_command_hook.run((input, seslist))
     if len(words) == 1: # display tick status
         for ses in seslist:
             if not ses.ticker:
@@ -1083,7 +1091,7 @@ def Tick(words, seslist):
     else:
         Putline('command accepts no arguments')
 
-def Verbose(seslist):
+def Verbose(words, input, seslist):
     """Verbose(seslist) -> None
 
     Toggles whether or not to be verbose.
@@ -1105,7 +1113,7 @@ def TimeUpdate(seslist):
             TickerUpdate((ses,))
         ses.lastclock = click
 
-def TickerUpdate(seslist):
+def TickerUpdate(words, input, seslist):
     """TickerUpdate(seslist) -> None
 
     Called periodically to see if tick-related events need handling.

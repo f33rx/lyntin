@@ -49,7 +49,7 @@ class client:
                break
          hooks.internal_tick_hook.run(())
       except KeyboardInterrupt:
-         player.Quit()
+         player.Quit(None,None,None)
       except SystemExit: # handle sys.exit
          return None
       except BadUser, spec:
@@ -120,7 +120,7 @@ class client:
          for opt in sys.argv[1:]:
             if opt == '-tk': pass
             else:
-               player.ParseFile(['load', opt], [data.common])
+               player.DispatchCommand('#read %s'%opt,[data.common])
 
 
    def Initialize(self):
