@@ -6,4 +6,4 @@ the sessions you're currently running.
 ex:
    #all shout ARGH!     <-- Will shout ARGH! in every session
 
-category:commands
+category: commands

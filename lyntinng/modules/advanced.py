@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.15 2002/05/09 23:20:12 willhelm Exp $
+# $Id: advanced.py,v 1.16 2002/05/13 17:34:45 jmberne Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -19,14 +19,16 @@ usermodule = None
 
 def python_cmd(session, words, input):
   """
-#@ is different from all the rest because this one does some 
-incredibly magic stuff because it requires an environment to 
-execute the arbitrary python code in.  It allows you to execute
-arbitrary python code inside Lyntin.
+  #@ is different from all the rest because this one does some 
+  incredibly magic stuff because it requires an environment to 
+  execute the arbitrary python code in.  It allows you to execute
+  arbitrary python code inside Lyntin.
+  
+  ex:
+    #@ print "hello"
+    #@ print string.join(exported.get_commands(), "\\n")
 
-ex:
-  #@ print "hello"
-  #@ print string.join(exported.get_commands(), "\\n")
+  category: commands
   """
   # NOTE: if we ever get to handling multiple-lines, we'll need
   # to change this function completely.
