@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.53 2002/06/07 23:43:30 willhelm Exp $
+# $Id: engine.py,v 1.54 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -147,7 +147,7 @@ class Engine:
       (list of strings) of the thread status
 
     """
-    self.getManager("thread").checkThreadStatus()
+    return self.getManager("thread").checkThreadsStatus()
 
 
   ### ------------------------------------------
@@ -569,8 +569,7 @@ class Engine:
 
     for mem in self._sessions.values():
       # we do some fancy footwork here to make it print nicely
-      info = mem.getInfo().replace("\n", "\n   ")
-
+      info = string.join(self.getStatus(mem), "\n   ")
       data.append('   %s\n' % info)
 
     return string.join(data, "\n")
