@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.11 2002/05/04 21:50:32 jmberne Exp $
+# $Id: speedwalk.py,v 1.12 2002/05/05 16:09:50 jmberne Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -48,7 +48,7 @@ class SpeedwalkManager(manager.Manager):
     self._dirs[alias] = dir
     self.compileRegexp()
   
-  def removeDir(self, alias):
+  def removeDirs(self, alias):
     """
     Removes the speedwalking alias and only this one (no wildcard patterns
     are possible).
@@ -164,7 +164,7 @@ class SpeedwalkManager(manager.Manager):
     if exclude not in self._excludes:
       self._excludes.append(exclude)
   
-  def removeExclude(self, exclude):
+  def removeExcludes(self, exclude):
     """
     Removes a speedwalking exclude (and only one, no wildcards or the like)
     from the manager.

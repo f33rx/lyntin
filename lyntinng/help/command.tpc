@@ -17,4 +17,4 @@ ex:
    #all say hello
    #all #alias {sh} {say hello}
 
-category: general
+category: manual

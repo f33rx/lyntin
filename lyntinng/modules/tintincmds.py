@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.12 2002/05/09 17:15:18 jmberne Exp $
+# $Id: tintincmds.py,v 1.13 2002/05/09 23:20:12 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -44,6 +44,8 @@ def action_cmd(session, args, input):
      #action {EVISCERATES joey} {rescue joey}
      #action {%0 gives you %5} {say thanks for the %5, %0!}
      #action {^%1 tells you %2$} {say %1 just told me %2}
+
+  category: commands
   """
   trigger = args["trigger"]
   action = args["action"]
@@ -95,6 +97,8 @@ def alias_cmd(session, args, input):
   Note: It should be noted that actions are matched via 
   regular expressions and that %1 will get translated to (.*?)
   for the regular expression match.
+
+  category: commands
   """
   name = args["alias"]
   command = args["expansion"]
@@ -130,6 +134,8 @@ def boss_cmd(session, words, input):
   This probably isn't as helpful as it could be.  Right now it
   will print to your display code from Lyntin 2.x to make it seem
   like you're doing work.
+
+  category: commands
   """
   # FIXME - somehow make this more universal by having a bossfile?
   exported.write_mud_data(lyntin.BOSSTEXT)
@@ -146,6 +152,8 @@ def char_cmd(session, args, input):
 
   ex:
      #char {*}  <-- changes the command char to *
+
+  category: commands
   """
   char = args["char"]
 
@@ -164,6 +172,8 @@ def clear_cmd(session, words, input):
   """
   This command clears a session of all session data (except the actual 
   connection).  This covers gags, subs, actions, aliases...
+
+  category: commands
   """
   try:
     session.clear()
@@ -178,6 +188,8 @@ def cr_cmd(session, args, input):
   """
   This sends a carriage return to the mud.  Sometimes this is useful
   in aliases that require a carriage return.
+
+  category: commands
   """
   session.writeSocket("\n")
 
@@ -187,6 +199,8 @@ commands_dict["^cr"] = (cr_cmd, "")
 def end_cmd(session, args, input):
   """
   Closes all sessions and quits out of Lyntin.
+
+  category: commands
   """
   import event
   exported.write_message("end: you'll be back...")
@@ -217,6 +231,8 @@ def gag_cmd(session, args, input):
   ex:
      #gag has missed you       <-- will gag any text with "has",
                                    "missed", or "you"
+
+  category: commands
   """
   gaggedtext = args["text"]
   quiet = args["quiet"]
@@ -241,6 +257,8 @@ def help_cmd(session, args, input):
   """
   With no arguments, shows all the help files available.
   With an argument, shows that specific help file.
+
+  category: commands
   """
   item = args["item"]
 
@@ -287,6 +305,8 @@ def highlight_cmd(session, args, input):
   ex:
      #highlight {green} {Sven arrives.}
      #highlight {reverse,green} {Sven arrives.}
+
+  category: commands
   """
   style = args["style"]
   text = args["text"]
@@ -323,6 +343,8 @@ def history_cmd(session, args, input):
      !4 3k=gk
          executes the fourth to last thing you did after replacing
          3k with gk in it
+
+  category: commands
   """
   count = args["count"]
   
@@ -347,6 +369,8 @@ def if_cmd(session, args, input):
      #if {$myhpvar < 100} {#showme PANIC!}
      #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
      #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
+
+  category: commands
   """
   # original if_cmd code contributed by Sebastian John
 
@@ -378,6 +402,8 @@ commands_dict["if"] = (if_cmd, "expr action elseaction=")
 def ignore_cmd(session, args, input):
   """
   Toggles whether actions for that session are ignored or not.
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("ignore cannot be applied to common session.")
@@ -400,6 +426,8 @@ def info_cmd(session, args, input):
   Prints all the information about the active session: 
   actions, aliases, gags, highlights, variables, ticker, verbose, 
   speedwalking, and other various things.
+
+  category: commands
   """
   exported.write_message(session.getInfo())
 
@@ -410,6 +438,8 @@ def killall_cmd(session, args, input):
   """
   Clears all sessions of session oriented stuff: aliases,
   substitutions, gags, variables, so on so forth.
+
+  category: commands
   """
   for mem in exported.get_active_sessions():
     mem.clear()
@@ -422,6 +452,8 @@ def log_cmd(session, args, input):
   """
   Will start or stop logging to a given filename for that session.
   Each session can have its own logfile.
+
+  category: commands
   """
   logfile = args["logfile"]
   databuffer = args["databuffer"]
@@ -485,6 +517,8 @@ def loop_cmd(session, args, input):
      reclaim 3.corpse
      reclaim 4.corpse
      reclaim 5.corpse
+
+  category: commands
   """
   loop = args["fromto"]
   command = args["comm"]
@@ -524,6 +558,8 @@ def math_cmd(session, args, input):
   """
   Implements the #math command which allows you to manipulate
   variables above and beyond setting them.
+
+  category: commands
   """
   var = args["var"]
   ops = args["operation"]
@@ -549,6 +585,8 @@ def nop_cmd(session, args, input):
   and before a ; (unless it's braced) will be ignored.
 
   This was quite possibly the easiest command to program ever.
+
+  category: commands
   """
   return
 
@@ -574,6 +612,8 @@ def read_cmd(session, args, input):
   Note: the first non-whitespace char is used to set the Lyntin
   command character.  If you use non Lyntin commands in your file,
   make sure the first one is a command char.  If not, use #nop .
+
+  category: commands
   """
   filename = args["filename"]
 
@@ -629,6 +669,8 @@ def session_cmd(session, args, input):
   #eto      <=make the char in the 'eto' session the active one.
   ...       <= all commands now go to session 'eto'.
   #valgar   <=switching now to session 'valgar'.
+
+  category: commands
   """
   name = args["sessionname"]
   host = args["host"]
@@ -703,6 +745,8 @@ def showme_cmd(session, args, input):
 
   ex:
      #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
+
+  category: commands
   """
   input = args["input"]
   if not input:
@@ -716,6 +760,8 @@ commands_dict["showme"] = (showme_cmd, "text*", "noparsing")
 def speedwalk_cmd(session, args, input):
   """
   Toggles speedwalking on and off for the entire client.
+
+  category: commands
   """
   option = args["option"]
 
@@ -741,6 +787,8 @@ def substitute_cmd(session, args, input):
   Otherwise creates a substitution.
 
   Braces are advised around both 'name' and 'substitution'.
+
+  category: commands
   """
   item = args["item"]
   substitution = args["substitution"]
@@ -771,6 +819,8 @@ def textin_cmd(session, args, input):
   """
   Takes the contents of the file and outputs it directly to the mud
   without processing it (like #read does).
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("textin cannot be applied to common session.")
@@ -806,6 +856,8 @@ def tick_cmd(session, args, input):
   When a tick happens, it will look for a TICK!!! alias.  Finding none,
   it will print TICK!!! to the ui.
 
+
+  category: commands
   This allows you to perform an event every x number of seconds.
   """
   if (session.getName() == "common"):
@@ -829,6 +881,8 @@ def tickon_cmd(session, args, input):
   Turns on the ticker for this session.
 
   see also: tick, tickoff, ticksize
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("tickon cannot be applied to common session.")
@@ -846,6 +900,8 @@ def tickoff_cmd(session, args, input):
   Turns off the ticker for this session.
 
   see also: tick, tickon, ticksize
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("tickoff cannot be applied to common session.")
@@ -864,6 +920,8 @@ def ticksize_cmd(session, args, input):
   session.
 
   see also: tick, tickon, tickoff
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("ticksize cannot be applied to common session.")
@@ -889,6 +947,8 @@ commands_dict["ticksize"] = (ticksize_cmd, "size:int=0")
 def togglesubs_cmd(session, args, input):
   """
   Toggles whether substitutions for that session are ignored or not.
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("togglesubs cannot be applied to common session.")
@@ -914,74 +974,76 @@ def togglesubs_cmd(session, args, input):
 commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
 
 
-class Unsomethinger:
-  def __init__(self, managername, removalfunction, singular=None, plural=None, command=None, doc=None, wildcarding=1):
-    self.managername = managername
-    self.removalfunction = removalfunction
-    if singular:
-      self.singular = singular
-    else:
-      self.singular = managername
-    if plural:
-      self.plural = plural
-    else:
-      self.plural = self.singular + "s"
-    if command:
-      self.command = command
-    else:
-      self.command = "un" + self.singular
+def unaction_cmd(session, args, input):
+  """
+  Allows you to remove actions.
 
-    if doc:
-      self.__doc__ = doc
-    else:
-      self.__doc__ = ("\nRemoves %s matching {pattern}.\n\n" % (self.plural)
-                      + "ex: #%s {kill}    <-- remove %s 'kill'\n" % (self.command,self.singular))
-      if wildcarding:
-        self.__doc__ = (self.__doc__
-                        + "ex: #%s {*kill*}   <-- remove all %s with 'kill' in them\n" % (self.command, self.plural))
+  category: commands
+  """
+  func = session.getManager("action").removeActions
+  modutils.unsomething_helper(args, func, "action", "actions")
 
-  def __call__(self, session, args, input):
-    """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
-
-    Allows you to remove gags|substitutes|variables|actions|aliases|swdirs|swexcludes
-    swexcludes from whatever manager is handling that thing.  This function
-    handles all these commands.
-    """
-    text = args["pattern"]
-    quiet = args["quiet"]
-
-    removedthings = self.removalfunction(session.getManager(self.managername),text)
-    
-    if not quiet:
-      if len(removedthings) == 0:
-        exported.write_message("un%s: No %s removed." % (self.singular, self.plural))
-
-      data = ''
-      for mem in removedthings:
-        if type(mem) == type( (1,2) ):
-          data += self.singular + " {" + mem[0] + "} {" + mem[1] + "} removed.\n"
-        else:
-          data += self.singular + " {" + mem + "} removed.\n"
-
-      exported.write_message(data[:-1])
+commands_dict["unaction"] = (unaction_cmd, "str= quiet:boolean=false")
 
 
-commands_dict["unaction"] = (
-  Unsomethinger("action",lambda m,t:m.removeActions(t)), "pattern quiet:boolean=false")
-commands_dict["unalias"] = (
-  Unsomethinger("alias",lambda m,t:m.removeAliases(t)), "pattern quiet:boolean=false")
-commands_dict["ungag"] = (
-  Unsomethinger("gag",lambda m,t:m.removeGags(t)), "pattern quiet:boolean=false")
-commands_dict["unhighlight"] = (
-  Unsomethinger("highlight",lambda m,t:m.removeHighlights(t)), "pattern quiet:boolean=false")
-commands_dict["unswdir"] = (
-  Unsomethinger("speedwalk",lambda m,t:m.removeDir(t),singular="swdir",plural="speedwalking dirs",wildcarding=0), "pattern quiet:boolean=false")
-commands_dict["unswexclude"] = (
-  Unsomethinger("speedwalk",lambda m,t:m.removeExclude(t),singular="swexclude",plural="speedwalking excludes",wildcarding=0), "pattern quiet:boolean=false")
-commands_dict["unsubstitute"] = (
-  Unsomethinger("substitute",lambda m,t:m.removeSubstitutes(t)), "pattern quiet:boolean=false")
-commands_dict["unvariable"] = (
-  Unsomethinger("variable",lambda m,t:m.removeVariables(t)), "pattern quiet:boolean=false")
+def unalias_cmd(session, args, input):
+  """
+  Allows you to remove aliases.
+
+  category: commands
+  """
+  func = session.getManager("alias").removeAliases
+  modutils.unsomething_helper(args, func, "alias", "aliases")
+
+commands_dict["unalias"] = (unalias_cmd, "str= quiet:boolean=false")
+
+
+def ungag_cmd(session, args, input):
+  """
+  Allows you to remove gags.
+
+  category: commands
+  """
+  func = session.getManager("gag").removeGags
+  modutils.unsomething_helper(args, func, "gag", "gags")
+
+commands_dict["ungag"] = (ungag_cmd, "str= quiet:boolean=false")
+
+
+def unhighlight_cmd(session, args, input):
+  """
+  Allows you to remove highlights.
+
+  category: commands
+  """
+  func = session.getManager("highlight").removeHighlights
+  modutils.unsomething_helper(args, func, "highlight", "highlights")
+
+commands_dict["unhighlight"] = (unhighlight_cmd, "str= quiet:boolean=false")
+
+
+def unsubstitute_cmd(session, args, input):
+  """
+  Allows you to remove substitutes.
+
+  category: commands
+  """
+  func = session.getManager("substitute").removeSubstitutes
+  modutils.unsomething_helper(args, func, "substitute", "substitutes")
+
+commands_dict["unsubstitute"] = (unsubstitute_cmd, "str= quiet:boolean=false")
+
+
+def unvariable_cmd(session, args, input):
+  """
+  Allows you to remove variables.
+
+  category: commands
+  """
+  func = session.getManager("variable").removeVariables
+  modutils.unsomething_helper(args, func, "variable", "variables")
+
+commands_dict["unvariable"] = (unvariable_cmd, "str= quiet:boolean=false")
 
 
 def variable_cmd(session, args, input):
@@ -997,6 +1059,8 @@ def variable_cmd(session, args, input):
   Variables can later be accessed via the variable character
   (which defaults to $) and the variable name.  In the case of the
   above, the variable name would be $hps.
+
+  category: commands
   """
   var = args["var"]
   expansion = args["expansion"]
@@ -1032,6 +1096,8 @@ def verbatim_cmd(session, args, input):
   """
   Toggles whether user data is parsed for speedwalking,
   aliases, and variables.
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("verbatim cannot be applied to common session.")
@@ -1061,6 +1127,8 @@ def version_cmd(session, args, input):
   """
   Displays the version number, contact information, and web-site for
   Lyntin.
+
+  category: commands
   """
   exported.write_message(lyntin.VERSION)
 
@@ -1071,6 +1139,8 @@ def wizlist_cmd(session, args, input):
   """
   Tells you about all the people who have participated in Lyntin's
   development--these are the Lyntin wizards.
+
+  category: commands
   """
   exported.write_message(lyntin.WIZLIST)
 
@@ -1082,6 +1152,8 @@ def write_cmd(session, args, input):
   Writes all aliases, actions, gags, etc to the file specified.
   You can then use the #read command to read this file in and
   restore your session settings.
+
+  category: commands
   """
   filename = args["file"]
   try:
@@ -1098,6 +1170,8 @@ commands_dict["write"] = (write_cmd, "file")
 def zap_cmd(session, args, input):
   """
   This disconnects from the mud and closes the session.
+
+  category: commands
   """
   if exported.get_engine().closeSession(session):
     exported.write_message("zap: session %s zapped!" % session.getName())

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.1 2002/05/05 15:20:16 willhelm Exp $
+# $Id: lyntincmds.py,v 1.2 2002/05/09 23:20:12 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -16,11 +16,13 @@ commands_dict = {}
 
 def ansi_cmd(session, args, input):
   """
-Toggles whether Lyntin takes out all the ansi coloring for you
-or not.  Mind you, the mud has to send ansi colors your way--otherwise
-this toggle won't do anything for you at all.
+  Toggles whether Lyntin takes out all the ansi coloring for you
+  or not.  Mind you, the mud has to send ansi colors your way--otherwise
+  this toggle won't do anything for you at all.
 
-This is to help folks whose mud servers aren't so friendly.
+  This is to help folks whose mud servers aren't so friendly.
+
+  category: commands
   """
   option = args["option"]
 
@@ -43,8 +45,10 @@ commands_dict["ansi"] = (ansi_cmd, "option:booleanornone=")
 
 def datagrep_cmd(session, args, input):
   """
-Searches this session's databuffer with a regular expression printing 
-all matches in their entirety.
+  Searches this session's databuffer with a regular expression printing 
+  all matches in their entirety.
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("datagrep cannot be applied to common session.")
@@ -62,8 +66,10 @@ commands_dict["datagrep"] = (datagrep_cmd, "pattern size:int=300")
 
 def datagreplines_cmd(session, args, input):
   """
-Searches the lines in this session's databuffer with a regular 
-expression printing all matching lines in their entirety.
+  Searches the lines in this session's databuffer with a regular 
+  expression printing all matching lines in their entirety.
+
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("datagrep cannot be applied to common session.")
@@ -80,7 +86,9 @@ commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
 
 def deed_cmd(session, args, input):
   """
-This adds a deed or prints all the deeds stored till now.
+  This adds a deed or prints all the deeds stored till now.
+
+  category: commands
   """
   # original deed_cmd code contributied by Sebastian John
 
@@ -122,17 +130,19 @@ commands_dict["deed"] = (deed_cmd, "text= quiet:boolean=false")
 
 def diagnostics_cmd(session, args, input):
   """
-This is very useful for finding out all the information about Lyntin
-while it's running.  This will print out operating system information,
-Python version, what threads are running (assuming they're registered
-with the ThreadManager), hooks, functions connected to hooks, and
-#info for every session.  It's very helpful in debugging problems that
-are non-obvious or are platform specific.  It's also invaluable in
-bug-reporting.
+  This is very useful for finding out all the information about Lyntin
+  while it's running.  This will print out operating system information,
+  Python version, what threads are running (assuming they're registered
+  with the ThreadManager), hooks, functions connected to hooks, and
+  #info for every session.  It's very helpful in debugging problems that
+  are non-obvious or are platform specific.  It's also invaluable in
+  bug-reporting.
 
-It can take a filename argument and will copy the #diagnostics output
-to that file.  This allows you easier method of submitting diagnostics
-output along with bug reports.
+  It can take a filename argument and will copy the #diagnostics output
+  to that file.  This allows you easier method of submitting diagnostics
+  output along with bug reports.
+
+  category: commands
   """
   import os, sys
   message = "Diagnostics:\n"
@@ -181,12 +191,14 @@ commands_dict["diagnostics"] = (diagnostics_cmd, "logfile=")
 
 def mudecho_cmd(session, args, input):
   """
-Toggles echoing user commands.  When echo is on, all user commands
-will be printed to the screen.  When off, user commands are hidden.
+  Toggles echoing user commands.  When echo is on, all user commands
+  will be printed to the screen.  When off, user commands are hidden.
 
-Muds use echo for switching in and out of password handling.  This
-command was created so that if your mud screws up echo settings,
-you can set it locally.
+  Muds use echo for switching in and out of password handling.  This
+  command was created so that if your mud screws up echo settings,
+  you can set it locally.
+
+  category: commands
   """
   import event
   option = args["option"]
@@ -203,7 +215,9 @@ commands_dict["mudecho"] = (mudecho_cmd, "option:boolean")
 
 def raw_cmd(session, args, input):
   """
-Sends input straight to the mud.
+  Sends input straight to the mud.
+
+  category: commands
   """
   session.writeSocket(args["input"] + "\n")
   
@@ -212,8 +226,10 @@ commands_dict["raw"] = (raw_cmd, "input=", "noparsing")
 
 def swdir_cmd(session, args, input):
   """
-This adds speedwalking aliases and tells you the current speedwalking dirs
-already registered.
+  This adds speedwalking aliases and tells you the current speedwalking dirs
+  already registered.
+
+  category: commands
   """
   # originally written by Sebastian John
   alias = args["alias"]
@@ -250,10 +266,12 @@ commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
 
 def swexclude_cmd(session, args, input):
   """
-This adds speedwalking excludes and tells you the current excludes
-already registered. Excludes are a bit like antisubstitutes, but for
-speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
-get speedwalk-parsing.
+  This adds speedwalking excludes and tells you the current excludes
+  already registered. Excludes are a bit like antisubstitutes, but for
+  speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
+  get speedwalk-parsing.
+
+  category: commands
   """
   # originally written by Sebastian John
   excludes = args["exclude"]
@@ -274,6 +292,30 @@ get speedwalk-parsing.
       exported.write_message("swexclude: {%s} added." % exclude)
 
 commands_dict["swexclude"] = (swexclude_cmd, "exclude* quiet:boolean=false")
+
+
+def unswdir_cmd(session, args, input):
+  """
+  Allows you to remove swdirs.
+
+  category: commands
+  """
+  func = session.getManager("speedwalk").removeDirs
+  modutils.unsomething_helper(args, func, "swdir", "swdirs")
+
+commands_dict["unswdir"] = (unswdir_cmd, "str= quiet:boolean=false")
+
+
+def unswexclude_cmd(session, args, input):
+  """
+  Allows you to remove swexcludes.
+
+  category: commands
+  """
+  func = session.getManager("speedwalk").removeExcludes
+  modutils.unsomething_helper(args, func, "swexclude", "swexcludes")
+
+commands_dict["unswexclude"] = (unswexclude_cmd, "str= quiet:boolean=false")
 
 
 def load():

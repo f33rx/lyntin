@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.2 2002/04/11 03:58:22 willhelm Exp $
+# $Id: manager.py,v 1.3 2002/05/02 23:39:07 willhelm Exp $
 #######################################################################
 """
 This module defines the basic manager which handles various things
@@ -38,8 +38,8 @@ class Manager:
 
     arguments:
 
-      'text' -- allows us to filter which information we're looking for
-                based on names of things
+      'text' -- (string) allows us to filter which information we're
+                looking for based on names of things
 
     returns:
 
@@ -51,5 +51,20 @@ class Manager:
     """ 
     Similar to getInfo, except this just returns a count of how
     many things we're managing in this manager.
+    """
+    pass
+
+  def remove(self, str):
+    """
+    Removes things from this manager.
+
+    arguments:
+
+      'str' -- (string) the string specifying the things to remove.
+
+    returns:
+
+      a list of strings or a list of tuples of strings of the
+      things removed.
     """
     pass
