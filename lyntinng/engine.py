@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.26 2002/04/03 03:14:15 willhelm Exp $
+# $Id: engine.py,v 1.27 2002/04/05 23:55:46 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -582,7 +582,6 @@ class Engine:
 
       'text' -- (string or ui.Message) the message to write 
                 to the ui
-
     """
     if self._ui:
       self._ui_lock.acquire(1)

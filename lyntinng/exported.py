@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.5 2002/03/24 21:00:17 willhelm Exp $
+# $Id: exported.py,v 1.6 2002/04/05 23:55:46 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -111,7 +111,7 @@ def set_num_errors(num):
   """
   lyntin.errorcount = num
 
-def write_ui(text):
+def write_ui(text, sess=None):
   """ Calls engine.myengine.writeUI which writes a message to the ui.
 
   arguments:
@@ -119,23 +119,29 @@ def write_ui(text):
     'text' -- (string or ui.Message) the message to write 
               to the ui
 
+    'session=None' -- (session.Session instance) the session the
+                      mud data is associated with
+
   """
   if get_engine():
-    get_engine().writeUI(text)
+    get_engine().writeUI(text, session=sess)
   else:
     print text
 
 
-def write_test(text):
+def write_test(text, session=None):
   """ Calls engine.myengine.writeTest which writes TESTDATA message.
 
   arguments:
 
     'text' -- (string) the message to send
 
+    'session=None' -- (session.Session instance) the session the
+                      mud data is associated with
+
   """
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text, ui.ui.TESTDATA))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.TESTDATA, session))
   else:
     print "test:", text
 
@@ -148,44 +154,55 @@ def write_message(text):
 
   """
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text, ui.ui.LTDATA))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.LTDATA))
   else:
     print "message:", text
 
-def write_error(text):
+def write_error(text, session=None):
   """ Calls engine.myengine.writeError which writes ERROR message.
 
   arguments:
 
     'text' -- (string) the message to send
+
+    'session=None' -- (session.Session instance) the session the
+                      mud data is associated with
+
   """
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text, ui.ui.ERROR))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.ERROR, session))
   else:
     print "error:", text
 
-def write_user_data(text):
+def write_user_data(text, session=None):
   """ Calls engine.myengine.writeUserData which writes a USERDATA message.
 
   arguments:
 
     'text' -- (string) the message to send
+
+    'session=None' -- (session.Session instance) the session the
+                      mud data is associated with
+
   """
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text, ui.ui.USERDATA))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.USERDATA, session))
   else:
     print "userdata:", text
 
-def write_mud_data(text):
+def write_mud_data(text, session=None):
   """ Calls engine.myengine.writeMudData which writes a MUDDATA message.
 
   arguments:
 
     'text' -- (string) the message to send
 
+    'session=None' -- (session.Session instance) the session the
+                      mud data is associated with
+
   """
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text, ui.ui.MUDDATA))
+    get_engine().writeUI(ui.ui.Message(text, ui.ui.MUDDATA, session))
   else:
     print "muddata:", text
 

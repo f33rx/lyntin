@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.26 2002/04/03 03:14:15 willhelm Exp $
+# $Id: session.py,v 1.27 2002/04/04 01:04:30 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -326,7 +326,7 @@ class Session:
       inputlines[i] = mem
 
     input = string.join(inputlines, "")
-    exported.write_mud_data(input)
+    exported.write_mud_data(input, self)
 
 
   def log(self, input):

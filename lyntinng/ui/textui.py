@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.10 2002/04/01 18:24:36 willhelm Exp $
+# $Id: textui.py,v 1.11 2002/04/03 03:14:15 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -61,28 +61,38 @@ class Textui(ui.BaseUI):
     to the user.
     """
     if type(message) == type(''):
-      sys.stdout.write ("lyntin: " + 
-           message.replace("\n", "\nlyntin: ") + "\n")
+      sys.stdout.write ("lyntin: " + message.replace("\n", "\nlyntin: ") + 
+                        "\n")
       return
 
-    if message.type == ui.MUDDATA:
-      sys.stdout.write ( message.data )
-      sys.stdout.flush()
+    pretext = ""
+    if (message.session != None 
+        and message.session != exported.get_current_session()):
+      pretext = "[" + message.session.getName() + "] "
 
-    elif message.type == ui.ERROR:
-      sys.stdout.write ("error: " + 
-            message.data.replace("\n", "\nerror: ") + "\n")
+    if message.type == ui.ERROR:
+      pretext = "error: " + pretext
 
     elif message.type == ui.LTDATA:
-      sys.stdout.write ("lyntin: " + 
-            message.data.replace("\n", "\nlyntin: ") + "\n")
+      pretext = "lyntin: " + pretext
 
     elif message.type == ui.TESTDATA:
-      sys.stdout.write ("\nTEST: " + 
-            message.data.replace("\n", "\nTEST: ") + "\n")
+      pretext = "TEST: " + pretext
 
     elif message.type == ui.USERDATA:
-      pass
+      # we don't print user data in the textui
+      return
+
+    if pretext != "":
+      if message.data[-1] == "\n":
+        message.data = (pretext + 
+                        message.data[:-1].replace("\n", "\n" + pretext) + 
+                        "\n")
+      else:
+        message.data = pretext + message.data.replace("\n", "\n" + pretext)
+
+    sys.stdout.write(message.data)
+    sys.stdout.flush()
 
   def prompt(self):
     """ Prints a prompt to the user."""
