@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.81 2003/01/24 03:01:04 willhelm Exp $
+# $Id: engine.py,v 1.82 2003/01/29 18:35:40 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -269,9 +269,10 @@ class Engine:
           if mem.find(" ") != -1:
             command = mem.split(" ", 1)[1]
             command = utils.strip_braces(command)
-            for i in range(num):
-              loopcommand = self.handleUserData(command, 1, session)
-            historyitems.append(lyntin.commandchar + ses + " {" + loopcommand + "}")
+            if num > 0:
+              for i in range(num):
+                loopcommand = self.handleUserData(command, 1, session)
+              historyitems.append(lyntin.commandchar + ses + " {" + loopcommand + "}")
           continue
 
         # is it a session?
