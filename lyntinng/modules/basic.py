@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.47 2002/03/29 23:47:05 willhelm Exp $
+# $Id: basic.py,v 1.48 2002/03/30 18:36:28 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -634,7 +634,7 @@ def read_cmd(session, words, input):
 
     # FIXME - this doesn't account for bad first characters....
     try:
-      session.handleUserData("#char " + contents[0][0])
+      session.handleUserData(lyntin.commandchar + "char " + contents[0][0])
     except:
       pass
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.22 2002/03/28 01:03:41 willhelm Exp $
+# $Id: engine.py,v 1.23 2002/03/30 16:33:48 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -224,7 +224,7 @@ class Engine:
       mem = utils.chomp(mem).replace("\;", ";").strip()
 
       if len(mem) == 0:
-        mem = "#cr"
+        mem = lyntin.commandchar + "cr"
 
       # spam the hook with the raw input statement first...
       if internal:

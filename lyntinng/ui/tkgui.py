@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.20 2002/03/29 06:57:02 willhelm Exp $
+# $Id: tkgui.py,v 1.21 2002/03/29 18:09:59 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -386,7 +386,7 @@ class CommandEntry(Tkinter.Entry):
     self.bind("<Control-KeyPress-Down>", self.callPopInputStack)
     self.bind("<KeyPress-Escape>", self.callEsc)
 
-    # self.bind("<KeyPress-F1>", self.callBinding) - reserved for help
+    self.bind("<KeyPress-F1>", self.callBinding) - reserved for help
 
     self.bind("<KeyPress-F2>", self.callBinding)
     self.bind("<KeyPress-F3>", self.callBinding)
@@ -453,48 +453,21 @@ class CommandEntry(Tkinter.Entry):
       return 0
 
   def callBinding(self, tkevent):
-    """ Handles arbitrary bindings of keypresses."""
+    """ Handles arbitrary bindings of function call keypresses."""
 
     # handle all the function keys except F1
-    if tkevent.keycode == 113 and tkevent.keysym == "F2":
-      if self._executeBinding("VK_F2") == 1:
-        return "break"
-    if tkevent.keycode == 114 and tkevent.keysym == "F3":
-      if self._executeBinding("VK_F3") == 1:
-        return "break"
-    if tkevent.keycode == 115 and tkevent.keysym == "F4":
-      if self._executeBinding("VK_F4") == 1:
-        return "break"
-    if tkevent.keycode == 116 and tkevent.keysym == "F5":
-      if self._executeBinding("VK_F5") == 1:
-        return "break"
-    if tkevent.keycode == 117 and tkevent.keysym == "F6":
-      if self._executeBinding("VK_F6") == 1:
-        return "break"
-    if tkevent.keycode == 118 and tkevent.keysym == "F7":
-      if self._executeBinding("VK_F7") == 1:
-        return "break"
-    if tkevent.keycode == 119 and tkevent.keysym == "F8":
-      if self._executeBinding("VK_F8") == 1:
-        return "break"
-    if tkevent.keycode == 120 and tkevent.keysym == "F9":
-      if self._executeBinding("VK_F9") == 1:
-        return "break"
-    if tkevent.keycode == 121 and tkevent.keysym == "F10":
-      if self._executeBinding("VK_F10") == 1:
-        return "break"
-    if tkevent.keycode == 122 and tkevent.keysym == "F11":
-      if self._executeBinding("VK_F11") == 1:
-        return "break"
-    if tkevent.keycode == 123 and tkevent.keysym == "F12":
-      if self._executeBinding("VK_F12") == 1:
-        return "break"
+    if tkevent.keysym = "F1":
+      self._partk.handleinput(lyntin.commandchar + "help")
+      return "break"
+      
+    if self._executeBinding("VK_" + tkevent.keysym) == 1:
+      return "break"
 
-      # these two lines help in debugging stuff we bound
-      # but don't know how to handle because I can't seem to
-      # find a solid listing of Tk keysyms (grrrrrrr).
-      # print repr(tkevent)
-      # print repr(tkevent.__dict__)
+    # these two lines help in debugging stuff we bound
+    # but don't know how to handle because I can't seem to
+    # find a solid listing of Tk keysyms (grrrrrrr).
+    # print repr(tkevent)
+    # print repr(tkevent.__dict__)
 
 
   def callKP9(self, tkevent):

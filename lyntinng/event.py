@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.15 2002/03/22 01:27:24 willhelm Exp $
+# $Id: event.py,v 1.16 2002/03/24 21:00:17 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -108,7 +108,7 @@ class StartupEvent(Event):
 
     if f != '':
       exported.write_message("Reading in file " + f)
-      engine.myengine.getSession('common').handleUserData('#read ' + f)
+      engine.myengine.getSession('common').handleUserData(lyntin.commandchar + 'read ' + f)
 
     # start the timer thread
     engine.myengine.startthread("timer", engine.myengine.runtimer)

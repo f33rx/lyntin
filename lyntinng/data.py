@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.1 2002/03/29 23:47:05 willhelm Exp $
+# $Id: data.py,v 1.2 2002/03/30 18:36:27 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -13,6 +13,7 @@ is useful for modules.
 """
 
 import string, re
+import utils
 
 class DataBuffer:
   """
@@ -35,6 +36,7 @@ class DataBuffer:
     
       'text' -- (string) the text to add to the buffer
     """
+    text = utils.filter_ansi(utils.filter_cm(text))
     lines = text.splitlines(1)
     for mem in lines:
       if len(self._buffer) == 0 or self._buffer[-1][-1] == '\n':

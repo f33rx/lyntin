@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.7 2002/03/02 18:10:39 willhelm Exp $
+# $Id: ui.py,v 1.8 2002/03/02 22:28:47 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -13,7 +13,7 @@ to the user through the ui.  Messages have types and the ui
 will display the message differently depending on the type.
 """
 import string, re, sys
-import engine, event, utils
+import engine, event, utils, lyntin
 
 """ The message type constants."""
 ERROR = "ERROR: "
@@ -132,5 +132,5 @@ class BaseUI:
     """
     input = utils.chomp(input)
     if input == '':
-      input = "#cr"
+      input = lyntin.commandchar + "cr"
     event.InputEvent(input).enqueue()
