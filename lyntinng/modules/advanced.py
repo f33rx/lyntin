@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.22 2002/10/26 03:33:02 jmberne Exp $
+# $Id: advanced.py,v 1.23 2002/10/26 04:32:40 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -29,7 +29,8 @@ def _get_user_module():
   # first "lyntinuser" it finds and use that one.  i'm not sure how
   # we could implement a priority.
   for mem in sys.modules.keys():
-    if mem == "lyntinuser" or (len(mem) > 5 and mem[-5:] == ".lyntinuser"):
+    modname = "lyntinuser"
+    if mem == modname or (len(mem) > len(modname) and mem[-1 * (len(modname) + 1):] == "." + modname):
       usermodule = sys.modules[mem]
       return usermodule
 

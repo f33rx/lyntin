@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.12 2002/10/19 19:13:51 willhelm Exp $
+# $Id: variable.py,v 1.13 2002/10/23 23:59:09 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -421,33 +421,17 @@ def evalmodechange(args):
   old = args[0]
   new = args[1]
 
-  # Commented this out so that denestVars is always called in either mode.  It now
-  # does nothing in tintin mode.
-  #
-  #if (old == lyntin.LYNTIN or old == -1) and new == lyntin.TINTIN:
-  #  # lyntin's just starting up into TINTIN mode or we just switched
-  #  # into TINTIN
-  #  hooks.user_filter_hook.unregister(vm.denestVars)
-  #
-  #elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
-  #  # lyntin's just starting up into LYNTIN mode or we just switched
-  #  # into LYNTIN
-  #  hooks.user_filter_hook.register(vm.denestVars, 95)
-  #
-  #elif old == lyntin.LYNTIN and new == -1:
-  #  # this module is being unloaded
-  #  hooks.user_filter_hook.unregister(vm.denestVars)
-
-  hooks.user_filter_hook.register(vm.denestVars, 95)
-
+  #This doesn't really need to do anything any more... hmm...
 
 def load():
   """ Initializes the module by binding all the commands."""
+  print "Variable Module Loading"
   global vm
   modutils.load_commands(commands_dict)
   vm = VariableManager()
   exported.add_manager("variable", vm)
   hooks.user_filter_hook.register(vm.userfilter, 10)
+  hooks.user_filter_hook.register(vm.denestVars, 95)
   hooks.write_hook.register(vm.persist)
 
   hooks.evalmode_change_hook.register(evalmodechange)
@@ -459,6 +443,7 @@ def unload():
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("variable")
   hooks.user_filter_hook.unregister(vm.userfilter)
+  hooks.user_filter_hook.unregister(vm.denestVars)
   hooks.write_hook.unregister(vm.persist)
 
   hooks.evalmode_change_hook.unregister(evalmodechange)
