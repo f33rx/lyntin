@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.16 2002/07/06 04:02:42 willhelm Exp $
+# $Id: testserver.py,v 1.17 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -227,6 +227,9 @@ class MasterServer:
         try: new_data = conn._sock.recv(1024) 
         except Exception, e:
           print "exception: %s" % e
+          if conn in self._conns:
+            self._conns.remove(conn)
+          conn.killConn()
           continue
 
         if new_data:
