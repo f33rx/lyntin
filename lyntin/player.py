@@ -764,7 +764,8 @@ def UnAction(words, input, seslist):
                 # kill!!!
                 del ses.actions[ac]
             # remove from action_list
-            for i in xrange(len(ses.action_list)):
+            # FIXME - this causes an error--out of index range.
+            for i in xrange(len(ses.action_list) - 1):
                 if ses.action_list[i][0] in acs:
                     del ses.action_list[i]
 

@@ -144,7 +144,7 @@ def HandleMudOutput(output, ses):
 # log some text
 def log(str):
     if(data.debug > 0 and data.logfile):
-        data.logfile.write("*** Logging ***\n")
+        # data.logfile.write("*** Logging ***\n")
         data.logfile.writelines( [str, "\n"] )
         if(data.debug > 5 and data.logfile):
             for c in str:

@@ -310,6 +310,7 @@ class session:
     # that'll fix the problem.
     def CheckActions(self, output):
 
+        # works with the trigger
         # get a list of variables in str, in the order in
         # which they appear.
         # i.e., for the three variables %4 %1 %3, keylist
@@ -317,6 +318,7 @@ class session:
         def orderedvars(instr):
             str = instr[:] # we'll mutilate this copy
             keylist = []
+            speckeylist = []
             # loop over the pattern-variables in the string
             # adding the variables to the keylist
             # each time we process one, delete it from the string
@@ -329,6 +331,7 @@ class session:
             return keylist
 
 
+        # FIXME - It's somewhere below this line....
         acs = self.action_list  
         matched = [] # list of lines that match
         for line in split_into_lines(output):
@@ -358,7 +361,10 @@ class session:
             # matched on the trigger
             for var in varvals.keys():
                 # replace occurrences of '%i' with val
-                response = regsub.sub(var, varvals[var], response)
+                if string.find(var, response):
+                    response = regsub.sub(var, varvals[var], response)
+                if string.find("$" + var[1:], response):
+                    response = regsub.sub("$" + var[1:], string.replace(varvals[var], ";", "\;"), response)
 
             # run the action hook
             hooks.action_hook.run((self, match, response))
