@@ -9,6 +9,7 @@ things that need to be done.
 
 
 TODO:
+ - build event logging
  - fix ticker
  - fix substitutes (they're not implemented right)
 

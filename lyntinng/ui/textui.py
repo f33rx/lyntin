@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.5 2002/02/16 02:46:34 willhelm Exp $
+# $Id: textui.py,v 1.6 2002/02/18 05:19:42 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
 """
 import string, re, sys, traceback
-import engine, event, utils, ui
+import engine, event, utils, ui, exported
 
 class Textui(ui.BaseUI):
   """
@@ -26,9 +26,11 @@ class Textui(ui.BaseUI):
   def startui(self, args):
     """ Sets up the UI."""
     engine.myengine.startthread("ui", self.run)
-     
+
   def run(self):
     """ This is the poll loop for user input."""
+
+    # FIXME - should look into reworking this code
     import event, sys, select, os
     try:
       if os.name == 'posix':
@@ -43,6 +45,7 @@ class Textui(ui.BaseUI):
                   data = "#cr"
                 self.handleinput(data)
               except IOError:
+                # traceback.print_exc()
                 pass
 
       else:
@@ -53,6 +56,7 @@ class Textui(ui.BaseUI):
       pass
 
     except:
+      traceback.print_exc()
       event.ShutdownEvent().enqueue()
 
   def write(self, message):

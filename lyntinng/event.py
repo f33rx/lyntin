@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.8 2002/02/07 15:48:08 willhelm Exp $
+# $Id: event.py,v 1.9 2002/02/18 05:19:42 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -15,7 +15,7 @@ event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
 import string, os, traceback, sys, getopt
-import engine, ui.ui, lyntin
+import engine, ui.ui, lyntin, exported
 
 class Event:
   """ Base Event class.
@@ -81,15 +81,15 @@ class StartupEvent(Event):
       from ui.textui import Textui
       engine.myengine.setUI(Textui())
 
-    engine.write_message("UI started.")
+    exported.write_message("UI started.")
 
     # import modules listed in modulesinit
-    engine.write_message("Importing modules in modules directory.")
+    exported.write_message("Importing modules in modules directory.")
     try:
       import modules.__init__
       modules.__init__.load_modules()
     except:
-      engine.write_error("Modules did not load correctly.")
+      exported.write_error("Modules did not load correctly.")
       ShutdownEvent().enqueue()
       traceback.print_exc()
 
@@ -100,13 +100,14 @@ class StartupEvent(Event):
     # try to use ~/.lyntinrc
     if lyntin.options['readfile'] == '' and lyntin.options['datadir'] != '':
       lyntin.options['readfile'] = lyntin.options['datadir'] + ".lyntinrc"
-      engine.write_message("Setting readfile to " + lyntin.options['readfile'])
+      exported.write_message("Setting readfile to " + 
+                    lyntin.options['readfile'])
 
     # handle command files
     f = lyntin.options['readfile']
 
     if f != '':
-      engine.write_message("Reading in file " + f)
+      exported.write_message("Reading in file " + f)
       engine.myengine.getSession('common').handleUserData('#read ' + f)
 
     # start the timer thread
@@ -119,7 +120,7 @@ class StartupEvent(Event):
                "For help, type #help general.\n" +
                "------------------------------------\n")
 
-    engine.write_message(message)
+    exported.write_message(message)
     engine.myengine.writePrompt()
 
 
@@ -137,7 +138,7 @@ class ShutdownEvent(Event):
   def execute(self):
     """ Execute the shutdown."""
     import time
-    engine.write_message("shutting down...  goodbye.")
+    exported.write_message("shutting down...  goodbye.")
     engine.myengine.spamhook(engine.SHUTDOWN_HOOK)
     sys.exit(0)
 
@@ -191,7 +192,7 @@ class ReloadEvent(Event):
     except:
       message = "reload unsuccessful: " + self._name
 
-    engine.write_message(message)
+    exported.write_message(message)
  
 
 class MudEvent(Event):
@@ -231,7 +232,7 @@ class InputEvent(Event):
 
   def execute(self):
     """ Execute."""
-    engine.write_user_data(self._input)
+    exported.write_user_data(self._input)
     engine.myengine.handleUserData(self._input)
 
 
@@ -253,7 +254,7 @@ class OutputEvent(Event):
 
   def execute(self):
     """ Execute."""
-    engine.write_ui(self._message)
+    exported.write_ui(self._message)
 
 
 class SpamEvent(Event):

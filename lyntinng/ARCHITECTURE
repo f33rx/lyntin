@@ -3,7 +3,7 @@
 
 * VERSION
 
-$Id$
+$Id: ARCHITECTURE,v 1.3 2002/02/03 18:53:12 willhelm Exp $
 
 
 * SYNOPSIS
@@ -11,7 +11,8 @@ $Id$
 This is a quick architecture document to help understand the
 internals of Lyntin.  Along with the online documentation (UML
 diagrams and ool docs), this should provide you with everything
-you need to know to build modules and help fix Lyntin bugs.
+you need to know to build modules, fix Lyntin bugs, identify
+problems, and hack Lyntin to your own devious desires.
 
 
 * ARCHITECTURE
@@ -31,3 +32,16 @@ engine.Engine
    |-- 1 threadmanager.ThreadManager
    |-- 1 ui.Baseui subclass
 ^>>
+
+
+* HOOKS
+
+The engine is augmented by a series of hooks which allow modules to
+execute functions without having to change Lyntin's internals.  An
+example of this would be the startup and shutdown hooks.  Any functions
+that hook into these hooks will be executed upon startup or shutdown
+of Lyntin.  Lyntin also uses these hooks to implement some of its
+functionality.
+
+For example, the TkGui uses the startup hook to instantiate its gui 
+interface and set itself up.

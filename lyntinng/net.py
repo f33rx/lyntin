@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.6 2002/02/02 22:43:47 willhelm Exp $
+# $Id: net.py,v 1.7 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
 connections with a mud and polling the connection for data.
 """
 import socket, string, select
-import engine, event
+import exported, event
 
 
 class SocketCommunicator:
@@ -71,7 +71,7 @@ class SocketCommunicator:
     if type(port) == type(''):
       port = int(port)
 
-    engine.write_message("Trying to connect to " + host + ".")
+    exported.write_message("Trying to connect to " + host + ".")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, port))
     sock.setblocking(1)
@@ -80,7 +80,7 @@ class SocketCommunicator:
     self._port = port
     self._sock = sock
     self._sessionname = sessionname
-    engine.write_message("Connection made.")
+    exported.write_message("Connection made.")
          
   def run(self):
     """ Polls a socket and returns any data sitting there."""

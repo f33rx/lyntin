@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: unittest.py,v 1.4 2002/02/04 01:10:17 willhelm Exp $
+# $Id: unittest.py,v 1.5 2002/02/07 02:09:05 willhelm Exp $
 #######################################################################
 import string, traceback, sys
-import utils, engine
+import utils, engine, exported
 
 """
 This module holds one command (#test) and a series of helper functions
@@ -78,41 +78,41 @@ def test_cmd(session, words, input):
     else:
       data = "There are no tests registered."
 
-    engine.write_message(data)
+    exported.write_message(data)
     return
 
   if words[1] == 'all':
-    engine.write_test("Running all tests.")
+    exported.write_test("Running all tests.")
     for mem in test_lookup.keys():
       run_test(test_lookup[mem])
     return
 
   if test_lookup.has_key(words[1]):
-    engine.write_test("Running test: " + words[1])
+    exported.write_test("Running test: " + words[1])
     run_test(test_lookup[words[1]])
   else:
-    engine.write_error("There is no test for '" + words[1] + "'")
+    exported.write_error("There is no test for '" + words[1] + "'")
 
 
 def run_test(testsequence):
   """ Runs a test sequence."""
-  engine.write_test("BEGINNING OF TEST.")
+  exported.write_test("BEGINNING OF TEST.")
   for mem in testsequence:
     # we use print to allow tests to tell the user what they
     # should be looking for
     if mem.find("print") == 0:
-      engine.write_test(mem.split(' ', 1)[1])
+      exported.write_test(mem.split(' ', 1)[1])
       continue
 
-    engine.write_test("test: '" + mem + "'")
+    exported.write_test("test: '" + mem + "'")
     # if it's not a print, then it's a lyntin command
     try:
       engine.myengine.handleUserData(input=mem, internal=1)
     except:
-      engine.write_test("exception:\n" + 
+      exported.write_test("exception:\n" + 
          string.join(traceback.format_list(traceback.extract_tb()), '\n'))
 
-  engine.write_test("END OF TEST.")
+  exported.write_test("END OF TEST.")
 
 
 def load():

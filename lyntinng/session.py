@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.11 2002/02/04 01:10:17 willhelm Exp $
+# $Id: session.py,v 1.12 2002/02/18 05:19:42 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy
-import engine, utils, lyntin, event, ticker
+import exported, engine, utils, lyntin, event, ticker
 
 # this is the regular expression that matches speedwalking stuff
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -265,7 +265,7 @@ class Session:
             break
 
       else:
-        engine.write_error("Not a valid command.")
+        exported.write_error("Not a valid command.")
         if internal==0: self._prompt()
       return
 
@@ -282,7 +282,7 @@ class Session:
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
     if self._socket == None:
-      engine.write_error("No connection.  Create a session.")
+      exported.write_error("No connection.  Create a session.")
       if internal==0: self._prompt()
       return
 
@@ -321,7 +321,7 @@ class Session:
       # handle highlights 
       input = self.getHighlightManager().expand(input)
 
-    engine.write_mud_data(input)
+    exported.write_mud_data(input)
 
   def log(self, input):
     """ Logs text to a file instance in self._logfile.
@@ -335,7 +335,7 @@ class Session:
       # FIXME - this assumes unix files
       self._logfile.write(utils.filter_ansi(utils.filter_cm(input)))
     except:
-      engine.write_error("Logfile cannot be written to.")
+      exported.write_error("Logfile cannot be written to.")
       self._logfile = None
 
   def getLogfile(self):
