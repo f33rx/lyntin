@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.4 2002/10/26 02:47:59 willhelm Exp $
+# $Id: ansi.py,v 1.5 2002/10/26 04:32:39 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -140,7 +140,7 @@ def is_color_token(token):
   if len(token) == 0:
     return 0
 
-  return (token[0:2] == chr(27) + "[") and (token[-1] == "m")
+  return ANSI_COLOR_REGEXP.match(token)
 
 
 def fix_color(color):
@@ -188,18 +188,15 @@ def split_ansi_from_text(text):
     # we do this to handle ansi color sequences which are broken
     # between two network chunks
     if marker < len(text):
-      esc = text.find('\33', marker)
+      esc = text.rfind('\33', marker)
       if esc != -1:
         for i in range(esc, len(text)):
           c = text[i]
-          if esc != -1:
-            if c == '\33':
-              esc = i
+
+          if c.isdigit() or c == ";" or c == "[":
+            continue
           else:
-            if c.isdigit() or c == ";" or c == "[":
-              continue
-            else:
-              esc = -1
+            esc = -1
 
       if esc == -1:
         textlist.append(text[marker:])
@@ -208,7 +205,6 @@ def split_ansi_from_text(text):
         textlist.append(text[esc:])
 
     return textlist
-
   return [text]
 
 
@@ -232,16 +228,17 @@ def figure_color(textlist, currentcolor, leftover=""):
   @return: the new currentcolor and leftover as a tuple
   @rtype: ((int, int, int), string)
   """
-  if leftover:
-    ind = textlist[0].find("m")
-    if ind > -1:
-      leftover += textlist[0][:ind]
-      textlist[0] = textlist[0][ind+1:]
-    textlist.insert(0, leftover)
-    leftover = ''
-
   if type(textlist) == type(''):
     textlist = split_ansi_from_text(textlist)
+
+  if leftover:
+    first = leftover + textlist[0]
+    matchob = ANSI_COLOR_REGEXP.search(first)
+    if matchob:
+      (b, e) = matchob.span()
+      textlist.insert(0, first[:e])
+      textlist[1] = first[e:]
+    leftover = ''
 
   for color in textlist:
     if is_color_token(color):
@@ -279,8 +276,18 @@ def figure_color(textlist, currentcolor, leftover=""):
   # we're looking for leftover pieces here
   if len(textlist) > 0:
     mem = textlist[-1]
-    if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
-      leftover = mem
+    esc = mem.find('\33')
+    if esc != -1:
+      for i in range(esc, len(mem)):
+        c = mem[i]
+
+        if c.isdigit() or c == ";" or c == "[":
+          continue
+        else:
+          esc = -1
+
+      if esc != -1:
+        leftover = mem
       
   return currentcolor, leftover
 
