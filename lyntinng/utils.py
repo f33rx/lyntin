@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.17 2002/04/21 20:20:45 willhelm Exp $
+# $Id: utils.py,v 1.18 2002/04/29 04:21:39 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -105,36 +105,6 @@ def expand(str, list):
   return ret
 
    
-def expand_speedwalk(input):
-  """
-  Expands speedwalk shorthand into the full-blown exciting
-  thrill of mud-input.
-
-  arguments:
-
-    'input' -- (string) the input string
-
-  returns:
-
-    (string) the expanded speedwalk input
-
-  """
-
-  # FIXME - this might be better written
-
-  output = ''
-  c = ''
-  for mem in input:
-    if mem in '0123456789':
-      c += mem
-    elif len(c) > 0:
-      output = output + ((mem + '\n') * int(c))
-      c = '' 
-    else:
-      output = output + mem + '\n'
-  return output
-
-
 def filter_ansi(text):
   """ Filters out ansi codes."""
   return re.sub('\[[0-9;]*[mJ]', '', text)
