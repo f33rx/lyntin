@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.25 2002/05/15 00:16:55 willhelm Exp $
+# $Id: action.py,v 1.26 2002/05/16 02:13:47 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
 (triggers) and expansion of actions.
 """
-import re
+import re, string
 import manager, utils, event, lyntin
 
 # the placement variable regular expression
