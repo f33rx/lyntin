@@ -1,0 +1,13 @@
+   syntax: #command [<command> <function>]
+   With no arguments, prints all commands available.
+   With two arguments it adds a new command.
+
+   <function> is in the format of module.function .  Lyntin will
+   tell you if the function is not callable.
+
+   The function needs to have the signature:
+      def func(words, input, seslist)
+
+   Look at examples in player.py .
+
+   see also: uncommand

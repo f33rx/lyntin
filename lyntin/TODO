@@ -7,8 +7,6 @@ FOR 2.0 release:
 finish up help files
  - help files on modules
 
-fix up AddCommand in app.py
-
 check through the bugs
 
 

@@ -46,7 +46,7 @@ class Client(dict_plus.c):
            self.commands[name] = func
            return 1
        else:
-           pieces = split(func, ".")
+           pieces = string.split(func, ".")
            if len(pieces) < 2:
                player.PutError('Please specify function with module.function format.')
                return 0

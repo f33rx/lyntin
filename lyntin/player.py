@@ -214,12 +214,13 @@ def AddCommand(words, input, seslist):
     the 'command' command more like alias and action.
     """
     if len(words) > 2:
-        # FIXME - we actually have to go out and find the command
-        # mentioned.  should be in notation /path/module.function
-        # or something similar.
-        data.theapp.AddCommand(words[1], words[2])
+        ret = data.theapp.AddCommand(words[1], words[2])
+        if ret == 1:
+            PutMessage("command: " + words[1] + " added.")
+        else:
+            PutMessage("command: " + words[1] + " either doesn't exist, or is uncallable.")
     else:
-        return PrintCommand(words, input, seslist)
+        return PrintCommands(words, input, seslist)
 
 def UnCommand(words, input, seslist):
     """UnCommand(words, input, seslist) -> None
