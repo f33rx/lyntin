@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.18 2002/04/29 04:21:39 willhelm Exp $
+# $Id: utils.py,v 1.19 2002/04/29 05:02:05 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -47,7 +47,6 @@ def http_get(url):
   host, resource = filename.split("/", 1)
 
   resource = "/" + resource
-  print host, resource
   sock = httplib.HTTP()
   sock.connect(host)
   sock.putrequest("GET", resource)
