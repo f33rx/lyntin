@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.5 2002/02/04 01:10:16 willhelm Exp $
+# $Id: lyntin.py,v 1.6 2002/02/07 15:48:08 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -152,11 +152,12 @@ if __name__ == '__main__':
     # if they haven't set the datadir via the command line, then
     # we go see if they have a HOME in their environment variables....
     if lyntin.options['datadir'] == '':
-      datadir = os.environ["HOME"]
-      if datadir:
-        if datadir[-1] != os.sep: 
-          datadir = datadir + os.sep
-        lyntin.options['datadir'] = datadir
+      if os.environ.has_key("HOME"):
+        datadir = os.environ["HOME"]
+        if len(datadir) > 0:
+          if datadir[-1] != os.sep: 
+            datadir = datadir + os.sep
+          lyntin.options['datadir'] = datadir
 
 
     # instantiate an engine
