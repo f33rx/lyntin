@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.17 2002/06/02 15:10:55 jmberne Exp $
+# $Id: argparser.py,v 1.18 2002/06/02 16:06:03 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -21,10 +21,7 @@ defaultOptions={ "stripBraces": 1,
 optionParser = None
 
 class ParserException(Exception):
-  def __init__(self, value):
-    self.value = value
-  def __str__(self):
-    return `self.value`
+  pass
 
 class ArgumentParser:
   """

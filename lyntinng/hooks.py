@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.14 2002/05/31 02:08:30 willhelm Exp $
+# $Id: hooks.py,v 1.15 2002/06/07 23:43:30 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -21,12 +21,7 @@ FIRST = 0
 LAST = 99
 
 class StopSpammingException(Exception):
-  def __init__(self, value=""):
-    self.value = value
-
-  def __str__(self):
-    return `self.value`
-
+  pass
 
 class Hook:
   """
