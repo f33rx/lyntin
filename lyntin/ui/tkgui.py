@@ -30,6 +30,9 @@ fgColorCodes = {
                 "2036": "#00ffff",
                 "2037": "#ffffff" }
 
+winfont = ("Fixedsys", 12)
+posixfont = ("Fixedsys", 24)
+
 # fgColorCodes = { "30": "black", "31": "red", "32": "green",
 #                  "33": "yellow", "34": "blue", "35": "magenta",
 #                  "36": "cyan", "37": "white"}
@@ -52,10 +55,9 @@ class TkGui(BaseGUI):
         self.regcolors = (0, 37, 40)
         self.unfinishedcolor = (0, "")
         
-        
         if os.name != 'posix':
             # require tcl/tk 8.0 on windows
-            fnt = font.Font(font=("Fixedsys", 12))
+            fnt = font.Font(font=winfont)
             self.entry = tkhistentry.CommandEntry(self.tk, self, 
                                                 fg='white', bg='black',
                                                 insertbackground='yellow',
@@ -70,12 +72,14 @@ class TkGui(BaseGUI):
                                       'height': 20})
         else:
             self.entry = tkhistentry.CommandEntry(self.tk, self,
-                                                fg='white', bg='black',
-                                                insertbackground='yellow',
-                                                insertwidth='2')
+                                                  fg='white', bg='black',
+                                                  insertbackground='yellow',
+                                                  font=font.Font(font=posixfont),
+                                                  insertwidth='2')
 
             self.txt = Text(self.tk, {'fg': 'white', 'bg': 'black',
                                       'state': 'disabled',
+                                      'font': font.Font(font=posixfont),
                                       'height': 20})
             self.txtbuffer = Text(self.tk, {'fg': 'white', 
                                       'bg': 'black', 'state': 'disabled', 
@@ -289,7 +293,6 @@ class TkGui(BaseGUI):
         if txt[0] == chr(27):
         # if txt[0] == chr(27) and txt[len(txt)-1] == "m":
             newcolor = txt[2:(len(txt))]
-
             # if newcolor == "0":
             if newcolor == "0" or newcolor == "":
                 self.currcolors = self.regcolors
@@ -349,3 +352,9 @@ class TkGui(BaseGUI):
             self.txt.delete ("1.0", "100.end")
             self.txt.config(state=DISABLED)
 
+
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:
