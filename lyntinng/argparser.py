@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.6 2002/04/25 17:13:17 willhelm Exp $
+# $Id: argparser.py,v 1.7 2002/04/25 17:34:56 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -178,7 +178,7 @@ class ArgumentParser:
       if self.typecheckers.has_key(typespec):
         typechecker = self.typecheckers[typespec]
       else:
-        raise ParserException, "Unknown type specified"
+        raise ParserException, "Unknown type specified: %s" % (typespec)
 
       parser.typechecker = typechecker
 
