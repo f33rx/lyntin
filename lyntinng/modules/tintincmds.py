@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.16 2002/05/14 22:46:26 willhelm Exp $
+# $Id: tintincmds.py,v 1.17 2002/05/16 17:38:02 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -310,6 +310,7 @@ def highlight_cmd(session, args, input):
   """
   style = args["style"]
   text = args["text"]
+  quiet = args["quiet"]
 
   if not text and not style:
     data = session.getManager("highlight").getInfo()
@@ -321,9 +322,10 @@ def highlight_cmd(session, args, input):
 
   if text and style:
     session.getManager("highlight").addHighlight(style, text)
-    exported.write_message("highlight: {%s} {%s} added." % (style, text))
+    if not quiet:
+      exported.write_message("highlight: {%s} {%s} added." % (style, text))
 
-commands_dict["highlight"] = (highlight_cmd, "style= text=")
+commands_dict["highlight"] = (highlight_cmd, "style= text= quiet:boolean=true")
 
 
 def history_cmd(session, args, input):
