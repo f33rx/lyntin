@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.15 2002/04/14 03:58:18 willhelm Exp $
+# $Id: utils.py,v 1.16 2002/04/16 03:44:37 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -85,8 +85,6 @@ def expand_speedwalk(input):
   Expands speedwalk shorthand into the full-blown exciting
   thrill of mud-input.
 
-  FIXME - this might be better written
-
   arguments:
 
     'input' -- (string) the input string
@@ -96,6 +94,9 @@ def expand_speedwalk(input):
     (string) the expanded speedwalk input
 
   """
+
+  # FIXME - this might be better written
+
   output = ''
   c = ''
   for mem in input:
@@ -207,6 +208,9 @@ def strip_braces(text):
     (string) text with the braces (if matched) removed
   """
   text = text.strip()
+  if len(text) == 0:
+    return text
+
   if text[0] == '{' and text[-1] == '}':
     return text[1:-1]
   return text

@@ -1,20 +1,18 @@
+#!/usr/bin/python
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Free Software Foundation 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: utils.py,v 1.16 2002/04/16 03:44:37 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
 automatically into a dictionary.
-
-Usage:
-
 """
-
 import string, re
+import utils
 
 class ArgumentParser:
   """
@@ -22,10 +20,7 @@ class ArgumentParser:
   """
   
   def __init__(self,argspec):
-    self.typecheckers = { "string":stringChecker(), 
-                          "int":intChecker(), 
-                          "boolean":booleanChecker(),
-                          "booleanornone":booleanOrNoneChecker() }
+    self.typecheckers = { "string":stringChecker(), "int":intChecker() , "boolean":booleanChecker(), "booleanornone":booleanOrNoneChecker()}
     self.buildParsers(argspec)
     return
 
@@ -69,6 +64,7 @@ class ArgumentParser:
     self.argspec = self.split(argspec)
 
     parsedspec = self.argspec
+
     
     doneWithIndices = 0
     defaultSeen = 0
@@ -96,8 +92,8 @@ class ArgumentParser:
           namedCollector = 1
         else: #this is an index collection argument
           argname = argname[:-1]
-          # Must check to see that we are the last argument or that the 
-          # last argument is a named collector.
+          # Must check to see that we are the last argument or that 
+          # the last argument is a named collector.
           if i < len(parsedspec) - 2:
             raise Exception, "index collection argument must be last or second-to last argument (%s)" % (argname)
           if i == len(parsedspec) -2:
@@ -127,6 +123,8 @@ class ArgumentParser:
       if not namedCollector and not indexCollector:
         if not doneWithIndices:
           self.indexparsers.append(parser)
+        if self.parsers.has_key(argname):
+          raise Exception, "Multiple argument named %s specified." % (argname)
         self.parsers[argname] = parser
       elif namedCollector:
         self.extranamedparser = parser
@@ -278,6 +276,7 @@ class Parser:
       dict[self.argname] = self.parse(val)
 
   def parse(self, val):
+    val = utils.strip_braces(val)
     if self.typechecker:
       return self.typechecker.check(val)
     else:
@@ -294,8 +293,7 @@ class extraIndexParser(Parser):
     self.default = []
     
   def parseInto(self, index, val, dict):
-    if self.typechecker:
-      val = self.typechecker.check(val)
+    val = self.parse(val)
     if dict.has_key(self.argname):
       dict[self.argname].append(val)
     else:
@@ -312,8 +310,7 @@ class extraNamedParser(Parser):
     self.default = {}
     
   def parseInto(self, key, val, dict):
-    if self.typechecker:
-      value = self.typechecker.check(val)
+    val=self.parse(val)
     if dict.has_key(self.argname):
       if dict[self.argname].has_key(key):
         raise Exception, "multiple values given for extra argument %s" % (key)
@@ -387,15 +384,18 @@ class booleanOrNoneChecker:
       return 1
     elif arg == "off" or arg == "false" or arg == "0":
       return 0
-    elif arg == "None" or arg == "-" or "":
+    elif arg == "None" or arg == "-" or arg == "":
       return None
     else:
       raise Exception, "Invalid boolean value specified: %s" % (arg)
 
 
 if __name__ == '__main__':
-  try:
-    argParser = ArgumentParser("arg1 arg2 arg3* arg4**")
-    print argParser.parse("test1 test3 test5 test7 help=wahoo woo=weewee")
-  except Exception, e:
-    print e
+  testargs = {"arg1 arg2 arg3* arg4**":["test1 test3 test5 test7 help=wahoo woo=weewee"], "mapname*":["3k mapper by notadragon","lalala"]}
+
+  for argspec in testargs.keys():
+    argparser = ArgumentParser(argspec)
+    print "Argspec: %s" % (argspec)
+    for args in testargs[argspec]:
+      print "Args   : %s" % (args)
+      print "Dict   : %s" % (`argparser.parse(args)`)

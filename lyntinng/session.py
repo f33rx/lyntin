@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.36 2002/04/21 18:45:36 willhelm Exp $
+# $Id: session.py,v 1.37 2002/04/21 19:23:37 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -198,7 +198,7 @@ class Session:
 
   def writeSocket(self, message):
     """ Writes data to the socket."""
-    hooks.to_mud_hook.spamhook(self, message)
+    hooks.to_mud_hook.spamhook((self, message))
     if self._socket:
       self._socket.write(message)
 
@@ -297,6 +297,7 @@ class Session:
     if not self._verbatim:
       # are we speedwalking?... ("news" explicitly doesn't count)
       if lyntin.speedwalk == 1:
+
         # FIXME - handle news and sense differently
         if SPEEDWALK_REGEXP.search(input) and input != 'news':
           self.writeSocket(utils.expand_speedwalk(input))

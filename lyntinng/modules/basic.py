@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.61 2002/04/14 17:36:12 willhelm Exp $
+# $Id: basic.py,v 1.62 2002/04/21 19:23:37 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -87,29 +87,27 @@ def alias_cmd(session, words, input):
     exported.write_error("alias: cannot be added. %s" % e)
 
 
-def ansi_cmd(session, words, input):
+def ansi_cmd(session, opts, input):
   """#ansi [on|off]
 
   With no arguments, tells you whether ansicolor is enabled.
   With arguments, sets the ansicolor global variable.
   """
-  if len(words) == 1:
+  option = opts["option"]
+
+  if option == 1:
+    lyntin.ansicolor = 1
+    exported.write_message("ansi: ansi is now enabled.")
+
+  elif option == 0:
+    lyntin.ansicolor = 0
+    exported.write_message("ansi: ansi is now disabled.")
+
+  else:
     if lyntin.ansicolor:
       exported.write_message("ansi: ansi color is enabled.")
     else:
       exported.write_message("ansi: ansi color is disabled.")
-    return
-
-  option = utils.strip_braces(words[1])
-
-  if option == '1' or option == 'on':
-    lyntin.ansicolor = 1
-    exported.write_message("ansi: ansi is now enabled.")
-  elif option == '0' or option == 'off':
-    lyntin.ansicolor = 0
-    exported.write_message("ansi: ansi is now disabled.")
-  else:
-    exported.write_error("syntax: #ansi [on|off]")
 
 
 def boss_cmd(session, words, input):
@@ -1132,7 +1130,7 @@ def zap_cmd(session, words, input):
 def load():
   """ Initializes the module by binding all the commands."""
   exported.add_command("^clear", clear_cmd)
-  exported.add_command("ansi", ansi_cmd)
+  exported.add_command("ansi", ansi_cmd, "option:booleanornone=")
   exported.add_command("action", action_cmd)
   exported.add_command("alias", alias_cmd)
   # exported.add_command("antisubstitute", antisubstitute_cmd)
@@ -1150,7 +1148,7 @@ def load():
   exported.add_command("help", help_cmd)
   exported.add_command("highlight", highlight_cmd)
   exported.add_command("history", history_cmd)
-  exported.add_command("if", if_cmd,"expr action elseaction=")
+  exported.add_command("if", if_cmd, "expr action elseaction=")
   exported.add_command("ignore", ignore_cmd)
   # exported.add_command("import", import_cmd)
   exported.add_command("info", info_cmd)
