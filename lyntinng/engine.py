@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.63 2002/07/12 00:11:56 willhelm Exp $
+# $Id: engine.py,v 1.64 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -211,6 +211,9 @@ class Engine:
                                          allows you to execute this
                                          and run all things in a
                                          specific session
+
+    returns:
+      'executed' -- (string) the commands that were executed
     """ 
     inputlist = utils.split_commands(input)
     if session == None:
@@ -234,9 +237,6 @@ class Engine:
           historyitems.append(memhistory)
           continue
 
-      #if we get here then it is not a valid !-expression.
-      historyitems.append(mem)
-
       # if it starts with a # it's a loop, session or command
       if len(mem) > 0 and mem[0] == lyntin.commandchar:
 
@@ -247,8 +247,11 @@ class Engine:
         if ses.isdigit():
           num = int(ses)
           if mem.find(" ") != -1:
+            command = mem.split(" ", 1)[1]
+            command = utils.strip_braces(command)
             for i in range(num):
-              self.handleUserData(mem.split(" ", 1)[1], internal, session)
+              loopcommand = self.handleUserData(command, 1, session)
+            historyitems.append(lyntin.commandchar + ses + " {" + loopcommand + "}")
           continue
 
         # is it a session?
@@ -260,6 +263,7 @@ class Engine:
           else:
             self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
                                                      internal )
+          historyitems.append(mem)
           continue
 
         # is it "all" sessions?
@@ -268,7 +272,11 @@ class Engine:
           for sessionname in self._sessions.keys():
             if sessionname != "common":
               self._sessions[sessionname].handleUserData(newinput, internal)
+          historyitems.append(mem)
           continue
+
+      #if we get here then it is not a valid !-expression. and it's going to the default session
+      historyitems.append(mem)
 
       # no command char, so we pass it on to the session.handleUserData
       # to do session oriented things
@@ -276,9 +284,11 @@ class Engine:
 
     # we don't record internal stuff or input that isn't supposed
     # to be echo'd
+    executed = ";".join(historyitems)
     if internal == 0 and lyntin.mudecho == 1:
-      self.getManager("history").recordHistory(";".join(historyitems))
+      self.getManager("history").recordHistory(executed)
 
+    return executed
 
   def handleMudData(self, session, text):
     """ Handle input coming from the mud.
