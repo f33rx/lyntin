@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.49 2002/04/01 18:24:36 willhelm Exp $
+# $Id: basic.py,v 1.50 2002/04/01 18:45:20 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -632,12 +632,17 @@ def read_cmd(session, words, input):
     
     contents = file.readlines()
 
-    # FIXME - this doesn't account for bad first characters....
-    try:
-      if contents[0][0] != lyntin.commandchar:
-        session.handleUserData(lyntin.commandchar + "char " + contents[0][0])
-    except:
-      pass
+    # we want to get rid of initial blank lines and make sure
+    # the file has content in it
+    while len(contents) > 0 and len(contents[0].strip()) == 0:
+      contents = contents[1:]
+
+    if len(contents) == 0:
+      exported.write_message("read: %s had no data." % filename)
+      return
+      
+    if contents[0][0] != lyntin.commandchar:
+      session.handleUserData(lyntin.commandchar + "char " + contents[0][0])
 
     for mem in contents:
       mem = mem.strip()
