@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.39 2002/12/24 03:25:10 willhelm Exp $
+# $Id: textui.py,v 1.40 2002/12/31 00:04:00 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -212,7 +212,7 @@ class Textui(ui.BaseUI):
     message = args[0]
 
     if type(message) == types.StringType:
-      message = ui.Message(message)
+      message = ui.Message(message, ui.LTDATA)
 
     line = message.data
     ses = message.session
@@ -223,7 +223,7 @@ class Textui(ui.BaseUI):
     # we prepend the session name to the text if this is not the 
     # current session sending text.
     pretext = ""
-    if (ses != None and ses != exported.get_current_session()):
+    if ses != None and ses != exported.get_current_session():
       pretext = "[" + ses.getName() + "] "
 
     if message.type == ui.ERROR or message.type == ui.LTDATA:
@@ -234,7 +234,7 @@ class Textui(ui.BaseUI):
 
       line = pretext + utils.chomp(line).replace("\n", "\n" + pretext)
       if lyntin.ansicolor == 1:
-        line = DEFAULT_ANSI + line 
+        line = DEFAULT_ANSI + line
       sys.stdout.write(line + "\n")
       return
 

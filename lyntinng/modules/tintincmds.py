@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.60 2002/12/18 04:47:59 willhelm Exp $
+# $Id: tintincmds.py,v 1.61 2002/12/22 23:07:20 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -635,7 +635,7 @@ def ticksize_cmd(ses, args, input):
   category: commands
   """
   if (ses.getName() == "common"):
-    exported.write_error("ticksize cannot be applied to common session.", ses)
+    exported.write_error("ticksize: cannot be applied to common session.", ses)
     return
 
   size = args["size"]
@@ -645,14 +645,48 @@ def ticksize_cmd(ses, args, input):
                            ses.getTicker().getTickLen(), ses)
     return
 
-  if size <= 0:
-    exported.write_error("ticksize must be a positive number.", ses)
-    return
-
   ses.getTicker().setTickLen(size)
   exported.write_message("ticksize: tick length set to %s." % str(size), ses)
 
 commands_dict["ticksize"] = (ticksize_cmd, "size:timespan=0")
+
+
+def tickwarnsize_cmd(ses, args, input):
+  """
+  Sets and displays the number of seconds you get warned before a
+  Tick actually happens.
+  Set tickwarnsize to 0 to disable the warnings.
+
+  examples:
+    #tickwarnsize
+    #tickwarnsize 6
+    #tickwarnsize 0
+
+  category: commands
+  """
+  if (ses.getName() == "common"):
+    exported.write_error("tickwarnsize: cannot be applied to common session.", ses)
+    return
+
+  size = args["size"]
+
+  if size == 0:
+    exported.write_message("tickwarnsize: tickwarnsize is %d seconds." % 
+                           ses.getTicker().getTickWarn(), ses)
+    return
+
+  ticksize = ses.getTicker().getTickLen()
+  if size >= ticksize:
+    exported.write_error("tickwarnsize: tickwarn length cannot be >= " +
+                         "to ticksize.\nCurrent ticksize is %s." %
+                         str(ticksize), ses)
+    return
+
+  ses.getTicker().setTickWarn(size)
+  exported.write_message("tickwarnsize: tickwarn length set to %s." %
+                         str(size), ses)
+
+commands_dict["tickwarnsize"] = (tickwarnsize_cmd, "size:timespan=0")
 
 
 def version_cmd(ses, args, input):

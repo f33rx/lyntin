@@ -5,7 +5,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-$Id: HACKING,v 1.20 2002/10/20 16:09:57 willhelm Exp $
+$Id: HACKING,v 1.21 2002/12/04 03:05:02 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -63,7 +63,8 @@ respective sections:
 
 
 Before we continue, we should ramble on about Lyntin's architecture 
-first.  But before that, we should cover Lyntin's philosophy.
+first and how to do things.  Before that, we'll cover Lyntin's 
+philosophy.
 
 
 
@@ -302,6 +303,8 @@ For more information, read the "ui" module.
 
 
 
+
+
 HOOKS
 -----
 
@@ -356,25 +359,27 @@ loaded by Lyntin in two different ways.  The first is at Lyntin
 startup when Lyntin lookes through all the Python modules in
 the Lyntin "modules/" directory excluding modules whose names
 start with a _.  The second is using the "#import" Lyntin
-command.
+command:
 
-In both instances, when the Lyntin modules is loaded, Lyntin
-will check the module for a "load" function and if it exists, 
-Lyntin will execute it.  This function lets you separate Python
-importing of the module from the Lyntin initialization.  All
-the Lyntin modules that come with Lyntin use the "load"
-function for binding to Lyntin hooks, adding new commands, 
-adding new help text, and doing other initialization sorts
-of things.
+  #import lyntinuser
+  #import modules.highlight
 
-When "#import" is executed, it first checks to see if the module
-is already loaded.  If it is and the module has an "unload"
-function it will call this prior to reloading the module and
-calling the "load" function if it exists.  We typically use
-the "unload" function for unregistering functions with Lyntin
-hooks as well as removing commands.  This allows you to cleanly
-reload modules you're testing/debugging without stopping and
-restarting your Lyntin session.
+When the Lyntin modules is loaded, Lyntin will check the module 
+for a "load" function and if it exists, Lyntin will execute it.  
+This function lets you separate Python importing of the module 
+from the Lyntin initialization.  All the Lyntin modules that 
+come with Lyntin use the "load" function for binding to 
+Lyntin hooks, adding new commands, adding new help text, and 
+doing other initialization sorts of things.
+
+When using the "#import" command to load a module, it first 
+checks to see if the module is already loaded.  If it is and 
+the module has an "unload" function it will call this prior to 
+reloading the module and calling the "load" function if it 
+exists.  We typically use the "unload" function for unregistering 
+functions with Lyntin hooks as well as removing commands.  This 
+allows you to cleanly reload modules you're testing/debugging 
+without stopping and restarting your Lyntin session.
 
 Lyntin modules should use the "exported" module to access Lyntin 
 internals.  This API is guaranteed not to change (much) over versions 
@@ -384,8 +389,54 @@ In the modules/ subdirectory, there's a module called modutils.  This
 module holds some helper functions for making things a bit easier
 to deal with.  Consult the documentation there for more guidance.
 
-Additionally, since Lyntin's commands are implemented in Lyntin modules, 
-you can use them as an example for writing your own.
+Use the modules that come with Lyntin as a series of examples on
+writing your own modules.
+
+
+
+WRITING MESSAGES TO THE UI
+--------------------------
+
+In your modules, you should import the "exported" module.  In
+there are a series of write_* functions which write various
+Message types to the user interface.  For example:
+
+  import exported
+
+  def fancy_cmd(ses, args, input):
+
+    text = args[0]
+
+    if not text:
+      exported.write_error("error: there is not text")
+      return
+
+    exported.write_message("text: %s" % text)
+
+
+See the documentation in the "exported" module for more details.
+
+ANSI colors are supported in the text you write to the ui.  One
+way of doing this is as follows:
+
+  exported.write_message("\033[1;34mhellothere\033[0m")
+
+
+However, that's difficult to read and subject to many potential
+tyops.  As such, there's a get_color function in the "ansi" module
+which makes this a little easier:
+
+  import ansi
+
+  exported.write_message("%shello%s" % 
+                         ansi.get_color("light blue"),
+                         ansi.get_color("default"))
+
+
+ANSI coloring is not a binary thing--there's no end tag.  It's
+also not very nestable.  Make sure to use "default" when ending
+your ANSI coloring--that returns the ANSI color to the default
+values for options, foreground, and background.
 
 
 

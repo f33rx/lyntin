@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.17 2002/12/27 02:27:43 willhelm Exp $
+# $Id: highlight.py,v 1.18 2002/12/31 00:03:59 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -19,36 +19,6 @@ something like that when ansi is off.
 import string
 import ansi, manager, utils, lyntin, hooks, exported, modutils
 
-STYLEMAP = {
-             "bold": "1",
-             "underline": "4",
-             "blink": "5",
-             "reverse": "7",
-             "black": "30",
-             "red": "31",
-             "green": "32",
-             "yellow": "33",
-             "blue": "34",
-             "magenta": "35",
-             "cyan": "36",
-             "white": "37",
-             "grey": "1;30",
-             "light red": "1;31",
-             "light green": "1;32",
-             "light yellow": "1;33",
-             "light blue": "1;34",
-             "light magenta": "1;35",
-             "light cyan": "1;36",
-             "light white": "1;37",
-             "b black": "40",
-             "b red": "41", 
-             "b green": "42",
-             "b yellow": "43",
-             "b blue": "44",
-             "b magenta": "45",
-             "b cyan": "46",
-             "b white": "47"
-           }
 
 class HighlightData:
   def __init__(self):
@@ -73,27 +43,8 @@ class HighlightData:
     @type  text: string
     """
     style = style.lower()
-    markup, compiled = self._getMarkup(style), utils.compile_regexp(text, 0, 1)
+    markup, compiled = ansi.get_color(style), utils.compile_regexp(text, 0, 1)
     self._highlights[text] = (style, markup, compiled)
-
-  def _getMarkup(self, style):
-    """
-    Looks at the style (which is a comma separated list of 
-    styles) and figures out the markup string and returns it.
-
-    @param style: the style to retrieve markup for
-    @type  style: text
-
-    @return: the ansi code markup for the given style
-    @rtype: string
-    """
-    styles = style.split(",")
-    markup = ""
-    for mem in styles:
-      mem = mem.strip()
-      if STYLEMAP.has_key(mem):
-        markup = markup + STYLEMAP[mem] + ";"
-    return chr(27) + "[" + markup[:-1] + "m"
 
   def clear(self):
     """
@@ -247,7 +198,7 @@ class HighlightData:
 
     return newlist
 
-  def getInfo(self, text=""):
+  def getInfo(self, text="", colorize=0):
     """
     Returns information about the highlights in here.
 
@@ -257,6 +208,10 @@ class HighlightData:
 
     @param text: we return info on highlights that match this text
     @type  text: string
+
+    @param colorize: whether (1) or not (0) to colorize the style
+        text in the style
+    @type  colorize: int
 
     @return: one big string of all the information
     @rtype: string
@@ -271,8 +226,16 @@ class HighlightData:
 
     data = []
     for mem in list:
-      data.append("%shighlight {%s} {%s}" % 
-                  (lyntin.commandchar, self._highlights[mem][0], mem))
+      if colorize == 1:
+        data.append("%shighlight {%s%s%s} {%s}" % 
+                    (lyntin.commandchar, 
+                     ansi.get_color(self._highlights[mem][0]),
+                     self._highlights[mem][0], 
+                     ansi.get_color("default"),
+                     mem))
+      else:
+        data.append("%shighlight {%s} {%s}" % 
+                    (lyntin.commandchar, self._highlights[mem][0], mem))
 
     return string.join(data, "\n")
 
@@ -309,9 +272,9 @@ class HighlightManager(manager.Manager):
       return self._highlights[ses].getHighlights()
     return []
 
-  def getInfo(self, ses, text=""):
+  def getInfo(self, ses, text="", colorize=0):
     if self._highlights.has_key(ses):
-      return self._highlights[ses].getInfo(text)
+      return self._highlights[ses].getInfo(text, colorize)
     return ""
 
   def getStatus(self, ses):
@@ -401,21 +364,20 @@ def highlight_cmd(ses, args, input):
 
   category: commands
   """
-  global STYLEMAP
   style = args["style"]
   text = args["text"]
   quiet = args["quiet"]
 
   if not text and not style:
-    data = exported.get_manager("highlight").getInfo(ses)
+    data = exported.get_manager("highlight").getInfo(ses, "", 1)
     if not data:
       data = "highlight: no highlights defined."
 
-    exported.write_message(data, ses)
+    exported.write_message("highlights:\n" + data, ses)
     return
 
   if not text:
-    data = exported.get_manager("highlight").getInfo(ses, style)
+    data = exported.get_manager("highlight").getInfo(ses, style, 1)
     if not data:
       data = "highlight: no highlights defined."
 
@@ -425,7 +387,7 @@ def highlight_cmd(ses, args, input):
   style = style.lower()
   stylelist = style.split(",")
   for mem in stylelist:
-    if mem not in STYLEMAP:
+    if mem not in ansi.STYLEMAP:
       exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (mem, lyntin.commandchar))
       return
     

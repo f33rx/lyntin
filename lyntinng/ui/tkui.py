@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.27 2002/12/29 19:00:22 willhelm Exp $
+# $Id: tkui.py,v 1.28 2002/12/31 00:04:00 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -168,9 +168,9 @@ class Tkui(ui.BaseUI):
     exported.write_message("For tk help type \"#help tkui\".")
     exported.add_command("colorcheck", colorcheck_cmd)
 
-  def settitle(self, title = ''):
+  def settitle(self, title=""):
     """
-    Sets the title bar.
+    Sets the title bar to the Lyntin title plus the given string.
 
     @param title: the title to set
     @type  title: string
@@ -187,7 +187,8 @@ class Tkui(ui.BaseUI):
   def writeWindow(self, windowname, message):
     """
     This writes to the window named "windowname".  If the window
-    does not exist, we spin one off.
+    does not exist, we spin one off.  It handles ansi text and
+    messages just like writing to the main window.
 
     @param windowname: the name of the window to write to
     @type  windowname: string
@@ -317,115 +318,14 @@ class Tkui(ui.BaseUI):
     if line == '' or self.showTextForSession(ses) == 0:
       return
 
-    if message.type == ui.ERROR:
-      if line[-1] == "\n":
-        self._txt.insert('end', line[:-1], "44")
-        self._txt.insert('end', "\n")
-      else:
-        self._txt.insert('end', line, "44")
+     
+    color, leftover = buffer_write(message, self._txt, self._currcolors, 
+                                   self._unfinishedcolor)
 
-    elif message.type == ui.USERDATA:
-      if lyntin.mudecho == 1:
-        if line[-1] == "\n":
-          self._txt.insert('end', line[:-1], "44")
-          self._txt.insert('end', "\n")
-        else:
-          self._txt.insert('end', line, "44")
-
-    elif message.type == ui.LTDATA:
-      if line[-1] == "\n":
-        line = "# " + line[:-1].replace("\n", "\n# ") + "\n"
-      else:
-        line = "# " + line.replace("\n", "\n# ")
-
-      self._txt.insert('end', line)
-
-    elif message.type == ui.MUDDATA:
-      index = 0
-      start = 0
-
-      # we prepend the session name to the text if this is not the 
-      # current session sending text.
-      if (ses != None and ses != exported.get_current_session()):
-        pretext = "[%s]" % ses.getName()
-
-        if line[-1] == "\n":
-          line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
-        else:
-          line = pretext + line.replace("\n", "\n" + pretext)
-
-
-      # we remove all \\r stuff because it's icky.
-      line = line.replace("\r", "")
-
-      tokens = ansi.split_ansi_from_text(line)
-
-      # each session has a saved current color for mud data.  we grab
-      # that current color--or user our default if we don't have one
-      # for the session yet.
-      if self._currcolors.has_key(ses):
-        color = self._currcolors[ses]
-      else:
-        color = list(DEFAULT_COLOR)
-
-      # some sessions have an unfinished color as well--in case we
-      # got a part of an ansi color code in a mud message, and the other
-      # part is in another message.
-      if self._unfinishedcolor.has_key(ses):
-        leftover = self._unfinishedcolor[ses]
-      else:
-        leftover = ""
-
-      for mem in tokens:
-        if ansi.is_color_token(mem):
-          color, leftover = ansi.figure_color([mem], color, leftover)
-
-        else:
-          format = []
-          fg = ""
-          bg = ""
-
-          # handle reverse
-          if color[ansi.PLACE_REVERSE] == 0:
-            if color[ansi.PLACE_FG] == -1:
-              fg = "37"
-            else:
-              fg = str(color[ansi.PLACE_FG])
-
-            if color[ansi.PLACE_BG] != -1:
-              bg = str(color[ansi.PLACE_BG])
-
-          else:
-            if color[ansi.PLACE_BG] == -1:
-              fg = "30"
-            else:
-              fg = str(color[ansi.PLACE_BG] - 10)
-
-            if color[ansi.PLACE_FG] == -1:
-              bg = "37"
-            else:
-              bg = str(color[ansi.PLACE_FG] + 10)
-
-          # handle bold
-          if color[ansi.PLACE_BOLD] == 1:
-            fg = "b" + fg
-
-          # handle underline
-          if color[ansi.PLACE_UNDERLINE] == 1:
-            format.append("u")
-
-          format.append(fg)
-          if bg:
-            format.append(bg)
-
-          # insert the text using the formatting tuple we just generated
-          self._txt.insert('end', mem, tuple(format))
-
+    if message.type == ui.MUDDATA:
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
 
-    self._clipText()
-    self._yadjust()
 
   def convertColor(self, name):
     """
@@ -452,7 +352,7 @@ class Tkui(ui.BaseUI):
     return rgb
 
   def _initColorTags(self):
-    """ Sets up Tk tags for the text widget (fg/bg)."""
+    """ Sets up Tk tags for the text widget (fg/bg/u)."""
     for ck in fg_color_codes.keys():
       color = self.convertColor(fg_color_codes[ck])
       self._txt.tag_config(ck, foreground=color)
@@ -466,7 +366,11 @@ class Tkui(ui.BaseUI):
     self._txtbuffer.tag_config("u", underline=1)
 
   def colorCheck(self):
-
+    """
+    Goes through and displays all the combinations of fg and bg
+    with the text string involved.  Purely for debugging
+    purposes.
+    """
     fgkeys = ['30','31','32','33','34','35','36','37']
     bgkeys = ['40','41','42','43','44','45','46','47']
 
@@ -873,114 +777,12 @@ class NamedWindow:
     if line == '':
       return
 
-    if message.type == ui.ERROR:
-      if line[-1] == "\n":
-        self._txt.insert('end', line[:-1], "44")
-        self._txt.insert('end', "\n")
-      else:
-        self._txt.insert('end', line, "44")
+    color, leftover = buffer_write(message, self._txt, self._currcolors, 
+                                   self._unfinishedcolor)
 
-    elif message.type == ui.USERDATA:
-      if lyntin.mudecho == 1:
-        if line[-1] == "\n":
-          self._txt.insert('end', line[:-1], "44")
-          self._txt.insert('end', "\n")
-        else:
-          self._txt.insert('end', line, "44")
-
-    elif message.type == ui.LTDATA:
-      if line[-1] == "\n":
-        line = "# " + line[:-1].replace("\n", "\n# ") + "\n"
-      else:
-        line = "# " + line.replace("\n", "\n# ")
-
-      self._txt.insert('end', line)
-
-    elif message.type == ui.MUDDATA:
-      index = 0
-      start = 0
-
-      # we prepend the session name to the text if this is not the 
-      # current session sending text.
-      if (ses != None and ses != exported.get_current_session()):
-        pretext = "[%s]" % ses.getName()
-
-        if line[-1] == "\n":
-          line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
-        else:
-          line = pretext + line.replace("\n", "\n" + pretext)
-
-      # we remove all \\r stuff because it's icky.
-      line = line.replace("\r", "")
-
-      tokens = ansi.split_ansi_from_text(line)
-
-      # each session has a saved current color for mud data.  we grab
-      # that current color--or user our default if we don't have one
-      # for the session yet.
-      if self._currcolors.has_key(ses):
-        color = self._currcolors[ses]
-      else:
-        color = list(DEFAULT_COLOR)
-
-      # some sessions have an unfinished color as well--in case we
-      # got a part of an ansi color code in a mud message, and the other
-      # part is in another message.
-      if self._unfinishedcolor.has_key(ses):
-        leftover = self._unfinishedcolor[ses]
-      else:
-        leftover = ""
-
-      for mem in tokens:
-        if ansi.is_color_token(mem):
-          color, leftover = ansi.figure_color([mem], color, leftover)
-
-        else:
-          format = []
-          fg = ""
-          bg = ""
-
-          # handle reverse
-          if color[ansi.PLACE_REVERSE] == 0:
-            if color[ansi.PLACE_FG] == -1:
-              fg = "37"
-            else:
-              fg = str(color[ansi.PLACE_FG])
-
-            if color[ansi.PLACE_BG] != -1:
-              bg = str(color[ansi.PLACE_BG])
-
-          else:
-            if color[ansi.PLACE_BG] == -1:
-              fg = "30"
-            else:
-              fg = str(color[ansi.PLACE_BG] - 10)
-
-            if color[ansi.PLACE_FG] == -1:
-              bg = "37"
-            else:
-              bg = str(color[ansi.PLACE_FG] + 10)
-
-          # handle bold
-          if color[ansi.PLACE_BOLD] == 1:
-            fg = "b" + fg
-
-          # handle underline
-          if color[ansi.PLACE_UNDERLINE] == 1:
-            format.append("u")
-
-          format.append(fg)
-          if bg:
-            format.append(bg)
-
-          # insert the text using the formatting tuple we just generated
-          self._txt.insert('end', mem, tuple(format))
-
+    if message.type == ui.MUDDATA:
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
-
-    self._clipText()
-    self._yadjust()
 
  
 class Autotyper:
@@ -1041,14 +843,158 @@ class Autotyper:
     self._sendfunc(None)
     self._tk.destroy()
 
-def fix_unicode(text):
-    """
-    Unicode to standard string translation, fixes unicode bug.
-    """
-    if type(text) == unicode:
-        return text.encode(UNICODE_ENCODING)
+
+def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
+  """
+  Handles writing messages to a Tk Text widget taking into accound
+  ANSI colors, message types, session scoping, and a variety of
+  other things.
+
+  @param message: the Message to write to the buffer
+  @type  message: Message
+
+  @param txtbuffer: the Tk Text buffer to write to
+  @type  txtbuffer: Tkinter.Text
+
+  @param currentcolor: the current color that we should start with
+  @type  currentcolor: color (list of ints)
+
+  @param unfinishedcolor: the string of unfinished ANSI color stuff
+      that we'll prepend to the string we're printing
+  @type  unfinishedcolor: string
+
+  @returns: the new color and unfinished color
+  @rtype: list of ints, string
+  """
+  line = message.data
+  ses = message.session
+
+  if message.type == ui.ERROR:
+    if line[-1] == "\n":
+      line = "%s%s%s\n" % (ansi.get_color("b blue"), 
+                          line[:-1], 
+                          ansi.get_color("default"))
     else:
-        return text
+      line = "%s%s%s" % (ansi.get_color("b blue"), 
+                        line[:-1], 
+                        ansi.get_color("default"))
+
+  elif message.type == ui.USERDATA:
+    if lyntin.mudecho == 1:
+      if line[-1] == "\n":
+        line = "%s%s%s\n" % (ansi.get_color("b blue"), 
+                            line[:-1], 
+                            ansi.get_color("default"))
+      else:
+        line = "%s%s%s" % (ansi.get_color("b blue"), 
+                          line[:-1], 
+                          ansi.get_color("default"))
+    else:
+      # if echo is not on--we don't print this
+      return color, leftover
+
+  elif message.type == ui.LTDATA:
+    if line[-1] == "\n":
+      line = "# %s\n" % line[:-1].replace("\n", "\n# ")
+    else:
+      line = "# %s" % line.replace("\n", "\n# ")
+
+
+  # now we go through and handle writing all the data
+  index = 0
+  start = 0
+
+  # we prepend the session name to the text if this is not the 
+  # current session sending text and if the Message is session
+  # scoped.
+  if (ses != None and ses != exported.get_current_session()):
+    pretext = "[%s]" % ses.getName()
+
+    if line[-1] == "\n":
+      line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
+    else:
+      line = pretext + line.replace("\n", "\n" + pretext)
+
+
+  # we remove all \\r stuff because it's icky
+  line = line.replace("\r", "")
+
+  tokens = ansi.split_ansi_from_text(line)
+
+  # each session has a saved current color for MUDDATA.  we grab
+  # that current color--or use our default if we don't have one
+  # for the session yet.  additionally, some sessions have an
+  # unfinished color as well--in case we got a part of an ansi 
+  # color code in a mud message, and the other part is in another 
+  # message.
+  if message.type == ui.MUDDATA:
+    color = currentcolor.get(ses, list(DEFAULT_COLOR))
+    leftover = unfinishedcolor.get(ses, "")
+
+  else:
+    color = list(DEFAULT_COLOR)
+    leftover = ""
+
+
+  for mem in tokens:
+    if ansi.is_color_token(mem):
+      color, leftover = ansi.figure_color([mem], color, leftover)
+
+    else:
+      format = []
+      fg = ""
+      bg = ""
+
+      # handle reverse
+      if color[ansi.PLACE_REVERSE] == 0:
+        if color[ansi.PLACE_FG] == -1:
+          fg = "37"
+        else:
+          fg = str(color[ansi.PLACE_FG])
+
+        if color[ansi.PLACE_BG] != -1:
+          bg = str(color[ansi.PLACE_BG])
+
+      else:
+        if color[ansi.PLACE_BG] == -1:
+          fg = "30"
+        else:
+          fg = str(color[ansi.PLACE_BG] - 10)
+
+        if color[ansi.PLACE_FG] == -1:
+          bg = "37"
+        else:
+          bg = str(color[ansi.PLACE_FG] + 10)
+
+      # handle bold
+      if color[ansi.PLACE_BOLD] == 1:
+        fg = "b" + fg
+
+      # handle underline
+      if color[ansi.PLACE_UNDERLINE] == 1:
+        format.append("u")
+
+      format.append(fg)
+      if bg:
+        format.append(bg)
+
+      # insert the text using the formatting tuple we just generated
+      txtbuffer.insert('end', mem, tuple(format))
+
+  self._clipText()
+  self._yadjust()
+
+  return color, leftover
+
+
+def fix_unicode(text):
+  """
+  Unicode to standard string translation--fixes unicode bug.
+  """
+  if type(text) == unicode:
+    return text.encode(UNICODE_ENCODING)
+  else:
+    return text
 
 def colorcheck_cmd(ses, args, input):
   """

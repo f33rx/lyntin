@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.23 2002/10/20 16:09:57 willhelm Exp $
+# $Id: ticker.py,v 1.24 2002/11/18 02:43:54 willhelm Exp $
 #######################################################################
 """
 This module handles ticker stuff.  A session can have an associated
@@ -13,16 +13,21 @@ works off of the "timer_hook".
 """
 import lyntin, event, engine, exported
 
+DEFAULT_LEN = 2
+DEFAULT_WARN_LEN = 3
+
 class Ticker:
   """
   Manages ticker data.
   """
   def __init__(self):
+    global DEFAULT_LEN, DEFAULT_WARN_LEN
+
     # duration between ticks
-    self._ticklen = 2
+    self._ticklen = DEFAULT_LEN
 
     # how much before a tick we should warn
-    self._tickwarn = 3
+    self._tickwarn = DEFAULT_WARN_LEN
 
     # tickstart -- this is the tick that the ticker started on.
     # we use this for calculating the next tick.
@@ -145,6 +150,8 @@ class Ticker:
         am = exported.get_manager("alias")
         if am:
           tickaction = am.getAlias(ticksession, "TICK!!!")
+        if not tickaction:
+          tickaction = am.getAlias(ticksession, "TICK")
 
         if tickaction:
           event.InputEvent(tickaction, internal=1, ses=ticksession).enqueue()
@@ -154,7 +161,19 @@ class Ticker:
       # if this is a tickwarn...
       if ((tick - self._tickstart) % self._ticklen == 
               (self._ticklen - self._tickwarn)):
+
+        tickaction = ""
+        am = exported.get_manager("alias")
+        if am:
+          tickaction = am.getAlias(ticksession, "TICKWARN!!!")
+        if not tickaction:
+          tickaction = am.getAlias(ticksession, "TICKWARN")
+
+        if tickaction:
+          event.InputEvent(tickaction, internal=1, ses=ticksession).enqueue()
+
         exported.write_message("ticker: %d seconds to tick!" % self._tickwarn)
+
 
     else:
       # we kill this ticker because it belongs to a nonexistant 
@@ -165,9 +184,11 @@ class Ticker:
     """
     Disables the ticker and clears the variables.
     """
+    global DEFAULT_LEN, DEFAULT_WARN_LEN
+
     self.disableTicker()
-    self._ticklen = 0
-    self._tickwarn = 0
+    self._ticklen = DEFAULT_LEN
+    self._tickwarn = DEFAULT_WARN_LEN
 
   def getInfo(self):
     """

@@ -6,7 +6,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-Wed, 18 Dec 2002 04:49:15 +0000
+Tue, 31 Dec 2002 01:26:57 +0000
 
 For more up-to-date information and documentation, please check the 
 web-site: http://Lyntin.sourceforge.net/
@@ -264,26 +264,33 @@ COMMANDS.HIGHLIGHT
    With multiple arguments, creates a highlight.
    
    Highlights enable you to colorfully "tag" text that's of interest
-   to you with the given style.  This may not work or fully work in
-   all ui's.
+   to you with the given style.
    
    Styles available are:
-      bold     black    grey           b black
-      blink    red      light red      b red
-      reverse  green    light green    b green
-               yellow   light yellow   b yellow
-               blue     light blue     b blue
-               magenta  light magenta  b magenta
-               cyan     light cyan     b cyan
-               white    light white    b white
+      styles     foreground colors        background colors
+      bold       black    grey            b black
+      blink      red      light red       b red
+      reverse    green    light green     b green
+      underline  yellow   light yellow    b yellow
+                 blue     light blue      b blue
+                 magenta  light magenta   b magenta
+                 cyan     light cyan      b cyan
+                 white    light white     b white
    
-   Highlights also handle *.  So '*word*' will highlight an entire line
-   with "word" in it.  '*word' will highlight the line up to "word".  
-   'word*' will highlight the line from "word" to the end.
+   Highlights handle * at the beginning and end of non-regular expression
+   texts.  Highlights will handle regular expression texts as well.  See
+   "#help regexp" for more details.
+   
+   Note: blink, underline, and reverse may not be available in all ui's.
    
    examples:
      #highlight {green} {Sven arrives.}
      #highlight {reverse,green} {Sven arrives.}
+     #highlight {blue} {r[^.*?says:]}
+   
+       which is the same as:
+   
+     #highlight {blue} {*says:}
 
 
 
@@ -498,6 +505,18 @@ COMMANDS.SHOWME
    
    examples:
      #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
+
+
+
+COMMANDS.SNOOP
+
+   syntax: #snoop [SESSION] [<MODE:BOOLEANORNONE>] 
+   
+   Sets the session specified into or out of snooping mode.
+   
+   examples:
+     #snoop a          -- tells you whether a is in snoop mode
+     #snoop a on       -- sets snoop mode for a
 
 
 

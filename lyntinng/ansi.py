@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.10 2002/12/31 00:03:59 willhelm Exp $
+# $Id: ansi.py,v 1.11 2002/12/31 01:22:07 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -35,7 +35,41 @@ PLACE_REVERSE = 3
 PLACE_FG = 4
 PLACE_BG = 5
 
+# the default color
 DEFAULT_COLOR = [0, 0, 0, 0, -1, -1]
+
+# used for converting text descriptions to ANSI color sequences
+STYLEMAP = {
+             "default": "0",
+             "bold": "1",
+             "underline": "4",
+             "blink": "5",
+             "reverse": "7",
+             "black": "30",
+             "red": "31",
+             "green": "32",
+             "yellow": "33",
+             "blue": "34",
+             "magenta": "35",
+             "cyan": "36",
+             "white": "37",
+             "grey": "1;30",
+             "light red": "1;31",
+             "light green": "1;32",
+             "light yellow": "1;33",
+             "light blue": "1;34",
+             "light magenta": "1;35",
+             "light cyan": "1;36",
+             "light white": "1;37",
+             "b black": "40",
+             "b red": "41", 
+             "b green": "42",
+             "b yellow": "43",
+             "b blue": "44",
+             "b magenta": "45",
+             "b cyan": "46",
+             "b white": "47"
+           }
 
 
 def filter_ansi(text):
@@ -248,6 +282,26 @@ def figure_color(textlist, currentcolor, leftover=""):
         leftover = mem
       
   return currentcolor, leftover
+
+
+def get_color(style):
+  """
+  Looks at the style (which is a comma separated list of 
+  styles) and figures out the markup string and returns it.
+
+  @param style: the style to retrieve markup for
+  @type  style: text
+
+  @return: the ansi code markup for the given style
+  @rtype: string
+  """
+  styles = style.split(",")
+  markup = ""
+  for mem in styles:
+    mem = mem.strip()
+    if STYLEMAP.has_key(mem):
+      markup = markup + STYLEMAP[mem] + ";"
+  return chr(27) + "[" + markup[:-1] + "m"
 
 
 def convert_tuple_to_ansi(token):
