@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.23 2002/12/08 18:49:51 willhelm Exp $
+# $Id: tkui.py,v 1.24 2002/12/14 23:37:23 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -339,7 +339,7 @@ class Tkui(ui.BaseUI):
       # we prepend the session name to the text if this is not the 
       # current session sending text.
       if (ses != None and ses != exported.get_current_session()):
-        pretext = "[" + ses.getName() + "] "
+        pretext = "[%s]" % ses.getName()
 
         if line[-1] == "\n":
           line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
@@ -544,7 +544,7 @@ class CommandEntry(Tkinter.Entry):
       self._partk.handleinput(action)
       return 1
     else:
-      exported.write_error(binding + " is currently not bound to anything.")
+      exported.write_error("%s is currently not bound to anything." % binding)
       return 0
 
   def callBinding(self, tkevent):
@@ -555,7 +555,7 @@ class CommandEntry(Tkinter.Entry):
       self._partk.handleinput(lyntin.commandchar + "help")
       return "break"
       
-    if self._executeBinding("VK_" + tkevent.keysym) == 1:
+    if self._executeBinding("VK_%s" % tkevent.keysym) == 1:
       return "break"
 
     # these two lines help in debugging stuff we bound

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.47 2002/11/18 02:43:53 willhelm Exp $
+# $Id: event.py,v 1.48 2002/12/08 18:49:51 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -106,7 +106,7 @@ class StartupEvent(Event):
           exported.get_engine().setUI(uiinstance)
           exported.write_message("UI started.")
         except Exception, e2:
-          print "Cannot start textui either: %s" % e
+          print "Cannot start textui either: %s" % e2
           traceback.print_exc()
           sys.exit(0)
       else:
@@ -263,7 +263,7 @@ class InputEvent(Event):
     if not self._internal:
       exported.write_user_data(self._input)
 
-    exported.get_engine().handleUserData(self._input, internal=self._internal, session=self._ses)
+    exported.lyntin_command(self._input, internal=self._internal, session=self._ses)
 
 
 class OutputEvent(Event):

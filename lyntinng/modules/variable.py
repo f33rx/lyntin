@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.17 2002/12/06 00:33:32 willhelm Exp $
+# $Id: variable.py,v 1.18 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -319,7 +319,7 @@ class VariableManager(manager.Manager):
     if varexpansion == text:
       return text
     else:
-      engine.myengine.handleUserData(varexpansion, 1, ses)
+      exported.lyntin_command(varexpansion, 1, ses)
       return None
 
 

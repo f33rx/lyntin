@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.76 2002/11/21 02:04:19 willhelm Exp $
+# $Id: engine.py,v 1.77 2002/12/09 04:30:48 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -20,9 +20,9 @@ The Engine class is a singleton and the reference to it is stored in
 "engine.myengine".  However, you should use the exported module
 to access the engine using the "get_engine()" function.
 """
-import Queue, copy, string, re, thread, sys
+import Queue, thread, sys
 
-import session, ui.ui, lyntin, utils, event, argparser
+import session, lyntin, utils, event, argparser
 import exported, hooks, helpmanager, history, threadmanager, commandmanager
 
 # this is the singleton reference to the Engine instance.
@@ -251,7 +251,7 @@ class Engine:
           input = mem.split(" ", 1)
           if len(input) < 2:
             self._current_session = self._sessions[ses]
-            exported.write_message(ses + " now current session.")
+            exported.write_message("%s now current session." % ses)
           else:
             self.handleUserData(input[1], internal=1, session=self._sessions[ses])
           historyitems.append(mem)
@@ -556,10 +556,10 @@ class Engine:
 
     for mem in self._sessions.values():
       # we do some fancy footwork here to make it print nicely
-      info = string.join(self.getStatus(mem), "\n   ")
+      info = "\n   ".join(self.getStatus(mem)
       data.append('   %s\n' % info)
 
-    return string.join(data, "\n")
+    return "\n".join(data)
 
 
   ### ------------------------------------------
@@ -707,25 +707,19 @@ def _evalmodechange(args):
   if (old == -1):
     # just started up
     if new == lyntin.EVALMODE_TINTIN:
-      # FIXME hooks.user_filter_hook.register(cm.filter, 1)
       exported.hook_register("user_filter_hook", cm.filter, 1)
     else:
-      # FIXME hooks.user_filter_hook.register(cm.filter, 100)
       exported.hook_register("user_filter_hook", cm.filter, 100)
 
   elif old == lyntin.EVALMODE_LYNTIN and new == lyntin.EVALMODE_TINTIN:
     # just switched into EVALMODE_TINTIN mode
     exported.hook_unregister("user_filter_hook", cm.filter)
     exported.hook_register("user_filter_hook", cm.filter, 1)
-    # FIXME hooks.user_filter_hook.unregister(cm.filter)
-    # FIXME hooks.user_filter_hook.register(cm.filter, 1)
 
   elif old == lyntin.EVALMODE_TINTIN and new == lyntin.EVALMODE_LYNTIN:
     # just switched into EVALMODE_LYNTIN mode
     exported.hook_unregister("user_filter_hook", cm.filter)
     exported.hook_register("user_filter_hook", cm.filter, 100)
-    # FIXME hooks.user_filter_hook.unregister(cm.filter)
-    # FIXME hooks.user_filter_hook.register(cm.filter, 100)
 
 # Local variables:
 # mode:python

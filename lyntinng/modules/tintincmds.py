@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.59 2002/12/06 00:33:32 willhelm Exp $
+# $Id: tintincmds.py,v 1.60 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -98,9 +98,9 @@ def help_cmd(ses, args, input):
   error, breadcrumbs, text = exported.get_help(item)
 
   if error:
-    data += error + "\n\n"
+    data += "%s\n\n" % error
   if breadcrumbs:
-    data += "category: " + breadcrumbs + "\n\n"
+    data += "category: %s\n\n" % breadcrumbs
 
   data += text
   exported.write_message(data)
@@ -132,7 +132,7 @@ def history_cmd(ses, args, input):
   
   historylist = exported.get_history(count)
   for i in range(0, len(historylist)):
-    historylist[i] = repr(i+1) + " " + historylist[i]
+    historylist[i] = "%d %s" % ((i+1), historylist[i])
   historylist.reverse()
   exported.write_message("History:\n" + string.join(historylist, "\n"))
 
@@ -362,14 +362,14 @@ def read_cmd(ses, args, input):
     return
 
   if contents[0][0] != lyntin.commandchar:
-    exported.lyntin_command(lyntin.commandchar + "char " + contents[0][0], internal=1, session=ses)
+    exported.lyntin_command("%sconfig commandchar %s" % (lyntin.commandchar, contents[0][0]), internal=1, session=ses)
 
   for mem in contents:
     mem = mem.strip()
     if len(mem) > 0:
       exported.lyntin_command(mem, internal=1, session=ses)
 
-  exported.write_message("read: file " + filename + " read.", ses)
+  exported.write_message("read: file %s read." % filename, ses)
 
 commands_dict["read"] = (read_cmd, "filename")
 
@@ -402,9 +402,8 @@ def session_cmd(ses, args, input):
 
   if not name and not host and (not port or port == -1):
     data = "Sessions available:\n"
-    # for mem in engine.myengine.getSessions():
     for mem in exported.get_active_sessions():
-      data = data + "   " + mem.getName() + ": " + repr(mem._socket) + "\n"
+      data += "   %s: %r\n" % (mem.getName(), mem._socket)
 
     exported.write_message(data[:-1])
     return

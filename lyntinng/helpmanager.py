@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.15 2002/10/31 02:40:49 willhelm Exp $
+# $Id: helpmanager.py,v 1.16 2002/11/06 03:03:19 willhelm Exp $
 #######################################################################
 """
 Lyntin has a comprehensive X{help} system that can be accessed in-game
@@ -253,7 +253,7 @@ class HelpManager(manager.Manager):
         nextbreadcrumbs, nextnode = tosearch[0]
         tosearch = tosearch[1:]
         for key in nextnode.keys():
-          currentbreadcrumbs = nextbreadcrumbs + "." + key
+          currentbreadcrumbs = "%s.%s" % (nextbreadcrumbs, key)
           if key == categorylist[0]:
             potentialroots.append( (currentbreadcrumbs,nextnode[key]) )
           if type(nextnode[key]) == type({}):
@@ -269,7 +269,7 @@ class HelpManager(manager.Manager):
             bc=None
             node=None
           else:
-            bc = bc+"."+key
+            bc = "%s.%s" % (bc, key)
             node = node[key]
         if node:
           foundnodes.append( (bc,node) )
@@ -316,10 +316,10 @@ class HelpManager(manager.Manager):
 
     for mem in tree.keys():
       if type(tree[mem]) == type({}):
-        print tab + "  " + mem + ":"
+        print "%s  %s:" % (tab, mem)
         self._printTree(tree[mem], tab + "  ")
       else:
-        print tab + "  " + "node: " + mem
+        print "%s  node: %s" % (tab, mem)
 
 
 def _split_name(fqn):

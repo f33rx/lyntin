@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.22 2002/11/21 02:04:19 willhelm Exp $
+# $Id: lyntincmds.py,v 1.23 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 import string
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -55,7 +55,7 @@ def config_cmd(ses, args, input):
   if name in ["ignoreactions", "ignoresubs", "verbatim"]:
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
-      exec("ses._%s = value" % name)
+      setattr(ses, "_%s" % name, value)
       if not quiet:
         exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     else:
@@ -64,7 +64,7 @@ def config_cmd(ses, args, input):
 
   if name in ["variablechar", "commandchar"]:
     if len(value) == 1:
-      exec("lyntin.%s = value" % name)
+      setattr(lyntin, name, value)
       if not quiet:
         exported.write_message("config: %s set to '%s'." % (name, value), ses)
     else:
@@ -74,7 +74,7 @@ def config_cmd(ses, args, input):
   if name in ["ansicolor", "speedwalk"]:
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
-      exec("lyntin.%s = value" % name)
+      setattr(lyntin, name, value)
       if not quiet:
         exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     else:

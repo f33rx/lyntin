@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.26 2002/10/21 04:02:33 willhelm Exp $
+# $Id: net.py,v 1.27 2002/11/09 01:06:17 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -217,8 +217,8 @@ class SocketCommunicator:
     if convert:
       data = data.replace("\n", "\r\n")
 
-    if IAC in data:
-      data = data.replace(IAC, IAC+IAC)
+      if IAC in data:
+        data = data.replace(IAC, IAC+IAC)
 
     if self._shutdownflag == 0:
       try:
@@ -277,7 +277,7 @@ class SocketCommunicator:
             self.handleECHO(data[i+1])
 
           elif data[i+1] in DD:
-            self.write(IAC + WONT + data[i+2])
+            self.write(IAC + WONT + data[i+2], 0)
 
           data = data[:i] + data[i+3:]
 
@@ -290,6 +290,11 @@ class SocketCommunicator:
             break
 
           data = data[:i] + data[end+1:]
+
+        # handles IAC IAC
+        elif data[i+1] == IAC:
+          data = data[:i] + data[i+1:]
+          i = i + 1
 
         # in case they passed us something weird we remove the IAC and 
         # move on
