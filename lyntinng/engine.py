@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.42 2002/05/09 00:10:41 willhelm Exp $
+# $Id: engine.py,v 1.43 2002/05/09 03:53:06 jmberne Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -261,8 +261,9 @@ class Engine:
 
         # is it all sessions?
         if ses == "all":
-          for mem in self._sessions.value():
-            mem.handleUserData(mem.split(" ", 1)[1], internal )
+          for sessionname in self._sessions.keys():
+            if sessionname != "common":
+              self._sessions[sessionname].handleUserData(mem.split(" ",1)[1], internal )
           continue
 
       # no command char, so we pass it on to the mud
