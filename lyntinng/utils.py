@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.32 2002/06/09 02:11:45 jmberne Exp $
+# $Id: utils.py,v 1.33 2002/06/19 03:19:43 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -19,7 +19,7 @@ VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
 TIMESPAN_REGEXP = re.compile(r"^(?P<days>\d+d)?(?P<hours>\d+h)?(?P<minutes>\d+m)?(?P<seconds>\d+s?)?$")
-TIME_REGEXP=re.compile(r"^(?P<hour>\d\d?)(:(?P<minute>\d\d)(:(?P<second>\d\d))?)?(?P<ampm>a|p)?$")
+TIME_REGEXP=re.compile(r"^(?P<hour>\d\d?):(?P<minute>[0-5]\d)(:(?P<second>[0-5]\d))?(?P<ampm>a|p)?$")
 
 def chomp(text):
   """ Removes all '\\r' and '\\n' from the input string.

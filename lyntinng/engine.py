@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.57 2002/06/20 03:23:27 willhelm Exp $
+# $Id: engine.py,v 1.58 2002/06/21 02:34:21 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -389,7 +389,9 @@ class Engine:
         exported.write_message("Exception with removing session %s." % e)
 
     del self._sessions[ses.getName()]
-    self.changeSession()
+
+    if ses == self._current_session:
+      self.changeSession()
 
   def currentSession(self):
     """ Returns the current session.
