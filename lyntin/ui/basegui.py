@@ -1,3 +1,5 @@
+from threading import *
+
 """
 To implement a ui, override the following functions:
    def setup(self)
@@ -29,10 +31,13 @@ To implement a ui, override the following functions:
 
 """
 
-class BaseGUI:
+class BaseGUI(Thread):
     def __init__(self):
+        Thread.__init__(self)
         self.support_hash = {'echo':0}
         self.status_hash = {'echo':1,'scollback':0}
+        self.rlock = RLock()
+        self.session = None
         self.setup()
 
     def setup(self):
@@ -116,14 +121,17 @@ class BaseGUI:
         self.status('scrollback',0)
         return None
 
+    def run(self):
+        self.mainloop()
+        
     def mainloop(self):
         """mainloop(self)->None
         
         """
         while 1:
             try:
-                if not self.app.Loop():
-                    return
+                input = getUserInput()
+                self.session.PreHandleUserInput(input)
             except SystemExit:
                 return
 
@@ -237,7 +245,11 @@ class BaseGUI:
         To the end of every line and the modifier is 'error'.
         The client can do whatever it likes to denote error-hood.
         """
-        self.print_string(line,modifiers='error',ending='\n')
+        self.rlock.aquire
+        try:
+            self.print_string(line,modifiers='error',ending='\n')
+        finally:
+            self.rlock.release()
 
     def PutUserInput(self, line):
         """PutUserInput(self, line) -> None
@@ -246,8 +258,12 @@ class BaseGUI:
         'user' and the ending is '\n'.  The ui can denote
         UserInput-hood as it so desires.
         """
-        self.print_string(line,modifiers='user',ending='\n')
-
+        self.rlock.aquire
+        try:
+            self.print_string(line,modifiers='user',ending='\n')
+        finally:
+            self.rlock.release()
+            
     def PutMessage(self, line):
         """PutMessage(self, line) -> None
 
@@ -256,14 +272,22 @@ class BaseGUI:
         the ending is '\n'.  The ui can denote Lyntin messages
         however it so desires.
         """
-        self.print_string(line,modifiers='client',ending='\n')
-
+        self.rlock.aquire()
+        try:
+            self.print_string(line,modifiers='client',ending='\n')
+        finally:
+            self.rlock.release()
+        
     def PutRaw(self, line):
         """PutRaw(self, line) -> None
 
         Just prints stuff raw to the ui.
         """
-        self.print_string(line,ending='')
+        self.rlock.aquire()
+        try:
+            self.print_string(line,ending='')
+        finally:
+            self.rlock.release()
 
 
 

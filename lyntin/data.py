@@ -21,7 +21,7 @@ contains global variables
 
 import socket, select, re, os, string, copy
 import mud, app, player, hooks, handler
-
+from threading import *
 
 
 ##################################################################
@@ -122,7 +122,7 @@ histsize = 30
 
 
 """this sets whether we're in debug mode or not.  affects mud.log."""
-debug = 1
+debug = 0
 
 
 ##################################################################
@@ -202,13 +202,14 @@ def compile_trigger(trig):
 
 
 
-class Session:
+class Session(Thread):
    """
    Session class the framework knows about
    """
    def __init__(self, name, domain, port):
       # we save a certain amount of previous mud output in the 'databuffer'
       # for later inspection by python functions
+      Thread.__init__(self)
       self.databuf = databuffer()
       self.connected = 0
       self.name = ''
@@ -233,6 +234,13 @@ class Session:
          self.name = name
          self.connected = 1        
 
+   def run(self):
+      if self.connected:
+         self.Poll()
+      if self.ticker:
+         self.tickUpdate() thinkme
+
+      
    def tickUpdate(self):
       pass
 
@@ -528,7 +536,10 @@ class UserSession(Session):
          theapp.HandleUserInput(response)            
 
 
-
+   def display_if_current(self, string):
+      if self.ui.session == self:
+         self.ui.
+   
 ##################################################################
 # databuffer class:
 # class for storing previous output from the mud.
