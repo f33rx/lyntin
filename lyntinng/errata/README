@@ -8,6 +8,9 @@ utilities that can be used for Lyntin development and use:
 Contents:
 
 testserver.py
-    a super basic testserver that you can connect to for bug
-    testing if you don't have a mud available.  it could use 
-    some work.
+    Neil's Pub is a small mini-mud capable of allowing multiple
+    people to log on and do basic things.  It allows us to test
+    various things without connecting to a real mud and possibly
+    messing things up.  It's also another reason why Lyntin is
+    so cool--you get your own mini-mud along with your mud 
+    client!

@@ -1,237 +1,283 @@
 #!/usr/bin/env python
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Free Software Foundation 2001, 2002
+# copyright (c) Free Software Foundation 2001
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.11 2002/06/01 15:51:44 willhelm Exp $
+# $Id$
 #######################################################################
 """
-This runs a multithreaded server on port 3000.
-It used to test mud clients.  It currently take no arguments.
+This new test-server is a patchwork of stuff from the existing test server
+and code I wrote for the Varium mud server way back when.  It is actually
+a functional mini-mud now.
 """
-import SocketServer, random, time, string, thread
+import socket, sys, Queue, select, string
+import connection, utils
+from utils import wrap_text
 
-# terrible global shutdown variable
-shutdown = 0
-server = None
+my_world = None
 
-class ConnectionHandler(SocketServer.StreamRequestHandler):
+class Event:
+  def __init__(self):
+    pass
 
-  def setup(self):
-    print "Connection from: " + repr(self.request)
-    SocketServer.StreamRequestHandler.setup(self)
-    self._vocab = ['look', 'bleeding', 'door', 'cat', 'dog', 'naga',
-           'doh!', 'horse', 'slashed', 'hurt', 'jumped', 'dodged',
-           'says', 'tell', 'goblin', 'pink', 'crunch', 'smashed',
-           'hungry', 'thirsty', 'huh?', 'glows', 'drop', 'blind',
-           'to', 'the', 'of', 'broken', 'red', 'smoke']
-    self._spamFreq = 0
-    self._message = ''
-    self._myline = 'Default testserver line.'
+  def execute(self, world):
+    pass
 
-    self._rlist = [self.request]
+  def __str__(self):
+    return ""
 
-    self._spamThread = None
+class InputEvent(Event):
+  def __init__(self, conn, input):
+    self._conn = conn
+    self._input = input
 
-    self._dir = []
-    for item in dir(self.__class__):
-      if ( type( eval("self.%s" % item)) == type(self.__init__) and item.find("handle_") == 0):
-        self._dir.append(item)
+  def __str__(self):
+    return '"%s" for "%s"' % (self._input, str(self._conn))
 
-  def write(self, data):
-    # put data in string for writing when socket ready
-    data = data.replace("\n", "\r\n")
+  def execute(self, world):
+    self._conn.handleInput(world, self._input)
 
-    # add data for sending
-    self.request.send(data)
 
-  def handle(self):
-    """
-    This is the function that gets called by the StreamRequestHandler object.
-    """
-    self.write(self.color("You're logged in.") + "\n")
-    import select
+class NPC:
+  def __init__(self, world):
+    self._world = world
+    self._name = "Joe"
+    self._desc = "A regular looking NPC."
 
-    try:
-      self.request.setblocking(1)
-      data = ''
-      while shutdown == 0:
-        # check to see what is ready on the socket
-        conns = select.select([self.request], [], [], 0)[0]
-        for mem in conns:
-          # lets get the message
-          data += self.request.recv(1024)
+    from random import Random
+    self._random = Random()
 
-          if data.find("\n") != -1:
-            message = data[:data.find("\n")]
-            print "incoming: '%s'" % message[:-1]
-            self.messageHandler(message[:-1])
-            data = data[data.find("\n") + 1:]
-    except Exception, e:
-      print "Exception for %s\n%s" % (self.request, e)
+  def blab(self):
+    self._world.spammroom(self._name + " looks fidgety.\n")
 
-    return
+  def heartbeat(self):
+    g = (self._random.random() * 10)
+    if (g < 5):
+      self.blab()
 
-  def messageHandler(self, text):
-    """
-    messageHandler('the message read off readline')
-    text is the message which is checked against the first 3 letters for
-    a command match.
-    """
-    comm = text.split(" ", 1)[0]
-    self.write(self.color(time.ctime() + " <" + str(time.clock()) + ">",32,40) + " '%s'\n" % text)
-    if ("handle_%s" % comm) in self._dir:
-      exec ( "self.handle_%s(text)" % comm)
+class Neil(NPC):
+  def __init__(self, world):
+    NPC.__init__(self, world)
+    self._name = "Neil"
+    self._desc = "Neil is the bartender at this little mini-tavern."
+
+  def blab(self):
+    g = (self._random.random() * 10)
+    if (g < 2):
+      self._world.spammroom(self._name + " flicks a bug off his bar.\n")
+    elif (g < 5):
+      self._world.spammroom(self._name + " scrubs some glasses with his dishrag.\n")
     else:
-      # CATCH ALL for bad commands
-      self.write(self.color("received unimplemented command '%s'" % comm, 33) + "\n")
+      self._world.spammroom(self._name + " says, \"Mighty fine morning, isn't it?\"\n")
 
-  def handle_quit(self, text):
-    """ Quits your session."""
-    self.write("bye bye\n")
-    raise ValueError, "Shutdown of connection requested."
-    
-  def handle_remember(self, text):
-    """ Forces us to memorize something to "repeat" back to you later."""
-    self._myline = text[text.find(" ")+1:]
 
-  def handle_repeat(self, text):
-    """ Has us repeat something we "remember"."""
-    self.write(self._myline + "\n")
+class World:
+  def __init__(self, options):
+    self._event_queue = Queue.Queue(0)
+    self._worker = None
+    self._options = options
+    self._ms = None
 
-  def handle_command(self, text):
-    """ Prints out all the commands we understand."""
-    commands = []
-    for mem in self._dir:
-      if mem.find("handle_") == 0:
-        doc = ""
-        try: doc = eval ("self.%s.__doc__" % mem)
-        except: pass
+    temp = ("Welcome to Neil's Pub--a small tavern of unusual candor.  " +
+            "In many ways, this is a dream come true for Neil and it shows " +
+            "in the care he gives to the place.  The tavern is both " +
+            "infinitely large and terribly small.  There are no exits.  " +
+            "Only a long bar and a series of barstools for folks to show " +
+            "up, take a load off, and socialize.")
 
-        if doc:
-          commands.append(mem[7:] + " - " + doc)
+    self._desc = wrap_text(temp, 70, 0, 0)
+    self._npcs = []
+
+    self._npcs.append(Neil(self))
+
+  def enqueue(self, ev):
+    self._event_queue.put(ev)
+
+  def startup(self):
+    from threading import currentThread
+    self._worker = currentThread()
+
+    # launch the server
+    self._ms = MasterServer(self, self._options)
+    self._ms.startup()
+
+    # this is our main loop thingy!
+    while 1:
+      self._ms.networkLoop()
+
+      if not self._event_queue.empty():
+        event = self._event_queue.get(0)
+        es = str(event)
+        if es:
+          print "handling: '%s'" % es
+
+        try:
+          event.execute(self)
+        except Exception, e:
+          print "exception: %s" % e
+
+          if hasattr(event, 'conn'):
+            try:
+              conn.write("exception: %s" % e)
+            except: pass
+
+
+  def disconnect(self, conn):
+    if conn in self._ms._conns:
+      self._ms._conns.remove(conn)
+    if hasattr(conn, '_name'):
+      self.spamroom("%s has left the game.\n" % conn._name)
+    print "Goodbye %s" % str(conn)
+
+  def look(self, conn, item):
+    if item:
+      for mem in self._npcs:
+        if item == mem._name.lower():
+          return mem._desc + "\n"
+
+      for mem in self._ms._conns:
+        if item == mem._name.lower():
+          return mem._desc + "\n"
+
+    else:
+      out = self._desc + "\n\n"
+      names = map(lambda x:x._name, self._ms._conns)
+      for mem in self._npcs:
+        names.append(mem._name)
+      out += utils.wrap_text(string.join(names, ', '), 70, 0, 0)
+      out += "\n"
+
+      return out
+
+    return "That does not exist.\n"
+
+  def spamroom(self, data):
+    # note--we only spam real connections--not npcs
+    for mem in self._ms._conns:
+      try: mem.write(data)
+      except: pass
+
+  def shutdown(self):
+    if self._ms:
+      self._ms.closedown()
+    print "Shutting down."
+
+
+class MasterServer:
+  def __init__(self, world, options):
+    self._args = args
+    self._master = None
+    self._conns = []
+    self._shutdown = 0
+    self._options = options
+    self._world = world
+
+  def startup(self):
+    host = self._options["host"]
+    port = int(self._options["port"])
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((host, port))
+    s.listen(1)
+
+    print "Test server starting up: %s:%d" % (host, port)
+    self._master = connection.Connection(self._world, s, "MASTER")
+    self._master._name = "Igor"
+    self._master._desc = "A very busy old man."
+
+    self._conns = []
+    self._conns.append(self._master)
+
+  def networkLoop(self):
+    fi = []
+
+    fns = map(lambda x:x.sockid(), self._conns)
+    fi = select.select(fns, [], [], .1)[0]
+    allconns = filter(lambda x,y=fi:x.sockid() in y, self._conns)
+
+    for conn in allconns:
+      if conn._addr == "MASTER":
+        newsock, newaddr = conn._sock.accept()
+        newconn = connection.Connection(self._world, newsock, newaddr)
+        newconn.write("Welcome to Neil's Pub!  Type \"help\" if you're lost.\n")
+
+        self._conns.append(newconn)
+
+      else:
+        try: new_data = conn._sock.recv(1024) 
+        except Exception, e:
+          print "exception: %s" % e
+          continue
+
+        if new_data:
+          conn.handleNetworkData(new_data)
         else:
-          commands.append(mem[7:])
+          if conn in self._conns:
+            self._conns.remove(conn)
+          conn.killConn()
 
-    self.write(string.join(commands, "\n") + "\n")
-
-  def handle_colors(self, text):
-    """ Prints out all the colors we know about."""
-    response = ''
-    for background in range(40,48):
-      for foreground in range(30,38):
-        response += self.color(str(foreground), foreground, background)
-        response += self.color(str(foreground), foreground, background, 1)
-      response += "\n"
-
-    self.write(response)
-
-  def handle_word(self, text):
-    """ Returns a random word."""
-    response = ''
-    response = self.getWords(1) + "\n"
-    self.write(response)
-
-  def handle_line(self, text):
-    """ Returns a line consisting of 10 random words."""
-    response = ''
-    response = self.getWords(10) + "\n"
-    self.write(response)
-      
-  def handle_paragraph(self, text):
-    """ Returns a paragraph, which coincidentally, is a description of Lyntin."""
-    output = ("Lyntin is a mud client that is written in Python and uses\n" +
-             "Python as a scripting language. It strives to be functionally\n" +
-             "similar to TinTin++ while enhancing that functionality with\n" +
-             "the ability to call Python functions directly from the input\n" +
-             "line. It has the advantage of being platform-independent and\n" +
-             "has multiple interfaces as well--I use Lyntin at home with\n" +
-             "the Tk interface as well as over telnet using the text\n" +
-             "interface.")
-    self.write(output)
-
-  def handle_coloredline(self, text):
-    """ Returns a series of lines with colored text."""
-    output = "Notadragon is not a dragon.\n"
-    output += "Notadragon is " + self.color("not", 32) + " a dragon.\n"
-    output += "N" + self.color("otadragon", 35) + " is not a " + self.color("dragon.", 33) + "\n"
-    output += "Beginning of line " + self.color("Hunted by: ", 35) + self.color("No-one", 37) + " rest of line."
-    self.write(output)
-
-  def handle_text(self, text):
-    """ Returns 10 lines each with 10 random words in it."""
-    response = ''
-    for x in range(0,9):
-      response += self.getWords(10) + "\n"
-    self.write(response)
-
-  def handle_spam(self, text):
-    """ Starts the spam command."""
-    # 1 = 1 line per sec, 2 = 5 lines per sec, 3 = 10 lines per sec
-    text = text.split()
-    
-    try:
-      newval = float(text[1])
-
-      if self._spamFreq == 0 and newval > 0:
-        self._spamThread = thread.start_new_thread(self.spam, ())
-
-      self._spamFreq = newval
-    except Exception, e:
-      self._spamFreq = 0
-      self.write("That's not an appropriate spam setting. %s\n" % e)
-
-  def color(self, data, pcolor=37, backcolor=40, bold=0):
-    """
-    color(string,int,int,1/0)
-    returns the string with designated colors on the front of it.
-    """
-    output = chr(27) + "["
-    if bold==1:
-      output += "1;"
-    output += "%s;%sm" % (str(pcolor), str(backcolor))
-    output += data
-    output += chr(27) + "[0m"
-    return output
-
-  def getWords(self, numOfWords = 1):
-    """
-    words(string,int)
-    writes int words to string with spaces
-    """
-    datam = ''
-    for loop in range(0,numOfWords):
-      num = int(random.random() * 29)
-      datam += self._vocab[num] + " "
-    return datam
-  
-  def spam(self):
-    """
-    spam()
-    generates random 10 word lines per second
-    """
-    global shutdown
-    while not shutdown and self._spamFreq > 0:
-      time.sleep(self._spamFreq)
-
-      # print spam
-      self.write(self.getWords(10) + "\n")
-
-    return
-    
-def handler(signum, frame):
-  import sys
-  global shutdown
-  print "Quitting...."
-  shutdown = 1
-  sys.exit(0)
+  def closedown(self):
+    try: self._master.sockid().close()
+    except Exception, e: print "closing down master socket: '%s'" % e
+    for mem in self._conns:
+      if mem._addr == "MASTER":
+        continue
+      try:
+        mem.write("Server shutting down.\n")
+        mem.killConn()
+      except:
+        pass
 
 
-if __name__=='__main__':
-  import signal
-  server = SocketServer.ThreadingTCPServer(('', 3000), ConnectionHandler)
-  print "Server is up on port 3000"
-  signal.signal(signal.SIGINT, handler)
-  server.serve_forever()
+if __name__ == '__main__':
+  import testserver, signal
+
+  # parse out arguments
+  args = sys.argv[1:]
+  i = 0
+  optlist = []
+  while (i < len(args)):
+
+    if args[i][0] == "-":
+      if (i+1 < len(args)):
+        if args[i+1][0] != "-":
+          optlist.append((args[i], args[i+1]))
+          i = i + 1
+        else:
+          optlist.append((args[i], ""))
+      else:
+        optlist.append((args[i], ""))
+
+    else:
+      optlist.append(("", args[i]))
+
+    i = i + 1
+
+  options = {"host": "localhost", "port": "3000"}
+  print "Handling arguments."
+  for mem in optlist:
+    if mem[0] == "--host" or mem[0] == "-h":
+      if mem[1]:
+        testserver.my_options["host"] = mem[1]
+      else:
+        print_syntax("Host was not specified.")
+        sys.exit(1)
+
+    elif mem[0] == "--port" or mem[0] == "-p":
+      if mem[1] and mem[1].isdigit():
+        testserver.my_options["port"] = mem[1]
+      else:
+        print_syntax("Port needs to be a number.")
+        sys.exit(1)
+
+  print "Host: %s" % options["host"]
+  print "Port: %s" % options["port"]
+
+  # create the world
+  testserver.my_world = World(options)
+  try:
+    testserver.my_world.startup()
+  except Exception, e:
+    print "Outer loop exception: %s" % e
+  testserver.my_world.shutdown()
