@@ -1,5 +1,5 @@
 For more up-to-date installation guide, please check the web-site:
-http://www.varium.com/lyntin
+http://lyntin.sourceforge.net
 
 
 Unix/Linux 
@@ -33,24 +33,5 @@ Windows
 
 
 
-
-
-
-1.) Install python 1.3 or greater.
-
-2.) unzip and untar lyntin; this will result in a directory named
-'lt'.
-
-3.) set the environment variable LYNTINDIR to be the name of the
-directory you just created.
-
-4.) set the environment variable PYTHONPATH to include the name of
-the directory you just created.
-
-5.) mv the file 'direc_you_just_created/lt', eg lt/lt to a directory in
-your path.
-
-type 'lt', and you're running lyntin.
-
-lyntin accepts command line arguments, and interprets them as files
-filled with aliases/actions/subs/vars/gags
+After that, we have in-game help which you can access via #help.  If you
+are really new to Lyntin, read README then read #help general.
