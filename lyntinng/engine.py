@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.5 2001/12/15 05:59:10 willhelm Exp $
+# $Id: engine.py,v 1.6 2001/12/24 02:59:44 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -350,7 +350,8 @@ class Engine:
               "   ui: " + repr(self._ui) + "\n" + 
               "   thread manager: " + repr(self._threadman) + "\n" + 
               "   speedwalking: " + repr(lyntin.speedwalk) + "\n" +
-              "   ansicolor: " + repr(lyntin.ansicolor) + "\n")
+              "   ansicolor: " + repr(lyntin.ansicolor) + "\n" +
+              "   ticks: " + repr(self._tick) + "\n")
 
 
       # print info from each session
