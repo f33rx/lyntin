@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.4 2002/05/11 18:06:48 willhelm Exp $
+# $Id: helpmanager.py,v 1.5 2002/05/11 18:56:59 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -14,7 +14,7 @@ which then can be converted to a variety of other formats (probably
 either AFT or reStructuredText).
 """
 import string
-import utils
+import utils, lyntin
 
 class HelpManager:
   """ Manages the help text hierarchy.
@@ -232,6 +232,10 @@ class HelpManager:
       keys = keys[1:]
 
     if len(keys) > 0:
-      return (keys[:-1], keys[-1])
+      categories = keys[:-1]
+      name = keys[-1]
+      if len(name) > 0 and name[0] == lyntin.commandchar:
+        name = name[1:]
+      return (categories, name)
     else:
       return ([], "")
