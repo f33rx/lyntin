@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.2 2002/03/02 23:57:50 willhelm Exp $
+# $Id: advanced.py,v 1.3 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 import traceback, sys, string
-import exported, engine
+import exported, engine, ui.ui
 
 """
 This module holds the magical python_cmd code.  It takes in code,
