@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.45 2002/05/09 23:20:11 willhelm Exp $
+# $Id: engine.py,v 1.46 2002/05/31 00:01:48 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -217,26 +217,24 @@ class Engine:
       session = self._current_session
 
     for mem in inputlist:
-      # chomp it, replace \; -> ;, and strip leading/trailing whitespace
-      # FIXME mem = utils.chomp(mem).replace("\;", ";").strip()
-      mem = utils.chomp(mem).strip()
+      mem = mem.strip()
 
       if len(mem) == 0:
         mem = lyntin.commandchar + "cr"
 
-      # spam the hook with the raw input statement first...
+      # if it's not internal we spam the hook with the raw input
       if internal == 0:
         hooks.from_user_hook.spamhook((mem,))
 
-      # FIXME - handle history stuff
       if mem[0] == "!":
         memhistory = self.getHistoryManager().getHistoryItem(mem)
         if memhistory != -1:
           self.handleUserData(memhistory)
           continue
 
-      # if it starts with a # it's a loop, session or command.
+      # if it starts with a # it's a loop, session or command
       if len(mem) > 0 and mem[0] == lyntin.commandchar:
+
         # pull off the first token without the commandchar
         ses = mem.split(" ", 1)[0][1:]
 
@@ -259,15 +257,17 @@ class Engine:
                                                      internal )
           continue
 
-        # is it all sessions?
+        # is it "all" sessions?
         if ses == "all":
+          newinput = mem.split(" ", 1)[1]
           for sessionname in self._sessions.keys():
             if sessionname != "common":
-              self._sessions[sessionname].handleUserData(mem.split(" ",1)[1], internal )
+              self._sessions[sessionname].handleUserData(newinput, internal)
           continue
 
-      # no command char, so we pass it on to the mud
-      session.handleUserData(mem, internal )
+      # no command char, so we pass it on to the session.handleUserData
+      # to do session oriented things
+      session.handleUserData(mem, internal)
 
 
   def handleMudData(self, session, text):
@@ -395,6 +395,10 @@ class Engine:
     """
     if name == '':
       keys = self._sessions.keys()
+
+      # it's a little bit of finagling here to make sure
+      # that the common session is the last one we would
+      # switch to
       keys.remove("common")
       if len(keys) == 0:
         self._current_session = self._sessions["common"]
@@ -409,7 +413,7 @@ class Engine:
       exported.write_error("No session of that name.")
 
   def writeSession(self, message):
-    """ Writes a message to the socket.
+    """ Writes a message to the network socket.
 
     The message should be a string.  Otherwise, it's unhealthy.
 
@@ -566,6 +570,9 @@ class Engine:
 
     This method uses a lock so that multiple threads can write
     to the ui without intersecting and crashing the python process.
+
+    Theoretically you should use the exported module to write
+    things to the ui--it calls this method.
 
     arguments:
 

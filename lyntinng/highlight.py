@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.23 2002/05/18 23:32:00 willhelm Exp $
+# $Id: highlight.py,v 1.24 2002/05/28 03:42:40 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -179,6 +179,23 @@ class HighlightManager(manager.Manager):
     """
     Takes a bunch of stuff and applies the highlight involved.  
     It's messy.
+
+    arguments:
+
+      'textlist' -- a list of strings
+
+      'place' -- if the textlist were concatenated without
+                 ansi color codes, place would be the index
+                 of where the highlight should start
+
+      'memlength' -- the length of the string to be highlighted
+
+      'hl' -- the highlight to apply
+
+    returns:
+
+      the new textlist
+
     """
     # first we find the place to stick the highlight thingy.
     i = 0
@@ -257,6 +274,23 @@ class HighlightManager(manager.Manager):
     """ 
     Takes a textlist of text and color tokens and figures out
     the latest current color.
+
+    arguments:
+
+      'textlist' -- the list of strings and ansi color codes
+
+      'currentcolor' -- a tuple of three items that represent
+                        the current color.  
+                        (attribute, foreground, background)
+
+      'leftover=-1' -- if we encounter a half done color code
+                       we throw it in the leftover.  the leftover
+                       gets prepended to the first textlist element
+                       on the next run of figureColor
+
+    returns:
+
+      the new currentcolor and leftover as a tuple
     """
     if leftover == -1:
       leftover = self._colorleftover
@@ -316,10 +350,10 @@ class HighlightManager(manager.Manager):
     if len(self._highlights.keys()) == 0:
       return ''
 
-    if text=='':
-      list = self._highlights.keys()
-    else:
-      list = utils.expand(text, self._highlights.keys())
+    list = self._highlights.keys()
+
+    if not text:
+      list = utils.expand(text, list)
 
     data = []
     for mem in list:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.12 2002/04/29 00:31:42 jmberne Exp $
+# $Id: hooks.py,v 1.13 2002/05/02 23:39:07 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -12,7 +12,6 @@ Also contains the Hook class which encapsulates hook functionality.
 """
 
 import traceback
-
 import session, variable
 
 """

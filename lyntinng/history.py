@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.5 2002/04/11 03:58:22 willhelm Exp $
+# $Id: history.py,v 1.6 2002/05/08 02:07:03 jmberne Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered
@@ -35,6 +35,17 @@ class HistoryManager:
                      out which item they're referring to and
                      whether to apply a substitution
 
+      'calledbyuser=1' -- if this was called by the user, it means
+                          that the item in position 0 of self._history
+                          is actually a history command ("!4 blah=blah").
+                          if calledbyuser == 1, then we replace that
+                          position 0 of self._history with the newly
+                          figured out command
+                          
+    returns:
+
+      -1 if we didn't discover anything or the command string at
+      the history index
     """
     tokens = userinput.split(" ", 1)
 
