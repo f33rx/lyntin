@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.31 2002/04/24 04:38:24 willhelm Exp $
+# $Id: tkgui.py,v 1.32 2002/04/26 00:54:16 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -365,18 +365,16 @@ class TkGui(ui.BaseUI):
             self._currcolors[0] = 1
 
         elif fg_color_codes.has_key(num):
-          if self._currcolors[0] == 1:
-            self._currcolors[1] = "b" + num
-          else:
-            self._currcolors[0] = 0
             self._currcolors[1] = num
 
         elif bg_color_codes.has_key(num):
-          if self._currcolors[0] == 1:
-            self._currcolors[2] = "b" + num
-          else:
-            self._currcolors[0] = 0
             self._currcolors[2] = num
+
+      if self._currcolors[0] == 1:
+        if self._currcolors[1][0] != "b":
+          self._currcolors[1] = "b" + self._currcolors[1]
+        if self._currcolors[2][0] != "b":
+          self._currcolors[2] = "b" + self._currcolors[2]
 
 
   def _initColorTags(self):

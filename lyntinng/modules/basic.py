@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.82 2002/05/01 23:01:43 willhelm Exp $
+# $Id: basic.py,v 1.83 2002/05/02 23:39:07 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -377,6 +377,9 @@ def help_cmd(session, words, input):
 
   for mem in words[1:]:
     mem = utils.strip_braces(mem)
+
+    if mem[0] == lyntin.commandchar:
+      mem = mem[1:]
 
     if mem + ".tpc" in helpfiles:
       f = open(helpdir + "/" + mem + ".tpc", "r")
@@ -920,7 +923,7 @@ def textin_cmd(session, args, input):
     exported.write_error("textin cannot be applied to common session.")
     return
 
-  filename = args["filename"]
+  filename = args["file"]
 
   if not filename:
     exported.write_error("syntax: #textin <filename>")

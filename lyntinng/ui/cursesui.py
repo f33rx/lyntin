@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.8 2002/04/21 03:49:31 willhelm Exp $
+# $Id: cursesui.py,v 1.9 2002/04/29 02:06:18 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
 """
-import regsub, curses, string
+import curses, string
 import ui, hooks, event, engine, utils
 
 
@@ -52,7 +52,7 @@ class Cursesui(ui.BaseUI):
     curses.cbreak()
 
     self._stdscr.nodelay(0)
-    self._stdscr.keypad(1)
+    self._stdscr.keypad(0)
 
     (self._height, self._width) = self._stdscr.getmaxyx()
     self._main = curses.newwin(self._height, self._width, 0, 0)
@@ -60,17 +60,18 @@ class Cursesui(ui.BaseUI):
     self._output = self._main.subwin(self._height - 3, self._width, 0, 0)
     # FIXME - might want to try a textbox here
     self._input = self._main.subwin(self._height - 2, 0)
-
+    self._input.hline(0, 0, curses.ACS_HLINE, self._width)
+    self._input.move(1,0)
     # self._output.nodelay(1)
     # self._input.nodelay(0) 
     self.refresh_all()
-    hooks.startup_hook.register(self.shutdown)
-    hooks.shutdown_hook.register(self.startui)
+    hooks.startup_hook.register(self.startui)
+    hooks.shutdown_hook.register(self.shutdown)
 
 
   def startui(self, args):
     """ Starts the ui."""
-    import engine
+    #import engine
     hooks.to_user_hook.register(self.write)
     engine.myengine.startthread("ui", self.run)
 
@@ -118,7 +119,7 @@ class Cursesui(ui.BaseUI):
     (y,x) = self._output.getyx()
     (maxy,maxx) = self._output.getmaxyx()
       
-    if y + ls > maxy:
+    if y + ls >= maxy:
       lines = message.data.splitlines()
       for n in range(0, len(lines)):
         (y,x) = self._output.getyx()
@@ -127,28 +128,21 @@ class Cursesui(ui.BaseUI):
         self._output.move(y,0)
         self._output.addstr(lines[n])
 
-      if message.data[-1] == "\n":
-        (y,x) = self._output.getyx()
-        self._output.move(0,0)
-        self._output.deleteln()
-        self._output.move(y,0)
-        self._output.addstr("\n")
-
-      self._output.refresh()
     else:
       self._output.addstr(message.data)
 
     self._output.refresh()
 
- 
   def run(self):
     """ Reads through keys typed one by one and handles them accordingly."""
     while not self._shutdown:
       newchar = self._input.getch()
+      
       if newchar == 10:
         self.handleinput(string.join(self._newline, ''))
         self._newline = []
-        self._input.erase()
+        self._input.deleteln()
+	self._input.move(1,0)
 
       elif newchar == 13:
         continue
@@ -156,6 +150,7 @@ class Cursesui(ui.BaseUI):
       elif (newchar == curses.KEY_DC or 
         newchar == curses.KEY_BACKSPACE or 
         newchar == 8 or newchar == 127):
+	
         if len(self._newline) > 0:
           self._newline = self._newline[:-1]
           (y,x) = self._input.getyx()

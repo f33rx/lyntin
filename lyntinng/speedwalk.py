@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.6 2002/05/01 23:01:43 willhelm Exp $
+# $Id: speedwalk.py,v 1.7 2002/05/02 23:39:07 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -13,7 +13,7 @@ This module defines the speedwalking code.
 # Originally written 2002 by Sebastian John
 
 import re
-import manager, utils, lyntin
+import manager, utils, lyntin, engine
 
 class SpeedwalkManager(manager.Manager):
   """
@@ -41,9 +41,6 @@ class SpeedwalkManager(manager.Manager):
       'dir' -- (string) the actual direction
     
     """
-    if alias == dir:
-      raise ValueError, "Alias cannot be the same as dir."
-
     for mem in self._dirs.keys():
       if mem.find(alias) != -1 or mem.find(dir) != -1:
         raise ValueError, "possible ambiguity"
@@ -135,8 +132,9 @@ class SpeedwalkManager(manager.Manager):
     """
     Compiles the actual speedwalking pattern.
     """
+    keys = "|".join(self._dirs.keys())
     if self._dirs:
-      regexp = "^(\\d*(%s))+$" % "|".join(self._dirs.keys())
+      regexp = "^\\d*(%s)(\\d*(%s))+$" % (keys, keys)
       self._regexp = re.compile(regexp)
     else:
       self._regexp = None
@@ -271,10 +269,14 @@ class SpeedwalkManager(manager.Manager):
     """
     user_filter_hook function to check for speedwalking expansion.
     """
+    session = args[0]
+    internal = args[1]
     text = args[-1]
      
-    if lyntin.speedwalk == 0 or not self._dirs or text in self._excludes \
-        or not self._regexp.search(text):
+    if lyntin.speedwalk == 0 or not self._dirs or text in self._excludes:
+      return text
+
+    if not self._regexp.match(text):
       return text
 
     swdirs = []
@@ -292,4 +294,5 @@ class SpeedwalkManager(manager.Manager):
             swdirs.append(self._dirs[dir])
           dir = num = ""
       n = n + 1
-    return "\n".join(swdirs)
+
+    engine.myengine.handleUserData(";".join(swdirs), internal, session)
