@@ -304,6 +304,10 @@ class session:
     # see if any mud output triggers an action.
     # any trigger causes the action_hook to be run, just
     # before the action response is taken
+
+    # FIXME - need to handle $n as well as %n syntax.
+    # the former should replace all ; with \; and I think
+    # that'll fix the problem.
     def CheckActions(self, output):
 
         # get a list of variables in str, in the order in
