@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.12 2002/05/05 16:34:51 willhelm Exp $
+# $Id: substitute.py,v 1.13 2002/05/15 00:16:55 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -93,5 +93,8 @@ class SubstituteManager(manager.Manager):
     Mud_filter_hook function to perform substitutions on data 
     that comes from the mud.
     """
+    session = args[0]
     text = args[-1]
-    return self.expand(text)
+    if not session._ignoresubs:
+      text = self.expand(text)
+    return text
