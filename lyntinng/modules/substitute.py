@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.4 2002/07/07 04:53:45 willhelm Exp $
+# $Id: substitute.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -53,12 +53,17 @@ class SubstituteData:
     """
     if len(text) > 0:
       for mem in self._substitutes.keys():
-        # note: this . thing is done on purpose because that's a tintin
-        # feature
         if self._substitutes[mem] == ".":
-          if text.find(mem) > -1:
-            text = ''
+          # handling gags
+          if utils.filter_ansi(text).find(mem) > -1:
+            tokens = utils.split_ansi_from_text(text)
+            text = []
+            for mem in tokens:
+              if utils.is_color_token(mem):
+                text.append(mem)
+            text = string.join(text, "")
         else:
+          # handling regular substitutes
           if self._substitutes[mem] == r"\.":
             text = text.replace(mem, ".")
           else:
