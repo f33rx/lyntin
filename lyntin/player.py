@@ -54,8 +54,10 @@ def dispatch_command(input, seslist):
 
     # execute some python code?
     if input[0] == '@':
-        hooks.exec_user_code_hook.run((input,))
         input = input[1:]
+        hooks.exec_user_code_hook.run((input,))
+        
+        # auto-bind lyntin variables to local variables some day?
         exec input in user.__dict__
         return
 
@@ -532,7 +534,7 @@ def Variable(words, input, seslist):
             ses.vars[name] = expansion
 	    if ses.verbose:
                 PutMessage('variable: variable defined:')
-                PutMessage("  " + ses.GetVarDisplayString(var))
+                PutMessage("  " + ses.GetVarDisplayString(name))
 
 def WriteFile(words, input, seslist):
     """WriteFile(words, seslist) -> None
