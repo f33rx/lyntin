@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.22 2002/03/03 19:09:55 willhelm Exp $
+# $Id: basic.py,v 1.23 2002/03/05 01:26:13 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin, exported
@@ -259,7 +259,8 @@ def help_cmd(session, words, input):
     command_list = []
 
     for mem in file_list:
-      if len(mem) < 5: continue
+      if len(mem) < 5:
+        continue
 
       if mem[-4:] == ".tpc":
         topic_list.append(mem[:-4])
@@ -287,9 +288,9 @@ def help_cmd(session, words, input):
         data += mem + " is not a valid help topic.\n"
         continue
 
-      lines = f.readlines()
-      f.close()
-      data += (string.join(lines, "") + "\n")
+    lines = f.readlines()
+    f.close()
+    data += (string.join(lines, "") + "\n")
 
   exported.write_message(data)
 
