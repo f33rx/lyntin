@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.70 2003/03/12 22:04:35 willhelm Exp $
+# $Id: utils.py,v 1.71 2003/03/19 23:49:24 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -684,7 +684,7 @@ def escape(s):
     # should probably build a regexp to do the substitution with
     # which handles the various situations.  or something along
     # those lines.
-    if side.endswith("$") or side.endswith("$]"):
+    if s.endswith("$") or s.endswith("$]"):
       s = s[:-1].replace("$", "\\$") + "$"
     else:
       s = s.replace("$", "\\$")
