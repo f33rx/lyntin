@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.4 2002/06/18 04:01:12 willhelm Exp $
+# $Id: modutils.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 import string
 import exported
@@ -69,14 +69,15 @@ def unsomething_helper(args, func, ses, sing, plur):
 
   if not quiet:
     if len(removedthings) == 0:
-      data = "%s: No %s removed." % (sing, plur)
+      data = "un%s: No %s removed." % (sing, plur)
     else:
       data = []
       for mem in removedthings:
-        if type(mem) == type(()):
-          data.append("%s: {%s} {%s} removed." % (sing, mem[0], mem[1]))
+        if type(mem) == type(()) or type(mem) == type([]):
+          mem = "{" + string.join(mem, "} {") + "}"
+          data.append("un%s: %s removed." % (sing, mem))
         else:
-          data.append("%s: {%s} removed." % (sing, mem))
+          data.append("un%s: {%s} removed." % (sing, mem))
       data = string.join(data, "\n")
     exported.write_message(data)
 

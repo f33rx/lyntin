@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.7 2002/08/12 15:17:52 jmberne Exp $
+# $Id: speedwalk.py,v 1.8 2002/08/13 02:22:49 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -181,12 +181,12 @@ class SpeedwalkHash:
     
       list with the exclude removed
     """
-    try:
-      self._excludes.remove(exclude)
-    except ValueError:
-      return []
-    else:
-      return [exclude]
+    badexcludes = utils.expand_text(exclude, self._excludes)
+
+    for mem in badexcludes:
+      self._excludes.remove(mem)
+
+    return badexcludes
   
   def getExcludes(self):
     """
@@ -265,7 +265,7 @@ class SpeedwalkManager(manager.Manager):
 
   def removeDirs(self, ses, alias):
     if self._hashes.has_key(ses):
-      return self._hashes[ses].removeDir(alias)
+      return self._hashes[ses].removeDirs(alias)
     return []
 
   def getDirs(self, ses):
