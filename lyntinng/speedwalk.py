@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.10 2002/05/04 17:39:58 jmberne Exp $
+# $Id: speedwalk.py,v 1.11 2002/05/04 21:50:32 jmberne Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -29,7 +29,7 @@ class SpeedwalkManager(manager.Manager):
     Clears all stored speedwalking dirs from the manager.
     """
     self._dirs = {}
-    self._aliases = []
+    self.compileRegexp()
   
   def addDir(self, alias, dir):
     """
@@ -132,16 +132,18 @@ class SpeedwalkManager(manager.Manager):
   def compileRegexp(self):
     """
     Compiles the actual speedwalking pattern.
-    Also maintains self._aliases - the default excludes.
+    Also maintains self._aliases the default excludes.
     """
     if self._dirs:
       keys = "|".join(self._dirs.keys())
       regexp = "^(\\d*(%s))+$" % (keys)
       self._regexp = re.compile(regexp)
       self._aliases = self._dirs.values()
+      self._dirs_available = self._dirs.keys()
     else:
       self._regexp = None
       self._aliases = []
+      self._dirs_available = []
   
   def clearExcludes(self):
     """
@@ -277,34 +279,34 @@ class SpeedwalkManager(manager.Manager):
     internal = args[1]
     text = args[-1]
      
-    if lyntin.speedwalk == 0 or not self._dirs or text in self._excludes or text in self._aliases:
+    if lyntin.speedwalk == 0 or not self._dirs or not self._regexp:
+      return text
+
+    if text in self._excludes or text in self._aliases:
       return text
 
     if not self._regexp.match(text):
       return text
 
     swdirs = []
-    dirsavailable = self._dirs.keys()
     dir = num = ""
-    n = 0
-    while n < len(text):
-      if text[n].isdigit():
-        num = num + text[n]
+    for char in text:
+      if char.isdigit():
+        num = num + char
       else:
-        dir = dir + text[n]
-        if dir in dirsavailable:
+        dir = dir + char
+        if dir in self._dirs_available:
           if num: count = int(num)
           else: count = 1
           for i in range(count):
             swdirs.append(self._dirs[dir])
           dir = num = ""
-      n = n + 1
 
     output = ";".join(swdirs)
     if output == text:
       return text
     else:
-      engine.myengine.handleUserData(";".join(swdirs), internal, session)
+      engine.myengine.handleUserData(output, internal, session)
       return None
 
 
