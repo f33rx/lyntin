@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.71 2003/02/14 00:20:39 willhelm Exp $
+# $Id: tintincmds.py,v 1.72 2003/02/15 03:35:06 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -28,18 +28,6 @@ def bell_cmd(ses, words, input):
   exported.get_hook("bell_hook").spamhook((ses,))
 
 commands_dict["bell"] = (bell_cmd, "")
-
-def boss_cmd(ses, words, input):
-  """
-  This probably isn't as helpful as it could be.  Right now it
-  will print to your display code from Lyntin 2.x to make it seem
-  like you're doing work.
-
-  category: commands
-  """
-  exported.write_mud_data(lyntin.BOSSTEXT)
-
-commands_dict["boss"] = (boss_cmd, "")
 
 
 def clear_cmd(ses, words, input):
@@ -224,19 +212,18 @@ def loop_cmd(ses, args, input):
   the range of numbers specified in <from> and <to>.
 
   example:
-    #loop {1,5} {reclaim %0.corpse}
+    #loop {1,4} {reclaim %0.corpse}
 
   will execute:
     reclaim 1.corpse
     reclaim 2.corpse
     reclaim 3.corpse
     reclaim 4.corpse
-    reclaim 5.corpse
 
   A better way to execute a command a number of times without regard
   to an index, would be:
 
-    #5 {reclaim corpse}
+    #4 {reclaim corpse}
 
   which will send "reclaim corpse" to the mud 5 times.
 
@@ -309,7 +296,7 @@ commands_dict["math"] = (math_cmd, "var operation quiet:boolean=false")
 def nop_cmd(ses, args, input):
   """
   nop stands for "no operation".  So anything after a #nop
-  and before a ; (unless it's braced) will be ignored.
+  and before a ; (unless it's escaped) will be ignored.
 
   This was quite possibly the easiest command to program ever.
 
@@ -585,8 +572,8 @@ commands_dict["version"] = (version_cmd, "")
 
 def wizlist_cmd(ses, args, input):
   """
-  Tells you about all the people who have participated in Lyntin's
-  development--these are the Lyntin wizards.
+  Displays the web-page where you can find an up-to-date list
+  of people who have contributed to Lyntin's development.
 
   category: commands
   """

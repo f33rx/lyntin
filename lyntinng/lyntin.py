@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.38 2003/01/18 16:49:10 willhelm Exp $
+# $Id: lyntin.py,v 1.39 2003/04/08 22:19:07 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -68,43 +68,7 @@ OPTIONS:
 """
 
 # the wizlist of folks without whom Lyntin wouldn't exist.
-WIZLIST = """This is the wizlist--people who have worked to bring you Lyntin:
-Lyn Headley, Will Guaraldi, James, Aquarius, Sebastian John, 
-Joshua Berne, Brian Bell
-"""
-
-# bosstext - code derived from the original Lyntin
-BOSSTEXT = """
-      hooks.too_many_errors_hook.add(abort_due_to_errors)
-      sys.path.append(data.initdir + 'stdlib')
-
-        
-   def PreHandleUserInput(self, input):
-      \"""
-      Do stuff that we want to do one time for each command, like
-      registering the command in the history list.
-      We can't do this in HandleUserInput because it is recursive
-      \"""
-      if input == '\\n':
-          self.SendPlainInput('\\r')
-
-      elif input:
-          self.RecordHistory(input)
-
-          # run the received_user_input hook
-          newinput = strip_final_elt_if(input, ['\\r', '\\n'])
-          hooks.received_user_input_hook.run((newinput,))
-
-          # send it along to the recursive workhorse
-          self.HandleUserInput(input)
-
-
-   def HandleUserInput(self, input):
-      \"""
-      The main "eval" command for Lyntin.  This function is
-      recursive.
-      \"""
-      if not input:
+WIZLIST = """See the website: http://lyntin.sourceforge.net/contrib.php
 """
 
 # Lyntin displays this after it's done initializing and it's
