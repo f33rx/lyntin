@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.5 2002/02/18 05:19:42 willhelm Exp $
+# $Id: ui.py,v 1.6 2002/03/01 16:39:22 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -101,6 +101,7 @@ class BaseUI:
 
     Also deals with things like \n.
     """
-    input = input.replace("\n", "")
-    input = input.replace("\r", "")
+    input = utils.chomp(input)
+    if input == '':
+      input = "#cr"
     event.InputEvent(input).enqueue()
