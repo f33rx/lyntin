@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.56 2002/06/20 01:20:10 willhelm Exp $
+# $Id: engine.py,v 1.57 2002/06/20 03:23:27 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -820,7 +820,9 @@ class Engine:
 
       the manager instance
     """
-    return self._managers[name]
+    if self._managers.has_key(name):
+      return self._managers[name]
+    return None
 
   ### ------------------------------------------------
   ### Status stuff
