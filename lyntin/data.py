@@ -101,7 +101,7 @@ class session:
             self.name = name
         if domain and port:
             self.sorck= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sorck.connect(domain, port)
+            self.sorck.connect((domain, port))
             self.domain = domain
             self.name = name
             self.connected = 1        

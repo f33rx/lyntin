@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python
 """
 The main script that figures out the args, and instantiates everything.
 """

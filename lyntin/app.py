@@ -120,6 +120,11 @@ class client(dict_plus.c):
       self.ui = None
       
       if len(sys.argv) > 1:
+         if sys.argv[1] == '-ui' and not self.ui:
+            # need to do arbitrary importing here of argv[2]
+            ui = null
+            self.ui = ui
+            ui.app = self
          if sys.argv[1] == '-curses' and not self.ui:
             import cursesui
             ui = cursesui.Textui()
