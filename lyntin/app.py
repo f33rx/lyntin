@@ -497,7 +497,15 @@ def run():
    player.init_player()
 
    cl.PreInitialize()
-    
+
+   # process user customizations
+   try:
+      import user
+      player.import_user()
+   except ImportError:
+      player.PutError('Unable to load user customizations')
+
+
    cl.CommandLine1()
 
    def prul(l): player.PutMessage(l)
@@ -511,13 +519,6 @@ def run():
 
    cl.CommandLine2()
 
-   # process user customizations
-   try:
-      import user
-      player.import_user()
-   except ImportError:
-      player.PutError('Unable to load user customizations')
-    
    # warn player if no-echo not possible
    if not data.theapp.ui.has_echo():
       cl.ui.WarnNoEcho()
@@ -739,3 +740,8 @@ def abort_due_to_errors(arg):
    player.PutError('too many errors! abort! abort! abort!')
    player.Quit(None, None, None)
 
+# Local variables:
+# mode:python
+# py-indent-offset:3
+# tab-width:3
+# End:
