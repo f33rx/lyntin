@@ -66,7 +66,7 @@ logfile = ''
 try:
     logfile = open(datadir + 'mudlog', 'w')
 except:
-    player.Putline('\nUnable to write log to LYNTINDATADIR %s!'%datadir)
+    player.PutError('Unable to write log to LYNTINDATADIR %s!'%datadir)
     logfile = None
 
 """The lyntin character: prepended to all lyntin commands."""
@@ -294,7 +294,7 @@ class UserSession(Session):
         global common, numsessions, sessionlist, currsession
         import types
         if type(exc) == types.StringType:
-            player.Putline(exc)
+            player.PutError(exc)
         else:
             player.Putline(exc[1])
         # run the death hook; feed self as argument
@@ -302,18 +302,18 @@ class UserSession(Session):
 
         # mop up this session
         self.Close()
-        player.Putline('session "' + self.name + '" died.')
+        player.PutError('session "' + self.name + '" died.')
         numsessions = numsessions - 1
         sessionlist.remove(self)
         
         # try to switch to another live session
         if len(sessionlist) > 1:
             currsession = sessionlist[1]
-            player.Putline('session "' + currsession.name + '" activated.')
+            player.PutError('session "' + currsession.name + '" activated.')
         else:
             # no more live sessions
             currsession = common
-            player.Putline('no more active sessions')
+            player.PutError('no more active sessions')
             player.prompt()
         theapp.ui.OnEcho()
 
@@ -350,14 +350,14 @@ class UserSession(Session):
             self.sorck.connect((domain, port))
             self.connected = 1
         except:
-            player.Putline('unable to connect')
+            player.PutError('unable to connect')
 
     # write something to our connection
     def WriteTo(self, data):
         mud.log(data)
         self.log(data)
         if not self.connected:
-            player.Putline("data.WriteTo: ** Internal Error: not connected  **")
+            player.PutError("data.WriteTo: ** Internal Error: not connected  **")
             return
         try:
             self.sorck.send(data)

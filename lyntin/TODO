@@ -4,10 +4,6 @@ http://lyntin.sourceforge.net
 -------------------------------------------------------------
 finish cleaning up modules
 
-finish basegui translation
-
-fix extra space problem with textui
-
 fix spacing problems in tkgui
 
 finish up help files
@@ -17,6 +13,10 @@ fix all the files--
  - consistent indentation 
  - doc-strings
  - consistent naming
+
+fix lyntin messages
+ - consistent messaging
+ - consistent use of PutMessage, PutError, and PutRaw
 
 
 

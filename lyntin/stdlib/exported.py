@@ -123,11 +123,24 @@ def grep_databuffer_lines(str, ses):
     return ses.databuf.greplines(str)
 
 def print_line(str):
-    """print_line(str) -> none
+    """here for backwards-compatibility reasons"""
+    put_message("use 'put_message' exported function instead.")
+    put_message(str)
+
+def put_message(str):
+    """put_message(str) -> none
 
     Prints a line to the screen with an added \n.
     """
-    data.player.PutUntouchedLine(str)
+    data.player.PutMessage(str)
+
+def put_error(str):
+    """put_error(str) -> none
+
+    Prints an error to the screen.
+    """
+    data.player.PutError(str)
+
 
 ##################################################################
 # use the scheduler to run functions at predetermined intervals

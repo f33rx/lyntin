@@ -131,7 +131,7 @@ def handle_mud_output(output, ses):
         # display the text if this is the current session
         if ses is data.currsession and ses.connected:
             log(oldcleandata)
-            player.PutReallyUntouchedLine(oldcleandata)
+            player.PutRaw(oldcleandata)
 
         # add output to the session's databuffer
         ses.databuf.add(cleandata)

@@ -34,7 +34,7 @@ fgColorCodes = {
 #                  "33": "yellow", "34": "blue", "35": "magenta",
 #                  "36": "cyan", "37": "white"}
 
-bgColorCodes = { "40": "black", "41": "red", "42": "green",
+bgColorCodes = { "40": "black", "41": "red", "42": "#004411",
                  "43": "yellow", "44": "blue", "45": "magenta",
                  "46": "cyan", "47": "white", "50": "purple" }
 
@@ -177,10 +177,22 @@ class TkGui(BaseGUI):
     """overridden function"""
     def print_string(self, line, modifiers=None, ending='\n', target=None):
 
-        if modifiers=='client':
+        if modifiers=='error':
             if line:
                 self.txt.configure(state='normal')
-                self.txt.insert('end', '> '+line, "44")
+                self.txt.insert('end', line, "44")
+                self.txt.insert('end', "\n")
+                self.txt.configure(state='disabled')
+
+                self.txt.yview('moveto', '1')
+                if os.name != 'posix':
+                    self.txt.yview('scroll', '20', 'units')
+
+        elif modifiers=='client':
+            if line:
+                self.txt.configure(state='normal')
+                # self.txt.insert('end', line, "42")
+                self.txt.insert('end', "# " + line)
                 self.txt.insert('end', "\n")
                 self.txt.configure(state='disabled')
 

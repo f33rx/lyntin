@@ -44,7 +44,7 @@ class Client(dict_plus.c):
        if callable(func):
            self.commands[name] = func
        else:
-           player.Putline('##' + name + ' is uncallable.  Sorry kiddo.')
+           player.PutError(name + ' is uncallable.  Sorry kiddo.')
 
    def RemoveCommand(self, name):
        """RemoveCommand(self) -> None
@@ -75,7 +75,7 @@ class Client(dict_plus.c):
        except SystemExit: # handle sys.exit
            return None
        except BadUser, spec:
-           player.Putline('User variable %s unset!  Abort!'%spec.why)
+           player.PutError('User variable %s unset!  Abort!'%spec.why)
            return None
 
 
@@ -90,8 +90,8 @@ class Client(dict_plus.c):
 
            info = exc_info()
            exc_class = info[0]
-           player.Putline("Cough...  sputter...  lyntin internal error:")
-           player.Putline(string.join(format_exception(info[0], info[1], info[2]), ""))
+           player.PutError("Cough...  sputter...  lyntin internal error:")
+           player.PutMessage(string.join(format_exception(info[0], info[1], info[2]), ""))
 
            self.numerrors = self.numerrors + 1
            hooks.error_occurred_hook.run(())
@@ -99,7 +99,7 @@ class Client(dict_plus.c):
                if self.numerrors >= self.too_many_errors:
                    hooks.too_many_errors_hook.run(())
            except BadUser, spec:
-               player.Putline('User variable %s unset!  Abort!'%spec.why)
+               player.PutError('User variable %s unset!  Abort!'%spec.why)
                raise SystemExit
        return 1
 
@@ -288,7 +288,7 @@ class Client(dict_plus.c):
             seslist = data.get_session(words[0])
          except ValueError:
             # tried to do an #all when there aren't any connections
-            player.Putline('there aren\'t any sessions!')
+            player.PutError('there aren\'t any sessions!')
             return 0
          # did player specify a target session for this command?
          if seslist:
@@ -380,9 +380,7 @@ class Client(dict_plus.c):
          data.currsession.WriteTo(input)
 
       elif not data.numsessions:
-         ans = "no session active. " + \
-               "use the #session command to start one"
-         player.Putline(ans)
+         player.PutMessage("no session active.  use the #session command to start one")
          player.prompt()
 
 
@@ -487,13 +485,14 @@ def run():
     
    cl.CommandLine1()
 
-   def prul(l): player.PutReallyUntouchedLine(l)
-   prul('############################################\n')
-   prul("#          Welcome to LynTin...            #\n")
-   prul('#          The Hacker\'s mud client.        #\n')
-   prul('#          For help, type #help general.   #\n')     
-   prul('############################################\n')
-   prul('\n\n')
+   def prul(l): player.PutMessage(l)
+   prul('############################################')
+   prul("#          Welcome to LynTin...            #")
+   prul('#          The Hacker\'s mud client.        #')
+   prul('#          For help, type #help general.   #')     
+   prul('############################################')
+   player.PutRaw('\n')
+   player.PutRaw('\n')
 
    cl.CommandLine2()
 
@@ -502,7 +501,7 @@ def run():
       import user
       player.import_user()
    except ImportError:
-      player.Putline('Unable to load user customizations')
+      player.PutError('Unable to load user customizations')
     
    # warn player if no-echo not possible
    if not data.theapp.ui.has_echo():
@@ -733,6 +732,6 @@ def abort_due_to_errors(arg):
 
    There have been too many errors.  so we quit.
    """
-   player.Putline('too many errors! abort! abort! abort!')
+   player.PutError('too many errors! abort! abort! abort!')
    player.Quit(None, None, None)
 

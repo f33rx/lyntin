@@ -27,8 +27,6 @@ class SessionError: pass
 
 command_table = {}
 
-# parse command intended for client, (i.e. one prefaced by data.ltchar)
-# allow abbreviations for most commands
 def dispatch_command(input, seslist):
     """dispatch_command(input, seslist) -> None
 
@@ -39,9 +37,6 @@ def dispatch_command(input, seslist):
     data.ltchar)
     allows abbreviations for most commands.
     """
-
-## 2.0-JA  Because input is needed to run the hook anyway, we're sending
-##         both input and words to the functions.
 
     import data
 
@@ -76,8 +71,10 @@ def dispatch_command(input, seslist):
                 return data.theapp.commands[mem](words, input, seslist)
 
     # unrecognized command
-    Putline('error: command is not defined --%s--'%words[0])
+    PutError('error: command is not defined --%s--'%words[0])
     return
+
+
 
 ###
 ### Player library functions
@@ -116,7 +113,7 @@ def set_session(ses):
     hooks.set_session_hook.run((data.currsession, ses))
     data.currsession = ses
     ans = 'ok, session "' + ses.name + '" activated.'
-    Putline(ans)
+    PutMessage(ans)
 
 def prompt():
     """prompt() -> None
@@ -157,24 +154,29 @@ def get_user_module():
 
 
 
-def Putline(line):
-    """Putline(line) -> None
+def PutError(line):
+    """PutError(line) -> None
 
-    Prints a message from the client to the player prepending
-    a "#".  This is Lyntin output. 
-    " # studid emacs
+    Prints an error to the ui.
     """
-    data.theapp.ui.Putline(line)
+    data.theapp.ui.PutError(line)
 
-def PutUntouchedLine(line):
-    """PutUntouchedLine(line) -> None
+def PutMessage(line):
+    """PutMessage(line) -> None
+
+    Prints a lyntin message (non-error informative thing) to 
+    the ui.
     """
-    data.theapp.ui.PutUntouchedLine(line)
+    data.theapp.ui.PutMessage(line)
     
-def PutReallyUntouchedLine(line):
-    """PutReallyUntouchedLine(line) -> None
+def PutRaw(line):
+    """PutRaw(line) -> None
+
+    Prints raw messages to the ui.  This is if you wanted
+    to format it yourself or dislike the Error/Message methods.
+    Output from the mud is always printed raw.
     """
-    data.theapp.ui.PutReallyUntouchedLine(line)
+    data.theapp.ui.PutRaw(line)
 
 
 ###
@@ -193,10 +195,10 @@ def PrintCommands(words, input, seslist):
     for mem in the_list:
         new_line = new_line + string.ljust(mem, 16)
         if (count % 3) == 0:
-            PutUntouchedLine(new_line)
+            PutRaw(new_line)
             new_line = '   '
         count = count + 1
-    PutUntouchedLine(new_line + "\n")
+    PutRaw(new_line + "\n")
     return
 
 def AddCommand(words, input, seslist):
@@ -234,9 +236,9 @@ def UnCommand(words, input, seslist):
         for ac in acs:
             data.theapp.RemoveCommand(ac)
 
-        Putline('uncommand: ' + str(len(acs)) + ' commands removed')
+        PutMessage('uncommand: ' + str(len(acs)) + ' commands removed')
     else:
-        Putline('uncommand: that command is not defined')
+        PutError('uncommand: that command is not defined')
 
 
 def LynImport(words, input, seslist):
@@ -247,24 +249,24 @@ def LynImport(words, input, seslist):
     been imported, then it gets reloaded.
     """
     import sys
-    Putline("trying to import " + words[1])
+    PutMessage("trying to import " + words[1])
 
     try:
         if sys.modules.has_key(words[1]):
             reload(sys.modules[words[1]])
-            Putline("import (actually--we reloaded) successful.")
+            PutMessage("import (actually--we reloaded) successful.")
         else:
             exec ("import " + words[1])
-            Putline("import successful.")
+            PutMessage("import successful.")
     except ImportError:
-        Putline(words[1] + " module does not exist.")
+        PutError(words[1] + " module does not exist.")
     except:
         from sys import exc_info
         from traceback import format_exception
 
         info = exc_info()
         exc_class = info[0]
-        Putline(string.join(format_exception(info[0], info[1], info[2]), ""))
+        PutError(string.join(format_exception(info[0], info[1], info[2]), ""))
     return
 
 def Showme(words, input, seslist):
@@ -276,11 +278,11 @@ def Showme(words, input, seslist):
     hooks.showme_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
-            Putline('showme: showme what?')
+            PutError('showme: showme what?')
             return
         # only display if this is the current session
         if ses is data.currsession:
-            PutUntouchedLine(string.join(words[1:]))
+            PutMessage(string.join(words[1:]))
 
 def Ses(words, input, seslist):
     """Ses(words, input, seslist) -> None
@@ -296,13 +298,15 @@ def Ses(words, input, seslist):
     to = words[1:]
 
     if len(to) == 0:
-        Putline("sessions: ")
+        PutMessage("sessions: ")
+        # FIXME - print sessions here?
+
     elif len(to) >= 3:
 
         # see if there's an existing session with the same name
         for ses in data.sessionlist:
             if ses.name == to[0]:
-                Putline('ses: session "'+ses.name+'" already exists.')
+                PutError('ses: session "'+ses.name+'" already exists.')
                 return
 
         try:
@@ -311,21 +315,22 @@ def Ses(words, input, seslist):
             host = to[1]
             port = string.atoi(to[2])
         except ValueError:
-            Putline('ses: bad arguments: #session sesname hostname port')
+            PutError('ses: bad arguments: #session sesname hostname port')
             return
 
         try:
             # try to connect with the given parameters
-            Putline("ses: Trying to connect...")
+            PutMessage("ses: Trying to connect...")
             thisses = data.UserSession(name,host,port)
             
         except socket.error:
-            Putline("ses: Unable to connect!")
+            PutError("ses: Unable to connect!")
+
             # pass the session name to the connect_failed hook
             hooks.connect_failed_hook.run((name, host, port))
             
         except ValueError:
-            Putline('ses: illegal port number: %d'%port)
+            PutError('ses: illegal port number: %d'%port)
         else:
             # it worked
             # initialize new session as copy of common session
@@ -337,8 +342,8 @@ def Ses(words, input, seslist):
             # pass the session name to the connect_succeeded hook
             hooks.connect_succeeded_hook.run((name, host, port))
     else:
-        Putline("ses: requires 3 arguments")
-        Putline("ses <name> <address> <port>")
+        PutMessage("ses: requires 3 arguments")
+        PutMessage("ses <name> <address> <port>")
 
 def SpeedWalk(words, input, seslist):
     """SpeedWalk(seslist) -> None
@@ -350,9 +355,9 @@ def SpeedWalk(words, input, seslist):
     for ses in seslist:
         ses.speedwalk = not ses.speedwalk
         if ses.speedwalk:
-            Putline('speedwalk: speedwalking is now ON')
+            PutMessage('speedwalk: speedwalking is now ON')
         else:
-            Putline('speedwalk: speedwalking is now OFF')
+            PutMessage('speedwalk: speedwalking is now OFF')
 
 def DataBuffer(words, input, seslist):
     """DataBuffer(words, seslist) -> None
@@ -364,15 +369,15 @@ def DataBuffer(words, input, seslist):
     hooks.databuffer_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            Putline('databuffer: databuffer size is %d'%ses.databuf.size)
+            PutMessage('databuffer: databuffer size is %d'%ses.databuf.size)
             continue
         try:
             num = string.atoi(words[1])
         except ValueError:
-            Putline('databuffer: invalid argument')
+            PutError('databuffer: invalid argument')
         else:
             ses.databuf.resize(num)
-            Putline('databuffer: databuffer size set to %d'%num)
+            PutMessage('databuffer: databuffer size set to %d'%num)
 
 def Char(words, input, seslist):
     """Char(words, seslist) -> None
@@ -384,22 +389,22 @@ def Char(words, input, seslist):
     hooks.char_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
-            PutReallyUntouchedLine("CURRENT LYNTIN CHARACTER: '%s'\n"%data.ltchar)
+            PutMessage("CURRENT LYNTIN CHARACTER: '%s'\n"%data.ltchar)
             if not data.currsession.connected:
                 prompt()
         elif len(words) == 2:
             c = words[1]
             if len(c) != 1:
-                Putline('char: %s is not a single character!'%c)
+                PutError('char: %s is not a single character!'%c)
             else:
                 data.ltchar = c
-                PutReallyUntouchedLine("OK, LYNTIN CHARACTER SET TO '%s'\n"%c)
+                PutMessage("OK, LYNTIN CHARACTER SET TO '%s'\n"%c)
                 if not data.currsession.connected:
                     prompt()
         else:
-            Putline('char: command requires zero or one argument')
-            Putline("char")
-            Putline("char <newchar>")
+            PutMessage('char: command requires zero or one argument')
+            PutMessage("char")
+            PutMessage("char <newchar>")
 
 def DataGrep(words, input, seslist):
     """DataGrep(words, seslist) -> None
@@ -411,14 +416,14 @@ def DataGrep(words, input, seslist):
     hooks.datagrep_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            Putline('datagrep: command requires one argument')
-            Putline("datagrep <regex>")
+            PutMessage('datagrep: command requires one argument')
+            PutMessage("datagrep <regex>")
             continue
         pat = string.join(words[1:])
         got = ses.databuf.grep(pat)
         for g in got:
-            PutReallyUntouchedLine(g)
-        Putline('datagrep: %d match(es) found.'%len(got))
+            PutRaw(g)
+        PutMessage('datagrep: %d match(es) found.'%len(got))
 
 def DataGrepLines(words, input, seslist):
     """DataGrepLines(words, seslist) -> None
@@ -430,14 +435,14 @@ def DataGrepLines(words, input, seslist):
     hooks.datagreplines_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            Putline("datagreplines: command requires (at least) one argument")
-            Putline("datagreplines <regex>")
+            PutMessage("datagreplines: command requires (at least) one argument")
+            PutMessage("datagreplines <regex>")
             continue
         pat = string.join(words[1:])
         build = ses.databuf.greplines(pat)
         for b in build:
-            PutUntouchedLine(b)
-        Putline('datagreplines: %d match(es) found.'%len(build))
+            PutRaw(b)
+        PutMessage('datagreplines: %d match(es) found.'%len(build))
 
 def Echo(words, input, seslist):
     """Echo(words, input, seslist) -> None
@@ -445,16 +450,16 @@ def Echo(words, input, seslist):
     Will turn on and shut off echo.
     """
     if len(words) < 2:
-        Putline("echo: command requires one argument")
-        Putline("echo <on|off>")
+        PutMessage("echo: command requires one argument")
+        PutMessage("echo <on|off>")
         return
 
     if (words[1] == "on"):
         data.theapp.ui.OnEcho("no")
-        Putline("echo on")
+        PutMessage("echo on")
     else:
         data.theapp.ui.OffEcho("no")
-        Putline("echo off")
+        PutMessage("echo off")
 
 def Report(words, input, seslist):
     """Report(words, input, seslist) -> None
@@ -470,12 +475,12 @@ def Report(words, input, seslist):
         if len(words) == 1:
             # print all defined reports
             for (file, text) in eachses.reports:
-                PutUntouchedLine('#REPORT TO FILE %s: "%s"'%(file, text))
-            Putline('report: %d reports defined.'%len(eachses.reports))
+                PutMessage('REPORT TO FILE %s: "%s"'%(file, text))
+            PutMessage('report: %d reports defined.'%len(eachses.reports))
         elif len(words) == 2:
             # reject it.
-            Putline("report: not enough arguments.")
-            Putline("report [tofile] [text string]")
+            PutError("report: not enough arguments.")
+            PutError("report [tofile] [text string]")
         else:
             try:
                 # define a new report
@@ -483,10 +488,9 @@ def Report(words, input, seslist):
                 text = string.join(words[2:])
                 file = app.get_appropriate_file(filename, 'a')
                 eachses.reports.append((file, text))
-                PutUntouchedLine('OK, "%s" NOW REPORTED TO FILE %s'% \
-                                 (text, file))
+                PutMessage('OK, "%s" NOW REPORTED TO FILE %s'% (text, file))
             except IOError:
-                Putline('report: unable to open file %s'%filename)
+                PutError('report: unable to open file %s'%filename)
                     
 def Variable(words, input, seslist):
     """Variable(words, seslist) -> None
@@ -499,23 +503,23 @@ def Variable(words, input, seslist):
         if len(words) == 1:
             # display all variables
             if len(ses.vars.keys()) == 0:
-                Putline('variable: no variables defined...nil')
+                PutMessage('variable: no variables defined...nil')
             else:
-                Putline('variable: defined variables:')
+                PutMessage('variable: defined variables:')
                 for var in ses.vars.keys():
                     display = ses.GetVarDisplayString(var)
-                    PutUntouchedLine(display)
+                    PutRaw("  " + display + "\n")
             continue
         elif len(words) == 2:
             # display just the matching variables
             which = words[1]
             whichl = ses.Expand(which, ses.vars.keys())
             if not len(whichl):
-                Putline("variable: that variable is not defined")
+                PutError("variable: that variable is not defined")
             else:
                 for w in whichl:
                     display = ses.GetVarDisplayString(w)
-                    PutUntouchedLine(display)
+                    PutRaw("  " + display + "\n")
         else:
             # more than one argument: define
             # a new variable for the current session
@@ -526,9 +530,9 @@ def Variable(words, input, seslist):
                 continue
             ses.vars[name] = expansion
 	    if ses.verbose:
-                Putline('variable: variable defined:')
+                PutMessage('variable: variable defined:')
                 display = ses.GetVarDisplayString(name)
-                PutUntouchedLine(display)
+                PutRaw("  " + display + "\n")
 
 def WriteFile(words, input, seslist):
     """WriteFile(words, seslist) -> None
@@ -542,8 +546,8 @@ def WriteFile(words, input, seslist):
     for ses in seslist:
         try:
             if len(words) != 2:
-                Putline("write: command requires at least one argument")
-                Putline("write <filename>")
+                PutError("write: command requires at least one argument")
+                PutError("write <filename>")
                 return
             thefile = app.get_appropriate_file(words[1], 'w')
 
@@ -567,9 +571,9 @@ def WriteFile(words, input, seslist):
                 str = '#var {%s} {%s}\n'%(var, ses.vars[var])
                 thefile.write(str)
 
-            Putline('write: ok, session "%s" saved'%ses.name)
+            PutMessage('write: ok, session "%s" saved'%ses.name)
         except IOError:
-            Putline('write: unable to open file %s'%thefile)
+            PutMessage('write: unable to open file %s'%thefile)
 
 def Textin(words, input, seslist):
     """Textin(words, seslist) -> None
@@ -582,8 +586,8 @@ def Textin(words, input, seslist):
     
     for ses in seslist:
         if len(words) != 2:
-            Putline("textin: command requires one argument")
-            Putline("textin <filename>")
+            PutError("textin: command requires one argument")
+            PutError("textin <filename>")
             data.currsession = oldses
             return
 
@@ -597,10 +601,10 @@ def Textin(words, input, seslist):
         try:
             f = open(filename, 'r')
         except IOError:
-            Putline('textin: unable to open text file: ' + filename)
+            PutError('textin: unable to open text file: ' + filename)
         else:
             # ok, got it open.  do the textin stuff...
-            Putline('textin: ok, sending commands...')
+            PutMessage('textin: ok, sending commands...')
             thelist = f.readlines()
             data.currsession = ses
             for line in thelist:
@@ -620,62 +624,51 @@ def ParseFile(ofile, input, seslist):
         try:
 
             if len(ofile) != 2:
-                Putline("read: command requires one argument")
-                Putline("read <filename>")
+                PutError("read: command requires one argument")
+                PutError("read <filename>")
                 return
             
             # open a file for reading
             thefile = app.get_appropriate_file(ofile[1], 'r')
             
             thelist = thefile.readlines()
-            al_count = ac_count = sub_count = gag_count = var_count = 0
+            other_count = al_count = ac_count = sub_count = gag_count = var_count = 0
 
             # go through the file, adding actions, aliases
             # etc where appropriate
             for s in thelist:
+                dispatch_command(s, seslist)
+
                 words = string.split(s)
                 if len(words) > 2:
                     # alias
                     if words[0] == '#al':
                         al_count = al_count + 1
-                        name, expansion = \
-                              app.split_braced(string.join(words[1:]))
-                        ses.aliases[name] = expansion
                     # action
                     elif words[0] == '#ac':
                         ac_count = ac_count + 1
-                        trigger, response = cmdparse.split_action(s)
-                        
-                        ses.add_action(trigger, response)
                     # substitute
                     elif string.find('#substitute', words[0]) == 0:
                         sub_count = sub_count + 1
-                        pat, repl = app.split_braced(string.join(words[1]))
-                        ses.subs[pat] = repl
                     # gag
                     elif string.find('#gag', words[0]) == 0:
-                        if len(words) > 1:
-                            gag_count = gag_count + 1
-                            ses.gags = ses.gags + \
-                                                    [string.join(words[1:])]
+                        gag_count = gag_count + 1
                     #variable
                     elif string.find('#variable', words[0]) == 0:
-                        if len(words) > 2:
-                            var_count = var_count + 1
-                            name, val = \
-                                  app.split_braced(string.join(words[1:]))
-                            ses.vars[name] = val
+                        var_count = var_count + 1
+                    else:
+                        other_count = other_count + 1
 
-
-            Putline('read: ok.')
-            Putline(string.join([str(al_count), "aliases loaded."]))
-            Putline(string.join([str(ac_count), "actions loaded."]))
-            Putline(string.join([str(sub_count), "substitutes loaded."]))
-            Putline(string.join([str(var_count), "variables loaded."]))
-            Putline(string.join([str(gag_count), "gags loaded."]))
+            PutMessage('read: ok.')
+            PutMessage(string.join([str(al_count), "aliases loaded."]))
+            PutMessage(string.join([str(ac_count), "actions loaded."]))
+            PutMessage(string.join([str(sub_count), "substitutes loaded."]))
+            PutMessage(string.join([str(var_count), "variables loaded."]))
+            PutMessage(string.join([str(gag_count), "gags loaded."]))
+            PutMessage(string.join([str(other_count), "other things loaded."]))
 
         except IOError, arg:
-            Putline(string.join(["read: unable to open input file:",
+            PutError(string.join(["read: unable to open input file:",
                                  ofile[1], str(arg)]))
 
 def CR(words, input, seslist):
@@ -700,25 +693,25 @@ def Log(words, input, seslist):
     hooks.log_command_hook.run((input, seslist))
     # check for bad argument like #all #log myfile
     if len(seslist) > 1:
-        Putline( 'can\'t log more than one session to the same file!')
+        PutError( 'can\'t log more than one session to the same file!')
         return
     for ses in seslist: # pseudo for-loop through a one-element list
         if len(words) == 1:
             # cancel an in-progress log
             if ses.logging:
-                Putline('log: ok, closing logfile '+ses.logfile.name)
+                PutMessage('log: ok, closing logfile '+ses.logfile.name)
                 ses.logging = 0
                 ses.logfile = None
                 return
             else:
                 # they aren't logging already, so they must have screwed up
-                Putline('log: log what?')
+                PutError('log: log what?')
                 return
         if len(words) > 2:
-            Putline('log: too many arguments')
+            PutError('log: too many arguments')
             return
         if not ses.connected:
-            Putline("log: this session is not connected--nothing to log.")
+            PutMessage("log: this session is not connected--nothing to log.")
             return
         # if they give us a full path name, we try to open it.
         # otherwise we prepend the datadir to the argument
@@ -730,10 +723,10 @@ def Log(words, input, seslist):
         try:
             f = open(fullfile, 'w')
         except IOError:
-            Putline('log: unable to open log file: ' + fullfile)
+            PutError('log: unable to open log file: ' + fullfile)
         else:
             # ok, got it open.  set up the logging stuff...
-            Putline('log: ok, logging...')
+            PutMessage('log: ok, logging...')
             ses.logging = 1
             ses.logfile = f
 
@@ -743,7 +736,7 @@ def Quit(words, input, seslist):
     Quits lyntin.
     This is a user command.
     """
-    Putline("quit: you'll be back...")
+    PutMessage("quit: you'll be back...")
     # run the shutdown hook.
     hooks.shut_down_lyntin_hook.run()
     if data.numsessions:
@@ -763,7 +756,7 @@ def KillAll(words,input,seslist):
     hooks.killall_command_hook.run((input, seslist))
     for ses in data.sessionlist:
         ses.Clear()
-        Putline('killall: session "'+ses.name+'" cleared.')
+        PutMessage('killall: session "'+ses.name+'" cleared.')
 
 
 def Action(words, input, seslist):
@@ -782,7 +775,7 @@ def Action(words, input, seslist):
     
         if trigger and response:
             eachses.add_action(trigger, response)
-            PutUntouchedLine('#OK, {%s} NOW TRIGGERS {%s}'%(trigger, response))
+            PutMessage('ok, {%s} now triggers {%s}'%(trigger, response))
 
         elif trigger:
             # print action definition
@@ -790,17 +783,17 @@ def Action(words, input, seslist):
             if expanded:
                 count = count + len(expanded)
                 for ac in expanded:
-                    PutUntouchedLine('#ac {%s}={%s}'%(ac, eachses.actions[ac]))
+                    PutMessage('#ac {%s}={%s}'%(ac, eachses.actions[ac]))
 
             if not count:
-                Putline("action: That action is not defined")
+                PutMessage("action: That action is not defined")
 
         else: # print all current actions
             for ac in eachses.actions.keys():
                 count = count + 1
-                PutUntouchedLine('#ac {%s}={%s}'%(ac, eachses.actions[ac]))
+                PutMessage('#ac {%s}={%s}'%(ac, eachses.actions[ac]))
             if count == 0:
-                Putline("action: No actions defined.")
+                PutMessage("action: No actions defined.")
 
 def UnAction(words, input, seslist):
     """UnAction(words, seslist) -> None
@@ -811,8 +804,8 @@ def UnAction(words, input, seslist):
     hooks.unaction_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            Putline('unaction: command requires one argument')
-            Putline('unaction <action-name>')
+            PutError('unaction: command requires one argument')
+            PutError('unaction <action-name>')
             return
 
         un = string.join(words[1:])
@@ -831,9 +824,9 @@ def UnAction(words, input, seslist):
                     del ses.action_list[i]
 
                 
-            Putline('unaction: ' + str(len(acs)) + ' actions removed')
+            PutMessage('unaction: ' + str(len(acs)) + ' actions removed')
         else:
-            Putline('unaction: that action is not defined')
+            PutMessage('unaction: that action is not defined')
 
 def Alias(words, input, seslist):
     """Alias(words, seslist) -> None
@@ -851,7 +844,7 @@ def Alias(words, input, seslist):
         if len(words) > 2:
             name, expansion = app.split_braced(string.join(words[1:]))
             ses.aliases[name] = expansion
-            PutUntouchedLine('#OK, {%s} ALIASES {%s}'%(name, expansion))
+            PutMessage('OK, {%s} ALIASES {%s}'%(name, expansion))
 
         elif len(words) == 2:
             # print alias definition
@@ -860,17 +853,17 @@ def Alias(words, input, seslist):
             if expanded:
                 count = count + len(expanded)
                 for al in expanded:
-                    PutUntouchedLine('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
+                    PutMessage('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
             if not count:
-                Putline("alias: that alias is not defined")
+                PutMessage("alias: that alias is not defined")
 
         else: 
             # print all current aliases
             for al in ses.aliases.keys():
                 count = count + 1
-                PutUntouchedLine('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
+                PutMessage('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
             if count == 0:
-                Putline("alias: no aliases defined.")
+                PutMessage("alias: no aliases defined.")
 
 def Help(words, input, seslist):
     """Help(words, seslist) -> None
@@ -884,31 +877,31 @@ def Help(words, input, seslist):
     import os
 
     helpdir = data.initdir + "help"
-    PutUntouchedLine('::lyntin help::\n')
+    PutMessage('::lyntin help::')
     if words == ['help']:
-        PutUntouchedLine("Topics Available:\n")
+        PutMessage("Topics Available:")
         the_list = os.listdir(helpdir)
         the_list.sort()
         new_line = '   '
         count = 1
         for mem in the_list:
-            new_line = new_line + string.ljust(mem, 16)
-            if (count % 3) == 0:
-                PutUntouchedLine(new_line + "\n")
-                new_line = '   '
-            count = count + 1
-        PutUntouchedLine(new_line + "\n")
+            if len(mem) > 5 and mem[-5:] == ".help":
+                new_line = new_line + string.ljust(mem[:-5], 16)
+                if (count % 3) == 0:
+                    PutMessage(new_line)
+                    new_line = '   '
+                count = count + 1
+        PutMessage(new_line)
         return
 
     for mem in words[1:]:
-        the_list = os.listdir(helpdir)
-        if mem in the_list:
-            f = open(helpdir + "/" + mem, "r")
+        try:
+            f = open(helpdir + "/" + mem + ".help", "r")
             lines = f.readlines()
             f.close()
-            PutUntouchedLine(string.join(lines, "") + "\n")
-        else:
-            PutUntouchedLine(mem + " is not a valid help topic.")
+            PutRaw(string.join(lines, ""))
+        except:
+            PutMessage(mem + " is not a valid help topic.")
 
 def History(words, input, seslist):
     """History(words, seslist) -> None
@@ -920,31 +913,31 @@ def History(words, input, seslist):
     hooks.history_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) > 2:
-            Putline('history: too many arguments')
+            PutError('history: too many arguments')
             continue
         elif len(words) == 2:
             # try to set a new history size
             try:
                 num = string.atoi(words[1])
             except ValueError:
-                Putline('history: invalid argument')
+                PutError('history: invalid argument')
                 continue
             else:
                 if num == 0:
-                    Putline('history: can\'t set history size to nothing.')
+                    PutError('history: can\'t set history size to nothing.')
                     continue
                 data.histsize = num
-                Putline('history: ok, history size set to '+str(num))
+                PutMessage('history: ok, history size set to '+str(num))
         # print last histsize history entries
         else:
             n = len(data.history)
             if n == 0:
-                Putline('history: no history yet...')
+                PutMessage('history: no history yet...')
                 continue
             m = min([data.histsize, len(data.history)])
-            PutUntouchedLine('\nHistory:')
+            PutMessage('History:')
             for i in range(m - 1, -1, -1):
-                PutUntouchedLine(str(i)+' '+str(data.history[i]))
+                PutRaw(str(i)+' '+str(data.history[i]))
                 
 def Info(words,input,seslist):
     """Info(seslist) -> None
@@ -953,17 +946,26 @@ def Info(words,input,seslist):
     This is a user command.
     """
     for ses in seslist:
-        Putline('Session: ' + ses.name)
-        Putline(repr(len(ses.actions.keys())) + ' actions.')
-        Putline(repr(len(ses.aliases.keys())) + ' aliases.')
-        Putline(repr(len(ses.gags)) + ' gags.')
-        Putline(repr(len(ses.vars.keys())) + ' variables.')
-        if ses.verbose: Putline('Verbose is on.')
-        else:           Putline('Verbose is off.')
-        if ses.speedwalk: Putline('Speedwalking is on.')
-        else:             Putline('Speedwalking is off.')
-        if ses.ticker: Putline('Ticker is on; ' + repr(ses.ticklen) + ses.tickaction)
-        else:          Putline('Ticker is off.')
+        PutMessage('Session: ' + ses.name)
+        PutMessage(repr(len(ses.actions.keys())) + ' actions.')
+        PutMessage(repr(len(ses.aliases.keys())) + ' aliases.')
+        PutMessage(repr(len(ses.gags)) + ' gags.')
+        PutMessage(repr(len(ses.vars.keys())) + ' variables.')
+
+        if ses.verbose:
+            PutMessage('Verbose is on.')
+        else:
+            PutMessage('Verbose is off.')
+
+        if ses.speedwalk:
+            PutMessage('Speedwalking is on.')
+        else:
+            PutMessage('Speedwalking is off.')
+
+        if ses.ticker:
+            PutMessage('Ticker is on; ' + repr(ses.ticklen) + ses.tickaction)
+        else:
+            PutMessage('Ticker is off.')
     
 def UnAlias(words, input, seslist):
     """UnAlias(words, seslist) -> None
@@ -974,8 +976,8 @@ def UnAlias(words, input, seslist):
     hooks.unalias_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) != 2:
-            Putline('unalias: command requires one argument')
-            Putline('unalias <aliasname>')
+            PutError('unalias: command requires one argument')
+            PutError('unalias <aliasname>')
             return
 
         als = ses.ExpandAlias(words[1])
@@ -983,9 +985,9 @@ def UnAlias(words, input, seslist):
             for al in als:
                 # kill!!!
                 del ses.aliases[al]
-            Putline('unalias: ' + str(len(als)) + ' aliases removed') 
+            PutMessage('unalias: ' + str(len(als)) + ' aliases removed') 
         else:
-            Putline('unalias: that alias is not defined')
+            PutError('unalias: that alias is not defined')
 
 def Gag(words, input, seslist):
     """Gag(words, seslist) -> None
@@ -1000,15 +1002,16 @@ def Gag(words, input, seslist):
         if len(words) < 2:
             # print all gags
             if len(ses.gags) == 0:
-                Putline('gag: no gags are defined')
+                PutMessage('no gags are defined')
             else:
                 for gag in ses.gags:
-                    Putline('gag: gag ' + gag)
+                    PutMessage('gag: gag ' + gag)
             continue
         gagwhat = string.join(words[1:])
+
         # add string to current session's gags
         ses.gags = ses.gags + [gagwhat]
-        Putline('gag: ok, "' + gagwhat + '" is now gagged')
+        PutMessage('ok, "' + gagwhat + '" is now gagged')
 
 def UnGag(words, input, seslist):
     """UnGag(words, seslist) -> None
@@ -1019,8 +1022,8 @@ def UnGag(words, input, seslist):
     hooks.ungag_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            Putline('ungag: command requires at least one argument')
-            Putline('ungag <gagname>')
+            PutError('ungag: command requires at least one argument')
+            PutError('ungag <gagname>')
             return
         ungagwhat = string.join(words[1:])
         ungagwhatlist = ses.Expand(ungagwhat, ses.gags)
@@ -1028,9 +1031,9 @@ def UnGag(words, input, seslist):
         for g in ungagwhatlist:
             if ses.gags.count(g) > 0:
                 ses.gags.remove(g)
-                Putline('gag: ok, "' + g + '" is no longer gagged')
+                PutMessage('gag: ok, "' + g + '" is no longer gagged')
         if not ungagwhatlist:
-            Putline('gag: that gag is not defined')
+            PutError('gag: that gag is not defined')
 
 def Substitute(words, input, seslist):
     """Substitute(words, seslist) -> None
@@ -1042,11 +1045,11 @@ def Substitute(words, input, seslist):
     hooks.substitute_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 3:
-            Putline('substitute: command requires at least two arguments')
+            PutError('substitute: command requires at least two arguments')
             continue
         pattern, replacement = app.split_braced(string.join(words[1:]))
         ses.subs[pattern] = replacement
-        Putline('ok, ' + pattern + ' is now replaced by ' + replacement)
+        PutMessage('ok, ' + pattern + ' is now replaced by ' + replacement)
 
 def UnSubstitute(words, input, seslist):
     """UnSubstitute(words, seslist) -> None
@@ -1057,12 +1060,12 @@ def UnSubstitute(words, input, seslist):
     hooks.unsubstitute_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            Putline('command requires at least one argument')
+            PutError('command requires at least one argument')
             return
         unlist = ses.Expand(string.join(words[1:]), ses.subs.keys())
         for sub in unlist:
             del ses.subs[sub]
-        Putline(str(len(unlist)) + ' substitutes removed')
+        PutMessage(str(len(unlist)) + ' substitutes removed')
 
 def Clear(words, input, seslist):
     """Clear(seslist) -> None
@@ -1078,7 +1081,7 @@ def Clear(words, input, seslist):
         ses.subs = {}
         ses.vars = {}
         ses.gags = []
-        Putline('session ' + ses.name + ' cleared')
+        PutMessage('session ' + ses.name + ' cleared')
 
 
 def Tickset(words, input, seslist):
@@ -1093,9 +1096,9 @@ def Tickset(words, input, seslist):
         # synchronize
         for ses in seslist:
             if not ses.ticker:
-                Putline('Ticker is off')
+                PutMessage('Ticker is off')
                 return
-            Putline('resetting ticker...')
+            PutMessage('resetting ticker...')
             ses.lasttickclock = 0
             ses.lastclock = time.time()
             ses.warnedtick = 0
@@ -1109,21 +1112,21 @@ def Tickset(words, input, seslist):
                     ses.lasttickclock = 0
                     ses.lastclock = time.time()
                     ses.warnedtick = 0
-                    Putline('Ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                    PutMessage('Ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
                 else:
-                    Putline('Ticker is already on!')
+                    PutMessage('Ticker is already on!')
 
         elif words[1] == 'off':
             # turn off ticker
             for ses in seslist:
                 ses.ticker = 0
-                Putline('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                PutMessage('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
             
         elif words[1] == 'clear':
             for ses in seslist:
                 ses.ticker = 0
                 ses.tickaction = ''
-                Putline('ticklen and tickaction cleared.')
+                PutMessage('ticklen and tickaction cleared.')
 
         elif words[1] == 'toggle':
             # toggle ticker status
@@ -1133,34 +1136,33 @@ def Tickset(words, input, seslist):
                     ses.lasttickclock = 0
                     ses.lastclock = time.time()
                     ses.warnedtick = 0
-                    Putline('Ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                    PutMessage('Ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
                 else:
-                    Putline('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                    PutMessage('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
 
         elif words[1] == 'status':
             for ses in seslist:
-                Putline('Ticker status:')
+                PutMessage('Ticker status:')
                 if ses.ticker:
-                    Putline('Ticker is on')
-                    Putline('Ticklength = %d'%ses.ticklen)
-                    Putline('Tickaction = %s'%ses.tickaction)
-                    Putline('Time to next tick = %d'%(ses.ticklen - ses.lasttickclock))
+                    PutMessage('Ticker is on')
+                    PutMessage('Ticklength = %d'%ses.ticklen)
+                    PutMessage('Tickaction = %s'%ses.tickaction)
+                    PutMessage('Time to next tick = %d'%(ses.ticklen - ses.lasttickclock))
                 else:
-                    Putline('Ticker is off')
-                    Putline('Ticklength = %d'%ses.ticklen)
-                    Putline('Tickaction = %s'%ses.tickaction)
-                    Putline('Time to next tick = %d'%(ses.ticklen - ses.lasttickclock))
+                    PutMessage('Ticker is off')
+                    PutMessage('Ticklength = %d'%ses.ticklen)
+                    PutMessage('Tickaction = %s'%ses.tickaction)
+                    PutMessage('Time to next tick = %d'%(ses.ticklen - ses.lasttickclock))
                     
         else:
             # set ticklength
             for ses in seslist:
                 try:
                     ses.ticklen = string.atoi(words[1])
-                    Putline('tick length set to %d'%ses.ticklen)
+                    PutMessage('tick length set to %d'%ses.ticklen)
                 except ValueError:
-                    # Putline('invalid argument -- must be an integer')
                     ses.tickaction = string.join(words[1:], " ")
-                    Putline('tickaction set to %s'%ses.tickaction)
+                    PutMessage('tickaction set to %s'%ses.tickaction)
 
 
 def Tick(words, input, seslist):
@@ -1170,15 +1172,12 @@ def Tick(words, input, seslist):
     This is a user command.
     """
     hooks.tick_command_hook.run((input, seslist))
-    if len(words) == 1: # display tick status
-        for ses in seslist:
-            if not ses.ticker:
-                Putline('Ticker is off')
-                return
-            Putline('there are %d seconds to the next tick!!'%\
-                    (ses.ticklen - ses.lasttickclock))
-    else:
-        Putline('command accepts no arguments')
+    for ses in seslist:
+        if not ses.ticker:
+            PutMessage('Ticker is off')
+            return
+        PutMessage('there are %d seconds to the next tick!!'% \
+                (ses.ticklen - ses.lasttickclock))
 
 def Version(words, input, seslist):
     """Version(words, input, seslist) -> None
@@ -1186,7 +1185,7 @@ def Version(words, input, seslist):
     Prints out the version.
     """
     import data
-    PutUntouchedLine(data.version)
+    PutMessage(data.version)
 
 
 def Verbose(words, input, seslist):
@@ -1198,7 +1197,7 @@ def Verbose(words, input, seslist):
     for ses in seslist:
         ses.verbose = not ses.verbose
         if ses.verbose:
-	    Putline('Verbose mode now on.')
+	    PutMessage('Verbose mode now on.')
 
 def TickerUpdate(seslist):
     """TickerUpdate(seslist) -> None
@@ -1212,10 +1211,10 @@ def TickerUpdate(seslist):
             if not ses.warnedtick:
                 ses.warnedtick=1
                 warntext='%d seconds to tick!!!'%ses.tickwarn
-                Putline(warntext)
+                PutMessage(warntext)
                 hooks.ticker_warn_hook.run((ses,))
         if ses.lasttickclock > ses.ticklen:
-            Putline('tick!!!')
+            PutMessage('tick!!!')
             hooks.ticker_pass_hook.run((ses,))
             if ses.tickaction:
                 data.theapp.HandleUserInput(ses.tickaction)

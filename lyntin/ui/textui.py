@@ -69,7 +69,7 @@ class Textui(BaseGUI):
 
     """over-ridden from BaseGUI"""
     def print_string(self,line,modifiers=None,ending='\n',target=None):
-        if modifiers == 'client':
+        if modifiers == 'client' or modifiers == 'error':
             line = string.replace(line, "\n", "\n## ")
             line = line + "\n"
 
@@ -145,8 +145,8 @@ class Textui(BaseGUI):
 
     """over-ridden from BaseGUI"""
     def warn_no_echo(self):
-        self.Putline('Warning, noecho unavailable. '+
+        self.PutError('Warning, noecho unavailable. '+
                        'Your password will be visible')
         if os.name == 'posix':
-            self.Putline('Install the termios module or Tkinter to enable '+
+            self.PutError('Install the termios module or Tkinter to enable '+
                          'echo toggling')

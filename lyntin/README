@@ -152,7 +152,7 @@ examples:
 
 examples:
   #@for c in 'hello': print c
-  #@Putline('this is lyntin speaking')
+  #@PutMessage('this is lyntin speaking')
   #@myvars.dead = 'yep'
   #@mycode.doit()
 

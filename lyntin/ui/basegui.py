@@ -216,37 +216,42 @@ class BaseGUI:
         """
         pass #because this isn't real
 
-    def Putline(self, line):
-        """PutLine(self, line) -> None
+    def PutError(self, line):
+        """PutError(self, line) -> None
         
-        Prints a message from the client to the player
-        changing the background color to magenta.
+        Prints errors to the ui.  Errors have a '\n' appended
+        To the end of every line and the modifier is 'error'.
+        The client can do whatever it likes to denote error-hood.
         """
-        self.print_string(line,modifiers='client')
+        self.print_string(line,modifiers='error',ending='\n')
 
     def PutUserInput(self, line):
         """PutUserInput(self, line) -> None
 
-        Prints the user input to the screen with a blue background
-        color and a white foreground color.  Lets you immediately
-        discern what's input vs. what's output.
+        Prints user input to the screen.  The modifiers are
+        'user' and the ending is '\n'.  The ui can denote
+        UserInput-hood as it so desires.
         """
-        self.print_string(line,modifiers='user')
+        self.print_string(line,modifiers='user',ending='\n')
 
-    def PutUntouchedLine(self, line):
-        """PutUntouchedLine(self, line) -> None
+    def PutMessage(self, line):
+        """PutMessage(self, line) -> None
 
-        Prints a line for the user after adding a newline to the end of it
+        Prints a Lyntin message to the ui.  Modifiers are that
+        it comes from the client (in this case Lyntin) and
+        the ending is '\n'.  The ui can denote Lyntin messages
+        however it so desires.
         """
-        self.print_string(line)
+        self.print_string(line,modifiers='client',ending='\n')
 
-    def PutReallyUntouchedLine(self, line):
-        """PutReallyUntouchedLine(self, line) -> None
+    def PutRaw(self, line):
+        """PutRaw(self, line) -> None
 
-        Prints a line for the user without any preprocessing or trailing
-        newline
+        Just prints stuff raw to the ui.
         """
         self.print_string(line,ending='')
+
+
 
     def get_input(self):
         return None
@@ -254,7 +259,8 @@ class BaseGUI:
     def GetUserInput(self):
         """GetUserInput(self)->string
 
-        returns the user input once enter has been hit and None otherwise
+        Returns the user input once enter has been hit and None 
+        otherwise.
         """
         return self.get_input()
 
