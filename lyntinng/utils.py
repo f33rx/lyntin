@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.6 2002/02/04 01:10:17 willhelm Exp $
+# $Id: utils.py,v 1.7 2002/02/27 02:25:22 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -16,6 +16,7 @@ import string, re
 
 SEMI_REGEXP = re.compile('(?<!\\\\);')
 VAR_REGEXP = re.compile('%(\d+)')
+INT_REGEXP = re.compile('^\d+$')
 
 def chomp(text):
   """ Removes '\\r' and '\\n' from the input string.
@@ -119,6 +120,22 @@ def filter_ansi(text):
 def filter_cm(text):
   """ Filters out ^M.  Useful for logging."""
   return re.sub('\015|\r', '', text)
+
+
+def is_int(text):
+  """ Returns a 1 if it's an int and a 0 if not.
+
+  arguments:
+
+    'text' -- the string you want to test int-hood on
+
+  returns:
+
+    1 if it's an int, 0 if not
+  """
+  if INT_REGEXP.match(text):
+    return 1
+  return 0
 
 
 def split_commands(text):

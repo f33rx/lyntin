@@ -4,15 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.24 2002/03/07 22:21:41 willhelm Exp $
+# $Id: basic.py,v 1.25 2002/03/09 00:32:22 willhelm Exp $
 #######################################################################
-import re, string, traceback
+import string, traceback
 import net, utils, engine, lyntin, exported
 
 """
 This module holds a series of basic commands.
 """
-INT_REGEXP = re.compile("\d+")
 
 def action_cmd(session, words, input):
   """#action [<trigger> <response>]
@@ -101,11 +100,7 @@ def ansi_cmd(session, words, input):
       exported.write_message("ansi: ansi color is disabled.")
     return
 
-  try:
-    option = utils.strip_braces(words[1])
-  except ValueError:
-    exported.write_error("ansi: mismatched braces.")
-    return
+  option = utils.strip_braces(words[1])
 
   if option == '1' or option == 'on':
     lyntin.ansicolor = 1
@@ -139,11 +134,7 @@ def char_cmd(session, words, input):
                                  lyntin.commandchar + ".")
     return
 
-  try:
-    newchar = utils.strip_braces(words[1])
-  except ValueError:
-    exported.write_error("char: mismatched braces.")
-    return
+  newchar = utils.strip_braces(words[1])
 
   lyntin.commandchar = newchar
   exported.write_message("char: new command character is " + 
@@ -218,8 +209,6 @@ def diagnostics_cmd(session, words, input):
               "\n\n")
       f.write(message)
       f.close()
-    except ValueError:
-      exported.write_error("diagnostics: mismatched braces.")
     except:
       exported.write_error("diagnostics: Error writing to file " + words[1] + ".")
       traceback.print_exc()
@@ -249,11 +238,10 @@ def gag_cmd(session, words, input):
     exported.write_message(data)
     return
 
-  try:
-    gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
-  except ValueError:
-    exported.write_error("gag: mismatched braces")
-    return
+  # note: this one might be a problem if they try to gag } { in 
+  # the text.  the solution is for them to place the text in
+  # braces.
+  gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
 
   session.getManager("gag").addGag(gaggedtext)
   exported.write_message("gag: '" + gaggedtext + "' added.")
@@ -298,6 +286,8 @@ def help_cmd(session, words, input):
   helpfiles = dircache.listdir(helpdir + "/")
 
   for mem in words[1:]:
+    mem = utils.strip_braces(mem)
+
     if mem + ".tpc" in helpfiles:
       f = open(helpdir + "/" + mem + ".tpc", "r")
     elif mem + ".cmd" in helpfiles:
@@ -359,6 +349,7 @@ def history_cmd(session, words, input):
   historylist.reverse()
   exported.write_message("History:\n" + string.join(historylist, "\n"))
 
+
 def info_cmd(session, words, input):
   """#info
 
@@ -399,7 +390,8 @@ def log_cmd(session, words, input):
 
   else:
     try:
-      session.openLogfile(words[1])
+      filename = utils.strip_braces(words[1])
+      session.openLogfile(filename)
       exported.write_message("log: starting logging to '" + 
                                    session.getLogfileName() + 
                                    "'.")
@@ -457,10 +449,12 @@ def mudecho_cmd(session, words, input):
     exported.write_error("syntax: #echo <on|off>")
     return
 
-  if words[1] == "on":
+  option = utils.strip_braced(words[1])
+
+  if option == "on":
     event.EchoEvent(1).enqueue() 
     exported.write_message("echo: turned on manually.")
-  elif words[1] == "off":
+  elif option == "off":
     event.EchoEvent(0).enqueue() 
     exported.write_message("echo: turned off manually.")
   else:
@@ -489,7 +483,8 @@ def read_cmd(session, words, input):
 
   try:
     filename = utils.strip_braces(words[1])
-    file = open(words[1], "r")
+
+    file = open(filename, "r")
     contents = file.readlines()
 
     # FIXME - this doesn't account for bad first characters....
@@ -501,13 +496,10 @@ def read_cmd(session, words, input):
     for mem in contents:
       mem = mem.strip()
       session.handleUserData(mem)
-    exported.write_message("read: file " + words[1] + " read.")
-
-  except ValueError:
-    exported.write_error("read: unmatched braces")
+    exported.write_message("read: file " + filename + " read.")
 
   except IOError:
-    exported.write_error("read: file " + words[1] + " is not readable.")
+    exported.write_error("read: file " + filename + " is not readable.")
     return
 
 
@@ -530,17 +522,18 @@ def session_cmd(session, words, input):
     exported.write_error("syntax: #session <sesname> <host> <port>")
     return
 
-  sessionname = words[1]
+  sessionname = utils.strip_braces(words[1])
+  host = utils.strip_braces(words[2])
+  port = utils.strip_braces(words[3])
 
-  if INT_REGEXP.match(sessionname):
-    exported.write_error("session: session names cannot be all numbers.")
+  if utils.is_int(port) == 1:
+    port = int(port)
+  else:
+    exported.write_error("session: port must be a number.")
     return
-
-  host = words[2]
-  try:
-    port = int(words[3])
-  except:
-    exported.write_error("session: port must be a number: " + words[3])
+  
+  if utils.is_int(sessionname) == 1:
+    exported.write_error("session: session names cannot be all numbers.")
     return
 
   # we do this to deal with non-unique session names
@@ -617,10 +610,12 @@ def speedwalk_cmd(session, words, input):
       exported.write_message("speedwalk: disabled.")
     return
 
-  if words[1] == '1' or words[1] == 'on':
+  option = utils.strip_braces(words[1])
+
+  if option == '1' or option == 'on':
     lyntin.speedwalk = 1
     exported.write_message("speedwalk: now enabled.")
-  elif words[1] == '0' or words[1] == 'off':
+  elif option == '0' or option == 'off':
     lyntin.speedwalk = 0
     exported.write_message("speedwalk: now disabled.")
   else:
@@ -674,16 +669,17 @@ def textin_cmd(session, words, input):
     return
    
   try:
-    file = open(words[1], "r")
+    filename = utils.strip_braces(words[1])
+    file = open(filename, "r")
     contents = file.readlines()
     for mem in contents:
       mem = mem.strip()
       session.getSocketCommunicator().write(mem + "\n")
-    exported.write_message("textin: file " + words[1] + 
+    exported.write_message("textin: file " + filename + 
                                    " read and sent to client.")
 
   except IOError:
-    exported.write_error("textin: file " + words[1] + 
+    exported.write_error("textin: file " + filename + 
                                  " is not readable.")
   except:
     exported.write_error("textin: exception thrown.")
@@ -730,9 +726,10 @@ def ticksize_cmd(session, words, input):
     exported.write_error("syntax: #ticksize {number}")
     return
 
-  try:
-    ticklength = int(words[1])
-  except:
+  ticklength = utils.strip_braces(words[1])
+  if utils.is_int(ticklength) == 1:
+    ticklength = int(ticklength)
+  else:
     exported.write_error("syntax: #ticksize {number}")
     return
 
@@ -862,14 +859,15 @@ def write_cmd(session, words, input):
     return
 
   try:
-    f = open(words[1], "w")
+    filename = utils.strip_braces(words[1])
+    f = open(filename, "w")
     f.write(session.getWriteFileInfo())
     f.close()
-    exported.write_message("write: file " + 
-                                 words[1] + " has been written.")
+    exported.write_message("write: file " + filename +
+                                 " has been written.")
   except:
     exported.write_error("write: error writing to file " + 
-                                 words[1] + ".")
+                                 filename + ".")
     traceback.print_exc()
 
 
