@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.15 2002/05/13 17:34:45 jmberne Exp $
+# $Id: tintincmds.py,v 1.16 2002/05/14 22:46:26 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -563,6 +563,7 @@ def math_cmd(session, args, input):
   """
   var = args["var"]
   ops = args["operation"]
+  quiet = args["quiet"]
 
   # we have to do manual variable expansion here.
   varexpansion = session.getManager("variable").expand(ops)
@@ -572,11 +573,12 @@ def math_cmd(session, args, input):
   try:
     rvalue = eval(ops)
     session.getManager("variable").addVariable(var, str(rvalue))
-    exported.write_message("math: %s = %s." % (var, ops))
+    if not quiet:
+      exported.write_message("math: %s = %s." % (var, ops))
   except Exception, e:
     exported.write_error("math: exception: %s\n%s" % (ops, e))
 
-commands_dict["math"] = (math_cmd, "var operation")
+commands_dict["math"] = (math_cmd, "var operation quiet:boolean=false")
 
 
 def nop_cmd(session, args, input):
