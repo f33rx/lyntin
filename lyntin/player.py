@@ -893,8 +893,8 @@ def Help(words, input, seslist):
         new_line = '   '
         count = 1
         for mem in the_list:
-            if len(mem) > 5 and mem[-5:] == ".help":
-                new_line = new_line + string.ljust(mem[:-5], 16)
+            if len(mem) > 4 and mem[-4:] == ".hlp":
+                new_line = new_line + string.ljust(mem[:-4], 16)
                 if (count % 3) == 0:
                     PutMessage(new_line)
                     new_line = '   '
@@ -904,7 +904,7 @@ def Help(words, input, seslist):
 
     for mem in words[1:]:
         try:
-            f = open(helpdir + "/" + mem + ".help", "r")
+            f = open(helpdir + "/" + mem + ".hlp", "r")
             lines = f.readlines()
             f.close()
             PutRaw(string.join(lines, ""))
