@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.8 2002/04/30 23:13:40 willhelm Exp $
+# $Id: testserver.py,v 1.9 2002/05/09 23:20:12 willhelm Exp $
 #######################################################################
 """
 This runs a multithreaded server on port 3000.
@@ -42,6 +42,7 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     self._commands["line"] = self.handle_line
     self._commands["text"] = self.handle_text
     self._commands["spam"] = self.handle_spam
+    self._commands["hltest"] = self.handle_coloredline
 
     self._rlist = [self.request]
 
@@ -61,12 +62,11 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     self.write(self.color("You're logged in.") + "\n")
     import select
     try:
-      self.request.setblocking(0)
+      self.request.setblocking(1)
       data = ''
       while shutdown == 0:
         #check to see what is ready on the socket
         conns = select.select([self.request], [], [], 0)[0]
-
         for mem in conns:
           #lets get the message
           data += self.request.recv(1024)
@@ -134,6 +134,13 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     response = self.getWords(10) + "\n"
     self.write(response)
       
+  def handle_coloredline(self, text):
+    output = "Notadragon is not a dragon.\n"
+    output += "Notadragon is " + self.color("not", 32) + " a dragon.\n"
+    output += "N" + self.color("otadragon", 35) + " is not a " + self.color("dragon.", 33) + "\n"
+    output += "Beginning of line " + self.color("Hunted by: ", 35) + self.color("No-one", 37) + " rest of line."
+    self.write(output)
+
   def handle_text(self, text):
     # TEXT command -> returns 10 lines of 10 words
     response = ''
