@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.27 2002/05/16 14:27:45 jmberne Exp $
+# $Id: action.py,v 1.28 2002/05/18 03:45:59 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -46,7 +46,7 @@ class ActionManager(manager.Manager):
     regexp = re.sub('%_[0-9]+', '(\S+?)', regexp)
     return re.compile(regexp)
 
-  def addAction(self, trigger, response):
+  def addAction(self, trigger, response, onetime=0):
     """
     Compiles a trigger pattern and adds the entire action to the
     hash.
@@ -58,13 +58,15 @@ class ActionManager(manager.Manager):
       'response' -- (string) what to do when the trigger pattern
                     is found
 
+      'onetime' -- (boolean) whethere this should be an auto-removing action
+
     returns:
 
       (int) always returns a 1
 
     """
     compiled = self._compileAction(trigger)
-    self._actions[trigger] = (trigger, compiled, response)
+    self._actions[trigger] = (trigger, compiled, response, onetime)
     return 1
 
   def clear(self):
@@ -164,11 +166,13 @@ class ActionManager(manager.Manager):
 
     # go through all the lines in the data and see if we have
     # any matches
-    for (action, actioncompiled, response) in self._actions.values():
+    for (action, actioncompiled, response, onetime) in self._actions.values():
       line = utils.filter_cm(utils.filter_ansi(text))
       match = actioncompiled.search(line)
       if match:
         matched.append((line, action, actioncompiled, response))
+        if onetime:
+          del self._actions[action]
 
     # for every match we figure out what the expanded response
     # is and add it as an InputEvent in the queue.  the reason
@@ -232,8 +236,8 @@ class ActionManager(manager.Manager):
 
     data = []
     for mem in list:
-      data.append("%saction {%s} {%s}" % 
-              (lyntin.commandchar, mem, self._actions[mem][2]))
+      data.append("%saction {%s} {%s} onetime=%s" % 
+              (lyntin.commandchar, mem, self._actions[mem][2], self._actions[mem][3]))
 
     return string.join(data, "\n")
 
