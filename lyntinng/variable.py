@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.14 2002/05/05 16:34:51 willhelm Exp $
+# $Id: variable.py,v 1.15 2002/05/15 00:16:55 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
 It also defines some builtin variables like $TIMESTAMP.
 """
-import re
+import re, string
 import manager, utils, lyntin, engine
 
 localvarchar = lyntin.variablechar

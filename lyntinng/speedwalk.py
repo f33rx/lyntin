@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.12 2002/05/05 16:09:50 jmberne Exp $
+# $Id: speedwalk.py,v 1.13 2002/05/12 04:40:38 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -229,7 +229,7 @@ class SpeedwalkManager(manager.Manager):
     
     return data[:-1]
   
-  def getExcludeCount(self):
+  def getExcludesCount(self):
     """
     Returns the number of excludes currently stored.
     
