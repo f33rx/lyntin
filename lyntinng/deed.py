@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: deed.py,v 1.1 2002/03/28 01:03:41 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
@@ -81,8 +81,8 @@ class DeedManager(manager.Manager):
     if not self._deeds:
       return ""
     
-    if text.isdigit():
-      count = int(text)
+    if num.isdigit():
+      count = int(num)
       list = self._deeds[-count:]
     else:
       list = self._deeds
