@@ -14,6 +14,7 @@ basic.
 """
 
 import data, string, sys, mud, app, select, os, time, regsub
+import exported
 if os.name != 'posix':
     import thread
 
@@ -109,8 +110,8 @@ class Textui:
         return tio
 
     # turn on echo
-    def OnEcho(self):
-        if not tio:
+    def OnEcho(self, checktio="yes"):
+        if not tio and chectio == "yes":
             return
         global echo
         global offecho_attr
@@ -126,8 +127,8 @@ class Textui:
             raise 'lt_echo_error', 'unable to turn on echo'
 
     # turn off echo
-    def OffEcho(self):
-        if not tio:
+    def OffEcho(self, checktio="yes"):
+        if not tio and checktio == "yes":
             return
         global echo
         global onecho_attr

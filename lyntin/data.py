@@ -245,7 +245,7 @@ class UserSession(session):
             if not self.domain or not self.port:
                 return
             self.sorck = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sorck.connect(domain, port)
+            self.sorck.connect((domain, port))
             self.connected = 1
         except:
             player.Putline('unable to connect')

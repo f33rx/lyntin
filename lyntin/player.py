@@ -52,6 +52,9 @@ def DispatchCommand(input, seslist):
     if not seslist:
         raise SesError, 'No session supplied'
 
+    if len(input) <= 0:
+        return
+
     words = string.split(input)
 
     # execute some python code?
@@ -433,8 +436,25 @@ def DataGrepLines(words, input, seslist):
             PutUntouchedLine(b)
         Putline('datagreplines: %d match(es) found.'%len(build))
 
+def Echo(words, input, seslist):
+    """Echo(words, input, seslist) -> None
+
+    Will turn on and shut off echo.
+    """
+    if len(words) < 2:
+        Putline("echo: command requires one argument")
+        Putline("echo <on|off>")
+        return
+
+    if (words[1] == "on"):
+        data.theapp.ui.OnEcho("no")
+        Putline("echo on")
+    else:
+        data.theapp.ui.OffEcho("no")
+        Putline("echo off")
+
 def Report(words, input, seslist):
-    """Report(words, seslist) -> None
+    """Report(words, input, seslist) -> None
 
     With no args, prints all reports
     Otherwise, creates a report which prints the line containing
@@ -1229,3 +1249,4 @@ def InitPlayer():
     data.theapp.AddCommand("verbose", player.Verbose)
     data.theapp.AddCommand("version", player.Version)
     data.theapp.AddCommand("read", player.ParseFile)
+    data.theapp.AddCommand("echo", player.Echo)
