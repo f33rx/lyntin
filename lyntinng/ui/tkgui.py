@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.25 2002/04/08 21:53:05 willhelm Exp $
+# $Id: tkgui.py,v 1.26 2002/04/09 22:11:59 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -245,22 +245,46 @@ class TkGui(ui.BaseUI):
     if message.data == '':
       return
 
-    if message.type == ui.ERROR or message.type == ui.USERDATA:
-      self._txt.insert('end', message.data, "44")
-      self._txt.insert('end', "\n")
+    if message.type == ui.ERROR:
+      if message.data[-1] == "\n":
+        self._txt.insert('end', message.data[:-1], "44")
+        self._txt.insert('end', "\n")
+      else:
+        self._txt.insert('end', message.data, "44")
+
+    elif message.type == ui.USERDATA:
+      if lyntin.echo == 1:
+        if message.data[-1] == "\n":
+          self._txt.insert('end', message.data[:-1], "44")
+          self._txt.insert('end', "\n")
+        else:
+          self._txt.insert('end', message.data, "44")
 
     elif message.type == ui.LTDATA:
-      message.data = "# " + message.data.replace("\n", "\n# ")
+      if message.data[-1] == "\n":
+        message.data = "# " + message.data[:-1].replace("\n", "\n# ") + "\n"
+      else:
+        message.data = "# " + message.data.replace("\n", "\n# ")
+
       self._txt.insert('end', message.data)
-      self._txt.insert('end', "\n")
 
     elif message.type == ui.TESTDATA:
       self._txt.insert('end', message.data, "42")
-      self._txt.insert('end', "\n")
 
     elif message.type == ui.MUDDATA:
       index = 0
       start = 0
+
+      if (message.session != None 
+          and message.session != exported.get_current_session()):
+        pretext = "[" + message.session.getName() + "] "
+
+        if message.data[-1] == "\n":
+          message.data = (pretext + 
+                          message.data[:-1].replace("\n", "\n" + pretext) + 
+                          "\n")
+        else:
+          message.data = pretext + message.data.replace("\n", "\n" + pretext)
 
       # first we remove all \\r stuff
       line = message.data.replace("\r", "")

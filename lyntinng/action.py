@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.16 2002/04/04 01:04:30 willhelm Exp $
+# $Id: action.py,v 1.17 2002/04/05 23:55:46 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -186,7 +186,7 @@ class ActionManager(manager.Manager):
       # matched on the trigger
       for var in varvals.keys():
         # replace occurrences of '%i' with val
-        if var.find(response) > -1:
+        if response.find(var) > -1:
           response = re.sub(var, varvals[var], response)
 
       # replace occurrances of '$i' with val replacing ; with \;
