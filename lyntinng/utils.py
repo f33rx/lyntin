@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.19 2002/04/29 05:02:05 willhelm Exp $
+# $Id: utils.py,v 1.20 2002/04/30 02:42:08 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -15,7 +15,7 @@ they're highly unit tested.
 import string, re
 
 SEMI_REGEXP = re.compile('(?<!\\\\);')
-VAR_REGEXP = re.compile('%(\d+)')
+VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 
 def chomp(text):
@@ -313,14 +313,24 @@ def replace_vars(input, expansion):
 
     # for all the variables, find what it translates to
     for mem in vars:
-      intmem = int(mem)
-      if intmem == 0:
-        varlookup['0'] = input.split(' ', 1)[1]
-      else:
-        if len(inputsplit) > intmem:
-          varlookup[mem] = inputsplit[intmem]
+      if mem.find(':') < 0:
+        start = int(mem)
+        if start == -1:
+          end = len(inputsplit)
         else:
-          varlookup[mem] = ''
+          end = start + 1
+      else:
+        startmem,endmem = mem.split(':')
+        if startmem:
+          start = int(startmem)
+        else:
+          start = 0
+        if endmem:
+          end = int(endmem)
+        else:
+          end = max(len(inputsplit),start)
+
+      varlookup[mem] = ' '.join(inputsplit[start:end])
 
     # run through the replacements
     for mem in varlookup.keys():
@@ -420,3 +430,14 @@ if __name__ == '__main__':
   print replace_vars("#test 1 2 3", "#test")
   print replace_vars("#test 1 2 3", "#test %1 %2")
   print replace_vars("#test 1 2 3", "#test %0")
+  print replace_vars("#test 1 2 3", "#test %-1")
+  print replace_vars("#test 1 2 3", "#test %:-1")
+  print replace_vars("#test 1 2 3", "#test %1:-1")
+
+
+
+
+
+
+
+
