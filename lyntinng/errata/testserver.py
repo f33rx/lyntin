@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: testserver.py,v 1.13 2002/06/26 22:50:42 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -259,14 +259,14 @@ if __name__ == '__main__':
   for mem in optlist:
     if mem[0] == "--host" or mem[0] == "-h":
       if mem[1]:
-        testserver.my_options["host"] = mem[1]
+        options["host"] = mem[1]
       else:
         print_syntax("Host was not specified.")
         sys.exit(1)
 
     elif mem[0] == "--port" or mem[0] == "-p":
       if mem[1] and mem[1].isdigit():
-        testserver.my_options["port"] = mem[1]
+        options["port"] = mem[1]
       else:
         print_syntax("Port needs to be a number.")
         sys.exit(1)
