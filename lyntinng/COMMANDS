@@ -6,7 +6,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-Wed, 18 Dec 2002 04:44:08 +0000
+Wed, 18 Dec 2002 04:49:15 +0000
 
 For more up-to-date information and documentation, please check the 
 web-site: http://Lyntin.sourceforge.net/
@@ -55,7 +55,7 @@ COMMANDS.@
    such module exists, it will execute the code inside 
    modules.advanced .
    
-   ex:
+   examples:
      #@ print "hello"
      #@ print string.join(exported.get_commands(), "\n")
 
@@ -92,11 +92,10 @@ COMMANDS.ACTION
    itself automatically after it is triggered.
    
    examples:
-   
-      #action {^You are hungry} {get bread bag;eat bread}
-      #action {%0 gives you %5} {say thanks for the %5, %0!}
-      #action {r[^%_1 tells\s+you %2$]} {say %1 just told me %2}
-      #action {r[sven dealt .+? to %1$]i} {say i just killed %1!}
+     #action {^You are hungry} {get bread bag;eat bread}
+     #action {%0 gives you %5} {say thanks for the %5, %0!}
+     #action {r[^%_1 tells\s+you %2$]} {say %1 just told me %2}
+     #action {r[sven dealt .+? to %1$]i} {say i just killed %1!}
 
 
 
@@ -120,7 +119,6 @@ COMMANDS.ALIAS
    list. 
    
    examples:
-   
      #alias {k*}                    - prints out aliases that start with k
      #alias {k} {kill %1}           - builds a new alias
      #alias {gg} {put %1: in chest} - builds a new alias
@@ -210,7 +208,7 @@ COMMANDS.END
 
    Closes all sessions and quits out of Lyntin.
    
-   Note, on most muds this will leave your character in a state of 
+   Note: on most muds this will leave your character in a state of 
    linkdeath--it does not sell all your stuff, return you to town, 
    save your character, tell your friends goodbye, or anything of 
    that nature.
@@ -235,12 +233,11 @@ COMMANDS.GAG
    accepts a quiet argument to supress reporting of what has been
    gagged.  
    
-   ex:
-      #gag {has missed you.}    <-- will prevent any incoming line
-                                    with "has missed you" to be shown.
-   ex:
-      #gag has missed you       <-- will gag any text with "has",
-                                    "missed", or "you"
+   examples:
+     #gag {has missed you.}    <-- will prevent any incoming line
+                                   with "has missed you" to be shown.
+     #gag has missed you       <-- will gag any text with "has",
+                                   "missed", or "you"
 
 
 
@@ -252,7 +249,6 @@ COMMANDS.HELP
    With an argument, shows that specific help file.
    
    examples:
-   
      #help
      #help help
      #help commands.substitute
@@ -285,9 +281,9 @@ COMMANDS.HIGHLIGHT
    with "word" in it.  '*word' will highlight the line up to "word".  
    'word*' will highlight the line from "word" to the end.
    
-   ex:
-      #highlight {green} {Sven arrives.}
-      #highlight {reverse,green} {Sven arrives.}
+   examples:
+     #highlight {green} {Sven arrives.}
+     #highlight {reverse,green} {Sven arrives.}
 
 
 
@@ -301,7 +297,6 @@ COMMANDS.HISTORY
    the !.  You can also do replacements via the sub=repl syntax.
    
    examples:
-   
      #history [count=30]
          prints the last count entries in the history buffer
      !
@@ -325,7 +320,6 @@ COMMANDS.IF
    Strings should be in single quotes:
    
    examples:
-   
      #if {$myhpvar < 100} {#showme PANIC!}
      #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
      #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
@@ -349,7 +343,6 @@ COMMANDS.IMPORT
    NOT safe to import in-game.
    
    examples:
-   
      #import modules.action
      #import exportuser
    
@@ -396,11 +389,9 @@ COMMANDS.LOOP
    the range of numbers specified in <from> and <to>.
    
    example:
-   
      #loop {1,5} {reclaim %0.corpse}
    
    will execute:
-   
      reclaim 1.corpse
      reclaim 2.corpse
      reclaim 3.corpse
@@ -424,7 +415,6 @@ COMMANDS.MATH
    variables above and beyond setting them.
    
    examples:
-   
      #math {hps} {$hps + 5}
 
 
@@ -643,7 +633,7 @@ COMMANDS.SUBSTITUTE
    With one argument, prints all substitutes which match the argument.
    Otherwise creates a substitution.
    
-   Braces are advised around both 'name' and 'substitution'.
+   Braces are advised around both 'item' and 'substitution'.
 
 
 
@@ -654,15 +644,14 @@ COMMANDS.SWDIR
    This adds speedwalking aliases and tells you the current speedwalking dirs
    already registered.
    
-   ex:
-   
-      #swdir {n} {north}
-      #swdir {s} {south}
-      #swdir {e} {east}
-      #swdir {w} {west}
-      #swdir {NE} {northeast}
-      #swdir {l} {look}
-      ...
+   examples:
+     #swdir {n} {north}
+     #swdir {s} {south}
+     #swdir {e} {east}
+     #swdir {w} {west}
+     #swdir {NE} {northeast}
+     #swdir {l} {look}
+     ...
    
    see also: swexclude
 
@@ -678,6 +667,10 @@ COMMANDS.SWEXCLUDE
    If you had swdirs "n", "e", "s", and "w", you might want to create
    excludes for the words "sense", "news", "sew", ...  Which are real
    words that you most likely don't want to be expanded.
+   
+   examples:
+     #swexclude {end}
+     #swexclude {news}
    
    see also: swdir
 
@@ -702,7 +695,6 @@ COMMANDS.TICK
    
    When a tick happens, it will look for a TICK!!! alias.  Finding none,
    it will print TICK!!! to the ui.
-   
    
    This allows you to perform an event every x number of seconds.
 
@@ -747,7 +739,6 @@ COMMANDS.UNACTION
    Removes action(s) from the manager.
    
    examples:
-   
      #unaction {missed you.}
      #unaction missed*
 
@@ -776,7 +767,6 @@ COMMANDS.UNHIGHLIGHT
    Allows you to remove highlights.
    
    examples:
-   
      #highlight {hello}
      #highlight {blah*}
 
@@ -829,9 +819,9 @@ COMMANDS.VARIABLE
    Creates a variable for that session of said name with said value.
    Variables can then pretty much be used anywhere.
    
-   ex:
-      #variable {hps} {100}
-      #action {HP: %0/%1 } {#variable {hps} {%0}}
+   examples:
+     #variable {hps} {100}
+     #action {HP: %0/%1 } {#variable {hps} {%0}}
    
    Variables can later be accessed via the variable character
    (which defaults to $) and the variable name.  In the case of the
@@ -841,7 +831,7 @@ COMMANDS.VARIABLE
    global variables.  To set a global variable, it must be preceded
    by a _.
    
-   ex:
+   examples:
      #variable {_fun} {happy fun ball}
    
    Global variables can be accessed by any session.
