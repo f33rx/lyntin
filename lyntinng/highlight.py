@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.25 2002/05/31 02:08:30 willhelm Exp $
+# $Id: highlight.py,v 1.26 2002/06/01 15:51:44 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -296,7 +296,11 @@ class HighlightManager(manager.Manager):
       leftover = self._colorleftover
 
     if leftover:
-      textlist[0] = leftover + textlist[0]
+      ind = textlist[0].find("m")
+      if ind > -1:
+        leftover += textlist[0][:ind]
+        textlist[0] = textlist[0][ind+1:]
+      textlist.insert(0, leftover)
       leftover = ''
 
     for mem in textlist:
@@ -325,6 +329,7 @@ class HighlightManager(manager.Manager):
             # these are background attributes
             currentcolor[2] = i
 
+    # we're looking for leftover pieces here
     if len(textlist) > 0:
       mem = textlist[-1]
       if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
