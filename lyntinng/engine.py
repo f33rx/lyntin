@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.38 2002/04/29 23:14:13 willhelm Exp $
+# $Id: engine.py,v 1.39 2002/05/04 04:31:48 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -625,8 +625,11 @@ class Engine:
 
     self._command_list[name] = func
     if arguments != None:
-      self._command_arguments[name] = argparser.ArgumentParser(arguments, argoptions)
-
+      try:
+        self._command_arguments[name] = argparser.ArgumentParser(arguments, argoptions)
+      except Exception, e:
+        raise Exception, "Error with arguments for command %s, (%s)" % (name,e)
+        
   def removeCommand(self, name):
     """
     Removes a command for whatever reasons.
