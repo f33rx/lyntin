@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.2 2002/10/20 16:59:23 willhelm Exp $
+# $Id: ansi.py,v 1.3 2002/10/26 02:42:09 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -286,6 +286,16 @@ def figure_color(textlist, currentcolor, leftover=""):
 
 
 def convert_tuple_to_ansi(token):
+  """
+  Takes in a color tuple like what figure_color creates
+  and converts it into an ANSI color sequence.
+
+  @param token: the color tuple (option, fg, bg)
+  @type  token: (int, int, int)
+
+  @return: the ANSI color string
+  @rtype: string
+  """
   options = token[0]
   fg = token[1]
   bg = token[2]

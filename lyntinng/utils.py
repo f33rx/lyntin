@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.55 2002/10/24 23:07:03 willhelm Exp $
+# $Id: utils.py,v 1.56 2002/10/26 02:42:09 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -36,7 +36,7 @@ def filter_cm(text):
   @returns: text without ^M stuff
   @rtype: string
   """
-  return re.sub('\r', '', text)
+  return text.replace("\r", "")
 
 
 def exists_dir(dir):
@@ -56,6 +56,8 @@ def exists_dir(dir):
     return 0
 
 
+CHOMP_EOL = re.compile("[\r\n]+$")
+
 def chomp(text):
   """
   Removes all CR and LF from the end of the input string.
@@ -66,7 +68,7 @@ def chomp(text):
   @returns: the text without CR or LF at the end.
   @rtype: string
   """
-  return re.sub("[\n\r]+$", '', text)
+  return CHOMP_EOL.sub('', text)
 
 
 def http_get(url):
