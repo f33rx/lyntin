@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.25 2002/07/11 04:11:19 willhelm Exp $
+# $Id: argparser.py,v 1.26 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -97,13 +97,14 @@ class ArgumentParser:
     """
     Build up the set of parsers to be used for argument parsing.
 
-    The argspec follows the following format
-    [argname[:argtype]]+ 
-    [argname[:argtype]=defaultval]+ 
-    [argname:argtype*] 
-    [argname[:argtype]]+ 
-    [argname[:argtype]=defaultval]+ 
-    [argname:argtype**]
+    The argspec follows the following format::
+
+      [argname[:argtype]]+ 
+      [argname[:argtype]=defaultval]+ 
+      [argname:argtype*] 
+      [argname[:argtype]]+ 
+      [argname[:argtype]=defaultval]+ 
+      [argname:argtype**]
 
     Any of the arguments can be specified either by name or populated
     by position, except for arguments after the index collector
@@ -111,9 +112,9 @@ class ArgumentParser:
 
     Once one default value is given all further arguments must have
     default values (except collector arguments, which have implicit
-    default arguments of the empty list and the empty map)
+    default arguments of the empty list and the empty map).
 
-    Examples:  see the test code at the end of argparser.py
+    For examples see the test code at the end of argparser.py.
     """
     self.parsers = {}
     self.indexparsers = []
@@ -132,8 +133,9 @@ class ArgumentParser:
       argname, argdef = parsedspec[i]
       if argname.find(":") > -1:
         argname,typespec = argname.split(":",1)
-      else:  # extra argname assignment here is just for consistency
-        argname,typespec = argname, "string"
+      else:
+        # extra argname assignment here is just for consistency
+        argname, typespec = argname, "string"
 
       if len(argname) >= 1 and argname[-1:] == "*":
         if argdef != None:
@@ -143,12 +145,12 @@ class ArgumentParser:
           argname = argname[:-2]
           if i < len(parsedspec) -1:
             raise ParserException, "named collection argument must be the last argument (%s)" % (argname)
-          parser = extraNamedParser(self,argname)
+          parser = extraNamedParser(self, argname)
           namedCollector = 1
 
         else: #this is an index collection argument
           argname = argname[:-1]
-          parser = extraIndexParser(self,argname)
+          parser = extraIndexParser(self, argname)
           indexCollector = 1
           doneWithIndices = 1
           
@@ -190,7 +192,7 @@ class ArgumentParser:
     """    
     dict = {}
 
-    arguments = self.split(input,self.getOption("limitparsing"))
+    arguments = self.split(input, self.getOption("limitparsing"))
 
     foundNamedArg = 0
     for i in range(0,len(arguments)):
