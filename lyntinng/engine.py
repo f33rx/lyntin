@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.74 2002/11/06 03:03:19 willhelm Exp $
+# $Id: engine.py,v 1.75 2002/11/18 02:43:53 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -70,8 +70,7 @@ class Engine:
     self._managers["command"] = commandmanager.CommandManager()
 
     # our hook manager
-    self._managers["hook"] = hooks.HookManager()
-    hooks.initialize_hooks(self._managers["hook"])
+    self._managers["hook"] = hooks.get_hook_manager()
 
     # there is only one ui in the system.
     self._ui = None

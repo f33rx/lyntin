@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.20 2002/10/26 15:17:24 willhelm Exp $
+# $Id: lyntincmds.py,v 1.21 2002/11/06 02:09:08 willhelm Exp $
 #######################################################################
 import string
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -180,8 +180,15 @@ def diagnostics_cmd(session, args, input):
   message.append("Diagnostics:")
   message.append(exported.get_engine().getDiagnostics())
 
+  message.append("Hook statii:")
+  data = exported.get_engine().getManager("hook").getHookStatus()
+  data.sort()
+  for mem in data:
+    message.append(mem)
+
   message.append("Thread statii:")
   data = exported.get_engine().checkthreads()
+  data.sort()
   for mem in data:
     message.append(mem)
       
