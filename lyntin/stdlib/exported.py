@@ -81,6 +81,10 @@ def grep_databuffer(str, ses):
 def grep_databuffer_lines(str, ses):
     return ses.databuf.greplines(str)
 
+##################################################################
+# print a line to the screen with an added \n
+def print_line(str):
+    data.player.PutUntouchedLine(str)
 
 ##################################################################
 # use the scheduler to run functions at predetermined intervals
