@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.11 2002/04/14 03:58:18 willhelm Exp $
+# $Id: advanced.py,v 1.12 2002/04/14 17:36:12 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -56,7 +56,8 @@ def import_cmd(session, words, input):
 
     _module = sys.modules[mod]
     try:
-      if (_module.__dict__.has_key("unload")):
+      if ((_module.__dict__.has_key("unload") and 
+          _module.__dict__.has_key("lyntin_import"))):
         try:
           _module.unload()
         except Exception, e:
@@ -68,6 +69,7 @@ def import_cmd(session, words, input):
       if (_module.__dict__.has_key("load")):
         _module = sys.modules[mod]
         _module.load()
+      _module.__dict__["lyntin_import"] = 1
       exported.write_message("import: module %s reloaded." % mod)
     except Exception, e:
       exported.write_error("import: had problems with %s. %s" % (mod, e))
@@ -82,6 +84,7 @@ def import_cmd(session, words, input):
       if (_module.__dict__.has_key("load")):
         _module.load()
 
+      _module.__dict__["lyntin_import"] = 1
       exported.write_message("import successful.")
     except Exception, e:
       exported.write_error("import: had problems with %s. %s" % (mod, e))
