@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.70 2002/04/25 19:18:51 willhelm Exp $
+# $Id: basic.py,v 1.71 2002/04/26 02:34:25 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -632,6 +632,15 @@ def nop_cmd(session, args, input):
 
 commands_dict["nop"] = (nop_cmd, "comment*")
 
+def raw_cmd(session, args, input):
+  """#raw text_to_mud
+
+  Takes its arguments and sends them straight to the mud.
+  """
+  session.writeSocket(string.join(args["input"]," ") + "\n")
+  exported.write_message(string.join(args["input"]," "))
+
+commands_dict["raw"] = (raw_cmd, "input*")
 
 def read_cmd(session, args, input):
   """#read <filename>
