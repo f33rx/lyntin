@@ -23,52 +23,52 @@ class CommandEntry(Entry):
         self.bind("<KeyPress-Tab>", self.insertTab)
         self.bind("<KeyPress-Prior>", self.callPrior)
         self.bind("<KeyPress-Next>", self.callNext)
-	if os.name!="posix":
-	    self.bind("<KeyPress-8>", self.callKP8)
-	    self.bind("<KeyPress-6>", self.callKP6)
-	    self.bind("<KeyPress-4>", self.callKP4)
-	    self.bind("<KeyPress-2>", self.callKP2)
-	    self.bind("<KeyPress-9>", self.callKP9)
-	    self.bind("<KeyPress-7>", self.callKP7)
-	    self.bind("<KeyPress-5>", self.callKP5)
-	    self.bind("<KeyPress-3>", self.callKP3)
-	    self.bind("<KeyPress-1>", self.callKP1)
+        if os.name!="posix":
+            self.bind("<KeyPress-8>", self.callKP8)
+            self.bind("<KeyPress-6>", self.callKP6)
+            self.bind("<KeyPress-4>", self.callKP4)
+            self.bind("<KeyPress-2>", self.callKP2)
+            self.bind("<KeyPress-9>", self.callKP9)
+            self.bind("<KeyPress-7>", self.callKP7)
+            self.bind("<KeyPress-5>", self.callKP5)
+            self.bind("<KeyPress-3>", self.callKP3)
+            self.bind("<KeyPress-1>", self.callKP1)
 
-	    try: 
-		self.bind("<KeyPress-/>", self.callKPSlash)
-		self.bind("<KeyPress-*>", self.callKPStar)
-		self.bind("<KeyPress-minus>", self.callKPMinus)
-		self.bind("<KeyPress-+>", self.callKPPlus)
-	    except:
-		print "Some keys could not be bound."
-	else:
-	    self.bind("<KeyPress-KP_Up>", self.callKP8)
-	    self.bind("<KeyPress-KP_Right>", self.callKP6)
-	    self.bind("<KeyPress-KP_Left>", self.callKP4)
-	    self.bind("<KeyPress-KP_Down>", self.callKP2)
-	    self.bind("<KeyPress-KP_Prior>", self.callKP9)
-	    self.bind("<KeyPress-KP_Home>", self.callKP7)
-	    self.bind("<KeyPress-KP_Begin>", self.callKP5)
-	    self.bind("<KeyPress-KP_Next>", self.callKP3)
-	    self.bind("<KeyPress-KP_End>", self.callKP1)
-	    try: 
-		self.bind("<KeyPress-KP_Divide>", self.callKPSlash)
-		self.bind("<KeyPress-KP_Multiply>", self.callKPStar)
-		self.bind("<KeyPress-KP_Subtract>", self.callKPMinus)
-		self.bind("<KeyPress-KP_Add>", self.callKPPlus)
-	    except:
-		print "Some keys could not be bound."
+            try: 
+                self.bind("<KeyPress-/>", self.callKPSlash)
+                self.bind("<KeyPress-*>", self.callKPStar)
+                self.bind("<KeyPress-minus>", self.callKPMinus)
+                self.bind("<KeyPress-+>", self.callKPPlus)
+            except:
+                print "Some keys could not be bound."
+        else:
+            self.bind("<KeyPress-KP_Up>", self.callKP8)
+            self.bind("<KeyPress-KP_Right>", self.callKP6)
+            self.bind("<KeyPress-KP_Left>", self.callKP4)
+            self.bind("<KeyPress-KP_Down>", self.callKP2)
+            self.bind("<KeyPress-KP_Prior>", self.callKP9)
+            self.bind("<KeyPress-KP_Home>", self.callKP7)
+            self.bind("<KeyPress-KP_Begin>", self.callKP5)
+            self.bind("<KeyPress-KP_Next>", self.callKP3)
+            self.bind("<KeyPress-KP_End>", self.callKP1)
+            try: 
+                self.bind("<KeyPress-KP_Divide>", self.callKPSlash)
+                self.bind("<KeyPress-KP_Multiply>", self.callKPStar)
+                self.bind("<KeyPress-KP_Subtract>", self.callKPMinus)
+                self.bind("<KeyPress-KP_Add>", self.callKPPlus)
+            except:
+                print "Some keys could not be bound."
 
-	self.bind("<Control-KeyPress-u>", self.callKillLine)
-	self.bind("<Control-KeyPress-Up>", self.callPushInputStack)
-	self.bind("<Control-KeyPress-Down>", self.callPopInputStack)
+        self.bind("<Control-KeyPress-u>", self.callKillLine)
+        self.bind("<Control-KeyPress-Up>", self.callPushInputStack)
+        self.bind("<Control-KeyPress-Down>", self.callPopInputStack)
         self.bind("<KeyPress-Escape>", self.callEsc)
         self.input = []
         self.hist_index = -1
         self.partk = partk
-	self.inputstack = []
-	self.saveinputhighlight = 0 #JA Change this to store the last input in 
-	                            #the line but highlight it like zMUD does.
+        self.inputstack = []
+        self.saveinputhighlight = 0 #JA Change this to store the last input in 
+                                    #the line but highlight it like zMUD does.
         
     def callKPSlash(self, event):
         if event.keycode == 111 or os.name=='posix':
@@ -151,15 +151,15 @@ class CommandEntry(Entry):
 
     def store_input(self, event):
         val = self.get()
-	val=string.replace(val,'\n',';')
+        val=string.replace(val,'\n',';')
         if len(val) < 1:
             val = "#cr"
         val = val + '\n'
         self.input.append(val)
-	if self.saveinputhighlight == 1:
-	    self.selection_range(0,'end')
-	else:
-	    self.delete(0, 'end')
+        if self.saveinputhighlight == 1:
+            self.selection_range(0,'end')
+        else:
+            self.delete(0, 'end')
         self.hist_index = -1
 
     def clear_input(self):
@@ -181,20 +181,20 @@ class CommandEntry(Entry):
         # self.insert(INSERT, 'keypress esc')
     
     def callKillLine(self, event): #JA Kill line with ^U like normal terminals
-	self.delete(0,'end')
+        self.delete(0,'end')
 
     def callPushInputStack(self, event):
-	self.inputstack.append((self.index('insert'),self.get()))
-	self.delete(0,'end')
+        self.inputstack.append((self.index('insert'),self.get()))
+        self.delete(0,'end')
 
     def callPopInputStack(self,event):
-	if len(self.inputstack) < 1:
-	    print('no stack, dork')
-	    return
-	poppage = self.inputstack.pop()
-	self.delete(0,'end')
-	self.insert(0,poppage[1])
-	self.icursor(poppage[0])
+        if len(self.inputstack) < 1:
+            print('no stack, dork')
+            return
+        poppage = self.inputstack.pop()
+        self.delete(0,'end')
+        self.insert(0,poppage[1])
+        self.icursor(poppage[0])
         
     # go backward in the history list
     def InsertPrevCommand(self, event):

@@ -23,20 +23,20 @@ class CompletionEntry(Entry):
         apply(Entry.__init__, (self, master), kw)
 
         self.bind("<Tab>", self.__tab)
-	self.unbind_all()
-	self.bind("<Return>", self.store_input)
+        self.unbind_all()
+        self.bind("<Return>", self.store_input)
         self.__state = None, None, None
-	self.input = []
-	
+        self.input = []
+
     def store_input(self, event):
-	val = self.get()
-	if not val:
-	    self.input.append('\n')
-	self.input.append(val)
-	self.delete(0, 'end')
-	
+        val = self.get()
+        if not val:
+            self.input.append('\n')
+        self.input.append(val)
+        self.delete(0, 'end')
+
     def __tab(self, event):
-	
+
         #import pdb;pdb.set_trace()
         index = self.index(INSERT)
         value = self.get()
@@ -83,7 +83,7 @@ class FileEntry(CompletionEntry):
     def complete(self, state, prefix, suffix):
 
         #import pdb;pdb.set_trace()
-        
+
         # workaround os.path.isdir buglet
         path = prefix
         if path[-1:] in ("/", os.sep):
@@ -119,7 +119,7 @@ class FileEntry(CompletionEntry):
         return self.__files[state][len(prefix):]
 
     def __init__(self, master, **kw):
-	#import pdb;pdb.set_trace()
+        #import pdb;pdb.set_trace()
         apply(CompletionEntry.__init__, (self, master), kw)
 
 

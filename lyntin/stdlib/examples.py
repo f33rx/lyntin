@@ -22,11 +22,11 @@ class PrintEvent(TimeEvent):
 
 class RepeatEvent(TimeEvent):
     def __init__(self, dowhat, interval=1,times=-1):
-	TimeEvent.__init__(self,interval, times)
-	self.dowhat=dowhat
+        TimeEvent.__init__(self,interval, times)
+        self.dowhat=dowhat
 
     def internal_perform(self, scheduler):
-	data.theapp.HandleUserInput(self.dowhat)
+        data.theapp.HandleUserInput(self.dowhat)
 
 ##################################################################
 # example of a function which interacts with a mud through lyntin
@@ -70,12 +70,12 @@ class timedfileexecution(TimeEvent):
 
 class afterexec(TimeEvent):
     def __init__(self, command, after=1):
-	self.command=command
-	TimeEvent.__init__(self,after,1)
+        self.command=command
+        TimeEvent.__init__(self,after,1)
     
     def internal_perform(self, scheduler):
-	lyntin_command(self.command)
-	scheduler.remove(self)
+        lyntin_command(self.command)
+        scheduler.remove(self)
 
 ##################################################################
 # This is a very simple auto saver but can be dangerous to use if 
