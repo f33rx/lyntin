@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.44 2002/03/29 16:13:59 willhelm Exp $
+# $Id: basic.py,v 1.45 2002/03/29 18:09:59 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -520,7 +520,7 @@ def loop_cmd(session, words, input):
 
 
 def mudecho_cmd(session, words, input):
-  """#echo <on|off>
+  """#mudecho <on|off>
 
   Sometimes muds screw up the detail and don't properly turn echo
   on and off.  Sometimes you just want to be able to turn it on
@@ -528,19 +528,19 @@ def mudecho_cmd(session, words, input):
   """
   import event
   if len(words) == 1:
-    exported.write_error("syntax: #echo <on|off>")
+    exported.write_error("syntax: #mudecho <on|off>")
     return
 
   option = utils.strip_braces(words[1])
 
   if option == "on":
     event.EchoEvent(1).enqueue() 
-    exported.write_message("echo: turned on manually.")
+    exported.write_message("mudecho: turned on manually.")
   elif option == "off":
     event.EchoEvent(0).enqueue() 
-    exported.write_message("echo: turned off manually.")
+    exported.write_message("mudecho: turned off manually.")
   else:
-    exported.write_error("syntax: #echo <on|off>")
+    exported.write_error("syntax: #mudecho <on|off>")
 
  
 def nop_cmd(session, words, input):
@@ -855,12 +855,12 @@ def togglesubs_cmd(session, words, input):
   """
   if session._ignoresubs == 1:
     session._ignoresubs = 0
-    exported.write_message("ignore: substitutions are active for session %s." 
-                           % session.getName())
+    exported.write_message("togglesubs: substitutions are active for " +
+                           "session %s." % session.getName())
   else:
     session._ignoresubs = 1
-    exported.write_message("ignore: now ignoring substitions for session %s." 
-                           % session.getName())
+    exported.write_message("togglesubs: now ignoring substitions for " +
+                           "session %s." % session.getName())
 
 
 def unsomething_cmd(session, words, input):
@@ -955,6 +955,21 @@ def variable_cmd(session, words, input):
   except:
     exported.write_error("variable: cannot be set.")
     traceback.print_exc()
+
+
+def verbatim_cmd(session, words, input):
+  """#verbatim
+
+  Turns on and shuts off verbatim mode.
+  """
+  if session._verbatim == 1:
+    session._verbatim = 0
+    exported.write_message("verbatim: verbatim disabled for session %s." 
+                           % session.getName())
+  else:
+    session._verbatim = 1
+    exported.write_message("verbatim: verbatim enabled for session %s." 
+                           % session.getName())
 
 
 def version_cmd(session, words, input):
@@ -1065,7 +1080,7 @@ def load():
   exported.add_command("tickon", tickon_cmd)
   exported.add_command("tickoff", tickoff_cmd)
   exported.add_command("ticksize", ticksize_cmd)
-  # exported.add_command("togglesub", togglesub_cmd)
+  exported.add_command("togglesubs", togglesubs_cmd)
   exported.add_command("unaction", unsomething_cmd)
   exported.add_command("unalias", unsomething_cmd)
   # exported.add_command("unantisubstitute", unsomething_cmd)
@@ -1076,7 +1091,7 @@ def load():
   exported.add_command("unvariable", unsomething_cmd)
   exported.add_command("variable", variable_cmd)
   exported.add_command("version", version_cmd)
-  # exported.add_command("verbatim", verbatim_cmd)
+  exported.add_command("verbatim", verbatim_cmd)
   exported.add_command("wizlist", wizlist_cmd)
   exported.add_command("write", write_cmd)
   exported.add_command("zap", zap_cmd)

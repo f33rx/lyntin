@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.19 2002/03/29 06:23:29 willhelm Exp $
+# $Id: session.py,v 1.20 2002/03/29 16:13:59 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -37,6 +37,11 @@ class Session:
     # allows users to toggle whether we're doing substitutions.
     # 0 for substitutions, 1 if we're ignoring substitutions
     self._ignoresubs = 0
+
+    # tells us whether we're in verbatim mode where we don't
+    # do any massaging of user data.
+    # 0 if we're massaging stuff, 1 if we're in verbatim mode
+    self._verbatim = 0
 
     # register with the shutdown hook 
     engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
@@ -201,14 +206,15 @@ class Session:
     output for internal stuff too.  1 if internal, 0 if not.
     """
     # we deal with possible variables...
-    varexpansion = self.getManager("variable").expand(input)
-    if varexpansion:
-      varexpansion = self.getManager("variable").unescapeVariables(varexpansion)
-      engine.myengine.handleUserData(varexpansion, internal)
-      return
+    if not self._verbatim or (len(input) > 0 and input[0] != '#'):
+      varexpansion = self.getManager("variable").expand(input)
+      if varexpansion:
+        varexpansion = self.getManager("variable").unescapeVariables(varexpansion)
+        engine.myengine.handleUserData(varexpansion, internal)
+        return
 
-    # replace \$ -> $
-    input = self.getManager("variable").unescapeVariables(input)
+      # replace \$ -> $
+      input = self.getManager("variable").unescapeVariables(input)
 
     # handle lyntin commands
     if len(input) > 1 and input[0] == lyntin.commandchar:
@@ -242,15 +248,16 @@ class Session:
         if internal==0: self._prompt()
       return
 
-    # we check for aliases here--and if we find some, we
-    # do the variable expansion and then recurse over the result
-    aliasexpansion = self.getManager("alias").expand(input)
-    if aliasexpansion:
-      # replace placement variables in the expansion
-      aliasexpansion = utils.replace_vars(input, aliasexpansion)
+    if not self._verbatim:
+      # we check for aliases here--and if we find some, we
+      # do the variable expansion and then recurse over the result
+      aliasexpansion = self.getManager("alias").expand(input)
+      if aliasexpansion:
+        # replace placement variables in the expansion
+        aliasexpansion = utils.replace_vars(input, aliasexpansion)
 
-      engine.myengine.handleUserData(aliasexpansion, internal)
-      return
+        engine.myengine.handleUserData(aliasexpansion, internal)
+        return
 
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
@@ -259,12 +266,13 @@ class Session:
       if internal==0: self._prompt()
       return
 
-    # are we speedwalking?... ("news" explicitly doesn't count)
-    if lyntin.speedwalk == 1:
-      # FIXME - handle news and sense differently
-      if SPEEDWALK_REGEXP.search(input) and input != 'news':
-        self._socket.write(utils.expand_speedwalk(input))
-        return
+    if not self._verbatim:
+      # are we speedwalking?... ("news" explicitly doesn't count)
+      if lyntin.speedwalk == 1:
+        # FIXME - handle news and sense differently
+        if SPEEDWALK_REGEXP.search(input) and input != 'news':
+          self._socket.write(utils.expand_speedwalk(input))
+          return
 
     # just regular data to the mud
     self._socket.write(input + "\n")
