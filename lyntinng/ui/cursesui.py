@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.7 2002/04/11 03:58:22 willhelm Exp $
+# $Id: cursesui.py,v 1.8 2002/04/21 03:49:31 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -86,7 +86,6 @@ class Cursesui(ui.BaseUI):
     self._stdscr.keypad(0)
     curses.echo()
     curses.endwin()
-    print "end: you'll be back...."
 
 
   def write(self, message):

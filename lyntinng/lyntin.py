@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.20 2002/04/18 02:10:04 willhelm Exp $
+# $Id: lyntin.py,v 1.21 2002/04/21 03:49:31 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -120,6 +120,13 @@ lyntindir = "."
 # many indicating a "bigger problem".
 errorcount = 0
 
+def shutdown():
+  import hooks, exported
+  try:
+    exported.write_message("shutting down...  goodbye.")
+  except:
+    print "shutting down...  goodbye."
+  hooks.shutdown_hook.spamhook()
 
 if __name__ == '__main__':
   try:
@@ -177,6 +184,9 @@ if __name__ == '__main__':
             datadir = datadir + os.sep
           lyntin.options['datadir'] = datadir
 
+
+    import atexit
+    atexit.register(lyntin.shutdown)
 
     # instantiate an engine
     engine.myengine = engine.Engine()

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.25 2002/04/21 03:49:31 willhelm Exp $
+# $Id: event.py,v 1.26 2002/04/25 17:13:17 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -123,10 +123,7 @@ class StartupEvent(Event):
 
 class ShutdownEvent(Event):
   """
-  When the user shuts down lyntin, it triggers a shutdown
-  event to close all network connections, close ui's, return the 
-  user's session to a normal state, and shuts down whatever modules
-  have registered with the shutdown hook.
+  This calls sys.exit(0) which will trigger the Python atexit stuff.
   """
   def __init__(self):
     """ Initialize."""
@@ -134,9 +131,6 @@ class ShutdownEvent(Event):
 
   def execute(self):
     """ Execute the shutdown."""
-    import time
-    exported.write_message("shutting down...  goodbye.")
-    hooks.shutdown_hook.spamhook()
     sys.exit(0)
 
 
