@@ -27,7 +27,6 @@ TODO:
  - add a #reload, #load, and #unload commands
  - add autotyper to the tkgui (may want to overhaul the TkGui too)
  - first char in command file is the command char when using #read
- - fix write_cmd so that it uses the correct command char
  - make sure all commands can handle braces for arguments
    probably by changing the breakup of a command into words to
    breaking it into components via braces
