@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.18 2002/06/04 00:52:39 willhelm Exp $
+# $Id: variable.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
 It also defines some builtin variables like $TIMESTAMP.
 """
-import re, string
+import re, string, time
 import manager, utils, lyntin, engine, hooks, exported, modutils
 
 localvarchar = lyntin.variablechar
@@ -19,11 +19,23 @@ VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
 def _fixvariableregexp():
   VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
 
+class TimeStampBuiltin:
+  """
+  Allows us to do dynamic TIMESTAMPs as a builtin variable.
+  """
+  def __init__(self): pass
+  def __str__(self): return time.asctime(time.localtime())
+
+
 class VariableData:
   def __init__(self):
     self._variables = {}
+    self._builtins = []
 
-  def addVariable(self, var, expansion):
+    # add built-in variables
+    self.addVariable("TIMESTAMP", TimeStampBuiltin(), 1)
+
+  def addVariable(self, var, expansion, builtin=0):
     """ Adds a variable to the dict.
 
     arguments:
@@ -32,17 +44,25 @@ class VariableData:
 
       'expansion' -- the variable value
 
+      'builtin' -- (int) 0 if the variable is not a builtin, 1 if it is.
+                   It should be noted that builtin variables should
+                   never be removed.
+
     returns:
 
       (int) we always return 1.  we might at some point return 
       0 if we don't like the the value or something like that.
     """
     self._variables[var] = expansion
-    return 1
+    if builtin == 1 and var not in self._builtins:
+      self._builtins.append(var)
 
   def clear(self):
     """ Removes all the variables."""
-    self._variables.clear()
+    list = self._variables.keys()
+    for mem in list:
+      if mem not in self._builtins:
+        del self._variables[mem]
 
   def removeVariables(self, text):
     """ Removes variables from the list.
@@ -63,8 +83,9 @@ class VariableData:
 
     ret = []
     for mem in badvariables:
-      ret.append((mem, self._variables[mem]))
-      del self._variables[mem]
+      if mem not in self._builtins:
+        ret.append((mem, self._variables[mem]))
+        del self._variables[mem]
 
     return ret
 
@@ -99,15 +120,6 @@ class VariableData:
     else:
       return default
 
-  def setBuiltinVars(self):
-    """ Adds a series of built-in variables."""
-    import time
-    self.addVariable("TIMESTAMP", time.asctime(time.localtime()))
-
-  def removeBuiltinVars(self):
-    """ Removes built-in variables."""
-    self.removeVariables("TIMESTAMP")
-
   def expand(self, text):
     """ Looks at user input and expands any variables involved.
 
@@ -116,7 +128,6 @@ class VariableData:
     """
     global localvarchar, VARIABLE_REGEXP
 
-    self.setBuiltinVars()
     replacedvars = 0
     if len(text) > 0:
       marker = 0
@@ -137,7 +148,7 @@ class VariableData:
           if count == 0:
             for mem in self._variables.keys():
               if text[b:].find(lyntin.variablechar + mem) == 0:
-                repl = self._variables[mem]
+                repl = str(self._variables[mem])
                 replacedvars = 1
                 text = text[:b] + repl + text[b+len(mem)+1:]
                 break
@@ -145,7 +156,6 @@ class VariableData:
 
           matchob = VARIABLE_REGEXP.search(text, e)
 
-    self.removeBuiltinVars()
     if replacedvars == 0:
       return None
     else:
@@ -158,7 +168,7 @@ class VariableData:
 
       (string) the one-line status
     """
-    return "%d variable(s)." % len(self._variables)
+    return "%d variable(s)." % (len(self._variables) - len(self._builtins))
 
   def getInfo(self, text=""):
     """ Returns information about the variables in here.
@@ -187,7 +197,7 @@ class VariableData:
 
     data = []
     for mem in list:
-      if mem != "TIMESTAMP":
+      if mem not in self._builtins:
         data.append("%svariable {%s} {%s}" % 
                     (lyntin.commandchar, mem, self._variables[mem]))
 
@@ -197,7 +207,10 @@ class VariableData:
 class VariableManager(manager.Manager):
   def __init__(self):
     self._variables = {}
-    self._builtins = VariableData()
+
+    # this handles builtins even when we don't have a VariableData
+    # instance for that session
+    self._default = VariableData()
 
   def addVariable(self, ses, var, expansion):
     if not self._variables.has_key(ses):
@@ -226,7 +239,7 @@ class VariableManager(manager.Manager):
   def expand(self, ses, text):
     if self._variables.has_key(ses):
       return self._variables[ses].expand(text)
-    return None
+    return self._default.expand(text)
 
   def getInfo(self, ses, text=""):
     if self._variables.has_key(ses):
@@ -335,7 +348,7 @@ def variable_cmd(ses, args, input):
     if data == '':
       data = "variable: no variables defined."
 
-    exported.write_message(data)
+    exported.write_message("variables:\n" + data)
     return
 
   if not expansion:
@@ -343,7 +356,7 @@ def variable_cmd(ses, args, input):
     if data == '':
       data = "variable: no variables defined."
 
-    exported.write_message(data)
+    exported.write_message("variables:\n" + data)
     return 
 
   try:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.19 2002/06/07 23:43:30 willhelm Exp $
+# $Id: alias.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -297,16 +297,16 @@ def alias_cmd(ses, args, input):
     if data == '':
       data = "alias: no aliases defined."
 
-    exported.write_message(data)
+    exported.write_message("aliases:\n" + data)
     return
 
   # they typed '#alias dd*' and are looking for matching aliases
   if not command:
-    data = am.getInfo(ses)
+    data = am.getInfo(ses, name)
     if data == '':
       data = "alias: no aliases defined."
 
-    exported.write_message(data)
+    exported.write_message("aliases:\n" + data)
     return
 
   try:
