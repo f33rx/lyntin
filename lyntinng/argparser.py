@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.10 2002/05/04 04:31:47 willhelm Exp $
+# $Id: argparser.py,v 1.11 2002/05/04 17:36:30 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -118,7 +118,7 @@ class ArgumentParser:
     self.extraindexparser = None
     self.extranamedparser = None
 
-    self.argspec = self.split(argspec)
+    self.argspec = self.split(argspec, buildsyntaxline=1)
 
     parsedspec = self.argspec
 
@@ -132,8 +132,6 @@ class ArgumentParser:
         argname,typespec = argname.split(":",1)
       else:  # extra argname assignment here is just for consistency
         argname,typespec = argname, "string"
-
-      self.syntaxline += "[%s] " % argname
 
       if len(argname) >= 1 and argname[-1:] == "*":
         if argdef != None:
@@ -232,7 +230,7 @@ class ArgumentParser:
           
     return dict
 
-  def split(self, input):
+  def split(self, input, buildsyntaxline=0):
     """
     Take an input string and tokenizes it into a list of pairs.
     Tokens with equal signs come back as (key,value) pairs, those
@@ -252,6 +250,7 @@ class ArgumentParser:
     bracketdepth = 0
     arg = ""
     val = None
+    equalsign = 0
     arguments = []
     while input:
       nextchar = input[0:1]
@@ -262,8 +261,15 @@ class ArgumentParser:
           # We've completed a full argument
           if arg!="":
             arguments.append( (arg,val) )
+            if buildsyntaxline:
+              if equalsign == 1:
+                self.syntaxline += "<%s> " % arg
+              else:
+                self.syntaxline += "[%s] " % arg
+
           arg = ""
           val = None
+          equalsign = 0
         else:
           if val != None:
             val = val + nextchar
@@ -295,6 +301,7 @@ class ArgumentParser:
           arg = arg + nextchar
       elif val == None and bracketdepth == 0 and nextchar == "=":
         val = ""
+        equalsign = 1
       else:
         if val != None:
           val = val + nextchar
@@ -306,6 +313,12 @@ class ArgumentParser:
 
     if arg != "":
       arguments.append( (arg, val) )
+      if buildsyntaxline:
+        if equalsign == 1:
+          self.syntaxline += "<%s> " % arg
+        else:
+          self.syntaxline += "[%s] " % arg
+
       arg = ""
       val = ""
       
