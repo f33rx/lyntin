@@ -76,6 +76,12 @@ except:
    player.PutError('Unable to write log to LYNTINDATADIR %s!'%datadir)
    logfile = None
 
+def log(text):
+   """logs output to a mudlog opened in the previous couple of
+   lines
+   """
+   if logfile != None:
+      logfile.write(filter_crud(text))
 
 """The lyntin character: prepended to all lyntin commands."""
 ltchar = '#'
@@ -123,6 +129,7 @@ histsize = 30
 
 """this sets whether we're in debug mode or not.  affects mud.log."""
 debug = 1
+
 
 
 ##################################################################
@@ -217,6 +224,9 @@ class Session:
       self.sorck = None # the socket
       self.domain = None
       self.handlers = []
+
+
+      self.ansi_colors = 1  # should we show ansi colors?
 
       self.verbose = 1      # verbose mode--do we want to print
                             # lots of silly messages 1/0
@@ -344,9 +354,8 @@ class UserSession(Session):
 
    # write text to session's log file, but only if logging is turned on
    def log(self, text):
-      if self.logging:
-         text = filter_crud(text)
-         self.logfile.write(text)
+      if self.logging and self.logfile != None:
+         self.logfile.write(data.filter_crud(text))
 
    # add trigger as an action which invokes response
    # also compile and insert trigger's regex into action_list

@@ -33,7 +33,7 @@ def dispatch_command(input, seslist):
    input - the input string
    seslist - list of session objects
 
-   parse command intended for the client, (i.e. one prefaced by
+   Parse command intended for the client, (i.e. one prefaced by
    data.ltchar)
    allows abbreviations for most commands.
    """
@@ -224,6 +224,25 @@ def AddCommand(words, input, seslist):
    else:
       return PrintCommands(words, input, seslist)
 
+def Ansi(words, input, seslist):
+   """Allows the user to whack ansi colors from the client.
+
+   This is client-scoped--not session scoped.
+   """
+   ses = data.currsession
+
+   if len(words) > 1:
+      if words[1] == "on":
+         ses.ansi_colors = 1
+      elif words[1] == "off":
+         ses.ansi_colors = 0
+
+   if ses.ansi_colors:
+      PutMessage('ansi colors: is now ON')
+   else:
+      PutMessage('ansi colors: is now OFF')
+
+    
 def UnCommand(words, input, seslist):
    """UnCommand(words, input, seslist) -> None
 
@@ -572,6 +591,11 @@ def WriteFile(words, input, seslist):
          for var in ses.vars.keys():
             str = '#var {%s} {%s}\n'%(var, ses.vars[var])
             thefile.write(str)
+
+         if data.ansi_colors:
+            thefile.write("#ansi on")
+         else:
+            thefile.write("#ansi off")
 
          PutMessage('write: ok, session "%s" saved'%ses.name)
       except IOError:
@@ -975,6 +999,11 @@ def Info(words,input,seslist):
       else:
          PutMessage('Ticker is off.')
 
+      if data.ansi_colors:
+         PutMessage('Ansi is on (on the client).')
+      else:
+         PutMessage('Ansi is off (on the client).')
+
 def UnAlias(words, input, seslist):
    """UnAlias(words, seslist) -> None
 
@@ -1243,6 +1272,7 @@ def init_player():
    data.theapp.AddCommand("^clear", player.Clear)
    data.theapp.AddCommand("^cr", player.CR)
    data.theapp.AddCommand("^quit", player.Quit)
+   data.theapp.AddCommand("ansi", player.Ansi)
    data.theapp.AddCommand("action", player.Action)
    data.theapp.AddCommand("alias", player.Alias)
    data.theapp.AddCommand("command", player.AddCommand)

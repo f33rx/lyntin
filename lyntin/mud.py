@@ -37,8 +37,6 @@ def handle_mud_output(output, ses):
    if not string.split(output):
       return # just whitespace
 
-   log(output)
-
    #import pdb; pdb.set_trace()
    # I st... er 'adopted' this code from 'telnet.py', which comes with
    # the python distribution.
@@ -87,11 +85,20 @@ def handle_mud_output(output, ses):
 
    cleandata = string.join(charlist, '')
    if cleandata:
-      oldcleandata = cleandata
 
-      # get rid of Ansi crap (so colored stuff will still trigger actions)
-      oldcleandata = data.filter_cm(oldcleandata)
-      cleandata = data.filter_crud(cleandata)
+      # if they want ansi colors preserved
+      if ses.ansi_colors == 1:
+         oldcleandata = cleandata
+
+         # get rid of Ansi crap (so colored stuff will still trigger actions)
+         oldcleandata = data.filter_cm(oldcleandata)
+         cleandata = data.filter_crud(cleandata)
+
+      # otherwise we take out all the ansi stuff
+      else:
+         cleandata = data.filter_crud(cleandata)
+         oldcleandata = data.filter_crud(cleandata)
+
       # ses.log(cleandata)
       if ses.CheckForGaggedText(cleandata):
          # whoa, this text is special; it's been gagged.
@@ -135,10 +142,12 @@ def handle_mud_output(output, ses):
             file.write(cleandata)
             file.write('\n\n')
 
-      # display the text if this is the current session
+      # display the text if this is the current session and log it
       if ses is data.currsession and ses.connected:
-         # log(oldcleandata)
+         ses.log(oldcleandata)
          player.PutRaw(oldcleandata)
+
+      data.log(oldcleandata)
 
       # add output to the session's databuffer
       ses.databuf.add(cleandata)
