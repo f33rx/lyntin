@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.17 2002/12/22 23:07:20 willhelm Exp $
+# $Id: helpmanager.py,v 1.18 2002/12/24 03:25:10 willhelm Exp $
 #######################################################################
 """
 Lyntin has a comprehensive X{help} system that can be accessed in-game
@@ -294,7 +294,7 @@ class HelpManager(manager.Manager):
       list = []
       for key, value in tree.items():
         if type(value) == types.DictType:
-          list.append("%s*" % (key,))
+          list.append("%s(%d) " % (key, len(value)))
         else:
           list.append(key)
       list.sort()

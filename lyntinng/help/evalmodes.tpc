@@ -19,4 +19,7 @@ Lyntin defaults to lyntin mode--so if you're a Tintin user and
 want to user your Tintin command files, you should make sure to start 
 Lyntin up in tintin mode.
 
+Note: Lyntin 4.0 will no longer have the tintin evalmode and the idea
+of evalmodes will go away.
+
 category: readme

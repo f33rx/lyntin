@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.10 2003/02/04 00:14:59 willhelm Exp $
+# $Id: commandmanager.py,v 1.11 2003/02/15 03:35:04 willhelm Exp $
 #######################################################################
 """
 Lyntin comes with a series of X{command}s for manipulating aliases, 
@@ -31,7 +31,7 @@ command examples.  Additionally, check out the Lyntin module repository
 on http://lyntin.sourceforge.net/ for more examples.
 """
 import inspect, re
-import manager, lyntin, exported, argparser, hooks
+import manager, lyntin, exported, argparser, hooks, utils
 
 class _CommandData:
   """
@@ -113,7 +113,7 @@ class CommandManager(manager.Manager):
       try:
         cd.setName(name)
         cd.setArgParser(argparser.ArgumentParser(arguments, argoptions))
-        syntaxline = cd.getArgParser().syntaxline
+        syntaxline = utils.wrap_text(cd.getArgParser().syntaxline, 60, 6)
       except Exception, e:
         raise Exception, "Error with arguments for command %s, (%s)" % (name,e)
 

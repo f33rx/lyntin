@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.32 2003/02/28 01:08:53 jmberne Exp $
+# $Id: advanced.py,v 1.33 2003/03/15 01:22:32 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -51,11 +51,12 @@ def python_cmd(ses, words, input):
   It will first look for a module named "lyntinuser" and execute
   the code inside that module's __dict__ environment.  If no
   such module exists, it will execute the code inside 
-  modules.advanced .
+  modules.advanced .  At present it can only handle one-line
+  Python statements.
 
   examples:
     #@ print "hello"
-    #@ print string.join(exported.get_commands(), "\\n")
+    #@ print "\\n".join(exported.get_commands())
 
   category: commands
   """

@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.39 2003/04/08 22:19:07 willhelm Exp $
+# $Id: lyntin.py,v 1.40 2003/04/12 17:38:27 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -48,13 +48,13 @@ OPTIONS:
   -m or --moduledir
        Lyntin dynamically loads everything in the lyntin/modules 
        dir, but will additionally dynamically load modules in dirs 
-       specified by this flag.  You can specify multiple --moduledir 
-       flags.
+       specified by this flag.  You can specify multiple 
+       --moduledir flags.
          
   -r or --read or --readfile
        Reads a file in at startup populating the common session 
-       with aliases, actions, and whatnot.  You can specify multiple 
-       files to read with multiple --read flags.
+       with aliases, actions, and whatnot.  You can specify 
+       multiple files to read with multiple --read flags.
 
   --nosnoop
        Lyntin defaults to snooping.  This sets it so Lyntin will

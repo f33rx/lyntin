@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.74 2003/04/22 19:31:41 willhelm Exp $
+# $Id: tintincmds.py,v 1.75 2003/04/27 04:31:58 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -116,7 +116,7 @@ def help_cmd(ses, args, input):
     data += "category: %s\n\n" % breadcrumbs
 
   data += text
-  exported.write_message(data)
+  exported.write_message(utils.wrap_text(data, 68))
 
 commands_dict["help"] = (help_cmd, "item=")
 

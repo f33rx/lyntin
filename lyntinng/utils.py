@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.73 2003/04/13 03:44:36 willhelm Exp $
+# $Id: utils.py,v 1.74 2003/04/21 02:35:28 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -457,9 +457,15 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
       # insert the carriage return, any indent, and lstrip the line as well
       # print "'" + textlist[i] + "'", len(textlist[i]), x
       if textlist[i][x] == "\n":
-        textlist[i] = (textlist[i][:x+1] + (indent * ' ') + textlist[i][x:].lstrip())
+        if indent:
+          textlist[i] = (textlist[i][:x+1] + (indent * ' ') + textlist[i][x+1:].lstrip())
+        else:
+          textlist[i] = (textlist[i][:x+1] + textlist[i][x+1:])
       else:
-        textlist[i] = (textlist[i][:x+1] + '\n' + (indent * ' ') + textlist[i][x+1:].lstrip())
+        if indent:
+          textlist[i] = (textlist[i][:x+1] + '\n' + (indent * ' ') + textlist[i][x+1:].lstrip())
+        else:
+          textlist[i] = (textlist[i][:x+1] + '\n' + textlist[i][x+1:])
 
       marker = x + indent + 2
       wrapcount = 0
