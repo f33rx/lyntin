@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.4 2001/12/11 19:24:50 willhelm Exp $
+# $Id: tkgui.py,v 1.5 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -310,24 +310,24 @@ class TkGui(ui.BaseUI):
     """
     if txt[0] == chr(27):
     # if txt[0] == chr(27) and txt[len(txt)-1] == "m":
-       newcolor = txt[2:(len(txt))]
-       # if newcolor == "0":
-       if newcolor == "0" or newcolor == "":
-         self._currcolors = self._regcolors
-       else:
-         numbers = string.split(newcolor, ";")
-         for num in numbers:
-           if fgColorCodes.has_key(num):
-             self._currcolors = (self._currcolors[0], int(num), self._currcolors[2])
-           if bgColorCodes.has_key(num):
-             self._currcolors = (self._currcolors[0], self._currcolors[1], int(num))
-           if txtAttribs.has_key(num):
-             self._currcolors = (int(num), self._currcolors[1], self._currcolors[2])
-             if num == "0":
-               self._currcolors = self._regcolors
+      newcolor = txt[2:(len(txt))]
+      # if newcolor == "0":
+      if newcolor == "0" or newcolor == "":
+        self._currcolors = self._regcolors
+      else:
+        numbers = string.split(newcolor, ";")
+        for num in numbers:
+          if fgColorCodes.has_key(num):
+            self._currcolors = (self._currcolors[0], int(num), self._currcolors[2])
+          if bgColorCodes.has_key(num):
+            self._currcolors = (self._currcolors[0], self._currcolors[1], int(num))
+          if txtAttribs.has_key(num):
+            self._currcolors = (int(num), self._currcolors[1], self._currcolors[2])
+            if num == "0":
+              self._currcolors = self._regcolors
 
-         self._currcolors = (self._currcolors[0], self._currcolors[1] % 2000, self._currcolors[2])
-         if self._currcolors[0] == 1:
+        self._currcolors = (self._currcolors[0], self._currcolors[1] % 2000, self._currcolors[2])
+        if self._currcolors[0] == 1:
            self._currcolors = (self._currcolors[0], self._currcolors[1] + 2000, self._currcolors[2])
 
 
@@ -339,11 +339,11 @@ class TkGui(ui.BaseUI):
       self._txt.tag_config(ck, foreground=codes[ck])
       self._txtbuffer.tag_config(ck, foreground=codes[ck])
 
-     codes = bgColorCodes
-     colorKeys = codes.keys()
-     for ck in colorKeys:
-       self._txt.tag_config(ck, background=codes[ck])
-       self._txtbuffer.tag_config(ck, background=codes[ck])
+    codes = bgColorCodes
+    colorKeys = codes.keys()
+    for ck in colorKeys:
+      self._txt.tag_config(ck, background=codes[ck])
+      self._txtbuffer.tag_config(ck, background=codes[ck])
 
 
   def ClipText(self):
@@ -445,31 +445,31 @@ class CommandEntry(Tkinter.Entry):
     self.saveinputhighlight = 0
         
   def createInputEvent(self, tkevent):
-     """ Handles the <KeyPress-Return> event."""
-     val = self.get()
-     self._partk.handleinput(val)
+    """ Handles the <KeyPress-Return> event."""
+    val = self.get()
+    self._partk.handleinput(val)
 
-     self.inputstack.insert(0, val)
-     if len(self.inputstack) > 30:
-       self.inputstack = self.inputstack[:-1]
+    self.inputstack.insert(0, val)
+    if len(self.inputstack) > 30:
+      self.inputstack = self.inputstack[:-1]
 
-     if self.saveinputhighlight == 1:
-       self.selection_range(0, 'end')
-     else:
-       self.delete(0, 'end')
-     self.hist_index = -1
+    if self.saveinputhighlight == 1:
+      self.selection_range(0, 'end')
+    else:
+      self.delete(0, 'end')
+    self.hist_index = -1
 
   def _executeBinding(self, binding):
-     """ Returns the alias for this keybinding."""
-     session = engine.myengine.currentSession()
-     action = session.getAliasManager().getAlias(binding)
-     if action:
-       self._partk.handleinput(action)
-       return 1
-     else:
-       engine.myengine.writeError(binding + 
-                       " is currenly not bound to anything.")
-       return 0
+    """ Returns the alias for this keybinding."""
+    session = engine.myengine.currentSession()
+    action = session.getAliasManager().getAlias(binding)
+    if action:
+      self._partk.handleinput(action)
+      return 1
+    else:
+      engine.myengine.writeError(binding + 
+                      " is currenly not bound to anything.")
+      return 0
 
   def callBinding(self, tkevent):
     """ Handles arbitrary bindings of keypresses."""
