@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.6 2002/04/11 01:50:07 willhelm Exp $
+# $Id: advanced.py,v 1.7 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -49,43 +49,43 @@ def import_cmd(session, words, input):
     return
 
   mod = utils.strip_braces(words[1])
+  modarray = mod.split(".")
 
-  if mod.find("modules.") == 0:
-    if sys.modules.has_key(mod):
-      _module = sys.modules[mod]
-      try:
-        _module.unload()
-      except:
-        pass
-      try:
-        reload(_module)
+  if sys.modules.has_key(mod):
+    # if this module has previously been loaded, we try to reload it.
+
+    _module = sys.modules[mod]
+    try:
+      if len(modarray) == 2 and modarray[0] == "modules":
+        try:
+          _module.unload()
+        except:
+          pass
+
+      reload(_module)
+
+      if len(modarray) == 2 and modarray[0] == "modules":
         _module = sys.modules[mod]
         _module.load()
-        exported.write_message("import (reload) successful.")
-      except Exception, e:
-        exported.write_error("import: had problems with %s. %s" % (mod, e))
-    else:
-      try:
-        name = mod[mod.find(".")+1:]
-        _module = getattr(__import__( mod ), name)
-        _module.load()
-        exported.write_message("import successful.")
-      except Exception, e:
-        exported.write_error("import: had problems with %s. %s" % (mod, e))
+      exported.write_message("import: module %s reloaded." % mod)
+    except Exception, e:
+      exported.write_error("import: had problems with %s. %s" % (mod, e))
+      return
 
   else:
-    if sys.modules.has_key(mod):
-      try:
-        reload(sys.modules[mod])
-        exported.write_message("import (reload) successful.")
-      except Exception, e:
-        exported.write_error("import: had problems with %s. %s" % (mod, e))
-    else:
-      try:
+    try:
+      name = mod[mod.rfind(".")+1:]
+      if len(modarray) == 1:
         _module = __import__( mod )
-        exported.write_message("import successful.")
-      except Exception, e:
-        exported.write_error("import: had problems with %s. %s" % (mod, e))
+      else:
+        _module = getattr(__import__( mod ), name)
+
+      if len(modarray) == 2 and modarray[0] == "modules":
+        _module.load()
+
+      exported.write_message("import successful.")
+    except Exception, e:
+      exported.write_error("import: had problems with %s. %s" % (mod, e))
 
 
 def _import_user_module():
