@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.51 2002/05/18 03:45:59 willhelm Exp $
+# $Id: session.py,v 1.52 2002/05/22 01:29:36 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -269,9 +269,12 @@ class Session:
 
     arguments:
       
-      'message' -- (string)
+      'message' -- (string) what is to be written to the mud
 
-      'tag=None' -- ...  i have no clue what this is
+      'tag=None' -- (object) Used to tag data being sent to the mud
+                    for identification when it comes out of the
+                    to_mud_hook.  Simply passed through as-is by
+                    lyntin internals.
     """
     for line in message.strip().split("\n"):
       hooks.to_mud_hook.spamhook((self, line, tag))
