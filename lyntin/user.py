@@ -42,3 +42,4 @@ def search_history(str):
 	if reg.match(n):
 	    retl.append(n)
     return retl
+

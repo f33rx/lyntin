@@ -1,18 +1,19 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Lyn Headley 1996-2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
-# module scheduler contains the scheduler class:
-# schedules _events_ to be run at certain intervals, either a set
-# number of times or forever.
-# events are classes with the methods ready_to_perform and perform
-# the TimeEvent implements time-based events, which are scheduled
-# to run a certain number of times at certain intervals
-# override your time-based events from TimeEvent
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
+"""
+schedules _events_ to be run at certain intervals, either a set
+number of times or forever.
+events are classes with the methods ready_to_perform and perform
+the TimeEvent implements time-based events, which are scheduled
+to run a certain number of times at certain intervals
+override your time-based events from TimeEvent
+"""
 
 import time
 

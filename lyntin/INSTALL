@@ -1,29 +1,19 @@
 For more up-to-date installation guide, please check the web-site:
-http://lyntin.sourceforge.net
-
+http://lyntin.sourceforge.net/
 
 Unix/Linux 
-1. make sure you have Python 1.5.2 and Tcl/Tk 8.0 (you need Tcl/Tk 
-   only to use the GUI--otherwise you can still use the console textui) 
-   installed 
+1. make sure you have at least Python 2.0
 2. download the version you're looking for (below) 
 3. untar the client into ~/lyntin
 4. create a LYNTINDIR environment variable set to the lyntin directory 
-   or alternately start lyntin from the lyntin directory (version 1.3.1 
-   and up) 
-5. change the permissions on lt or lt-gui.py or lt-text.py (depending on 
-   which one you plan on using to run lyntin) so that it's executable and 
-   fix the first line in it so that it correctly points to your python 
-   executable 
-6. then run:
+   or alternately start lyntin from the lyntin directory
+5. then run:
       lyntin.py [file]
       lyntin.py -tk [file]
 
-   he gui one will only work if you've got Tcl/Tk installed. 
 
 Windows 
-1. make sure you have Python 1.5.2 and Tcl/Tk 8.0 (you need Tcl/Tk only 
-   to use the GUI--otherwise you can still use the console textui) installed 
+1. make sure you have at least Python 2.0
 2. download the version you're looking for (below) 
 3. unzip the client into c:\lyntin 
 4. create a shortcut on your desktop: 
@@ -32,6 +22,6 @@ Windows
 5. double-click on the shortcut to run Lyntin
 
 
-
 After that, we have in-game help which you can access via #help.  If you
 are really new to Lyntin, read README then read #help general.
+

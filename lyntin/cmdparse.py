@@ -1,11 +1,10 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Lyn Headley 1996-2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
-# module cmdparse
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
 """
 contains utility functions for parsing user-commands

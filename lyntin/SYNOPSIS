@@ -1,18 +1,18 @@
 Lyntin is a feature-rich mud client and agent development environment,
 with an emphasis on extensibility and automation.  Lyntin targets
-hacker types as users.
+hacker types as users--this isn't the most user-friendly client.
 
 general features
 ================
 
- - command-line, tk, and other interfaces
- - multiple sessions
- - actions, aliases, gags, substitutes,
- - grepping previous mud output,
- - variables and pattern matching
- - history
- - logging
- - ticker
+ - Command-line, tk, and other interfaces
+ - Multiple sessions
+ - Actions, aliases, gags, substitutes,
+ - Grepping previous mud output,
+ - Variables and pattern matching
+ - History
+ - Logging
+ - Ticker
 
 features for hackers
 ========================

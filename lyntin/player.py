@@ -1,10 +1,10 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Lyn Headley 1996-2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
 """
 defines lyntin's user-level commands
@@ -274,6 +274,11 @@ def LynImport(words, input, seslist):
    """
    import sys
    PutMessage("trying to import " + words[1])
+
+   # this is a little klugy, but protects us from certain issues
+   if words[1] == "data":
+      PutError("End and restart Lyntin to re-import the data module.")
+      return
 
    try:
       if sys.modules.has_key(words[1]):

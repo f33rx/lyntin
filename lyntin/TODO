@@ -1,9 +1,10 @@
 For a more up-to-date TODO, please check the web-site:
 http://lyntin.sourceforge.net/
 
-
 ------------------------------------------------------------
 FOR 3.0 release?:
+
+refactor Lyntin?  threaded model?  event driven model?
 
 add ability to turn on command-checking and turn off command-checking
 (this would make it easier to write about lyntin using lyntin)

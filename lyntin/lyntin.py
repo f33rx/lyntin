@@ -1,12 +1,19 @@
 #!/usr/local/bin/python
+
+##################################################################
+# This file is part of Lyntin
+# copyright (c) Lyn Headley 1996-2001
+#
+# Lyntin is distributed under the GNU General Public License.  See
+# the file LICENSE in the distribution for details.
+# $Id$
+##################################################################
+
 """
 The main script that figures out the args, and instantiates everything.
 """
 # -*-python-*-
 
-#
-# the lyntin agent framework
-#
 
 ##################################################################
 # do these imports now to minimize perceived startup time

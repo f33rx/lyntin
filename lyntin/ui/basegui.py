@@ -1,3 +1,10 @@
+##################################################################
+# This file is part of Lyntin
+#
+# Lyntin is distributed under the GNU General Public License.  See
+# the file LICENSE in the distribution for details.
+# $Id$
+##################################################################
 """
 To implement a ui, override the following functions:
    def setup(self)
@@ -26,10 +33,12 @@ To implement a ui, override the following functions:
 
    def get_input(self)
      retrieves a line of input from the ui
-
 """
 
 class BaseGUI:
+    """
+    The BaseGUI class is the implementation base for all ui's in Lyntin.
+    """
     def __init__(self):
         self.support_hash = {'echo':0}
         self.status_hash = {'echo':1,'scollback':0}
@@ -264,8 +273,6 @@ class BaseGUI:
         Just prints stuff raw to the ui.
         """
         self.print_string(line,ending='')
-
-
 
     def get_input(self):
         return None

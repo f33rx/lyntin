@@ -1,12 +1,15 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Will Guaraldi 2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
-# curses ui (wbg)
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
+
+"""
+This module holds the Curses ui.  It could use some serious work.
+"""
 
 import data, string, sys, mud, app, select, os, time, regsub
 import regsub

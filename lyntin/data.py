@@ -1,11 +1,10 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Lyn Headley 1996-2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
-# module data:
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
 """
 contains the session class, which represents a user connection

@@ -1,17 +1,11 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Lyn Headley 1996-2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
-# module handler:
-#
-# a handler intercepts server output at a primitive level,
-# and can respond to it or change the input for the next handler.
-# $Id: handler.py,v 1.4 2001/04/28 07:28:02 willhelm Exp $
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
-
 """
 a hander intercepts server output at a primitive level and can
 respond to it or change the input for the next handler.

@@ -1,13 +1,16 @@
 ##################################################################
 # This file is part of Lyntin
-# copyright (c) Lyn Headley 1996-1998
+# copyright (c) Lyn Headley 1996-2001
 #
 # Lyntin is distributed under the GNU General Public License.  See
-# the file COPYING for details.
-#
-# module tkhistentry
-# a Tk entry which handles a history list of commands
+# the file LICENSE in the distribution for details.
+# $Id$
 ##################################################################
+
+"""
+a Tk entry which handles a history list of commands
+"""
+
 from Tkinter import *
 
 import os, exported, string
