@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: data.py,v 1.33 2001/08/06 02:00:19 willhelm Exp $
+# $Id: data.py,v 1.34 2001/08/11 05:23:10 willhelm Exp $
 ##################################################################
 """
 contains the session class, which represents a user connection
@@ -32,7 +32,7 @@ version = """
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 
-lyntin 2.0.1, (May 25, 2001) copyright 2000, 2001 Lyn Headley
+lyntin 2.0.2, (May 25, 2001) copyright 2000, 2001 Lyn Headley
 """
 
 
