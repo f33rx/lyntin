@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.25 2002/07/11 04:11:19 willhelm Exp $
+# $Id: exported.py,v 1.26 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -158,6 +158,31 @@ def expand_ses_vars(text, ses):
   vm = get_manager("variable")
   if vm:
     return vm.expand(ses, text)
+  return text
+
+def expand_ses_arguments(text, ses):
+  """
+  Grabs the variable manager (which we're hoping is using the
+  same expand_vars as what's registered--only time will tell)
+  and expands variables using the variable manager and its
+  varmap.  Should be used for arguments that were passed into a
+  command, since in some modes these will have already been fully
+  processed.
+
+  arguments:
+
+    'text' -- (string) the string to expand variables in
+
+    'ses' -- (Session) if it's a session object we'll
+             pass it to the variable manager with that session
+
+  returns:
+
+    (string) the (un)adjusted text
+  """
+  vm = get_manager("variable")
+  if vm:
+    return vm.expand_arguments(ses, text)
   return text
 
 def get_session(name):

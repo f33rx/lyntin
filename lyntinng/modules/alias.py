@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.8 2002/07/27 03:03:34 willhelm Exp $
+# $Id: alias.py,v 1.9 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -316,11 +316,9 @@ def alias_cmd(ses, args, input):
     return
 
   # we have to do manual variable expansion here.
-  varman = exported.get_manager("variable")
-  if varman:
-    varexpansion = varman.expand(ses, name)
-    if varexpansion:
-      name = varexpansion
+  varexpansion = exported.expand_ses_arguments(name, ses)
+  if varexpansion:
+    name = varexpansion
 
   try:
     am.addAlias(ses, name, command)

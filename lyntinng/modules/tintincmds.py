@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.43 2002/08/26 23:45:07 willhelm Exp $
+# $Id: tintincmds.py,v 1.44 2002/08/30 02:26:20 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -161,7 +161,7 @@ def if_cmd(ses, args, input):
   elseaction = args["elseaction"]
 
   # we have to do manual variable expansion here.
-  expr = exported.expand_ses_vars(expr, ses)
+  expr = exported.expand_ses_arguments(expr, ses)
 
   expr = expr.replace("&&", " and ")
   expr = expr.replace("||", " or ")
@@ -337,7 +337,7 @@ def math_cmd(ses, args, input):
   quiet = args["quiet"]
 
   # we have to do manual variable expansion here.
-  ops = exported.expand_ses_vars(ops, ses)
+  ops = exported.expand_ses_arguments(ops, ses)
 
   try:
     rvalue = eval(ops)
@@ -532,11 +532,9 @@ def showme_cmd(ses, args, input):
     return
 
   # we have to do manual variable expansion here.
-  varman = exported.get_manager("variable")
-  if varman:
-    varexpansion = varman.expand(ses, input)
-    if varexpansion:
-      input = varexpansion
+  varexpansion = exported.expand_ses_arguments(input, ses)
+  if varexpansion:
+    input = varexpansion
 
   input = input.replace("\\;", ";")
   input = input.replace("\\$", "$")

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.8 2002/07/21 04:14:48 willhelm Exp $
+# $Id: variable.py,v 1.9 2002/08/20 02:39:05 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -76,7 +76,36 @@ class VariableData:
 
       the text with variables expanded
     """
+    return utils.denest_vars(utils.expand_vars(text, self._variables), self._variables)
+
+  def expand_command(self, text):
+    """ Expands variables in the text, does not denest yet since the command
+    could get recursed on and over-expand variables in some modes.
+
+    arguments:
+
+      'text' -- (string) the text to expand variables in
+
+    returns:
+
+      the text with variables expanded
+    """
     return utils.expand_vars(text, self._variables)
+
+  def expand_arguments(self, text):
+    """ Expands the arguments of a command.
+        Presumable in lyntin mode these have alread been expanded and nothing needs doing.
+
+    arguments:
+
+      'text' -- (string) the text to expand variables in
+
+    return:
+
+      the text with variables expanded
+    """
+    return utils.expand_arguments(text, self._variables)
+    
 
   def getVariables(self):
     """ Returns the keys of the variables dict.
@@ -213,6 +242,18 @@ class VariableManager(manager.Manager):
       return self._variables[ses].expand(text)
     return text
 
+  def expand_command(self, ses, text):
+    text = self._global.expand_command(text)
+    if self._variables.has_key(ses):
+      return self._variables[ses].expand_command(text)
+    return text
+
+  def expand_arguments(self, ses, text):
+    text = self._global.expand_arguments(text)
+    if self._variables.has_key(ses):
+      return self._variables[ses].expand_arguments(text)
+    return text
+
   def getInfo(self, ses, text=""):
     if self._variables.has_key(ses):
       return self._variables[ses].getInfo(text)
@@ -262,7 +303,7 @@ class VariableManager(manager.Manager):
     if verbatim == 1:
       return text
 
-    return utils.lyntin_denest_vars(text)
+    return utils.denest_vars(text, self._variables)
 
   def filter(self, args):
     """ Handle the filtering of input through the current variables.
@@ -287,7 +328,8 @@ class VariableManager(manager.Manager):
     if verbatim == 1:
       return text
 
-    varexpansion = self.expand(ses, text)
+    varexpansion = self.expand_command(ses, text)
+
     if varexpansion == text:
       return text
     else:
@@ -344,7 +386,7 @@ def variable_cmd(ses, args, input):
     return 
 
   # need to expand the var
-  varexpansion = vm.expand(ses, var)
+  varexpansion = vm.expand_arguments(ses, var)
   if varexpansion:
     var = varexpansion
 
@@ -377,19 +419,24 @@ def evalmodechange(args):
   old = args[0]
   new = args[1]
 
-  if (old == lyntin.LYNTIN or old == -1) and new == lyntin.TINTIN:
-    # lyntin's just starting up into TINTIN mode or we just switched
-    # into TINTIN
-    hooks.user_filter_hook.unregister(vm.denestVars)
+  # Commented this out so that denestVars is always called in either mode.  It now
+  # does nothing in tintin mode.
+  #
+  #if (old == lyntin.LYNTIN or old == -1) and new == lyntin.TINTIN:
+  #  # lyntin's just starting up into TINTIN mode or we just switched
+  #  # into TINTIN
+  #  hooks.user_filter_hook.unregister(vm.denestVars)
+  #
+  #elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
+  #  # lyntin's just starting up into LYNTIN mode or we just switched
+  #  # into LYNTIN
+  #  hooks.user_filter_hook.register(vm.denestVars, 95)
+  #
+  #elif old == lyntin.LYNTIN and new == -1:
+  #  # this module is being unloaded
+  #  hooks.user_filter_hook.unregister(vm.denestVars)
 
-  elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
-    # lyntin's just starting up into LYNTIN mode or we just switched
-    # into LYNTIN
-    hooks.user_filter_hook.register(vm.denestVars, 95)
-
-  elif old == lyntin.LYNTIN and new == -1:
-    # this module is being unloaded
-    hooks.user_filter_hook.unregister(vm.denestVars)
+  hooks.user_filter_hook.register(vm.denestVars, 95)
 
 
 def load():

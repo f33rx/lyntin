@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.45 2002/08/21 03:25:36 willhelm Exp $
+# $Id: utils.py,v 1.46 2002/08/29 17:55:05 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -697,6 +697,28 @@ def expand_vars(text, varmap):
   to expand variables in that string according to session variables,
   use 'exported.expand_ses_vars' instead.
 
+  The following functions are used in the command processing pipeline
+  at different points and are implemented differently for tintin and
+  lyntin modes:
+
+  1) expand_vars - This expands variables in a function arbitrarily
+     according to the desired expansion policy.  It should be safe to
+     recusively evaluate this string and not have strings re-expanded.
+
+  2) denest_vars - This finishes expansion of a string and should be
+     called after all expansions are done.
+
+  3) expand_arguments - This should be called by commands that want to
+     explicitly expand their arguments.  Note that in lyntin mode
+     arguments are already expanded and so nothing is done by this function.
+
+
+  Note that the variablemanager's "expand" function is used for
+  general expansion of text when there won't be a recursion on the
+  partially expanded (but not yet denested) text.  It consists of
+  chaining expand_vars and denest_vars together.
+
+
   arguments:
 
     'text' -- (string) the text to expand variables on
@@ -712,6 +734,56 @@ def expand_vars(text, varmap):
   else:
     return lyntin_expand_vars(text, varmap)
 
+
+def expand_arguments(text, varmap):
+  """
+  Figures out which evalmode we're in and calls the appropriate
+  variable argument expansion function.
+
+  arguments:
+
+    'text' -- (string) the text to expand variables on
+
+    'varmap' -- (dict) the varname to expansion mapping
+
+  returns:
+
+    the text with all variables expanded
+  """
+  if lyntin.evalmode == lyntin.TINTIN:
+    return tintin_expand_arguments(text, varmap)
+  else:
+    return text
+
+def denest_vars(text, varmap):
+  """
+  Figures out which evalmode we're in and calls the appropriate
+  variable denesting function.
+
+  arguments:
+
+    'text' -- (string) the text to expand variables on
+
+    'varmap' -- (dict) the varname to expansion mapping (here only in
+    case a mode needs it in the future, and for consistency with the
+    other var expansion commands.)
+
+  returns:
+
+    the text with all variables expanded
+  """
+  if lyntin.evalmode == lyntin.TINTIN:
+    return text
+  else:
+    return lyntin_denest_vars(text)
+
+
+
+def tintin_expand_arguments(text, varmap):
+  """
+  Do not call this directly.  Use 'expand_arguments' instead.
+  """
+  return tintin_expand_vars(text, varmap)
 
 def lyntin_expand_vars(text, varmap):
   """ 
@@ -739,6 +811,10 @@ def lyntin_expand_vars(text, varmap):
   """
   if not ("%" in text or "$" in text) or len(text) == 0:
     return text
+
+  #import exported, traceback
+  #exported.write_message("utils.lyntin_expand_vars input: %s" % (text,))
+  #traceback.print_stack(limit=3)
 
   varmapkeys = varmap.keys()
   i = 0
@@ -771,6 +847,9 @@ def lyntin_expand_vars(text, varmap):
         i += ccount
 
     i += 1
+
+  #exported.write_message("utils.lyntin_expand_vars output: %s" % (text,))
+
   return text
 
 def lyntin_denest_vars(text):
