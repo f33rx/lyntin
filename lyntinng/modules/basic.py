@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.27 2002/03/10 05:03:52 willhelm Exp $
+# $Id: basic.py,v 1.28 2002/03/10 05:12:28 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -484,7 +484,36 @@ def read_cmd(session, words, input):
   try:
     filename = utils.strip_braces(words[1])
 
-    file = open(filename, "r")
+    if filename.find("http://") == 0:
+      url = filename[7:]
+      if url.find("/") == -1:
+        exported.write_error("read: malformed url.")
+        return
+
+      try:
+        import httplib
+      except:
+        exported.write_error("read: cannot import httplib.")
+        return
+        
+      host, resource = url.split("/", 1)
+      resource = "/" + resource
+      
+      sock = httplib.HTTP()
+      sock.connect(host)   
+      sock.putrequest("GET", resource)
+      sock.endheaders()
+      status, reason, headers = sock.getreply()
+      
+      if status != 200:
+        exported.write_error("read: http error: %d %s" % (status, reason))
+        return
+      
+      file = sock.getfile()
+    
+    else:
+      file = open(filename, "r")
+    
     contents = file.readlines()
 
     # FIXME - this doesn't account for bad first characters....
