@@ -113,7 +113,7 @@ REG_REGEXP = re.compile("^r\[.*\][Ii]*$")
 # for finding variables in the subject
 SUBVAR_REGEXP = re.compile("%_?[0-9]+")
 
-def compile_regexp(str):
+def compile_regexp(text, anchors=0):
   """
   Takes in a string and compiles it into a regular expression.  This
   is for commands that take in strings that can be compiled either
@@ -121,62 +121,81 @@ def compile_regexp(str):
   strings that are not regular expressions and use * as a wildcard
   character.
 
-  TBD
+  @param text: the string to convert
+  @type  text: string
 
-  @param str: the string to convert
-  @type  str: string
+  @param anchors: whether (1) or not (0) to deal with anchors
+      in the case of a string that's not a regular expression.
+      anchors are ^ and $ at the beginning and end of a string.
+  @type  anchors: boolean
 
   @return: the resulting regular expression
   @rtype: Re
   """
-  if not str:
+  if not text:
     return re.compile("")
 
   flags_bitmask = 0
   pieces = []
 
-  if REG_REGEXP.match(str) != None:
+  if REG_REGEXP.match(text) != None:
     # this is something we should compile as a regular expression
     # without doing any finagling
 
-    end_index = str.rfind("]")
+    end_index = text.rfind("]")
     # handle flags issues
-    flags = str[end_index+1:]
+    flags = text[end_index+1:]
     if flags == 'i' or flags == 'I':
       flags_bitmask = re.IGNORECASE
 
     # handle adjusting the string
-    str = str[2:end_index]
+    text = text[2:end_index]
 
     i = 0
-    match = SUBVAR_REGEXP.search(str)
+    match = SUBVAR_REGEXP.search(text)
     while match:
       b, e = match.span()
-      pieces.append(str[i:b])
-      if str[b:e].find("_") != -1:
+      pieces.append(text[i:b])
+      if text[b:e].find("_") != -1:
         pieces.append("(\S+?)")
       else:
         pieces.append("(.+?)")
       i = e
-      match = SUBVAR_REGEXP.search(str, i)
+      match = SUBVAR_REGEXP.search(text, i)
 
-    pieces.append(str[i:])
+    pieces.append(text[i:])
 
   else:
+    if anchors == 1:
+      anchor_begin = 0
+      anchor_end = 0
+      if text[0] == "^":
+        anchor_begin = 1
+        text = text[1:]
+
+      if text[-1] == "$":
+        anchor_end = 1
+        text = text[:-1]
+
     i = 0
-    match = SUBVAR_REGEXP.search(str)
+    match = SUBVAR_REGEXP.search(text)
     while match:
       b, e = match.span()
-      pieces.append(re.escape(str[i:b]))
-      if str[b:e].find("_") != -1:
+      pieces.append(re.escape(text[i:b]))
+      if text[b:e].find("_") != -1:
         pieces.append("(\S+?)")
       else:
         pieces.append("(.+?)")
 
       i = e
-      match = SUBVAR_REGEXP.search(str, i)
+      match = SUBVAR_REGEXP.search(text, i)
 
-    pieces.append(re.escape(str[i:]))
+    pieces.append(re.escape(text[i:]))
+    if anchors == 1:
+      if anchor_begin:
+        pieces.insert(0, "^")
+      if anchor_end:
+        pieces.append("$")
 
   return re.compile("".join(pieces), flags_bitmask)
 

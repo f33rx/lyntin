@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.18 2002/11/06 02:09:08 willhelm Exp $
+# $Id: action.py,v 1.19 2002/11/18 02:43:54 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -64,7 +64,7 @@ class ActionData:
     else:
       expansion = trigger
 
-    compiled = utils.compile_regexp(expansion)
+    compiled = utils.compile_regexp(expansion, 1)
     self._actions[trigger] = (trigger, compiled, response, onetime)
     return 1
 
