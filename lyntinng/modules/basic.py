@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.55 2002/04/11 01:50:07 willhelm Exp $
+# $Id: basic.py,v 1.56 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -207,7 +207,9 @@ def deed_cmd(session, words, input):
   
   This adds a deed or prints all the deeds stored till now.
   """
-  # begin copyright 2002 Sebastian John
+
+  # original deed_cmd code contributied by Sebastian John
+
   if (session.getName() == "common"):
     exported.write_error("deed cannot be applied to common session.")
     return
@@ -232,7 +234,7 @@ def deed_cmd(session, words, input):
   
   session.getManager("deed").addDeed(deedtext)
   exported.write_message("deed: '%s' added." % deedtext)
-  # end copyright 2002 Sebastian John
+
 
 def diagnostics_cmd(session, words, input):
   """#diagnostics
@@ -427,8 +429,9 @@ def if_cmd(session, words, input):
 
   Implements the Tintin++ #if command.
   """
-  # begin copyright 2002 Sebastian John
-  # if_cmd originally implemented
+
+  # original if_cmd code contributed by Sebastian John
+
   if len(words) < 3:
     exported.write_error("syntax: #if {<expr>} {<action>}")
     return
@@ -440,6 +443,11 @@ def if_cmd(session, words, input):
     exported.write_error("if: problems splitting arguments. %s" % e)
     return
 
+  # we have to do manual variable expansion here.
+  varexpansion = session.getManager("variable").expand(expr)
+  if varexpansion:
+    expr = varexpansion
+
   expr = expr.replace("&&", " and ")
   expr = expr.replace("||", " or ")
 
@@ -450,8 +458,6 @@ def if_cmd(session, words, input):
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
     exported.write_error("if: exception: %s" % e)
-
-  # end copyright 2002 Sebastian John
 
 
 def ignore_cmd(session, words, input):
@@ -613,8 +619,7 @@ def read_cmd(session, words, input):
   try:
     filename = utils.strip_braces(words[1])
 
-    # begin copyright 2002 Sebastian John
-    # http:// handling for read_cmd
+    # http reading contributed by Sebastian John
     if filename.find("http://") == 0:
       url = filename[7:]
       if url.find("/") == -1:
@@ -641,7 +646,6 @@ def read_cmd(session, words, input):
         return
       
       file = sock.getfile()
-      # end copyright 2002 Sebastian John block
     
     else:
       file = open(filename, "r")

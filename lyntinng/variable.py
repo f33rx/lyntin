@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.9 2002/04/11 03:19:56 willhelm Exp $
+# $Id: variable.py,v 1.10 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -129,13 +129,16 @@ class VariableManager(manager.Manager):
             matchob = VARIABLE_REGEXP.search(text, e)
             continue
 
-          for mem in self._variables.keys():
-            if text[b:].find(lyntin.variablechar + mem) == 0:
-              repl = self._variables[mem]
-              replacedvars = 1
-              text = text[:b] + repl + text[b+len(mem)+1:]
-              break
-          marker = e
+          count = text[marker:b].count('{') - text[marker:b].count('}')
+
+          if count == 0:
+            for mem in self._variables.keys():
+              if text[b:].find(lyntin.variablechar + mem) == 0:
+                repl = self._variables[mem]
+                replacedvars = 1
+                text = text[:b] + repl + text[b+len(mem)+1:]
+                break
+            marker = e
 
           matchob = VARIABLE_REGEXP.search(text, e)
 
