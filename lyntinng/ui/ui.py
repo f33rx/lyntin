@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.17 2002/10/13 02:55:54 willhelm Exp $
+# $Id: ui.py,v 1.18 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -13,7 +13,7 @@ to the user through the ui.  Messages have types and the ui
 will display the message differently depending on the type.
 """
 import string, re, sys
-import engine, hooks, event, utils, lyntin
+import engine, hooks, event, utils, lyntin, exported
 
 """ The message type constants."""
 ERROR = "ERROR: "
@@ -132,6 +132,25 @@ class BaseUI:
     and it shouldn't be needed.  I'm not wholly sure why it's here.
     """
     pass
+
+  def showTextForSession(self, ses):
+    """
+    Returns whether or not we should show text for this session--it's
+    a convenience method.
+
+    We return a 1 if the session is None, it doesn't have a _snoop
+    attribute, it's the current session, or ses.getSnoop() == 1.
+
+    @param ses: the session we're looking at--if it's None we return a 1
+    @type  ses: Session
+
+    @returns: 1 if we should show text, 0 if not
+    @rtype: boolean
+    """
+    if ses == None or getattr(ses, "_snoop", None) == None \
+        or exported.get_current_session() == ses or ses.getSnoop() == 1:
+      return 1
+    return 0
 
   def handleinput(self, input):
     """

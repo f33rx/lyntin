@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.35 2002/11/08 02:35:12 willhelm Exp $
+# $Id: lyntin.py,v 1.36 2002/11/09 01:06:17 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -53,9 +53,14 @@ OPTIONS:
          session with aliases, actions, and whatnot.  You can specify
          multiple files to read with multiple --read flags.
 
+  --nosnoop
+         Lyntin defaults to snooping.  This sets it so Lyntin will
+         default to no snooping.
+
   --ui or -u
-         launches a specific ui for Lyntin.  current options
-         are 'text', 'tk', and 'curses'.
+         Launches a specific ui for Lyntin.  Lyntin comes with two ui's:
+         'text' and 'tk'.  Other ui's can be dropped into the ui/ 
+         subdirectory and this switch can be used for starting them.
 """
 
 # the wizlist of folks without whom Lyntin wouldn't exist.
@@ -142,6 +147,7 @@ options = {'datadir': '',
            'evalmode': EVALMODE_LYNTIN,
            'moduledir': [],
            'readfile': [],
+           'snoopdefault': 1,
            'ui': 'text'}
 
 # Lyntin has two modes for user input evaluation.  EVALMODE_TINTIN mode
@@ -198,6 +204,9 @@ if __name__ == '__main__':
           lyntin.options['evalmode'] = EVALMODE_TINTIN
         else:
           lyntin.options['evalmode'] = EVALMODE_LYNTIN
+
+      elif mem[0] == '--nosnoop':
+        lyntin.options['snoopdefault'] = 0
 
       elif mem[0] == '--help':
         print HELPTEXT

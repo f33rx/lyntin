@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.34 2002/11/09 04:21:59 willhelm Exp $
+# $Id: exported.py,v 1.35 2002/11/18 02:43:53 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -204,7 +204,7 @@ def expand_ses_arguments(text, ses):
 
 def get_session(name):
   """
-  Returns a named session.
+  Returns a named session or None if the session doesn't exist.
 
   @param name: the name of the session to retrieve
   @type  name: string

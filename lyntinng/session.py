@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.72 2002/11/15 02:36:24 willhelm Exp $
+# $Id: session.py,v 1.73 2002/11/18 02:43:54 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -52,6 +52,12 @@ class Session:
     # 0 if we're massaging stuff, 1 if we're in verbatim mode
     self._verbatim = 0
 
+    # whether or not we show text even when we're not the
+    # current session.  it's command-line configurable what
+    # the default is.
+    # 0 if we don't show text, 1 if we do
+    self._snoop = lyntin.options['snoopdefault']
+
     # register with the shutdown hook 
     exported.hook_register("shutdown_hook", self.shutdown)
     exported.hook_register("write_hook", self.getWriteFileInfo)
@@ -79,6 +85,26 @@ class Session:
     self.getTicker().setSessionName(name)
     if self._socket:
       self._socket.setSessionName(name)
+
+  def getSnoop(self):
+    """
+    Returns whether or not we show text when we're not the
+    current session.
+
+    @returns: 1 if we show text, 0 if not
+    @rtype: boolean
+    """
+    return self._snoop
+
+  def setSnoop(self, snoop):
+    """
+    Sets whether or not we show text when we're not the
+    current session.
+
+    @param snoop: 1 if we show text, 0 if not
+    @type  snoop: boolean
+    """
+    self._snoop = snoop
 
   def getDataBuffer(self):
     """
@@ -129,6 +155,10 @@ class Session:
     data = []
     
     data.append("Session name: %s" % self._name)
+    if self._snoop == 1:
+      data.append("   snoop: on")
+    else:
+      data.append("   snoop: off")
     data.append("   socket: %s" % repr(self._socket))
     data.append("   ticker: %s" % self.getTicker().getInfo())
 

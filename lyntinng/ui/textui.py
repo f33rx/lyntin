@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.30 2002/10/26 15:17:24 willhelm Exp $
+# $Id: textui.py,v 1.31 2002/11/18 02:43:54 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -102,6 +102,9 @@ class Textui(ui.BaseUI):
 
     line = message.data
     ses = message.session
+
+    if self.showTextForSession(ses) == 0:
+      return
 
     # we prepend the session name to the text if this is not the 
     # current session sending text.

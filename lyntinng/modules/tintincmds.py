@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.55 2002/11/10 20:03:00 willhelm Exp $
+# $Id: tintincmds.py,v 1.56 2002/11/15 02:36:24 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -495,6 +495,33 @@ def showme_cmd(ses, args, input):
      
 commands_dict["showme"] = (showme_cmd, "input=", "limitparsing=0")
 
+
+def snoop_cmd(ses, args, input):
+  """
+  Sets the session specified into or out of snooping mode.
+
+  examples:
+    #snoop a          -- tells you whether a is in snoop mode
+    #snoop a on       -- sets snoop mode for a
+  """
+  snoopsession = args["session"]
+  mode = args["mode"]
+
+  ses = exported.get_session(snoopsession)
+  if ses == None:
+    exported.write_error("snoop: session '%s' does not exist." % snoopsession)
+    return
+
+  if mode != None:
+    ses.setSnoop(mode)
+
+  if ses.getSnoop() == 1:
+    exported.write_message("snoop: snooping is enabled for %s." % snoopsession)
+  else:
+    exported.write_message("snoop: snooping is disabled for %s." % snoopsession)
+
+
+commands_dict["snoop"] = (snoop_cmd, "session mode:booleanornone=")
 
 def textin_cmd(session, args, input):
   """

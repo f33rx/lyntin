@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.19 2002/10/20 16:09:57 willhelm Exp $
+# $Id: tkui.py,v 1.20 2002/10/24 23:07:04 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -302,7 +302,7 @@ class Tkui(ui.BaseUI):
     if type(message) == type(''):
       message = ui.Message(message, ui.LTDATA)
 
-    if message.data == '':
+    if message.data == '' or self.showTextForSession(ses) == 0:
       return
 
     if message.type == ui.ERROR:
