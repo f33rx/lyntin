@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.37 2003/03/26 00:16:34 willhelm Exp $
+# $Id: hooks.py,v 1.38 2003/04/07 03:21:54 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -367,6 +367,7 @@ bell_hook = get_hook_manager().getHook("bell_hook")
 #
 # arg tuple: (Session)
 #  - the session the prompt came from
+#  - the prompt text
 prompt_hook = get_hook_manager().getHook("prompt_hook")
 
 # Whenever we switch evalmodes, we call everything on this hook.

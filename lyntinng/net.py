@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.36 2003/04/08 22:19:07 willhelm Exp $
+# $Id: net.py,v 1.37 2003/04/10 22:09:06 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -309,7 +309,7 @@ class SocketCommunicator:
     # calls.  this allows inline prompt detection in the stream.
     for d in splitdata:
       if self._prompt_regex.match(d):
-        event.SpamEvent(exported.get_hook("prompt_hook"), (self._session,)).enqueue()
+        event.SpamEvent(exported.get_hook("prompt_hook"), (self._session, d)).enqueue()
       else:
         
         # handle telnet option stuff
