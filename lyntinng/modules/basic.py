@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.63 2002/04/21 20:20:45 willhelm Exp $
+# $Id: basic.py,v 1.64 2002/04/21 22:37:58 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -618,7 +618,7 @@ def mudecho_cmd(session, words, input):
     exported.write_error("syntax: #mudecho <on|off>")
 
  
-def nop_cmd(session, words, input):
+def nop_cmd(session, args, input):
   """#nop <whatever you want to write here....>
 
   nop stands for "no operation".  So anything after a #nop
@@ -1161,7 +1161,7 @@ def load():
   # exported.add_command("mark", mark_cmd)
   # exported.add_command("message", message_cmd)
   exported.add_command("mudecho", mudecho_cmd)
-  exported.add_command("nop", nop_cmd)
+  exported.add_command("nop", nop_cmd, "message*")
   # exported.add_command("path", path_cmd)
   # exported.add_command("pathdir", pathdir_cmd)
   # exported.add_command("presub", presub_cmd)
@@ -1171,7 +1171,7 @@ def load():
   # exported.add_command("report", report_cmd)
   # exported.add_command("savepath", savepath_cmd)
   exported.add_command("session", session_cmd)
-  exported.add_command("showme", showme_cmd, "showstuff*")
+  exported.add_command("showme", showme_cmd, "message*")
   # exported.add_command("snoop", snoop_cmd)
   exported.add_command("speedwalk", speedwalk_cmd)
   exported.add_command("substitute", substitute_cmd)
