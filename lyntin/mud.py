@@ -53,11 +53,9 @@ def handle_mud_output(output, ses):
         if opt:
             if opt == WILL:
                 if c == '\001':
-                    player.PutMessage("IAC WILL ECHO (echo off)")
                     echo_off()
             elif opt == WONT:
                 if c == '\001':
-                    player.PutMessage("IAC WONT ECHO (echo on)")
                     echo_on()
             # we don't take orders
             # FIXME
