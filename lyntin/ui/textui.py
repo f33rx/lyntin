@@ -12,6 +12,10 @@
 Textui is the text user interface (the default).  It's _real_
 basic as it's designed to work almost everywhere you can have
 a command prompt.
+
+As an fyi--they moved all the termios constants from the TERMIOS
+module to the termios module.  So... we'll have to change this
+around a bit.
 """
 
 import data, string, sys, mud, app, select, os,  regsub
@@ -35,8 +39,8 @@ echo = 1
 if tio:
     stdinfd = sys.stdin.fileno()
     echonew = termios.tcgetattr(stdinfd)
-    onecho_attr = echonew
-    offecho_attr = echonew
+    onecho_attr = echonew[3]
+    offecho_attr = echonew[3] & ~TERMIOS.ECHO
 
 def getinputline(host):
     """getinputline(host) -> None
@@ -104,7 +108,7 @@ class Textui(BaseGUI):
         return tio
 
     """over-ridden from BaseGUI"""
-    def echo(self,yesno):
+    def echo(self, yesno):
         if yesno == 1:
             self.turnonecho()
         else:
@@ -113,32 +117,26 @@ class Textui(BaseGUI):
     def turnonecho(self, checktio="yes"):
         if not tio and checktio == "yes":
             return
-        global echo
         global offecho_attr
         global onecho_attr
 
-        echo = 1
         fd = sys.stdin.fileno()
         new = termios.tcgetattr(fd)
-        offecho_attr = new[:]
+        new[3] = onecho_attr
         try:
-            termios.tcsetattr(fd, TERMIOS.TCSADRAIN, onecho_attr)
+            termios.tcsetattr(fd, TERMIOS.TCSADRAIN, new)
         except:
             raise 'lt_echo_error', 'unable to turn on echo'
 
     def turnoffecho(self, checktio="yes"):
         if not tio and checktio == "yes":
             return
-        global echo
         global onecho_attr
         global offecho_attr
 
-        echo = 0
         fd = sys.stdin.fileno()
         new = termios.tcgetattr(fd)
-        onecho_attr = new[:]
-        new[3] = new[3] & ~TERMIOS.ECHO          # lflags
-        offecho_attr = new[:]
+        new[3] = offecho_attr
         try:
             termios.tcsetattr(fd, TERMIOS.TCSADRAIN, new)
         except:

@@ -46,14 +46,18 @@ def handle_mud_output(output, ses):
     charlist = [] 
     for c in output:
 	# First, we turn echo on by default
-	echo_on()
+        # why are we doing this?  ick!  (wbg)
+	# echo_on()
+
         # see if we're negotiating an option
         if opt:
             if opt == WILL:
                 if c == '\001':
+                    player.PutMessage("IAC WILL ECHO (echo off)")
                     echo_off()
             elif opt == WONT:
                 if c == '\001':
+                    player.PutMessage("IAC WONT ECHO (echo on)")
                     echo_on()
             # we don't take orders
             # FIXME

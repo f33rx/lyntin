@@ -161,16 +161,16 @@ class BaseGUI:
 
         Turn on echo
         """
-        self.status('echo',1)
         self.echo(1)
+        self.status('echo',1)
     
     def OffEcho(self):
         """OffEcho(self) -> None
 
         Turn off echo
         """
-        self.status('echo',0)
         self.echo(0)
+        self.status('echo',0)
 
 
     def close(self):
