@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.4 2002/04/22 00:38:26 jmberne Exp $
+# $Id: argparser.py,v 1.5 2002/04/25 16:50:55 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -19,6 +19,12 @@ defaultOptions={"stripBraces":1,
                 }
 optionParser = None
 
+class ParserException(Exception):
+  def __init__(self, value):
+    self.value = value
+  def __str__(self):
+    return `self.value`
+
 class ArgumentParser:
   """
   This is the actual argumentparser class
@@ -29,8 +35,16 @@ class ArgumentParser:
   noparsing (default=off) - puts input into dict["input"] and does no parsing.
   """
   
-  def __init__(self,argspec,argoptions=None):
-    self.typecheckers = { "string":stringChecker(), "int":intChecker() , "boolean":booleanChecker(), "booleanornone":booleanOrNoneChecker()}
+  def __init__(self, argspec, argoptions=None):
+
+    # the syntax line is automatically generated from the argspec.
+    # we print it out whenever we have an ParserException in the user input.
+    self.syntaxline = ""
+
+    self.typecheckers = { "string": stringChecker(),
+                          "int": intChecker(),
+                          "boolean": booleanChecker(),
+                          "booleanornone": booleanOrNoneChecker()}
     if argoptions:
       self.buildOptions(argoptions)
     else:
@@ -118,7 +132,6 @@ class ArgumentParser:
 
     parsedspec = self.argspec
 
-    
     doneWithIndices = 0
     defaultSeen = 0
     for i in range(0,len(parsedspec)):
@@ -136,33 +149,36 @@ class ArgumentParser:
 
       if len(argname) >= 1 and argname[-1:] == "*":
         if argdef != None:
-          raise Exception, "cannot specify a default value for a collection argument (%s=%s)" % (argname, argdef)
+          raise ParserException, "cannot specify a default value for a collection argument (%s=%s)" % (argname, argdef)
+
         if len(argname) >= 2 and argname [-2:] == "**":
           argname = argname[:-2]
           if i < len(parsedspec) -1:
-            raise Exception, "named collection argument must be the last argument (%s)" % (argname)
+            raise ParserException, "named collection argument must be the last argument (%s)" % (argname)
           parser = extraNamedParser(self,argname)
           namedCollector = 1
+
         else: #this is an index collection argument
           argname = argname[:-1]
           # Must check to see that we are the last argument or that 
           # the last argument is a named collector.
           if i < len(parsedspec) - 2:
-            raise Exception, "index collection argument must be last or second-to last argument (%s)" % (argname)
+            raise ParserException, "index collection argument must be last or second-to last argument (%s)" % (argname)
           if i == len(parsedspec) -2:
             # must check that the last arg is a named collector:
             nextarg,nextdef = parsedspec[i+1]
             if len(nextarg) < 2 or nextarg[-2:] != "**":
-              raise Exception, "index collector can only be second-to-last argument when last argument is a named collector"
+              raise ParserException, "index collector can only be second-to-last argument when last argument is a named collector"
           parser = extraIndexParser(self,argname)
           indexCollector = 1
+
       else:
         parser = Parser(self,argname)
 
       if self.typecheckers.has_key(typespec):
         typechecker = self.typecheckers[typespec]
       else:
-        raise Exception, "Unknown type specified"
+        raise ParserException, "Unknown type specified"
 
       parser.typechecker = typechecker
 
@@ -171,13 +187,13 @@ class ArgumentParser:
         defaultSeen = 1
 
       if defaultSeen and parser.default == None:
-        raise Exception, "Argument without default value (%s) seen after default values already specified" % (argname)
+        raise ParserException, "Argument without default value (%s) seen after default values already specified" % (argname)
       
       if not namedCollector and not indexCollector:
         if not doneWithIndices:
           self.indexparsers.append(parser)
         if self.parsers.has_key(argname):
-          raise Exception, "Multiple argument named %s specified." % (argname)
+          raise ParserException, "Multiple argument named %s specified." % (argname)
         self.parsers[argname] = parser
       elif namedCollector:
         self.extranamedparser = parser
@@ -204,13 +220,13 @@ class ArgumentParser:
 
         if val == None:
           if foundNamedArg:
-            raise Exception, "Non-named argument (%s) found after Named argument" % (key)
+            raise ParserException, "Non-named argument (%s) found after Named argument" % (key)
           if i < len(self.indexparsers):
             parser = self.indexparsers[i]
           elif self.extraindexparser:
             parser = self.extraindexparser
           else:
-            raise Exception, "Unexpected argument received %s" % (key)
+            raise ParserException, "Unexpected argument received %s" % (key)
           parser.parseInto(i,key,dict)
         else:
           foundNamedArg = 1
@@ -219,7 +235,7 @@ class ArgumentParser:
           elif self.extranamedparser:
             parser = self.extranamedparser
           else:
-            raise Exception, "Invalid named argument: %s=%s" % (key,val)
+            raise ParserException, "Invalid named argument: %s=%s" % (key,val)
           parser.parseInto(key,val,dict)
 
       # now check that everything has been specified, putting in defaults 
@@ -228,7 +244,7 @@ class ArgumentParser:
         if not dict.has_key(key):
           parser = self.parsers[key]
           if parser.default == None:
-            raise Exception, "Must specify a value for argument %s" % (key)
+            raise ParserException, "Must specify a value for argument %s" % (key)
           else:
             defval = parser.parse(parser.default)
             dict[key] = defval
@@ -274,7 +290,7 @@ class ArgumentParser:
             arg = arg + nextchar
       elif nextchar == "\\":
         if input == "":
-          raise Exception, "\\ at end of line."
+          raise ParserException, "\\ at end of line."
         else:
           nextchar = input[0:1]
           input = input[1:]
@@ -285,7 +301,7 @@ class ArgumentParser:
       elif nextchar == "}":
         bracketdepth = bracketdepth - 1
         if bracketdepth < 0:
-          raise Exception, "mismatched }"
+          raise ParserException, "mismatched }"
         if val != None:
           val = val + nextchar
         else:
@@ -305,7 +321,7 @@ class ArgumentParser:
           arg = arg + nextchar
 
     if bracketdepth:
-      raise Exception, "Mismatched {"
+      raise ParserException, "Mismatched {"
 
     if arg != "":
       arguments.append( (arg, val) )
@@ -327,7 +343,7 @@ class Parser:
 
   def parseInto(self, key, val, dict):
     if dict.has_key(self.argname):
-      raise Exception, "Multiple values for argument %s Given" % (self.argname)
+      raise ParserException, "Multiple values for argument %s Given" % (self.argname)
     else:
       dict[self.argname] = self.parse(val)
 
@@ -370,7 +386,7 @@ class extraNamedParser(Parser):
     val=self.parse(val)
     if dict.has_key(self.argname):
       if dict.has_key(key) or dict[self.argname].has_key(key):
-        raise Exception, "multiple values given for argument %s" % (key)
+        raise ParserException, "multiple values given for argument %s" % (key)
       dict[self.argname][key] = (val)
     else:
       dict[self.argname] = {key:val}
@@ -423,7 +439,7 @@ class booleanChecker:
     elif arg == "off" or arg == "false" or arg == "0":
       return 0
     else:
-      raise Exception, "Invalid boolean value specified: %s" % (arg)
+      raise ParserException, "Invalid boolean value specified: %s" % (arg)
 
 class booleanOrNoneChecker:
   """
@@ -444,7 +460,7 @@ class booleanOrNoneChecker:
     elif arg == "None" or arg == "-" or arg == "":
       return None
     else:
-      raise Exception, "Invalid boolean value specified: %s" % (arg)
+      raise ParserException, "Invalid boolean value specified: %s" % (arg)
 
 
 if __name__ == '__main__':

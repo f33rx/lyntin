@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.12 2002/04/21 19:23:37 willhelm Exp $
+# $Id: exported.py,v 1.13 2002/04/21 22:37:58 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -13,7 +13,7 @@ it does change it'll be between major Lyntin versions.
 """
 import engine, ui.ui
 
-def lyntin_command(text):
+def lyntin_command(text, internal=0, session=None):
   """
   The best way of executing a Lyntin command as if the user
   had typed it.
@@ -21,8 +21,18 @@ def lyntin_command(text):
   arguments:
 
     'text' -- the command to execute.  ex. "#help"
+
+    'internal=0' -- whether to execute it "internally" and suppress
+                    various outputs
+
+    'session=None' -- the session instance to execute this command
+                      in (defaults to the current session)
   """
-  get_engine().handleUserData(text)
+  if session != None:
+    get_engine().handleUserData(text, internal, session)
+  else:
+    get_engine().handleUserData(text, internal)
+
 
 def add_command(str, func, arguments=None, argoptions=None):
   """ The best way to add commands to Lyntin.

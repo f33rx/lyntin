@@ -4,13 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.37 2002/04/21 19:23:37 willhelm Exp $
+# $Id: session.py,v 1.38 2002/04/21 20:20:45 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy, string
 import deed, data, exported, engine, hooks, utils, lyntin, event, ticker
+import argparser
 
 # this is the regular expression that matches speedwalking stuff
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -253,21 +254,31 @@ class Session:
         if mem[0] == "^":
           if re.compile(mem).search(words[0]):
             command = engine.myengine.getCommand(mem)
-            argparser = engine.myengine.getArgParser(mem)
-            if argparser == None:
+            argumentparser = engine.myengine.getArgParser(mem)
+            if argumentparser == None:
               command(self, input.split(" "), input)
             else:
-              command(self, argparser.parse(input), input)
+              try:
+                command(self, argumentparser.parse(input), input)
+              except ValueError, e:
+                exported.write_error("%s: %s" % (mem, e))
+              except argparser.ParserException, e:
+                exported.write_error("%s: %s" % (mem, e))
             if internal==0: self._prompt()
             break
         else:
           if mem.find(words[0]) == 0:
             command = engine.myengine.getCommand(mem)
-            argparser = engine.myengine.getArgParser(mem)
-            if argparser == None:
+            argumentparser = engine.myengine.getArgParser(mem)
+            if argumentparser == None:
               command(self, words, input)
             else:
-              command(self, argparser.parse(input), input)
+              try:
+                command(self, argumentparser.parse(input), input)
+              except ValueError, e:
+                exported.write_error("%s: %s" % (mem, e))
+              except argparser.ParserException, e:
+                exported.write_error("%s: %s" % (mem, e))
             if internal==0: self._prompt()
             break
 

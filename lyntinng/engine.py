@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.32 2002/04/21 19:23:36 willhelm Exp $
+# $Id: engine.py,v 1.33 2002/04/21 22:37:58 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -201,8 +201,8 @@ class Engine:
 
       'input' -- (string) data from the user
 
-      'internal=0' -- (int) 1 if we should spam the input hook 
-                      0 if we shouldn't
+      'internal=0' -- (int) 0 if we should spam the input hook 
+                      1 if we shouldn't
 
       'session=self._current_session' -- (session.Session instance)
                                          allows you to execute this
@@ -221,8 +221,8 @@ class Engine:
         mem = lyntin.commandchar + "cr"
 
       # spam the hook with the raw input statement first...
-      if internal:
-        hooks.user_data_hook.spamhook((mem,))
+      if internal == 0:
+        hooks.from_user_hook.spamhook((mem,))
 
       # FIXME - handle history stuff
       if mem[0] == "!":
@@ -587,8 +587,10 @@ class Engine:
                 to the ui
     """
     self._ui_lock.acquire(1)
-    hooks.to_user_hook.spamhook((text))
-    self._ui_lock.release()
+    try:
+      hooks.to_user_hook.spamhook((text))
+    finally:
+      self._ui_lock.release()
 
 
   def writePrompt(self):
