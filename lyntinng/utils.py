@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.65 2002/12/24 03:25:10 willhelm Exp $
+# $Id: utils.py,v 1.66 2002/12/26 22:26:46 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -113,7 +113,7 @@ REG_REGEXP = re.compile("^r\[.*\][Ii]*$")
 # for finding variables in the subject
 SUBVAR_REGEXP = re.compile("%_?[0-9]+")
 
-def compile_regexp(text, anchors=0):
+def compile_regexp(text, anchors=0, stars=0):
   """
   Takes in a string and compiles it into a regular expression.  This
   is for commands that take in strings that can be compiled either
@@ -128,6 +128,10 @@ def compile_regexp(text, anchors=0):
       in the case of a string that's not a regular expression.
       anchors are ^ and $ at the beginning and end of a string.
   @type  anchors: boolean
+
+  @param stars: whether (1) or not (0) to deal with * wildcards
+      which can match whatever
+  @type  stars: boolean
 
   @return: the resulting regular expression
   @rtype: Re
@@ -177,6 +181,16 @@ def compile_regexp(text, anchors=0):
         anchor_end = 1
         text = text[:-1]
 
+    if stars == 1:
+      star_begin = 0
+      star_end = 0
+      if text[0] == "*":
+        star_begin = 1
+        text = text[1:]
+      if text[-1] == "*":
+        star_end = 1
+        text = text[:-1]
+
     i = 0
     match = SUBVAR_REGEXP.search(text)
     while match:
@@ -196,6 +210,12 @@ def compile_regexp(text, anchors=0):
         pieces.insert(0, "^")
       if anchor_end:
         pieces.append("$")
+
+    if stars == 1:
+      if star_begin:
+        pieces.insert(0, "^.*")
+      if star_end:
+        pieces.append(".*$")
 
   return re.compile("".join(pieces), flags_bitmask)
 

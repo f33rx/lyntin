@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.13 2002/12/09 04:08:12 willhelm Exp $
+# $Id: highlight.py,v 1.14 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -70,9 +70,13 @@ class HighlightData:
 
     @param text: the text to highlight
     @type  text: string
+
+    @returns: returns whether adding the highlight was successful (1) or not (0)
+    @rtype: int
     """
     style = style.lower()
-    self._highlights[text] = (style, self._getMarkup(style))
+    markup, compiled = self._getMarkup(style), utils.compile_regexp(text, 0, 1)
+    self._highlights[text] = (style, markup, compiled)
     return 1
 
   def _getMarkup(self, style):
@@ -151,28 +155,12 @@ class HighlightData:
       hlist = self._highlights.keys()
       hlist.sort()
       for mem in hlist:
-
-        # first we deal with those silly stars....
-        hltext = mem
-        if mem[0] == "*":
-          hltext = hltext[1:]
-        if mem[-1] == "*":
-          hltext = hltext[:-1]
-        i = faketext.find(hltext)
-
-        # then we go hunting for the unstarred text
-        while i != -1:
-          begin = i
-          end = len(hltext)
-          if mem[0] == "*":
-            begin = 0
-            end = i + len(hltext)
-          if mem[-1] == "*":
-            end = len(faketext) - begin
-
+        miter = self._highlights[mem][2].finditer(faketext)
+        for m in miter:
+          # we need to loop for multiple instances of the highlight
+          begin, end = m.span()
           hl = self._highlights[mem][1]
-          textlist = self.highlight(textlist, begin, end, hl)
-          i = faketext.find(hltext, i + 1)
+          textlist = self.highlight(textlist, begin, end - begin, hl)
 
       # here we sweep through the text string to update our current
       # color and leftover color attributes
@@ -377,7 +365,6 @@ class HighlightManager(manager.Manager):
 
     return text
 
-
 commands_dict = {}
 
 def highlight_cmd(ses, args, input):
@@ -410,6 +397,7 @@ def highlight_cmd(ses, args, input):
 
   category: commands
   """
+  global STYLEMAP
   style = args["style"]
   text = args["text"]
   quiet = args["quiet"]
@@ -423,6 +411,11 @@ def highlight_cmd(ses, args, input):
     return
 
   if text and style:
+    style = style.lower()
+    if style not in STYLEMAP:
+      exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (style, lyntin.commandchar))
+      return
+    
     exported.get_manager("highlight").addHighlight(ses, style, text)
     if not quiet:
       exported.write_message("highlight: {%s} {%s} added." % (style, text), ses)
