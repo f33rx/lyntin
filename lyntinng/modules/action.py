@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.14 2002/10/23 23:59:08 willhelm Exp $
+# $Id: action.py,v 1.15 2002/10/26 15:17:24 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -359,9 +359,10 @@ commands_dict = {}
 
 def action_cmd(ses, args, input):
   """
-  With no arguments, prints all actions.
-  With one argument, prints all actions which match the arg.
-  With multiple arguments, creates an action.
+  With no trigger and no action, prints all actions.
+  With a trigger and no action, prints actions that match the
+  trigger statement.
+  With a trigger and an action, creates an action.
 
   When data from the mud matches the trigger clause, the response
   will be executed.  Trigger clauses can use anchors (^ and $)
@@ -379,18 +380,17 @@ def action_cmd(ses, args, input):
   The special variable "%a" means "the whole matched line".
 
   We handle regular expressions with a special r[ ... ] syntax.  If
-  you put an "i" or "I" between the ] and }, then we'll ignorecase
-  as well.
+  you put an "i" or "I" after the ], then we'll ignorecase as well.
 
   The onetime argument can be set to true to have the action remove
-  itself automatically if it is ever executed.
+  itself automatically after it is triggered.
 
   examples:
 
      #action {^You are hungry} {get bread bag;eat bread}
      #action {%0 gives you %5} {say thanks for the %5, %0!}
      #action {r[^%_1 tells\\s+you %2$]} {say %1 just told me %2}
-     #action {r[sven\\s*dealt .+? to %1$]i} {say i just killed %1!}
+     #action {r[sven dealt .+? to %1$]i} {say i just killed %1!}
 
   category: commands
   """

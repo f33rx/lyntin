@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.13 2002/10/13 03:16:22 willhelm Exp $
+# $Id: helpmanager.py,v 1.14 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 Lyntin has a comprehensive X{help} system that can be accessed in-game
@@ -174,14 +174,13 @@ class HelpManager(manager.Manager):
     @param fqn: the fully qualified name of the topic being requested
     @type  fqn: string
 
-    @return: a list of nodes if the fqn is a category, a string 
-        if the fqn is a specific node
-    @rtype: string or list of strings
+    @return: a tuple consisting of the topic data string, and then a list
+        of nodes under this fqn (if it's a category)
+    @rtype: (string, list of strings)
 
     @raise ValueError: if the fqn doesn't exist
     """
     categorylist, name = _split_name(fqn)
-
     categorylist.append(name)
 
     tree = self._help_tree
@@ -191,23 +190,23 @@ class HelpManager(manager.Manager):
         if tree.has_key(mem):
           tree = tree[mem]
         else:
-          raise ValueError, "FQN doesn't exist."
+          raise ValueError, "FQN '%s' doesn't exist." % fqn
       else:
-        raise ValueError, "FQN doesn't exist."
+        raise ValueError, "FQN '%s' doesn't exist." % fqn
 
     if type(tree) == type({}):
       list = []
-      for key,value in tree.items():
-        if type(value) == type({}):
-          list.append("%s*" % (key,))
-        else:
-          list.append(key)
+      for key, value in tree.items():
+        list.append("%s.%s" % (".".join(categorylist), key))
+
       list.sort()
       if tree.has_key("__doc__"):
-        list.remove("__doc__")
+        list.remove(".".join(categorylist) + ".__doc__")
+        return (tree["__doc__"], list)
 
-      return list
-    return tree
+      return ('', list)
+
+    return (tree, [])
 
     
   def getHelp(self, fqn):
@@ -295,7 +294,7 @@ class HelpManager(manager.Manager):
 
     if type(tree) == type({}):
       list = []
-      for key,value in tree.items():
+      for key, value in tree.items():
         if type(value) == type({}):
           list.append("%s*" % (key,))
         else:
@@ -303,7 +302,7 @@ class HelpManager(manager.Manager):
       list.sort()
       if tree.has_key("__doc__"):
         list.remove("__doc__")
-        helphead = tree["__doc__"] + "\nOther topics in this category:\n"
+        helphead = tree["__doc__"] + "\n\nOther topics in this category:\n"
       else:
         helphead = ""
       return (error, breadcrumbs, helphead + utils.columnize(textlist=list, indent=3))

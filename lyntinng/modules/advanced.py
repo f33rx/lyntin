@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.24 2002/10/26 04:36:37 jmberne Exp $
+# $Id: advanced.py,v 1.25 2002/10/26 15:17:24 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -39,11 +39,12 @@ def _get_user_module():
 
 def python_cmd(session, words, input):
   """
-  #@ is different from all the rest because this one does some 
-  incredibly magic stuff because it requires an environment to 
-  execute the arbitrary python code in.  It allows you to execute
-  arbitrary python code inside Lyntin.
-  
+  #@ allows you to execute arbitrary Python code inside of Lyntin.
+  It will first look for a module named "lyntinuser" and execute
+  the code inside that module's __dict__ environment.  If no
+  such module exists, it will execute the code inside 
+  modules.advanced .
+
   ex:
     #@ print "hello"
     #@ print string.join(exported.get_commands(), "\\n")
@@ -69,8 +70,32 @@ def python_cmd(session, words, input):
 
 def import_cmd(session, args, input):
   """
-  Imports/reloads a module.  In the case of a Lyntin module, it also
-  executes the load and unload functions where appropriate.
+  Imports/reloads a module.
+
+  When reloading, it looks for an "unload" function and executes it
+  prior to reloading the module.
+
+  After reloading/importing, it looks for a "load" function and
+  executes it.
+
+  Lyntin modules located in the modules package are safe to reload 
+  in-game.  Lyntin core modules (engine, helpmanager, event...) are
+  NOT safe to import in-game.
+
+  examples:
+
+    #import modules.action
+    #import exportuser
+
+  #import will look for the module on the sys.path.  So if your module
+  is not on the sys.path, you should first add the directory using #@:
+
+    #@ import sys
+    #@ sys.path.append("/directory/where/my/module/exists")
+
+  Directories specified by the moduledir command-line argument are
+  added to the sys.path upon Lyntin startup.
+
   category: commands
   """
   import sys
