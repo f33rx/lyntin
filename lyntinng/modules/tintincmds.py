@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.34 2002/07/11 04:11:19 willhelm Exp $
+# $Id: tintincmds.py,v 1.36 2002/07/12 00:11:56 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -155,9 +155,9 @@ def if_cmd(ses, args, input):
 
   try:
     if eval(expr):
-      exported.lyntin_command(action, 1, session)
+      exported.lyntin_command(action, 1, ses)
     elif elseaction:
-      exported.lyntin_command(elseaction, 1, session)
+      exported.lyntin_command(elseaction, 1, ses)
   except SyntaxError:
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
@@ -319,7 +319,7 @@ def math_cmd(ses, args, input):
     rvalue = eval(ops)
     varman = exported.get_manager("variable")
     if varman:
-      varman.addVariable(session,var, str(rvalue))
+      varman.addVariable(ses,var, str(rvalue))
     if not quiet:
       exported.write_message("math: %s = %s = %s." % (var, ops, str(rvalue)))
   except Exception, e:
