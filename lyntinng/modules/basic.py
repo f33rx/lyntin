@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.64 2002/04/21 22:37:58 willhelm Exp $
+# $Id: basic.py,v 1.65 2002/04/21 23:48:29 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -87,13 +87,13 @@ def alias_cmd(session, words, input):
     exported.write_error("alias: cannot be added. %s" % e)
 
 
-def ansi_cmd(session, opts, input):
+def ansi_cmd(session, args, input):
   """#ansi [on|off]
 
   With no arguments, tells you whether ansicolor is enabled.
   With arguments, sets the ansicolor global variable.
   """
-  option = opts["option"]
+  option = args["option"]
 
   if option == 1:
     lyntin.ansicolor = 1
@@ -594,28 +594,22 @@ def math_cmd(session, words, input):
     exported.write_error("math: exception: %s" % e)
 
 
-def mudecho_cmd(session, words, input):
-  """#mudecho <on|off>
+def mudecho_cmd(session, args, input):
+  """#mudecho [on|off]
 
   Sometimes muds screw up the detail and don't properly turn echo
   on and off.  Sometimes you just want to be able to turn it on
   and off on your own.  So this allows you to do that.
   """
   import event
-  if len(words) == 1:
-    exported.write_error("syntax: #mudecho <on|off>")
-    return
+  option = args["option"]
 
-  option = utils.strip_braces(words[1])
-
-  if option == "on":
+  if option == 1:
     event.EchoEvent(1).enqueue() 
     exported.write_message("mudecho: turned on manually.")
-  elif option == "off":
+  elif option == 0:
     event.EchoEvent(0).enqueue() 
     exported.write_message("mudecho: turned off manually.")
-  else:
-    exported.write_error("syntax: #mudecho <on|off>")
 
  
 def nop_cmd(session, args, input):
@@ -1160,7 +1154,7 @@ def load():
   exported.add_command("math", math_cmd)
   # exported.add_command("mark", mark_cmd)
   # exported.add_command("message", message_cmd)
-  exported.add_command("mudecho", mudecho_cmd)
+  exported.add_command("mudecho", mudecho_cmd, "option:boolean")
   exported.add_command("nop", nop_cmd, "message*")
   # exported.add_command("path", path_cmd)
   # exported.add_command("pathdir", pathdir_cmd)
