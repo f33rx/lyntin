@@ -4,10 +4,17 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.8 2002/10/20 16:09:57 willhelm Exp $
+# $Id: highlight.py,v 1.9 2002/10/23 23:59:09 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
+
+Highlights can be used by the user to colorize text making it easier
+for the user to glance and see what's going on quickly.
+
+Note, if Lyntin's ansi is turned off, though, highlights won't happen.  
+We might at some point want to highlight things with [[ ... ]] or 
+something like that when ansi is off.
 """
 import string
 import ansi, manager, utils, lyntin, hooks, exported, modutils
@@ -55,13 +62,14 @@ class HighlightData:
     return hm
 
   def addHighlight(self, style, text):
-    """ Adds a highlight to the dict.
+    """
+    Adds a highlight to the dict.
 
-    arguments:
-      
-      'style' -- (string) the style to highlight the text as
+    @param style: the style to highlight the text with
+    @type  style: string
 
-      'text' -- (string) the text to highlight
+    @param text: the text to highlight
+    @type  text: string
     """
     style = style.lower()
     self._highlights[text] = (style, self._getMarkup(style))
@@ -72,13 +80,11 @@ class HighlightData:
     Looks at the style (which is a comma separated list of 
     styles) and figures out the markup string and returns it.
 
-    arguments:
+    @param style: the style to retrieve markup for
+    @type  style: text
 
-      'style' -- (string) the style to retrieve markup for
-
-    returns:
-
-      (string) the ansi code markup for the given style
+    @return: the ansi code markup for the given style
+    @rtype: string
     """
     styles = style.split(",")
     markup = ""
@@ -89,22 +95,23 @@ class HighlightData:
     return chr(27) + "[" + markup[:-1] + "m"
 
   def clear(self):
-    """ Removes all the highlights."""
+    """
+    Removes all the highlights.
+    """
     self._highlights.clear()
 
   def removeHighlights(self, text):
-    """ Removes highlights from the list.
+    """
+    Removes highlights from the list.
 
     Returns a list of tuples of highlight item/highlight that
     were removed.
 
-    arguments:
+    @param text: we remove highlights that match this text
+    @type  text: string
 
-      'text' -- (string) the text to match on
-
-    returns:
-
-      list of tuples of (text, style)
+    @return: list of (text, style)
+    @rtype: list of (string, string)
     """
     badhighlights = utils.expand_text(text, self._highlights.keys())
 
@@ -116,28 +123,27 @@ class HighlightData:
     return ret
 
   def getHighlights(self):
-    """ Returns the keys of the highlight dict.
+    """
+    Returns the keys of the highlight dict.
 
-    returns:
-      
-      sorted list of strings
+    @return: the list of highlight keys--which is the highlight text
+    @rtype: list of strings
     """
     list = self._highlights.keys()
     list.sort()
     return list
 
   def expand(self, text):
-    """ Looks at mud data and performs any highlights.
+    """
+    Looks at mud data and performs any highlights.
 
     It returns the final text--even if there were no highlights.
 
-    arguments:
+    @param text: the input text
+    @type  text: string
 
-      'text' -- (string) input text
-
-    returns:
-
-      (string) the finalized text
+    @return: the finalized text--even if no highlights were expanded
+    @rtype: string
     """
     if text:
       faketext = ansi.filter_ansi(text)
@@ -179,22 +185,22 @@ class HighlightData:
     Takes a bunch of stuff and applies the highlight involved.  
     It's messy.
 
-    arguments:
+    @param textlist: the list of strings representing the incoming
+        text--this is usually text interspersed with ansi color tokens.
+    @type textlist: list of strings
 
-      'textlist' -- a list of strings
+    @param place: the point in the text (skipping over ansi color stuff)
+        that marks the beginning of the highlight
+    @type  place: int
 
-      'place' -- if the textlist were concatenated without
-                 ansi color codes, place would be the index
-                 of where the highlight should start
+    @param memlength: the length of the string to be highlighted
+    @type  memlength: int
 
-      'memlength' -- the length of the string to be highlighted
+    @param hl: the highlight to apply
+    @type  hl: string
 
-      'hl' -- the highlight to apply
-
-    returns:
-
-      the new textlist
-
+    @returns: the newly adjusted textlist
+    @rtype: list of strings
     """
     # first we find the place to stick the highlight thingy.
     i = 0
@@ -217,7 +223,7 @@ class HighlightData:
     if len(textlist[i][place:]) >= memlength:
       newlist.append(textlist[i][place:place + memlength])
       newlist.append(chr(27) + "[0m")
-      color = self.convertColor(newcolor)
+      color = ansi.convert_tuple_to_ansi(newcolor)
       if color:
         newlist.append(color)
       newlist.append(textlist[i][place + memlength:])
@@ -244,7 +250,7 @@ class HighlightData:
 
     newlist.append(textlist[j][:memlength])
     newlist.append(chr(27) + "[0m")
-    color = self.convertColor(newcolor)
+    color = ansi.convert_tuple_to_ansi(newcolor)
     if color:
       newlist.append(color)
     newlist.append(textlist[j][memlength:])
@@ -254,35 +260,19 @@ class HighlightData:
 
     return newlist
 
-  def convertColor(self, color):
-    c = []
-    if color[0] != -1:
-      c.append(str(color[0]))
-    if color[1] != -1:
-      c.append(str(color[1]))
-    if color[2] != -1:
-      c.append(str(color[2]))
-
-    if len(c) == 0:
-      c = ''
-    else:
-      c = chr(27) + "[" + string.join(c, ";") + "m"
-    return c
-
   def getInfo(self, text=""):
-    """ Returns information about the highlights in here.
+    """
+    Returns information about the highlights in here.
 
     This is used by #highlight to tell all the highlights involved
     as well as #write which takes this information and dumps
     it to the file.
 
-    arguments:
+    @param text: we return info on highlights that match this text
+    @type  text: string
 
-      'text=""' -- (string) the text to match on
-
-    returns:
-
-      one big string of things.
+    @return: one big string of all the information
+    @rtype: string
     """
     if len(self._highlights.keys()) == 0:
       return ''
@@ -300,11 +290,11 @@ class HighlightData:
     return string.join(data, "\n")
 
   def getStatus(self):
-    """ Returns a one-liner describing this data object
+    """
+    Returns a one-liner describing this data object
 
-    returns:
-      
-      (string) a one liner describing this object
+    @return: one liner describing this object
+    @rtype: string
     """
     return "%d highlight(s)." % len(self._highlights.keys())
 
@@ -343,7 +333,6 @@ class HighlightManager(manager.Manager):
     return "0 highlight(s)."
 
   def addSession(self, newsession, basesession=None):
-    """ over-ridden from manager.Manager."""
     if basesession:
       if self._highlights.has_key(basesession):
         hdata = self._highlights[basesession]
@@ -351,7 +340,6 @@ class HighlightManager(manager.Manager):
           self.addHighlight(newsession, hdata._highlights[mem][0], mem)
 
   def removeSession(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._highlights.has_key(ses):
       del self._highlights[ses]
 
@@ -373,6 +361,9 @@ class HighlightManager(manager.Manager):
       file.flush()
 
   def mudfilter(self, args):
+    """
+    mud_filter_hook function for filtering incoming data from the mud.
+    """
     ses = args[0]
     text = args[-1]
 

@@ -4,10 +4,15 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.12 2002/09/30 18:29:25 willhelm Exp $
+# $Id: speedwalk.py,v 1.13 2002/10/23 23:59:09 willhelm Exp $
 #######################################################################
 """
-This module defines the speedwalking code.
+This module defines the speedwalking code.  Speedwalking is highly
+configurable and it's actually less like speedwalking in other mudclients
+and more like alias shorthand that allows you to quickly do things
+a number of times.
+
+The key ideas are creating the maps
 """
 
 # Originally written 2002 by Sebastian John

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.6 2002/10/13 03:16:22 willhelm Exp $
+# $Id: __init__.py,v 1.7 2002/11/06 01:56:51 willhelm Exp $
 #######################################################################
 """
 This is the ui package.  Ui's to be used in Lyntin need to be dropped
@@ -35,6 +35,7 @@ def get_ui(uiname):
     path = __file__[:index]
 
   if not glob.glob(os.path.join(path, uiname + ".py")):
+    print "ui '%s' does not exist" % uiname
     return None
 
   try:

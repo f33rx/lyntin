@@ -4,10 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.3 2002/07/21 04:14:48 willhelm Exp $
+# $Id: deed.py,v 1.4 2002/08/31 16:36:17 jmberne Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
+
+Deeds can be used to keep track of when things happened.  I tend to
+create deeds whenever someone does something nice for me via an action.
+This allows me to have a log of who did what to me and when they did it
+(if you use the $TIMESTAMP variable) even if I'm away from the computer
+or in the midst of copious battle spam.
 """
 
 # deed code originally written by Sebastian John.
@@ -20,32 +26,30 @@ class DeedData:
     self._deeds = []
   
   def addDeed(self, deed):
-    """ Adds a deed to the list.
+    """
+    Adds a deed to the list.
     
-    arguments:
-    
-      'deed' -- (string) the deed
-    
+    @param deed: the actual deed text
+    @type deed: string
     """
     self._deeds.append(deed)
   
   def clear(self):
-    """ Removes all the deeds."""
+    """
+    Removes all the deeds.
+    """
     self._deeds = []
   
   def removeDeeds(self, text):
-    """ Removes deeds from the list.
+    """
+    Removes deeds from the list and returns a list of the deeds
+    that were removed.
     
-    Returns a list of the gags that were removed.
-    
-    arguments:
-    
-      'text' -- (string) deeds will be removed that match the text
-    
-    returns:
-    
-      list of strings of removed deeds
-    
+    @param text: the text that matches the deeds to be removed.
+    @type  text: string
+
+    @return: the list of removed deeds
+    @rtype: list of strings
     """
     baddeeds = utils.expand_text(text, self._deeds)
     for mem in baddeeds:
@@ -53,28 +57,27 @@ class DeedData:
     return baddeeds
   
   def getDeeds(self):
-    """ Returns all deeds stored.
+    """
+    Returns a list of all the deeds currently stored for this
+    session.
     
-    returns:
-    
-      list of deed strings
+    @return: the list of deeds
+    @rtype: list of strings
     """
     return self._deeds
   
   def getInfo(self, num=""):
-    """ Returns information about the deeds in here.
+    """
+    Returns information about the deeds in here.
     
     This is used only by #deed to show all the deeds stored.
     
-    arguments:
-    
-      'num=""' -- (string) if a number, only the last num deeds will be
-                  returned
-    
-    returns:
-    
-      (string) one big string with all the deeds in it
-    
+    @param num: if a number, then returns the last num deeds.  otherwise
+        returns deeds that match what this expands to.
+    @type num: string or int
+
+    @returns: one big string with all the deeds in it
+    @rtype: string
     """
     if not self._deeds:
       return ""
@@ -88,11 +91,11 @@ class DeedData:
     return string.join(list, "\n")
   
   def getStatus(self):
-    """ Returns the number of deeds actually stored.
+    """
+    Returns the number of deeds actually stored.
 
-    returns:
-
-      (int) count of deeds.
+    @returns: the total number of deeds in this DeedData object.
+    @rtype: int
     """
     return "%d deed(s)." % len(self._deeds)
 
