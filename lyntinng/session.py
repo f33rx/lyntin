@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.48 2002/05/06 21:57:52 willhelm Exp $
+# $Id: session.py,v 1.49 2002/05/09 23:20:12 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -301,7 +301,7 @@ class Session:
 
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
-    if self._socket == None:
+    if not self.isConnected():
       exported.write_error("No connection.  Create a session.")
       if internal==0: self._prompt()
       return
