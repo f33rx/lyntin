@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.24 2002/12/22 23:07:20 willhelm Exp $
+# $Id: lyntincmds.py,v 1.25 2002/12/24 00:48:20 willhelm Exp $
 #######################################################################
 import string
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -27,7 +27,7 @@ def _fixmap(w, themap):
   for mem in keys:
     if type(themap[mem]) == type([]):
       output.append("   %s %s" % (mem.ljust(w), themap[mem][0]))
-      for mem2 in themap[mem]:
+      for mem2 in themap[mem][1:]:
         output.append((18 * " ") + mem2)
     else:
       output.append("   %s %s" % (mem.ljust(w), themap[mem]))
