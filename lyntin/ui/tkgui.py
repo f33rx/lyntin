@@ -31,7 +31,7 @@ fgColorCodes = {
                 "2037": "#ffffff" }
 
 winfont = ("Fixedsys", 12)
-posixfont = ("Fixedsys", 24)
+posixfont = ("Fixedsys", 12)
 
 # fgColorCodes = { "30": "black", "31": "red", "32": "green",
 #                  "33": "yellow", "34": "blue", "35": "magenta",
