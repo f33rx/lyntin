@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.72 2003/02/15 03:35:06 willhelm Exp $
+# $Id: tintincmds.py,v 1.73 2003/04/12 17:38:27 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -446,6 +446,9 @@ def session_cmd(ses, args, input):
     # start the network thread
     exported.get_engine().startthread("network", sock.run)
 
+    # spam the hook
+    hooks.connect_hook.spamhook((ses, host, port))
+
   except:
     exported.write_traceback("session: had problems creating the session.")
 
@@ -456,8 +459,6 @@ def session_cmd(ses, args, input):
       try:    exported.get_engine().closeSession(name)
       except: pass
 
-
-  hooks.connect_hook.spamhook((ses, host, port))
 
 commands_dict["session"] = (session_cmd, "sessionname= host= port:int=-1")
 
