@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.8 2002/04/12 15:44:40 willhelm Exp $
+# $Id: advanced.py,v 1.9 2002/04/12 21:24:06 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -74,12 +74,9 @@ def import_cmd(session, words, input):
 
   else:
     try:
-      name = mod[mod.rfind(".")+1:]
-      if len(modarray) == 1:
-        _module = __import__( mod )
-      else:
-        _module = getattr(__import__( mod ), name)
+      _module = __import__( mod )
 
+      _module = sys.modules[mod]
       if (_module.__dict__.has_key("load")):
         _module.load()
 
