@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.70 2002/11/09 04:21:59 willhelm Exp $
+# $Id: session.py,v 1.71 2002/11/10 20:02:58 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -34,7 +34,6 @@ class Session:
     self._name = ""
     self._host = "none"
     self._port = 0
-    self._logfile = None
     self._ticker = ticker.Ticker()
     self._colorbuffer = ''
 
@@ -92,8 +91,8 @@ class Session:
 
   def shutdown(self, args):
     """
-    Shuts down the session, shuts down the underlying SocketCommunicator,
-    clears the ticker, and also closes the logfile.
+    Shuts down the session, shuts down the underlying SocketCommunicator
+    and clears the ticker.
 
     @param args: the args tuple for the shutdown_hook.
     @type  args: tuple
@@ -109,7 +108,6 @@ class Session:
       if quiet == 0:
         event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
       self._ticker.clear()
-      self.closeLogfile()
       hooks.disconnect_hook.spamhook((self, self._host, self._port))
 
       try:
@@ -123,8 +121,7 @@ class Session:
   def getStatus(self):
     """
     Returns status of the session.  Most specifically the session name,
-    the socket we're connected to, the ticker status, and the logfile
-    status.
+    the socket we're connected to and the ticker status
 
     @returns: the status string
     @rtype: string
@@ -134,7 +131,6 @@ class Session:
     data.append("Session name: %s" % self._name)
     data.append("   socket: %s" % repr(self._socket))
     data.append("   ticker: %s" % self.getTicker().getInfo())
-    data.append("   logfile: %s" % self.getLogfileStatus())
 
     return data
 
@@ -334,9 +330,6 @@ class Session:
       self._colorbuffer = input[index:]
       input = input[:index]
 
-    if self._logfile:
-      self.log(input)
-
     # we add the new input to the databuffer
     self._databuffer.addData(input)
 
@@ -359,90 +352,6 @@ class Session:
     input = string.join(inputlines, "")
     exported.write_mud_data(input, self)
 
-
-  def log(self, input):
-    """
-    Logs text to a file instance self._logfile[0] and optionally
-    filters ansi according to self._logfile[1].
-
-    @param input: the string to log to the logfile for this session
-    @type  input: string
-    """
-    try:
-      if self._logfile[1] == 1:
-        input = ansi.filter_ansi(input)
-      text = utils.filter_cm(input)
-      text = text.replace("\n", os.linesep)
-      self._logfile[0].write(text)
-      self._logfile[0].flush()
-    except:
-      exported.write_error("Logfile cannot be written to.")
-      self._logfile = None
-      exported.write_traceback()
-
-  def getLogfile(self):
-    """
-    Returns the logfile file instance or None.
-
-    @returns: the file object representing the logfile
-    @rtype: File
-    """
-    return self._logfile
-
-  def closeLogfile(self):
-    """
-    Closes the logfile if it's currently open.
-    """
-    if self._logfile:
-      self._logfile[0].close()
-      self._logfile = None
-
-  def openLogfile(self, filename, stripansi=1):
-    """
-    Opens a new logfile.
-
-    @param filename: the name of the new file to open in append mode.
-    @type  filename: string
-
-    @param stripansi: whether (1) or not (0) to strip ansi from the
-        logs
-    @type  stripansi: boolean
-    """
-    # FIXME - what happens if we already have a logfile open?
-    self._logfile = (open(filename, "a"), stripansi)
-
-  def setLogfile(self, fileob, stripansi=1):
-    """
-    Sets the logfile.
-
-    @param fileob: the new File instance
-    @type  fileob: File
-    """
-    if self._logfile:
-      self._logfile[0] = fileob
-    else:
-      self._logfile = (fileob, stripansi)
-
-  def getLogfileName(self):
-    """
-    If we have a logfile, this returns the logfile name.
-
-    @return: the logfile name or "<none>"
-    @rtype: string
-    """
-    if self._logfile:
-      return self._logfile[0].name
-    else:
-      return "<none>"
-
-  def getLogfileStatus(self):
-    if self._logfile:
-      if self._logfile[1] == 0:
-        return self.getLogfileName() + " (noansi)"
-      else:
-        return self.getLogfileName()
-    else:
-      return "logging disabled"
 
 # Local variables:
 # mode:python

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.54 2002/11/08 02:35:13 willhelm Exp $
+# $Id: tintincmds.py,v 1.55 2002/11/10 20:03:00 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -211,66 +211,6 @@ def killall_cmd(session, args, input):
 commands_dict["^killall"] = (killall_cmd, "")
 
 
-def log_cmd(session, args, input):
-  """
-  Will start or stop logging to a given filename for that session.
-  Each session can have its own logfile.
-
-  category: commands
-  """
-  logfile = args["logfile"]
-  databuffer = args["databuffer"]
-  stripansi = args["stripansi"]
-
-  if not logfile:
-    exported.write_message(session.getLogfileStatus())
-    if session.getLogfile() != None:
-      exported.write_message("Currently logging to %s." 
-                             % session.getLogfileStatus())
-    else:
-      exported.write_message("Logging is disabled.")
-    return
-
-  if not session.isConnected():
-    exported.write_error("log: You must have a session to log")
-    return
-
-  # handle stopping logging
-  if session.getLogfile() != None:
-    try:
-      exported.write_message("log: stopping logging to '%s'." % (session.getLogfileName()))
-      session.closeLogfile()
-    except Exception, e:
-      exported.write_error("log: logfile cannot be closed (%s)." % (e))
-    return
-
-
-  # handle starting logging
-  try:
-    if databuffer:
-      f = open(logfile, "w")
-      buffer = session.getDataBuffer().fetchbuffer()
-      f.write(buffer)
-      exported.write_message("log: dumped %d lines of databuffer to logfile" % buffer.count("\n"))
-      session.setLogfile(f, stripansi)
-
-    else:
-      session.openLogfile(logfile, stripansi)
-
-    if stripansi:
-      stripansimessage = " stripping ansi"
-    else:
-      stripansimessage = ""
-
-    exported.write_message("log: starting logging to '%s'%s." % 
-                             (session.getLogfileName(), stripansimessage))
-  except Exception, e:
-    exported.write_error("log: logfile cannot be opened for appending. %s" % (e))
-
-
-commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false stripansi:boolean=true")
-
-         
 def loop_cmd(session, args, input):
   """
   Executes a given command replacing %0 in the command with
