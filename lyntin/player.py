@@ -239,8 +239,21 @@ def LynImport(words, input, seslist):
     """LynImport(words, input, seslist) -> None
 
     imports a module which adds itself to the app and such.
+    This is a user command.
     """
-    Putline("importing " + words[1])
+
+    # FIXME - this is a quickie implementation to allow me
+    # to test other things.  later this will allow for more
+    # sophisticated importing based on LYNTINDIR and reloading
+    # of modules (theoretically).
+
+    import sys
+    Putline("trying to import " + words[1])
+    try:
+        exec ("import " + words[1])
+        Putline('import succeeded.')
+    except:  
+        Putline('import failed.')
     return
 
 
@@ -248,6 +261,7 @@ def Showme(words, input, seslist):
     """Showme(words, seslist) -> None
 
     Prints the words to the clients display
+    This is a user command.
     """
     hooks.showme_command_hook.run((input, seslist))
     for ses in seslist:
@@ -280,6 +294,7 @@ def Ses(words, input, seslist):
     Creates a new session Connected to a mud.
     Increment global session count and add new session to global
     session list.
+    This is a user command.
     """
     hooks.session_command_hook.run((input, seslist))
     to = words[1:]
@@ -329,6 +344,7 @@ def SpeedWalk(words, input, seslist):
     """SpeedWalk(seslist) -> None
 
     Toggles speedwalking.
+    This is a user command.
     """
     hooks.speedwalk_command_hook.run((seslist,))
     for ses in seslist:
@@ -343,6 +359,7 @@ def DataBuffer(words, input, seslist):
 
     With one argument, sets the size of the session's databuffer.
     With no arguments, it displays the databuffer.
+    This is a user command.
     """
     hooks.databuffer_command_hook.run((input, seslist))
     for ses in seslist:
@@ -362,6 +379,7 @@ def Char(words, input, seslist):
 
     with no arguments, prints the lyntin character.
     With one argument, sets the lyntin character.
+    This is a user command.
     """
     hooks.char_command_hook.run((input, seslist))
     for ses in seslist:
@@ -388,6 +406,7 @@ def DataGrep(words, input, seslist):
 
     Searches through the databuffer for a regex, printing all matches
     in their entirety.
+    This is a user command.
     """
     hooks.datagrep_command_hook.run((input, seslist))
     for ses in seslist:
@@ -406,6 +425,7 @@ def DataGrepLines(words, input, seslist):
 
     Searches through the databuffer for a regex, printing out only
     the _lines_ which contain a match.
+    This is a user command.
     """
     hooks.datagreplines_command_hook.run((input, seslist))
     for ses in seslist:
@@ -426,6 +446,7 @@ def Report(words, input, seslist):
     Otherwise, creates a report which prints the line containing
     args 2+ to the file given by arg1, whenever said line is seen
     in mud output.
+    This is a user command.
     """
     hooks.report_command_hook.run((input, seslist))
     for eachses in seslist:
@@ -454,6 +475,7 @@ def Variable(words, input, seslist):
     """Variable(words, seslist) -> None
 
     Defines a variable
+    This is a user command.
     """
     hooks.variable_command_hook.run((input, seslist))
     for ses in seslist:
@@ -499,6 +521,7 @@ def WriteFile(words, input, seslist):
     Writes aliases/actions/gags, etc to a file.
     This saves the local session and the global session in one fell
     swoop.
+    This is a user command.
     """
     hooks.write_command_hook.run((input, seslist))
     for ses in seslist:
@@ -537,6 +560,7 @@ def Textin(words, input, seslist):
     """Textin(words, seslist) -> None
 
     Sends the text to the mud from a file.
+    This is a user command.
     """
     hooks.textin_command_hook.run((input, seslist))
     oldses = data.currsession
@@ -575,6 +599,7 @@ def ParseFile(ofile, input, seslist):
     """ParseFile(ofile, seslist) -> None
 
     Read in aliases/actions/gags/substitutes from a file.
+    This is a user command.
     """
     hooks.read_command_hook.run((input, seslist))
     for ses in seslist:
@@ -644,6 +669,7 @@ def CR(words, input, seslist):
 
     Sends a carriage return from teh current session to its connection.
     Useful for aliases that want to send carriage returns.
+    This is a user command.
     """
     hooks.cr_command_hook.run((seslist,))
     for ses in seslist:
@@ -655,6 +681,7 @@ def Log(words, input, seslist):
     """Log(words, seslist) -> None
 
     Starts a log file for the current session.
+    This is a user command.
     """
     hooks.log_command_hook.run((input, seslist))
     # check for bad argument like #all #log myfile
@@ -700,6 +727,7 @@ def Quit(words, input, seslist):
     """Quit() -> None
 
     Quits lyntin.
+    This is a user command.
     """
     Putline("quit: you'll be back...")
     # run the shutdown hook.
@@ -716,6 +744,7 @@ def KillAll(words,input,seslist):
     """KillAll() -> None
 
     Wipes clean all active session removing actions/gags/subs...
+    This is a user command.
     """
     hooks.killall_command_hook.run((input, seslist))
     for ses in data.sessionlist:
@@ -737,6 +766,7 @@ def Action(words, input, seslist):
     With one argument, prints matching action(s).
     Otherwise, creates an action named arg1 which expands to the
     rest of the args.
+    This is a user command.
     """
     hooks.action_command_hook.run((input, seslist))
     for eachses in seslist:
@@ -769,6 +799,7 @@ def UnAction(words, input, seslist):
     """UnAction(words, seslist) -> None
 
     Removes all matching actions.
+    This is a user command.
     """
     hooks.unaction_command_hook.run((input, seslist))
     for ses in seslist:
@@ -803,6 +834,7 @@ def Alias(words, input, seslist):
     With one argument, prints matching alias definitions.
     With many arguments, defines an alias named the first argument
     which expands to the rest of the arguments.
+    This is a user command.
     """
     hooks.alias_command_hook.run((input, seslist))
     for ses in seslist:
@@ -841,6 +873,7 @@ def Help(words, input, seslist):
     defined in help.print_help.  Then folks can build modules and
     add help to their modules without putting new help files in the
     help directory.  Later though.
+    This is a user command.
     """
     import os
 
@@ -877,6 +910,7 @@ def History(words, input, seslist):
 
     With one numeric argument, set history size.
     With no arguments, prints last histsize commands.
+    This is a user command.
     """
     hooks.history_command_hook.run((input, seslist))
     for ses in seslist:
@@ -910,24 +944,26 @@ def Info(words,input,seslist):
     """Info(seslist) -> None
 
     Prints session info to the client.
+    This is a user command.
     """
     for ses in seslist:
         Putline('Session: ' + ses.name)
-	Putline(repr(len(ses.actions.keys())) + ' actions.')
-	Putline(repr(len(ses.aliases.keys())) + ' aliases.')
-	Putline(repr(len(ses.gags)) + ' gags.')
-	Putline(repr(len(ses.vars.keys())) + ' variables.')
+        Putline(repr(len(ses.actions.keys())) + ' actions.')
+        Putline(repr(len(ses.aliases.keys())) + ' aliases.')
+        Putline(repr(len(ses.gags)) + ' gags.')
+        Putline(repr(len(ses.vars.keys())) + ' variables.')
         if ses.verbose: Putline('Verbose is on.')
-	else:           Putline('Verbose is off.')
-	if ses.speedwalk: Putline('Speedwalking is on.')
-	else:             Putline('Speedwalking is off.')
+        else:           Putline('Verbose is off.')
+        if ses.speedwalk: Putline('Speedwalking is on.')
+        else:             Putline('Speedwalking is off.')
         if ses.ticker: Putline('Ticker is on; ' + repr(ses.ticklen) + ses.tickaction)
-	else:          Putline('Ticker is off.')
+        else:          Putline('Ticker is off.')
     
 def UnAlias(words, input, seslist):
     """UnAlias(words, seslist) -> None
 
     Removes all matching aliases.
+    This is a user command.
     """
     hooks.unalias_command_hook.run((input, seslist))
     for ses in seslist:
@@ -951,6 +987,7 @@ def Gag(words, input, seslist):
     Cease displaying any text from the mud which contains the
     given string.  Useful for shutting up spammers or spammy
     events.
+    This is a user command.
     """
     hooks.gag_command_hook.run((input, seslist))
     for ses in seslist:
@@ -971,6 +1008,7 @@ def UnGag(words, input, seslist):
     """UnGag(words, seslist) -> None
 
     Removes the given string from the session's gags.
+    This is a user command.
     """
     hooks.ungag_command_hook.run((input, seslist))
     for ses in seslist:
@@ -993,6 +1031,7 @@ def Substitute(words, input, seslist):
 
     Anytime we see a certain string from the mud,
     substitute an alternate string for it.
+    This is a user command.
     """
     hooks.substitute_command_hook.run((input, seslist))
     for ses in seslist:
@@ -1007,6 +1046,7 @@ def UnSubstitute(words, input, seslist):
     """UnSubstitute(words, seslist) -> None
 
     Removes the substitute from the current session.
+    This is a user command.
     """
     hooks.unsubstitute_command_hook.run((input, seslist))
     for ses in seslist:
@@ -1022,6 +1062,7 @@ def Clear(words, input, seslist):
     """Clear(seslist) -> None
 
     Clears the session of aliases, actions, subs, vars, and gags.
+    This is a user command.
     """
     hooks.clear_command_hook.run((seslist,))
     for ses in seslist:
@@ -1039,6 +1080,7 @@ def Tickset(words, input, seslist):
 
     With no arguments, synchronize tick start ot current time.
     With arg "on" set ticker on.  With arg "off" set ticker off.
+    This is a user command.
     """
     hooks.tickset_command_hook.run((input, seslist))
     if len(words) == 1:
@@ -1104,7 +1146,8 @@ def Tickset(words, input, seslist):
 def Tick(words, input, seslist):
     """Tick(words, seslist) -> None
 
-    display tick status.
+    Display tick status.
+    This is a user command.
     """
     hooks.tick_command_hook.run((input, seslist))
     if len(words) == 1: # display tick status
@@ -1121,6 +1164,7 @@ def Verbose(words, input, seslist):
     """Verbose(seslist) -> None
 
     Toggles whether or not to be verbose.
+    This is a user command.
     """
     for ses in seslist:
         ses.verbose = not ses.verbose
