@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.30 2002/03/16 04:00:05 willhelm Exp $
+# $Id: basic.py,v 1.31 2002/03/16 04:03:08 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -431,9 +431,14 @@ def loop_cmd(session, words, input):
 
     # we add one because range(2,5) will be 2,3,4 and non-inclusive
     # of 5 which is what we want.
-    for i in range(ifrom, ito+1):
-      loopcommand = command.replace("%0", repr(i))
-      event.InputEvent(input=loopcommand, internal=1).enqueue()
+    if ifrom > ito:
+      for i in range(ito, ifrom+1):
+        loopcommand = command.replace("%0", repr(i))
+        event.InputEvent(input=loopcommand, internal=1).enqueue()
+    else:
+      for i in range(ifrom, ito+1):
+        loopcommand = command.replace("%0", repr(i))
+        event.InputEvent(input=loopcommand, internal=1).enqueue()
 
   except:
     exported.write_error("loop: error in the loop.")

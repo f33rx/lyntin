@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.6 2002/02/27 02:25:21 willhelm Exp $
+# $Id: gag.py,v 1.7 2002/03/10 04:49:31 willhelm Exp $
 #######################################################################
 """
 This module defines the GagManager which handles gags in Lyntin.
@@ -33,7 +33,7 @@ class GagManager(manager.Manager):
 
   def compileGagRegexp(self):
     """ Creates a regexp object of the list of gags."""
-    if self._gags != []:
+    if len(self._gags) > 0:
       gags = []
       # we have to handle special character which could
       # make the regular expression unhappy--so we do
@@ -99,7 +99,7 @@ class GagManager(manager.Manager):
     as well as #write which takes this information and dumps
     it to the file.
     """
-    if self._gags == []:
+    if len(self._gags) == 0:
       return ''
 
     data = ''

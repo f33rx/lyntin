@@ -4,11 +4,11 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.6 2002/02/27 02:25:22 willhelm Exp $
+# $Id: variable.py,v 1.7 2002/03/13 00:10:51 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
-It also defines some magic variables like $TIMESTAMP.
+It also defines some builtin variables like $TIMESTAMP.
 """
 import re
 import manager, utils, lyntin
@@ -23,7 +23,7 @@ class VariableManager(manager.Manager):
   """ Manages variables."""
   def __init__(self):
     self._variables = {}
-    self._setMagicVars()
+    self._setBuiltinVars()
 
   def addVariable(self, var, expansion):
     """ Adds a variable to the dict.
@@ -83,7 +83,7 @@ class VariableManager(manager.Manager):
     list.sort()
     return list
 
-  def _setMagicVars(self):
+  def _setBuiltinVars(self):
     """ Adds a series of built-in variables."""
     import time
     self.addVariable("TIMESTAMP", time.asctime(time.localtime()))
@@ -94,7 +94,7 @@ class VariableManager(manager.Manager):
     It'll return the expansion if there is one.  Otherwise
     it returns None.
     """
-    self._setMagicVars()
+    self._setBuiltinVars()
     replacedvars = 0
     if len(text) > 0:
       marker = 0
@@ -164,7 +164,7 @@ class VariableManager(manager.Manager):
       (string) one big string with all the information in it
 
     """
-    if self._variables.keys() == []:
+    if len(self._variables.keys()) == 0:
       return ''
 
     if text=='':

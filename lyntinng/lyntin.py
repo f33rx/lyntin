@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.9 2002/03/02 23:21:34 willhelm Exp $
+# $Id: lyntin.py,v 1.10 2002/03/02 23:57:49 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -37,7 +37,7 @@ HELPTEXT = """syntax: Lyntin.py [--help] [--readfile <file>] [--datadir <dir>] [
 
   --ui
          launches a specific ui for Lyntin.  current options
-         are 'textui', 'tkgui', and 'cursesui'.
+         are 'text', 'tk', and 'curses'.
 """
 
 # the wizlist of folks who have helped Lyntin out over the years.

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.8 2002/03/10 02:07:23 willhelm Exp $
+# $Id: utils.py,v 1.9 2002/03/16 04:03:08 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -53,7 +53,7 @@ def expand(str, list):
 
   """
   ret = []
-  wildcardcheck = string.find(str, '*')
+  wildcardcheck = str.find('*')
 
   # if they didn't have wildcards....
   if wildcardcheck == -1:

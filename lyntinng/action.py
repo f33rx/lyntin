@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.7 2002/02/27 02:25:21 willhelm Exp $
+# $Id: action.py,v 1.8 2002/03/01 04:32:47 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -177,7 +177,6 @@ class ActionManager(manager.Manager):
       varvals = {}
       # fill in values for all the variables in the match
       for i in xrange(len(actionvars)):
-        # varvals[actionvars[i]]=string.replace(regac.group(i+1),';','_')
         varvals[actionvars[i]] = match.group(i+1)
 
       # add special variables
@@ -217,7 +216,7 @@ class ActionManager(manager.Manager):
       a string of all the action information
 
     """
-    if self._actions.keys() == []:
+    if len(self._actions.keys()) == 0:
       return ''
 
     list = []

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.5 2002/02/04 01:10:16 willhelm Exp $
+# $Id: alias.py,v 1.6 2002/02/27 02:25:21 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -113,7 +113,7 @@ class AliasManager(manager.Manager):
     as well as #write which takes this information and dumps
     it to the file.
     """
-    if self._aliases.keys() == []:
+    if len(self._aliases.keys()) == 0:
       return ''
 
     list = []

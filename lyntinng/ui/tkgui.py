@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.14 2002/03/01 02:33:26 willhelm Exp $
+# $Id: tkgui.py,v 1.15 2002/03/14 22:33:31 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -542,7 +542,8 @@ class CommandEntry(Tkinter.Entry):
         
   def insertTab(self, tkevent):
     """ Handles the <KeyPress-Tab> event."""
-    self.insert(INSERT, '\t')
+    # self.insert(INSERT, '\t')
+    pass
         
   def callPrior(self, tkevent):
     """ Handles the <KeyPress-Prior> event."""
