@@ -1,0 +1,73 @@
+*Title: Hacking Guide to Lyntin
+*Author: Will
+
+
+* VERSION
+
+$Id$
+
+For more up-to-date information, please check the web-site:
+http://Lyntin.sourceforge.net/
+
+
+
+* NOTES
+
+This entire document is written off the top of my head and the contents
+of it are likely to change before 3.0 actually gets released.
+
+
+
+* SYNOPSIS
+
+Lyntin was built for the hacker/mudder.  This is a special breed of
+person that's mudding and has a series of complex problems they want
+to solve and mere aliases and triggers just aren't going to meet
+that need.
+
+Tintin++ has a series of commands that almost but not quite implements
+(ed. bad word choice) a programming language.  Building "macros" in 
+this way is complex and solves a small set of problems, but the more 
+complex problems really need a full language and a library to solve.  
+As such, Lyntin was built with Python and allows hackers to use Python 
+to enhance Lyntin.
+
+There a a few different methods of hacking Lyntin to suit your needs.  
+They are briefly outlined here and described in more detail in their 
+respective sections:
+
+	1. editing the source code
+	2. building modules
+	3. command line
+
+
+
+* EDITING THE SOURCE CODE
+
+Lyntin is entirely written in Python.  The source code is well organized
+(as of 3.0) and there will be plenty of documentation available on the
+website for supporting people who want to just change the internals of
+Lyntin.
+
+FIXME - More on this at some point in time.
+
+
+
+* BUILDING MODULES
+
+FIXME - This is likely to change in the near future prior to the final
+3.0 release.
+
+Lyntin has a modules package and all the commands are implemented in
+the 'basic' module.  You can add modules at your whim.
+
+
+
+* COMMAND LINE
+
+FIXME - This isn't quite implemented yet--but soon.
+
+Lyntin allows you to execute arbitrary Python at the command line.
+The code will be executed in some module--(to be determined).
+
+
