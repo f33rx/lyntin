@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.15 2002/07/21 04:14:48 willhelm Exp $
+# $Id: ui.py,v 1.16 2002/10/12 22:14:48 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -61,76 +61,84 @@ class BaseUI:
   the ui's and Lyntin.
   """
   def __init__(self):
-    """ Initializes.
-
+    """
     If you have initializations to do, override this class,
-    but call this function like this:
+    but call this function like this::
 
-       'BaseUI.__init__(self)'
+      BaseUI.__init__(self)
+
+    then go on to do the initializing you need to do.
     """
     self.shutdownflag = 0
     hooks.shutdown_hook.register(self.shutdown)
 
   def startui(self):
-    """ Initializes your user interface.
-
-    It's best to do all your initialization logic in startui
-    including the call to start whatever thread will handle
-    polling for user input.
+    """
+    Initializes your user interface.  It's best to do all your 
+    initialization logic in startui including the call to start w
+    hatever thread will handle polling for user input.
     """
     pass
 
   def write(self, args):
-    """ Writes output to the user.
-
-    Output can come from the mud, lyntin, or even user
-    input being printed to the screen.  If the message
-    argument is a String object rather than a Message
+    """
+    Writes output to the user.  Output can come from the mud, 
+    Lyntin, or even user input being printed to the screen.  If 
+    the message argument is a String object rather than a Message
     object, the ui should assume it's Lyntin output.
 
-    arguments:
+    This method should be registered with the to_user_hook.
 
-      'args' -- a tuple with one item: a ui.ui.Message instance
-
+    @param args: either a string or a Message instance--this is
+        the thing to be outputted to the user
+    @type args: tuple holding either a string or a Message instance
     """
     pass
 
   def prompt(self):
-    """ Prints a prompt to the user.
-
-    This is mostly for niceties so the user knows that
-    Lyntin is awaiting input.  It should just print
-    a prompt.  Prompts only get printed by the common
-    session.
+    """
+    Prints a prompt to the user.  This is mostly for niceties so the 
+    user knows that Lyntin is awaiting input.  It should just print
+    a prompt.  Prompts only get printed by the common session.
     """
     pass
 
   def run(self):
+    """
+    The ui's typically have their own thread to poll for user input.
+    If so, then you'll implement this method and toss it in a thread.
+    Then launch the thread in the startui method.  DON'T do it in 
+    __init__ because Lyntin won't have been bootstrapped enough at 
+    that point.
+    """
     pass
 
   def shutdown(self, args):
-    """ Tells the user interface thread to shutdown.
+    """
+    Tells the user interface thread to shutdown.  This is 
+    registered with the shutdown_hook.  Implement this method
+    if you have shutdown stuff to do.
 
-    arguments:
-
-      'args' -- we ignore this
-
+    @param args: it's an empty tuple--we ignore this
+    @type  args: tuple of 0 length
     """
     self.shutdownflag = 1
 
   def flush(self):
-    """ Flushes output to the user."""
+    """
+    Flushes output to the user.  Currently we don't do any flushing
+    and it shouldn't be needed.  I'm not wholly sure why it's here.
+    """
     pass
 
   def handleinput(self, input):
-    """ Nicely handles enqueuing of input events.
+    """
+    Nicely handles enqueuing of input events.  Also deals with things 
+    like CR and LF.  Call this method with input that's just been
+    polled from the user.
 
-    Also deals with things like \n.
-
-    arguments:
-
-      'input' -- the raw input from the user
-
+    @param input: the raw input from the user
+    @type  input: string
     """
     input = utils.chomp(input)
     if input == '':
