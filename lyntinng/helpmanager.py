@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.18 2002/12/24 03:25:10 willhelm Exp $
+# $Id: helpmanager.py,v 1.19 2003/04/29 01:01:44 willhelm Exp $
 #######################################################################
 """
 Lyntin has a comprehensive X{help} system that can be accessed in-game
@@ -291,19 +291,28 @@ class HelpManager(manager.Manager):
       error = ""
 
     if type(tree) == types.DictType:
-      list = []
+      toplist = []
+      catlist = []
       for key, value in tree.items():
         if type(value) == types.DictType:
-          list.append("%s(%d) " % (key, len(value)))
+          catlist.append("%s(%d) " % (key, len(value)))
         else:
-          list.append(key)
-      list.sort()
+          toplist.append(key)
+      toplist.sort()
+      catlist.sort()
       if tree.has_key("__doc__"):
-        list.remove("__doc__")
-        helphead = tree["__doc__"] + "\n\nOther topics in this category:\n"
+        if "__doc__" in toplist: toplist.remove("__doc__")
+        if "__doc__" in catlist: catlist.remove("__doc__")
+        helphead = tree["__doc__"] + "\n\nOther things in this category:\n\n"
       else:
         helphead = ""
-      return (error, breadcrumbs, helphead + utils.columnize(textlist=list, indent=3))
+      data = helphead
+      if catlist:
+        data += "Categories:\n" + utils.columnize(catlist, indent=3) + "\n"
+      if toplist:
+        data += "Topics:\n" + utils.columnize(toplist, indent=3) + "\n"
+
+      return (error, breadcrumbs, data)
     return (error, breadcrumbs, tree)
     
   def _printTree(self, tree=None, tab=""):
