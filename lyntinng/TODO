@@ -16,6 +16,8 @@ TODO:
  - handle "#session" by itself
  - add file logging status to #info
 
+ - have lyntin generate the user.py module for users to edit (if it's 
+   not there)
  - centralize all manager stuff into a Manager superclass and subclass 
    it lots
  - default command file should be .lyntinrc

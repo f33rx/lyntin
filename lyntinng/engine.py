@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.3 2001/12/11 02:34:33 willhelm Exp $
+# $Id: engine.py,v 1.4 2001/12/14 05:30:00 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -275,6 +275,7 @@ class Engine:
             return
 
          try:
+            # print e, e.__dict__
             e.execute()
          except KeyboardInterrupt:
             pass

@@ -4,14 +4,17 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: highlight.py,v 1.1 2001/12/11 02:34:33 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
 """
 import utils
 
-COLORMAP = {
+STYLEMAP = {
+             "reverse": chr(27),
+             "bold": chr(27),
+             "blink": chr(27),
              "black": chr(27) + "[40m",
              "red": chr(27) + "[41m", 
              "green": chr(27) + "[42m",
@@ -26,9 +29,9 @@ class HighlightManager:
    def __init__(self):
       self._highlights = {}
 
-   def addHighlight(self, item, color):
+   def addHighlight(self, style, text):
       """ Adds a highlight to the dict."""
-      self._highlights[item] = color
+      self._highlights[text] = color
       return 1
 
    def clearHighlights(self):
@@ -61,11 +64,12 @@ class HighlightManager:
       """ Looks at mud data and performs any highlights.
 
       It returns the final text--even if there were no highlights.
-      # FIXME -- this isn't done correctly.
       """
+      # FIXME handle ansi color issues, different styles, and
+      #       recovering better
       if len(input) > 0:
          for mem in self._highlights.keys():
-            input = input.replace(mem, COLORMAP[self._highlights[mem]] + 
+            input = input.replace(mem, STYLEMAP[self._highlights[mem]] + 
                                        mem + 
                                        chr(27) + "[40m")
 
