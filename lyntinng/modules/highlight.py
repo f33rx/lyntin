@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.14 2002/12/18 04:47:59 willhelm Exp $
+# $Id: highlight.py,v 1.15 2002/12/27 02:08:41 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -70,14 +70,10 @@ class HighlightData:
 
     @param text: the text to highlight
     @type  text: string
-
-    @returns: returns whether adding the highlight was successful (1) or not (0)
-    @rtype: int
     """
     style = style.lower()
     markup, compiled = self._getMarkup(style), utils.compile_regexp(text, 0, 1)
     self._highlights[text] = (style, markup, compiled)
-    return 1
 
   def _getMarkup(self, style):
     """
