@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.9 2002/05/04 04:31:48 willhelm Exp $
+# $Id: speedwalk.py,v 1.10 2002/05/04 17:39:58 jmberne Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -29,6 +29,7 @@ class SpeedwalkManager(manager.Manager):
     Clears all stored speedwalking dirs from the manager.
     """
     self._dirs = {}
+    self._aliases = []
   
   def addDir(self, alias, dir):
     """
@@ -131,13 +132,16 @@ class SpeedwalkManager(manager.Manager):
   def compileRegexp(self):
     """
     Compiles the actual speedwalking pattern.
+    Also maintains self._aliases - the default excludes.
     """
-    keys = "|".join(self._dirs.keys())
     if self._dirs:
+      keys = "|".join(self._dirs.keys())
       regexp = "^(\\d*(%s))+$" % (keys)
       self._regexp = re.compile(regexp)
+      self._aliases = self._dirs.values()
     else:
       self._regexp = None
+      self._aliases = []
   
   def clearExcludes(self):
     """
@@ -273,7 +277,7 @@ class SpeedwalkManager(manager.Manager):
     internal = args[1]
     text = args[-1]
      
-    if lyntin.speedwalk == 0 or not self._dirs or text in self._excludes:
+    if lyntin.speedwalk == 0 or not self._dirs or text in self._excludes or text in self._aliases:
       return text
 
     if not self._regexp.match(text):
