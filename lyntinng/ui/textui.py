@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.31 2002/11/18 02:43:54 willhelm Exp $
+# $Id: textui.py,v 1.32 2002/12/04 03:46:29 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -19,6 +19,20 @@ time, because it's so basic, it tends to be a good testing ui.
 
 The textui has no special features.
 """
+
+# termios is the module that allows us to change echo for a terminal
+# but only if the module is present
+try:
+  import termios
+except ImportError:
+  tio = 0
+else:
+  tio = 1
+  stdinfd = sys.stdin.fileno()
+  echonew = termios.tcgetattr(stdinfd)
+  onecho_attr = echonew[3]
+  offecho_attr = echonew[3] & ~termios.ECHO
+
 myui = None
 
 DEFAULT = [-1, -1, -1]
@@ -39,19 +53,61 @@ class Textui(ui.BaseUI):
   def __init__(self):
     """ Initialize the textui."""
     ui.BaseUI.__init__(self)
-    # hooks.startup_hook.register(self.startui)
-    # hooks.to_user_hook.register(self.write)
+    self._do_i_echo = 1
     exported.hook_register("startup_hook", self.startui)
     exported.hook_register("to_user_hook", self.write)
+    exported.hook_register("mudecho_hook", self.echo)
     self._currcolors = {}
     self._unfinishedcolor = {}
 
   def startui(self, args):
     """ Sets up the UI."""
-    global HELP_TEXT
+    global HELP_TEXT, tio
     exported.add_help("textui", HELP_TEXT)
     engine.myengine.startthread("ui", self.run)
     exported.write_message("For textui help, type \"#help textui\".")
+    if tio == 0:
+      exported.write_error("Warming: echo off is unavailable.  " +
+                           "Your password will be visible.")
+      
+
+  def turnonecho(self):
+    if tio == 0:
+      return
+    global onecho_attr
+    fd = sys.stdin.fileno()
+    new = termios.tcgetattr(fd)
+    new[3] = onecho_attr
+    try:
+      termios.tcsetattr(fd, termios.TCSADRAIN, new)
+    except Exception, e:
+      exported.write_error("textui: unable to turn on echo: %s" % e)
+
+  def turnoffecho(self):
+    if tio == 0:
+      return
+    global offecho_attr
+
+    fd = sys.stdin.fileno()
+    new = termios.tcgetattr(fd)
+    new[3] = offecho_attr
+    try:
+      termios.tcsetattr(fd, termios.TCSADRAIN, new)
+    except Exception, e:
+      exported.write_error("textui: unable to turn off echo: %s" % e)
+
+
+  def echo(self, args):
+    """ This turns echo on and off on the CommandEntry widget."""
+    yesno = args[0]
+    if yesno == 0:
+      # echo off
+      self._do_i_echo = 0
+      self.turnoffecho()
+    else:
+      # echo on
+      self._do_i_echo = 1
+      self.turnonecho()
 
   def run(self):
     """ This is the poll loop for user input."""

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.20 2002/10/24 23:07:04 willhelm Exp $
+# $Id: tkui.py,v 1.21 2002/12/04 03:46:29 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -162,9 +162,9 @@ class Tkui(ui.BaseUI):
     self._txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
 
     self._initColorTags()
-    hooks.mudecho_hook.register(self.echo)
-    hooks.startup_hook.register(self.startui)
-    hooks.to_user_hook.register(self.write)
+    exported.hook_register("mudecho_hook", self.echo)
+    exported.hook_register("startup_hook", self.startui)
+    exported.hook_register("to_user_hook", self.write)
 
 
   def startui(self, args):
@@ -177,12 +177,11 @@ class Tkui(ui.BaseUI):
 
 
   def settitle(self, title = ''):
-    """ Sets the title bar.
+    """
+    Sets the title bar.
 
-    arguments:
-
-      'title' -- (string) the title to set
-
+    @param title: the title to set
+    @type  title: string
     """
     if title:
       self._tk.title(lyntin.LYNTINTITLE + title)
@@ -269,9 +268,11 @@ class Tkui(ui.BaseUI):
     """ This turns echo on and off on the CommandEntry widget."""
     yesno = args[0]
     if yesno==1:
+      # echo on
       self._do_i_echo = 1
       self._entry.configure(show='')
     else:
+      # echo off
       self._do_i_echo = 0
       self._entry.configure(show='*')
 
