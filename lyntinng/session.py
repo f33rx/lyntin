@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.75 2003/01/22 03:09:28 willhelm Exp $
+# $Id: session.py,v 1.76 2003/01/28 22:38:02 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -13,7 +13,7 @@ to a mud--though it should be noted that sessions could also connect
 to any other TCP/IP service.
 """
 import re, copy, string, os
-import data, exported, engine, utils, ansi, lyntin, event, ticker
+import exported, engine, utils, ansi, lyntin, event, ticker
 import argparser
 
 ESC = chr(27)
@@ -307,7 +307,7 @@ class Session:
         self._databuffer[-1] += mem
 
     if len(self._databuffer) > self._databuffersize:
-      self._databuffer = self._databuffer[-self._size:]
+      self._databuffer = self._databuffer[-self._databuffersize:]
 
   def clearDataBuffer(self):
     """ 
