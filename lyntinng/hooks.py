@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.36 2003/02/12 15:15:22 jmberne Exp $
+# $Id: hooks.py,v 1.37 2003/03/26 00:16:34 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -423,7 +423,7 @@ from_user_hook = get_hook_manager().getHook("from_user_hook")
 # If you're looking for a line by line idea of things, use the
 # mud_filter_hook.
 #
-# arg tuple: (session,string)
+# arg tuple: (session, string)
 #  - the session instance data is coming from
 #  - the raw data we just got from the mud
 from_mud_hook = get_hook_manager().getHook("from_mud_hook")

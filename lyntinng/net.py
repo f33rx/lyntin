@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.33 2003/03/19 23:49:56 willhelm Exp $
+# $Id: net.py,v 1.34 2003/03/26 00:16:34 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -108,7 +108,7 @@ class SocketCommunicator:
     """
     Builds the prompt regex.  A prompt is IAC+GA or IAC+TELOPT_EOR or
     any string prompt.  Note that prompts eat up the characters.  So if
-    the prompt is "\\n> " those characters will disappear from the stream.
+    the prompt is ">> " those characters will disappear from the stream.
 
     Note: the prompt is NOT escaped before it is added to the regexp.  It's
     up to you to re.escape the bits that need escaping.
@@ -121,6 +121,7 @@ class SocketCommunicator:
     """
     if prompt:
       r = "(" + IAC+GA + "|" + IAC+TELOPT_EOR + "|" + prompt + ")"
+      print "setting prompt"
     else:
       r = "(" + IAC+GA + "|" + IAC+TELOPT_EOR + ")"
     return re.compile(r)
