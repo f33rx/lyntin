@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.37 2002/04/29 02:06:17 willhelm Exp $
+# $Id: engine.py,v 1.38 2002/04/29 23:14:13 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -89,6 +89,9 @@ class Engine:
 
     # holds argparsers for commands that get arguments pre-parsed
     self._command_arguments = {}
+
+    # holds help information for the commands
+    self._help = {}
 
     # we register ourselves with the shutdown hook
     hooks.shutdown_hook.register(self.shutdown)
@@ -615,14 +618,14 @@ class Engine:
 
       'argoptions=None' -- (string) options for how the argument spec
                            should be parsed
-    """
-    if callable(func):
-      self._command_list[name] = func
-      if arguments != None:
-        self._command_arguments[name] = argparser.ArgumentParser(arguments, argoptions)
-      return 1
 
-    self.writeError(name + ' is uncallable.')
+    """
+    if not callable(func):
+      raise ValueError, "%s is uncallable." % name
+
+    self._command_list[name] = func
+    if arguments != None:
+      self._command_arguments[name] = argparser.ArgumentParser(arguments, argoptions)
 
   def removeCommand(self, name):
     """
@@ -633,11 +636,11 @@ class Engine:
       'name' -- (string) the name of the command to remove
 
     """
-    try:
+    if self._command_list.has_key(name):
       del self._command_list[name]
+
+    if self._command_arguments.has_key(name):
       del self._command_arguments[name]
-    except:
-      pass
 
   def getCommand(self, name):
     """
@@ -662,6 +665,27 @@ class Engine:
 
     return None
 
+  def addHelp(self, helpname, helptext):
+    """ Creates a help topic.
+
+    arguments:
+
+      'helpname' -- (string) the help topic name
+
+      'helptext' -- (string) the help text
+    """
+    self._help[helpname] = helptext
+
+  def removeHelp(self, helpname):
+    """ Removes a help topic.
+
+    arguments:
+
+      'helpname' -- (string) the name of the help topic
+    """
+    if self._help.has_key(helpname):
+      del self._help[helpname]
+
   def getArgParser(self, name):
     """
     Returns the arguments parser for a given command name.
@@ -682,7 +706,23 @@ class Engine:
 
     return None
     
-      
+  def getHelp(self, name):
+    """
+    Returns the help text for a given command if it exists.
+
+    arguments:
+
+      'name' -- (string) the name fo the command
+
+    returns:
+
+      (string) the help text or "" if there is no text.
+    """    
+    if self._help.has_key(name):
+      return self._help[name]
+    else:
+      return ""
+
   def getHistoryManager(self):
     """ Retrieves the history manager.
 

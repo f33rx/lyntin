@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.17 2002/04/18 02:56:48 willhelm Exp $
+# $Id: net.py,v 1.18 2002/04/21 03:49:31 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -47,8 +47,7 @@ class SocketCommunicator:
     self._shutdownflag = 1
     if self._sock:
       import ui.ui
-      event.OutputEvent(ui.ui.Message("Lost connection to: " + self._host + "\n")).enqueue()
-      # engine.write_message("Lost connection to: " + self._host)
+      event.OutputEvent(ui.ui.Message("Lost connection to: %s\n" % self._host)).enqueue()
       try:
         self._sock.shutdown(2)
       except:

@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.8 2002/04/26 02:35:32 jmberne Exp $
+# $Id: argparser.py,v 1.9 2002/04/26 21:01:23 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -14,9 +14,8 @@ automatically into a dictionary.
 import string, re
 import utils
 
-defaultOptions={"stripBraces":1,
-                "noparsing":0
-                }
+defaultOptions={ "stripBraces": 1,
+                 "noparsing": 0 }
 optionParser = None
 
 class ParserException(Exception):
@@ -38,13 +37,14 @@ class ArgumentParser:
   def __init__(self, argspec, argoptions=None):
 
     # the syntax line is automatically generated from the argspec.
-    # we print it out whenever we have an ParserException in the user input.
+    # we print it out whenever we have a ParserException in the user input.
     self.syntaxline = ""
 
     self.typecheckers = { "string": stringChecker(),
                           "int": intChecker(),
                           "boolean": booleanChecker(),
-                          "booleanornone": booleanOrNoneChecker()}
+                          "booleanornone": booleanOrNoneChecker() }
+
     if argoptions:
       self.buildOptions(argoptions)
     else:
@@ -142,6 +142,8 @@ class ArgumentParser:
         argname,typespec = argname.split(":",1)
       else:  # extra argname assignment here is just for consistency
         argname,typespec = argname, "string"
+
+      self.syntaxline += "[%s] " % argname
 
       if argname == ":":
         doneWithIndices = 1

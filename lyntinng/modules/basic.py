@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.83 2002/05/02 23:39:07 willhelm Exp $
+# $Id: basic.py,v 1.84 2002/05/03 23:38:50 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -46,7 +46,37 @@ def action_cmd(session, args, input):
   if not quiet:
     exported.write_message("action: {%s} {%s} added." % (trigger, action))
 
-commands_dict["action"] = (action_cmd, "trigger= action= quiet:boolean=false")
+actionhelp = """
+With no arguments, prints all actions.
+With one argument, prints all actions which match the arg.
+With multiple arguments, creates an action.
+
+When data from the mud matches the trigger clause, the response
+will be executed.  Trigger clauses can use anchors (^ and $)
+to anchor the text to the beginning and end of the line 
+respectively.
+
+Triggers can also contain Lyntin pattern-variables which start
+with a % sign and have digits: %0, %1, %10...  When Lyntin sees 
+a pattern-variable in an action trigger, it tries to match any 
+pattern against it, and saves any match it finds so you can 
+use it in the response.  See below for examples.
+
+The response can be any mud command or Lyntin command and can
+contain placement-variables and the special variable %a which
+means "the whole matched line".
+
+Triggers get converted to regular expressions by converting
+placement variables %[0-9]+ to (.+?).  Feel free to use
+regular expression matching stuff.
+
+ex:
+   #action {^You are hungry} {get bread bag;eat bread}
+   #action {EVISCERATES joey} {rescue joey}
+   #action {%0 gives you %5} {say thanks for the %5, %0!}
+   #action {^%1 tells you %2$} {say %1 just told me %2}
+"""
+commands_dict["action"] = (action_cmd, "trigger= action= quiet:boolean=false", None, actionhelp)
 
 
 def alias_cmd(session, args, input):
@@ -81,7 +111,28 @@ def alias_cmd(session, args, input):
   if not quiet:
     exported.write_message("alias: {%s} {%s} added." % (name, command))
 
-commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false")
+aliashelp = """
+With no arguments, prints all aliases.
+With one argument, prints all aliases which match the arg.
+With multiple arguments, creates an alias.
+
+You can use pattern variables which look like % and a number.
+(ex: %4).   %0 is the alias name, %n (where n is a number)
+is the nth item after the alias name.  
+
+Ranges can be used by using python colon-syntax, specifying a
+half-open slice of the input items, so %0:3 is the first, second and
+third elements of the input
+
+Negative numbers count back from the end of the list.  So %-1 is the
+last item in the list, %:-1 is everything but the last item in the
+list. 
+
+Note: It should be noted that actions are matched via 
+regular expressions and that %1 will get translated to (.*?)
+for the regular expression match.
+"""
+commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false", None, aliashelp)
 
 
 def ansi_cmd(session, args, input):
@@ -373,6 +424,7 @@ def help_cmd(session, words, input):
     exported.write_message(data)
     return
 
+  command_list = exported.get_commands()
   helpfiles = dircache.listdir(helpdir + "/")
 
   for mem in words[1:]:
@@ -381,19 +433,27 @@ def help_cmd(session, words, input):
     if mem[0] == lyntin.commandchar:
       mem = mem[1:]
 
+    if mem in command_list:
+      ap = exported.get_engine().getArgParser(mem)
+      if ap:
+        syntaxline = "syntax: %s %s" % (mem, ap.syntaxline)
+      else:
+        syntaxline = ""
+
+      body = exported.get_engine().getHelp(mem)
+
+      exported.write_message(syntaxline + "\n" + body)
+      continue
+      
     if mem + ".tpc" in helpfiles:
       f = open(helpdir + "/" + mem + ".tpc", "r")
-    elif mem + ".cmd" in helpfiles:
-      f = open(helpdir + "/" + mem + ".cmd", "r")
+      lines = f.readlines()
+      f.close()
+      data += (string.join(lines, "") + "\n")
+      exported.write_message(data)
+ 
     else:
-      data += "Sorry, but" + mem + " is not a valid help topic.\n"
-      continue
-
-    lines = f.readlines()
-    f.close()
-    data += (string.join(lines, "") + "\n")
-
-  exported.write_message(data)
+      data += "Sorry, but %s is not a valid help topic.\n" % mem
 
 commands_dict["help"] = (help_cmd)
 
@@ -655,7 +715,7 @@ def nop_cmd(session, args, input):
   """
   return
 
-commands_dict["nop"] = (nop_cmd, "", "noparsing")
+commands_dict["nop"] = (nop_cmd, "comment*", "noparsing")
 
 def raw_cmd(session, args, input):
   """#raw text_to_mud
@@ -791,7 +851,7 @@ def showme_cmd(session, args, input):
   else:
     exported.write_message(input)
      
-commands_dict["showme"] = (showme_cmd, "", "noparsing")
+commands_dict["showme"] = (showme_cmd, "text*", "noparsing")
 
 
 def speedwalk_cmd(session, args, input):
@@ -837,7 +897,7 @@ def swdir_cmd(session, args, input):
     return
 
   # they typed '#swdir dd*' and are looking for matching speedwalking dirs
-  if not alias:
+  if not dir:
     data = session.getManager("speedwalk").getDirsInfo(alias)
     if data == '':
       data = "swdir: no speedwalking dirs defined."
@@ -1251,6 +1311,8 @@ def load():
         exported.add_command(mem, args[0], args[1])
       elif len(args) == 3:
         exported.add_command(mem, args[0], args[1], args[2])
+      elif len(args) == 4:
+        exported.add_command(mem, args[0], args[1], args[2], args[3])
     else:
       exported.add_command(mem, args)
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.13 2002/04/21 22:37:58 willhelm Exp $
+# $Id: exported.py,v 1.14 2002/04/25 17:13:17 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -34,21 +34,34 @@ def lyntin_command(text, internal=0, session=None):
     get_engine().handleUserData(text, internal)
 
 
-def add_command(str, func, arguments=None, argoptions=None):
+def add_command(command, func, arguments=None, argoptions=None, helptext=""):
   """ The best way to add commands to Lyntin.
 
   arguments:
 
-    'str' -- the command name.  ex. "help"
+    'command' -- the command name.  ex. "help"
 
     'func' -- the function to call when that command is executed.
 
-    'arguments=None' -- the argument stuff for the argument parser.
+    'arguments=None' -- (string) the argument stuff for the argument parser.
 
-    'argoptions=None' -- options for how to parse the argument stuff.
+    'argoptions=None' -- (string) options for how to parse the argument stuff.
 
   """
-  get_engine().addCommand(str, func, arguments, argoptions)
+  get_engine().addCommand(command, func, arguments, argoptions)
+  if helptext:
+    add_help(command, helptext)
+
+def add_help(helpname, helptext):
+  """ Creates a help topic.
+
+  arguments:
+
+    'helpname' -- (string) the help topic name
+
+    'helptext' -- (string) the help text
+  """
+  get_engine().addHelp(helpname, helptext)
 
 def remove_command(str):
   """ Removes a command from Lyntin.
