@@ -93,7 +93,7 @@ def handle_mud_output(output, ses):
         # get rid of Ansi crap (so colored stuff will still trigger actions)
         oldcleandata = data.filter_cm(oldcleandata)
         cleandata = data.filter_crud(cleandata)
-        ses.log(cleandata)
+        # ses.log(cleandata)
         if ses.CheckForGaggedText(cleandata):
             # whoa, this text is special; it's been gagged.
             # this is handled by splitting the text into lines, then
@@ -138,7 +138,7 @@ def handle_mud_output(output, ses):
 
         # display the text if this is the current session
         if ses is data.currsession and ses.connected:
-            log(oldcleandata)
+            # log(oldcleandata)
             player.PutRaw(oldcleandata)
 
         # add output to the session's databuffer

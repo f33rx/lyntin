@@ -391,7 +391,7 @@ class Client(dict_plus.c):
          if input[-1] != '\n' and input[-1] != '\r': 
             # FIXME?
             input = input + '\r'
-         mud.log(input)
+         # mud.log(input)
          data.currsession.WriteTo(input)
 
       elif not data.numsessions:
