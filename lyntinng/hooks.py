@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.33 2003/01/19 14:17:02 jmberne Exp $
+# $Id: hooks.py,v 1.34 2003/02/01 01:26:29 jmberne Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -484,7 +484,7 @@ too_many_errors_hook = get_hook_manager().getHook("too_many_errors_hook")
 # Filtered hooks
 ##################################################################
 
-def filter_mapper(x,y):
+def filter_mapper(x, y):
   """
   This is the mapping function to use for filter-style hooks.  
   Spamhook should be called as:
@@ -500,11 +500,12 @@ def filter_mapper(x,y):
   else:
     raise StopSpammingException
 
-def query_mapper(x,y):
+def query_mapper(x, y):
   """
   This is the mapping function to be used for query-style hooks.
   Spamhook should be called as:
-  1. output = hook.spamhook( arguments )
+
+    1. output = hook.spamhook( arguments )
 
   Each hook function will be called with the arguments until one function
   returns non-None.  That non-None value will be returned from spamhook
@@ -516,7 +517,8 @@ def query_mapper(x,y):
 
 def query_done(x):
   """
-  This is the done hook function to go with the query mapper for proper behaviour.
+  This is the done hook function to go with the query mapper for proper 
+  behaviour.
   """
   return None
 
@@ -561,8 +563,8 @@ user_filter_hook = get_hook_manager().getHook("user_filter_hook")
 # this hook.
 #
 # arg tuple: (session, commandname)
-# output: function that can accept 1 paramter, the argument name, and will return
-# the default string value, or None if no default is present
+# output: function that can accept 1 paramter, the argument name, and will 
+# return the default string value, or None if no default is present
 get_hook_manager().addHook("default_resolver_hook", QueryHook())
 default_resolver_hook = get_hook_manager().getHook("default_resolver_hook")
 

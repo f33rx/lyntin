@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.20 2002/12/31 04:21:41 willhelm Exp $
+# $Id: variable.py,v 1.21 2003/02/01 01:26:29 jmberne Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -139,20 +139,25 @@ class VariableData:
 
   def defaultResolver(self, command):
     """
-    Returns a defaultresolver that will look up potential default values in this session's variables.
+    Returns a defaultresolver that will look up potential default values in 
+    this session's variables.
 
     lookup will be first
+
        "default.%s.%s" % (command, argument,)
+
     then
+
        "default.%s" % (argument,)
 
-    to allow for overriding all arguments of a given name, or only arguments for specific commands.
+    to allow for overriding all arguments of a given name, or only arguments 
+    for specific commands.
 
     @param command: the command to look up arguments for
     @type  command: string
 
-    @returns:  a function object that will do the desired lookup
-    @rtype:    function object
+    @returns: a function object that will do the desired lookup
+    @rtype: function object
     """
     def resolver(argument, vdata=self, command=command):
       output = vdata.getVariable( "default.%s.%s" % (command, argument,))
