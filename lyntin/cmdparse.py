@@ -46,7 +46,7 @@ def SubVars(input):
                 v = ''
             else:
                 # this is not a variable. just put v back onto parsed
-                parsed = parsed + v
+                parsed = parsed + v + c
                 v = ''
                 varhunt = 0
         elif c == '{':

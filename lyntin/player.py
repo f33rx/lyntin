@@ -1182,7 +1182,7 @@ def Verbose(words, input, seslist):
         if ses.verbose:
 	    Putline('Verbose mode now on.')
 
-def TickerUpdate(words, input, seslist):
+def TickerUpdate(seslist):
     """TickerUpdate(seslist) -> None
 
     Called periodically to see if tick-related events need handling.

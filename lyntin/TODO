@@ -5,16 +5,8 @@ http://lyntin.sourceforge.net
 build some kind of sleep command.  so you can sleep some arbitrary amount
 between alias commands.
 
-Build a module system.  Then in the user module, folks can add new modules which
-all extend the same module class.  This binds it to the system and makes everything
-interoperate better.  Also makes adding modules easy to do.  Modules should be
-added via #module <blah> where <blah> is in the stdlib.
-
-ctrl-c or something like that should kill the input.  need to think about this.
-
 Replicate more of tintin's functionality.
  - colors
-
 
 embed lyntin into a C program.
  - portable disabling of echo

@@ -68,7 +68,7 @@ class client(dict_plus.c):
                    ses.Poll()
                if ses.ticker:
                    ses.TickUpdate()
-               elif ses is data.currsession:
+               if ses is data.currsession:
                    self.PreHandleUserInput(datato)
                    break
            hooks.internal_tick_hook.run(())
