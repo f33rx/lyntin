@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.31 2002/10/12 22:14:47 willhelm Exp $
+# $Id: lyntin.py,v 1.32 2002/10/23 23:59:08 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -184,7 +184,7 @@ if __name__ == '__main__':
       elif mem[0] == '--moduledir' or mem[0] == '-m':
         d = mem[1]
         if d[-1] != os.sep:
-          d = mem[1] + "/"
+          d = mem[1] + os.sep
         lyntin.options['moduledir'].append(d)
 
       elif mem[0] == '--datadir' or mem[0] == '-d':

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.51 2002/10/26 02:42:10 willhelm Exp $
+# $Id: tintincmds.py,v 1.52 2002/10/26 15:17:24 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -393,7 +393,7 @@ def read_cmd(ses, args, input):
   """
   filename = args["filename"]
 
-  if os.sep not in filename:
+  if os.sep not in filename and filename.find("http://") != 0:
     filename = lyntin.options['datadir'] + filename
 
   try:
