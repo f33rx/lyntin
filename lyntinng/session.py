@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.78 2003/01/31 15:20:55 willhelm Exp $
+# $Id: session.py,v 1.79 2003/02/14 00:20:38 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -275,7 +275,7 @@ class Session:
     lines = text.splitlines(1)
 
     for mem in lines:
-      if len(self._databuffer) == 0 or self._databuffer[-1][-1] == '\n':
+      if len(self._databuffer) == 0 or self._databuffer[-1].endswith("\n"):
         self._databuffer.append(mem)
       else:
         self._databuffer[-1] += mem

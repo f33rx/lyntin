@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.30 2002/12/31 00:03:59 willhelm Exp $
+# $Id: net.py,v 1.31 2003/01/14 01:21:06 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -190,7 +190,7 @@ class SocketCommunicator:
               data = newdata
               
           if data:
-            if data[-1] == "\n" or not newdata:
+            if data.endswith("\n") or not newdata:
               # actually handle whatever we've gotten because
               # we got a full line, or we polled for more and there was none.
 

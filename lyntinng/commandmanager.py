@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.9 2003/02/01 01:26:29 jmberne Exp $
+# $Id: commandmanager.py,v 1.10 2003/02/04 00:14:59 willhelm Exp $
 #######################################################################
 """
 Lyntin comes with a series of X{command}s for manipulating aliases, 
@@ -133,7 +133,7 @@ class CommandManager(manager.Manager):
       else:
         helptext = "\nThis command has no help."
 
-    if name[0] == "^":
+    if name.startswith("^"):
       cd.setNameAdjusted(name[1:])
     else:
       cd.setNameAdjusted(name)
@@ -184,7 +184,7 @@ class CommandManager(manager.Manager):
 
     # this is kind of a kluge to handle the #@ arbitrary
     # python stuff so that it can be in its own module.
-    if name[0] == "@" and self._commands.has_key("@"):
+    if name.startswith("@") and self._commands.has_key("@"):
       return self._commands["@"].getFunc()
 
     return None
@@ -200,7 +200,6 @@ class CommandManager(manager.Manager):
     @return: argument parsing object to convert incoming arguments
         into a dictionary to pass to the command function
     @rtype: ArgParser instance
-      
     """
     if self._commands.has_key(name):
       return self._commands[name].getArgParser()
@@ -223,7 +222,7 @@ class CommandManager(manager.Manager):
     internal = args[1]
     input = args[-1]
 
-    if len(input) > 1 and input[0] == lyntin.commandchar:
+    if len(input) > 1 and input.startswith(lyntin.commandchar):
       input = input[1:]
 
       # splits out the command name from the rest of the command line
@@ -234,7 +233,7 @@ class CommandManager(manager.Manager):
       if len(words) < 2: words.append("")
 
       # this checks to see if it's a special #@ command.
-      if input[0] == "@":
+      if input.startswith("@"):
         self.getCommand("@")(ses, input.split(" "), input)
         if internal==0: ses.prompt()
         return
@@ -244,11 +243,11 @@ class CommandManager(manager.Manager):
       commands.sort()
       for mem in commands:
         command = None
-        if mem[0] == "^":
+        if mem.startswith("^"):
           if re.compile(mem).search(words[0]):
             command = self.getCommand(mem)
         else:
-          if mem.find(words[0]) == 0:
+          if mem.startswith(words[0]):
             command = self.getCommand(mem)
 
         if command:
@@ -259,7 +258,7 @@ class CommandManager(manager.Manager):
             # for printing out the error message, we remove the ^
             # from the command name if it's there.
             fixedmem = mem
-            if len(fixedmem) > 0 and fixedmem[0] == '^':
+            if len(fixedmem) > 0 and fixedmem.startswith("^"):
               fixedmem = fixedmem[1:]
 
             resolver = hooks.default_resolver_hook.spamhook( (ses, mem) )

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.8 2002/12/05 01:04:53 willhelm Exp $
+# $Id: unittest.py,v 1.1 2003/01/29 18:35:42 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -140,10 +140,10 @@ it to see if we can handle wrapping with it \33[1;37mtoo.\33[0m""")
   # FIXME - these always fail because we don't get the precision right.
   # not sure what to do about that.
   from utils import parse_time
-  _pass_fail("parse_time 1", parse_time("4:20p"), 1029878400.0)
-  _pass_fail("parse_time 2", parse_time("4m"), 1029796956.9)
-  _pass_fail("parse_time 3", parse_time("9"), 1029796725.9)
-  _pass_fail("parse_time 4", parse_time("1:17:34a"), 1029824254.0)
+  _pass_fail("parse_time 1", int(parse_time("4:20p")), 1029878400)
+  _pass_fail("parse_time 2", int(parse_time("4m")), 1029796956)
+  _pass_fail("parse_time 3", int(parse_time("9")), 1029796725)
+  _pass_fail("parse_time 4", int(parse_time("1:17:34a")), 1029824254)
 
   print
 

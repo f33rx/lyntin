@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.41 2003/01/01 00:36:26 willhelm Exp $
+# $Id: textui.py,v 1.42 2003/02/05 02:12:00 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -249,7 +249,7 @@ class Textui(ui.BaseUI):
 
     if lyntin.ansicolor == 0:
       if pretext:
-        if line[-1] == "\n":
+        if line.endswith("\n"):
           line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
         else:
           line = pretext + line.replace("\n", "\n" + pretext)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.18 2002/12/06 00:33:32 willhelm Exp $
+# $Id: substitute.py,v 1.19 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -64,9 +64,9 @@ class SubstituteData:
     @returns: list of all the substitute items
     @rtype: list of strings
     """
-    list = self._substitutes.keys()
-    list.sort()
-    return list
+    listing = self._substitutes.keys()
+    listing.sort()
+    return listing
 
   def expand(self, text):
     """
@@ -120,16 +120,13 @@ class SubstituteData:
       return ''
 
     if text=='':
-      list = self._substitutes.keys()
+      listing = self._substitutes.keys()
     else:
-      list = utils.expand_text(text, self._substitutes.keys())
+      listing = utils.expand_text(text, self._substitutes.keys())
 
-    data = []
-    for mem in list:
-      data.append("%ssubstitute {%s} {%s}" % 
-                  (lyntin.commandchar, mem, self._substitutes[mem]))
+    listing = ["%ssubstitute {%s} {%s}" % (lyntin.commandchar, mem, self._substitutes[mem]) for mem in listing]
 
-    return string.join(data, "\n")
+    return string.join(listing, "\n")
 
   def getStatus(self):
     """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.32 2003/01/14 01:21:07 willhelm Exp $
+# $Id: tkui.py,v 1.33 2003/01/24 02:59:56 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -212,9 +212,14 @@ class Tkui(ui.BaseUI):
     else:
       title = lyntin.LYNTINTITLE
     self._event_queue.put(_TitleEvent(self._tk, title))
-    # self._tk.title = title
 
   def removeWindow(self, windowname):
+    """
+    This removes a NamedWindow from our list of NamedWindows.
+
+    @param windowname: the name of the window to write to
+    @type  windowname: string
+    """
     if self._windows.has_key(windowname):
       del self._windows[windowname]
 
@@ -382,7 +387,7 @@ class Tkui(ui.BaseUI):
     @returns: the rgb color value
     @rtype: string
     """
-    if name[0] == "#":
+    if name.startswith("#"):
       return name
 
     rgb = self._tk._getints(self._tk.tk.call('winfo', 'rgb', self._txt, name))
@@ -911,7 +916,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
   ses = message.session
 
   if message.type == ui.ERROR:
-    if line[-1] == "\n":
+    if line.endswith("\n"):
       line = "%s%s%s\n" % (ansi.get_color("b blue"), 
                           line[:-1], 
                           ansi.get_color("default"))
@@ -922,7 +927,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
 
   elif message.type == ui.USERDATA:
     if lyntin.mudecho == 1:
-      if line[-1] == "\n":
+      if line.endswith("\n"):
         line = "%s%s%s\n" % (ansi.get_color("b blue"), 
                             line[:-1], 
                             ansi.get_color("default"))
@@ -935,7 +940,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
       return currentcolor, unfinishedcolor
 
   elif message.type == ui.LTDATA:
-    if line[-1] == "\n":
+    if line.endswith("\n"):
       line = "# %s\n" % line[:-1].replace("\n", "\n# ")
     else:
       line = "# %s" % line.replace("\n", "\n# ")
@@ -951,7 +956,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
   if (ses != None and ses != exported.get_current_session()):
     pretext = "[%s]" % ses.getName()
 
-    if line[-1] == "\n":
+    if line.endswith("\n"):
       line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
     else:
       line = pretext + line.replace("\n", "\n" + pretext)

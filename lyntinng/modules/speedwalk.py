@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.17 2002/12/18 04:47:59 willhelm Exp $
+# $Id: speedwalk.py,v 1.18 2002/12/22 23:07:20 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.  Speedwalking is highly
@@ -128,17 +128,15 @@ class SpeedwalkHash:
       return ""
     
     if text == "":
-      list = self._dirs.keys()
+      listing = self._dirs.keys()
     else:
-      list = utils.expand_text(text, self._dirs.keys())
+      listing = utils.expand_text(text, self._dirs.keys())
     
     cmdchar = lyntin.commandchar
     
-    data = []
-    for mem in list:
-      data.append("%sswdir {%s} {%s}" % (cmdchar, mem, self._dirs[mem]))
+    listing = ["%sswdir {%s} {%s}" % (cmdchar, mem, self._dirs[mem]) for mem in listing]
     
-    return string.join(data, "\n")
+    return string.join(listing, "\n")
   
   def getDirStatus(self):
     """
@@ -228,17 +226,15 @@ class SpeedwalkHash:
       return ""
     
     if text == "":
-      list = self._excludes
+      listing = self._excludes
     else:
-      list = utils.expand_text(text, self._excludes)
+      listing = utils.expand_text(text, self._excludes)
     
     cmdchar = lyntin.commandchar
     
-    data = []
-    for mem in list:
-      data.append("%sswexclude {%s}" % (cmdchar, mem))
+    listing = ["%sswexclude {%s}" % (cmdchar, mem) for mem in listing]
     
-    return string.join(data, "\n")
+    return string.join(listing, "\n")
   
   def getExcludeStatus(self):
     """

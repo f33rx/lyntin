@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.19 2002/11/06 03:03:20 willhelm Exp $
+# $Id: __init__.py,v 1.20 2003/02/04 00:15:00 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -63,7 +63,7 @@ def load_modules():
     # this allows hackers to be working on a module and not have
     # it die every time.
     mem2 = mem[mem.rfind(os.sep)+1:mem.rfind(".")]
-    if mem2[0] == "_":
+    if mem2.startswith("_"):
       continue
 
     try:
@@ -91,7 +91,7 @@ def load_modules():
       # and toss all the contents of the directory in our _module_list
       for mem in _module_list:
         mem2 = mem[mem.rfind(os.sep)+1:mem.rfind(".")]
-        if mem2[0] == "_":
+        if mem2.startswith("_"):
           continue
 
         try:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.67 2002/12/27 02:08:40 willhelm Exp $
+# $Id: utils.py,v 1.68 2002/12/31 00:03:59 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -173,21 +173,21 @@ def compile_regexp(text, anchors=0, stars=0):
     if anchors == 1:
       anchor_begin = 0
       anchor_end = 0
-      if text[0] == "^":
+      if text.startswith("^"):
         anchor_begin = 1
         text = text[1:]
 
-      if text[-1] == "$":
+      if text.endswith("$"):
         anchor_end = 1
         text = text[:-1]
 
     if stars == 1:
       star_begin = 0
       star_end = 0
-      if text[0] == "*":
+      if text.startswith("*"):
         star_begin = 1
         text = text[1:]
-      if text[-1] == "*":
+      if text.endswith("*"):
         star_end = 1
         text = text[:-1]
 
@@ -320,7 +320,7 @@ def strip_braces(text):
   if len(text) < 1:
     return text
 
-  if text[0] == '{' and text[-1] == '}':
+  if text.startswith("{") and text.endswith("}"):
     return text[1:-1]
   return text
 
@@ -340,9 +340,9 @@ def parse_args(args):
   optlist = []
   while (i < len(args)):
 
-    if args[i][0] == "-":
+    if args[i].startswith("-"):
       if (i+1 < len(args)):
-        if args[i+1][0] != "-":
+        if not args[i+1].startswith("-"):
           optlist.append((args[i], args[i+1]))
           i = i + 1
         else:
@@ -544,28 +544,28 @@ def parse_timespan(timespan):
   days = timespec["days"]
   if not days:
     days="0"
-  elif days[-1]=="d":
+  elif days.endswith("d"):
     days=days[:-1]
   days=int(days)
 
   hours = timespec["hours"]
   if not hours:
     hours="0"
-  elif hours[-1]=="h":
+  elif hours.endswith("h"):
     hours=hours[:-1]
   hours=int(hours)
 
   minutes = timespec["minutes"]
   if not minutes:
     minutes="0"
-  elif minutes[-1]=="m":
+  elif minutes.endswith("m"):
     minutes=minutes[:-1]
   minutes=int(minutes)
     
   seconds = timespec["seconds"]
   if not seconds:
     seconds="0"
-  elif seconds[-1]=="s":
+  elif seconds.endswith("s"):
     seconds=seconds[:-1]
   seconds=int(seconds)
       

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.6 2002/12/06 00:33:32 willhelm Exp $
+# $Id: deed.py,v 1.7 2003/01/18 16:46:16 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
@@ -84,11 +84,11 @@ class DeedData:
     
     if num.isdigit():
       count = int(num)
-      list = self._deeds[-count:]
+      listing = self._deeds[-count:]
     else:
-      list = self._deeds
+      listing = self._deeds
     
-    return string.join(list, "\n")
+    return string.join(listing, "\n")
   
   def getStatus(self):
     """
@@ -140,7 +140,7 @@ def deed_cmd(ses, args, input):
   Deeds serve as a kind of notebook - whatever you don't want
   to forget, store it in a deed.
 
-  examples:
+  examples::
     #deed                             -- prints all the deeds for 
                                          that session
     #deed {$TIMESTAMP Joe healed me}  -- adds a new deed to the list

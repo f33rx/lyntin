@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.18 2002/12/31 00:03:59 willhelm Exp $
+# $Id: highlight.py,v 1.19 2003/01/01 00:36:25 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -81,9 +81,9 @@ class HighlightData:
     @return: the list of highlight keys--which is the highlight text
     @rtype: list of strings
     """
-    list = self._highlights.keys()
-    list.sort()
-    return list
+    listing = self._highlights.keys()
+    listing.sort()
+    return listing
 
   def expand(self, text):
     """
@@ -149,9 +149,7 @@ class HighlightData:
         else:
           break
 
-    newlist = []
-    for mem in textlist[:i]:
-      newlist.append(mem)
+    newlist = textlist[:i]
     newlist.append(textlist[i][:place])
     newcolor = ansi.figure_color(newlist, self._currcolor)[0]
     newlist.append(hl)
@@ -219,13 +217,13 @@ class HighlightData:
     if len(self._highlights.keys()) == 0:
       return ''
 
-    list = self._highlights.keys()
+    listing = self._highlights.keys()
 
     if text:
-      list = utils.expand_text(text, list)
+      listing = utils.expand_text(text, listing)
 
     data = []
-    for mem in list:
+    for mem in listing:
       if colorize == 1:
         data.append("%shighlight {%s%s%s} {%s}" % 
                     (lyntin.commandchar, 

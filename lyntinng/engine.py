@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.82 2003/01/29 18:35:40 willhelm Exp $
+# $Id: engine.py,v 1.83 2003/02/14 01:48:23 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -250,7 +250,7 @@ class Engine:
       if internal == 0:
         exported.get_hook("from_user_hook").spamhook((mem,))
 
-      if mem[0] == "!":
+      if mem.startswith("!"):
         memhistory = self.getManager("history").getHistoryItem(mem)
         if memhistory != None:
           self.handleUserData(memhistory, 1, session)
@@ -258,7 +258,7 @@ class Engine:
           continue
 
       # if it starts with a # it's a loop, session or command
-      if len(mem) > 0 and mem[0] == lyntin.commandchar:
+      if len(mem) > 0 and mem.startswith(lyntin.commandchar):
 
         # pull off the first token without the commandchar
         ses = mem.split(" ", 1)[0][1:]

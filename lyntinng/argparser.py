@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.35 2003/02/01 01:26:29 jmberne Exp $
+# $Id: argparser.py,v 1.36 2003/02/01 01:52:58 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses X{command argument}s
@@ -193,11 +193,11 @@ class ArgumentParser:
         # extra argname assignment here is just for consistency
         argname, typespec = argname, "string"
 
-      if len(argname) >= 1 and argname[-1:] == "*":
+      if len(argname) >= 1 and argname.endswith("*"):
         if argdef != None:
           raise ParserException, "cannot specify a default value for a collection argument (%s=%s)" % (argname, argdef)
 
-        if len(argname) >= 2 and argname [-2:] == "**":
+        if len(argname) >= 2 and argname.endswith("**"):
           argname = argname[:-2]
           if i < len(parsedspec) -1:
             raise ParserException, "named collection argument must be the last argument (%s)" % (argname)
@@ -379,7 +379,7 @@ class ArgumentParser:
             arguments.append( (arg,val) )
             if buildsyntaxline:
               synarg = arg.upper()
-              if synarg[-1] == "*":
+              if synarg.endswith("*"):
                 synarg = synarg[:-1] + "..."
 
               if val and len(val) > 0:
@@ -438,7 +438,7 @@ class ArgumentParser:
       arguments.append( (arg, val) )
       if buildsyntaxline:
         synarg = arg.upper()
-        if synarg[-1] == "*":
+        if synarg.endswith("*"):
           synarg = synarg[:-1] + "..."
 
         if val and len(val) > 0:

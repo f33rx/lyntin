@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.23 2002/12/18 04:47:59 willhelm Exp $
+# $Id: action.py,v 1.24 2003/01/14 01:21:07 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -120,9 +120,9 @@ class ActionData:
     @return: list of triggers for the actions we're managing.
     @rtype: list of strings
     """
-    list = self._actions.keys()
-    list.sort()
-    return list
+    listing = self._actions.keys()
+    listing.sort()
+    return listing
 
   def checkActions(self, text):
     """
@@ -200,12 +200,12 @@ class ActionData:
       return ''
 
     if text=='':
-      list = self._actions.keys()
+      listing = self._actions.keys()
     else:
-      list = utils.expand_text(text, self._actions.keys())
+      listing = utils.expand_text(text, self._actions.keys())
 
     data = []
-    for mem in list:
+    for mem in listing:
       actup = self._actions[mem]
 
       data.append("%saction {%s} {%s} onetime={%s}" % 

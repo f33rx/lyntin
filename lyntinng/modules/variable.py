@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.21 2003/02/01 01:26:29 jmberne Exp $
+# $Id: variable.py,v 1.22 2003/02/01 01:54:38 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -41,8 +41,8 @@ class VariableData:
     """
     Removes all the variables.
     """
-    list = self._variables.keys()
-    for mem in list:
+    listing = self._variables.keys()
+    for mem in listing:
       del self._variables[mem]
 
   def removeVariables(self, text):
@@ -113,9 +113,9 @@ class VariableData:
     @returns: a list of all the variable names being managed
     @rtype: list of strings
     """
-    list = self._variables.keys()
-    list.sort()
-    return list
+    listing = self._variables.keys()
+    listing.sort()
+    return listing
 
   def getVariable(self, name, default=None):
     """
@@ -142,11 +142,11 @@ class VariableData:
     Returns a defaultresolver that will look up potential default values in 
     this session's variables.
 
-    lookup will be first
+    Lookup will be first::
 
        "default.%s.%s" % (command, argument,)
 
-    then
+    then::
 
        "default.%s" % (argument,)
 
@@ -194,15 +194,13 @@ class VariableData:
       return ''
 
     if text=='':
-      list = self._variables.keys()
+      listing = self._variables.keys()
     else:
-      list = utils.expand_text(text, self._variables.keys())
+      listing = utils.expand_text(text, self._variables.keys())
 
-    data = []
-    for mem in list:
-      data.append("%svariable {%s} {%s}" % (lyntin.commandchar, mem, self._variables[mem]))
+    listing = ["%svariable {%s} {%s}" % (lyntin.commandchar, mem, self._variables[mem]) for mem in listing]
 
-    return string.join(data, "\n")
+    return string.join(listing, "\n")
 
 
 class VariableManager(manager.Manager):
@@ -226,7 +224,7 @@ class VariableManager(manager.Manager):
       self._variables[ses] = VariableData()
 
     # check to see if it's a global variable
-    if var[0] == "_":
+    if var.startswith("_"):
       vdata = self._global
     else:
       vdata = self._variables[ses]

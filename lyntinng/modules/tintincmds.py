@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.70 2003/02/12 04:44:48 willhelm Exp $
+# $Id: tintincmds.py,v 1.71 2003/02/14 00:20:39 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -37,7 +37,6 @@ def boss_cmd(ses, words, input):
 
   category: commands
   """
-  # FIXME - somehow make this more universal by having a bossfile?
   exported.write_mud_data(lyntin.BOSSTEXT)
 
 commands_dict["boss"] = (boss_cmd, "")
@@ -348,12 +347,12 @@ def read_cmd(ses, args, input):
   """
   filename = args["filename"]
 
-  if os.sep not in filename and filename.find("http://") != 0:
+  if os.sep not in filename and not filename.startswith("http://"):
     filename = lyntin.options['datadir'] + filename
 
   try:
     # http reading contributed by Sebastian John
-    if filename.find("http://") == 0:
+    if filename.startswith("http://"):
       file = utils.http_get(filename)
     else:
       file = open(filename, "r")
@@ -372,7 +371,7 @@ def read_cmd(ses, args, input):
     exported.write_message("read: %s had no data." % filename, ses)
     return
 
-  if contents[0][0] != lyntin.commandchar:
+  if not contents[0].startswith(lyntin.commandchar):
     exported.lyntin_command("%sconfig commandchar %s" % (lyntin.commandchar, contents[0][0]), internal=1, session=ses)
 
   for mem in contents:
