@@ -45,9 +45,7 @@ class client(dict_plus.c):
        if callable(func):
            self.commands[name] = func
        else:
-           # FIXME (wbg) - do something to indicate that the function
-           # is non-callable like raise an error!
-           pass
+           player.Putline('##' + name + ' is uncallable.  Sorry kiddo.')
 
    def RemoveCommand(self, name):
        """RemoveCommand(self) -> None
@@ -83,29 +81,20 @@ class client(dict_plus.c):
            return None
 
 
-       # if anything else goes wrong, we get ugly and print a traceback.
+       # if anything else goes wrong, we get ugly and print a traceback
+       # back to the user.
+       #
        # this is helpful for the user's programs; otherwise lyntin
        # would crash completely.
-       # FIXME - this fucking sucks.  put a real traceback in.
-       #
-       # agreed, but what to do about it?  the intent of the code below
-       # is to extract the traceback as a string for the ui to print.
-       # how the hell do we do that?   [2000/08/11 :lh]
        except:
-           player.Putline('######################'+ \
-                          'ack! error!'+ \
-                          '######################')
-           from StringIO import StringIO
-           strio = StringIO()
-           oldout = sys.stdout
-           sys.stdout = strio
-           traceback.print_exc()
-           sys.stdout.flush()
-           sys.stdout = oldout
-           for line in strio.readlines():
-               player.PutUntouchedLine(line)
-           player.Putline('########################' +\
-                          '#################################')
+           from sys import exc_info
+           from traceback import format_exception
+
+           info = exc_info()
+           exc_class = info[0]
+           player.Putline("Cough...  sputter...  lyntin internal error:")
+           player.Putline(string.join(format_exception(info[0], info[1], info[2]), ""))
+
            self.numerrors = self.numerrors + 1
            hooks.error_occurred_hook.run(())
            try:
@@ -136,16 +125,17 @@ class client(dict_plus.c):
             ui = cursesui.Textui()
             self.ui = ui
             ui.app = self
-	 if sys.argv[1] == '-nc' and not self.ui:
-	    import ncgui
-	    ui = ncgui.Gui()
-	    self.ui = ui
-	    ui.app = self
+         if sys.argv[1] == '-nc' and not self.ui:
+            import ncgui
+            ui = ncgui.Gui()
+            self.ui = ui
+            ui.app = self
          if sys.argv[1] == '-tk' and not self.ui:
             import tkgui
             ui = tkgui.Gui()
             self.ui = ui
             ui.app = self # circular ref... *shudder*
+
       if not self.ui:
          import textui
          tui = textui.Textui()
@@ -181,7 +171,7 @@ class client(dict_plus.c):
          else:
             sys.path.append(data.initdir + dir)
 
-   # do really early initialization
+
    def PreInitialize(self):
       """
       Does really early initialization.
@@ -208,6 +198,7 @@ class client(dict_plus.c):
 
           # send it along to the recursive workhorse
           self.HandleUserInput(input)
+
 
    def HandleUserInput(self, input):
       """

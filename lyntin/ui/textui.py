@@ -35,6 +35,7 @@ if tio:
 
 # a thread-function for windows which polls for user input
 def GetInputLine(host):
+    # this can't be good--FIXME
     while 1:
         while host.line_read != '':
             time.sleep(0.1)

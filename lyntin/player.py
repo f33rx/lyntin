@@ -196,8 +196,10 @@ def PrintCommands(words, input, seslist):
 def AddCommand(words, input, seslist):
     """AddCommand(words, input, seslist) -> None
 
-    Adds a command to the client.
-    This is a user command.
+    Adds a command to the client.  This is a user command.
+    If they don't pass in enough args, we print out the command
+    list--we might want to change this later, but it makes 
+    the 'command' command more like alias and action.
     """
     if len(words) > 2:
         # FIXME - we actually have to go out and find the command
@@ -207,7 +209,7 @@ def AddCommand(words, input, seslist):
     else:
         # raise error? or something because there aren't enough
         # arguments.
-        pass
+        return PrintCommands(words, input, seslist)
 
 def UnCommand(words, input, seslist):
     """UnCommand(words, input, seslist) -> None
@@ -234,13 +236,10 @@ def UnCommand(words, input, seslist):
 def LynImport(words, input, seslist):
     """LynImport(words, input, seslist) -> None
 
-    imports a module which adds itself to the app and such.
-    This is a user command.
+    Imports a module which adds itself to the app and such.
+    This is a user command.  If the module has already
+    been imported, then it gets reloaded.
     """
-
-    # FIXME - this still needs to handle reloading
-    # and maybe other stuff...  but looks good so far.  :)
-
     import sys
     Putline("trying to import " + words[1])
 
@@ -260,9 +259,6 @@ def LynImport(words, input, seslist):
         info = exc_info()
         exc_class = info[0]
         Putline(string.join(format_exception(info[0], info[1], info[2]), ""))
-
-        # message = 'Error: ' + info[-4] + info[-3] + info[-2] + info[-1]
-        # Putline("import failed because of:\n" + message)
     return
 
 def Showme(words, input, seslist):
