@@ -33,7 +33,7 @@ version = """
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 
-lyntin 2.0, (May 20, 2001) copyright 2000, 2001
+lyntin 2.0.1, (May 25, 2001) copyright 2000, 2001 Lyn Headley
 """
 
 
