@@ -4,11 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.3 2002/04/02 03:22:45 willhelm Exp $
+# $Id: deed.py,v 1.4 2002/04/26 21:02:57 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
 """
+
+# deed code originally written by Sebastian John.
 
 import string
 import manager, utils, lyntin
