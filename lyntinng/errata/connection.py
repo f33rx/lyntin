@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: connection.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
+# $Id: connection.py,v 1.6 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -132,6 +132,10 @@ class Connection:
           commands.append(mem[7:])
 
     self.write(string.join(commands, "\n") + "\n")
+
+  def handle_set_color(self, world, text):
+    """ Sets the color to yellow."""
+    self.write("\33[33m\nNow yellow.")
 
   def handle_colors(self, world, text):
     """ Prints out all the colors we know about."""

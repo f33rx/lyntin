@@ -1,10 +1,10 @@
-######################################################################
+#####################################################################
 # This file is part of Lyntin.
 # copyright (c) Free Software Foundation 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.15 2002/11/08 02:35:12 willhelm Exp $
+# $Id: speedwalk.py,v 1.16 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.  Speedwalking is highly
@@ -395,15 +395,14 @@ def swdir_cmd(ses, args, input):
   This adds speedwalking aliases and tells you the current speedwalking dirs
   already registered.
 
-  ex:
-
-     #swdir {n} {north}
-     #swdir {s} {south}
-     #swdir {e} {east}
-     #swdir {w} {west}
-     #swdir {NE} {northeast}
-     #swdir {l} {look}
-     ...
+  examples:
+    #swdir {n} {north}
+    #swdir {s} {south}
+    #swdir {e} {east}
+    #swdir {w} {west}
+    #swdir {NE} {northeast}
+    #swdir {l} {look}
+    ...
 
   see also: swexclude
 
@@ -450,6 +449,10 @@ def swexclude_cmd(ses, args, input):
   If you had swdirs "n", "e", "s", and "w", you might want to create
   excludes for the words "sense", "news", "sew", ...  Which are real
   words that you most likely don't want to be expanded.
+
+  examples:
+    #swexclude {end}
+    #swexclude {news}
 
   see also: swdir
 

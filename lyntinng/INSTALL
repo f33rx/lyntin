@@ -4,7 +4,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-$Id: INSTALL,v 1.12 2002/07/27 03:03:34 willhelm Exp $
+$Id: INSTALL,v 1.13 2002/10/16 23:59:06 willhelm Exp $
 
 For more up-to-date documentation, check out the web-site at:
 http://lyntin.sourceforge.net/
@@ -14,9 +14,9 @@ http://lyntin.sourceforge.net/
 SUMMARY
 =======
 
-This file holds installation instructions for Lyntin.  It should be
-revisited and re-written at some point.
-
+This document holds installation instructions for various operating
+systems as well as a series of general setup instructions for getting
+started with Lyntin.
 
 
 UNIX/LINUX

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.15 2002/11/09 04:21:59 willhelm Exp $
+# $Id: alias.py,v 1.16 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which manages aliases, creating new
@@ -295,7 +295,6 @@ def alias_cmd(ses, args, input):
   list. 
 
   examples:
-
     #alias {k*}                    - prints out aliases that start with k
     #alias {k} {kill %1}           - builds a new alias
     #alias {gg} {put %1: in chest} - builds a new alias

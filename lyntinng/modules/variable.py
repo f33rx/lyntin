@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.16 2002/11/08 02:35:13 willhelm Exp $
+# $Id: variable.py,v 1.17 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -330,9 +330,9 @@ def variable_cmd(ses, args, input):
   Creates a variable for that session of said name with said value.
   Variables can then pretty much be used anywhere.
 
-  ex:
-     #variable {hps} {100}
-     #action {HP: %0/%1 } {#variable {hps} {%0}}
+  examples:
+    #variable {hps} {100}
+    #action {HP: %0/%1 } {#variable {hps} {%0}}
 
   Variables can later be accessed via the variable character
   (which defaults to $) and the variable name.  In the case of the
@@ -342,7 +342,7 @@ def variable_cmd(ses, args, input):
   global variables.  To set a global variable, it must be preceded
   by a _.
 
-  ex:
+  examples:
     #variable {_fun} {happy fun ball}
 
   Global variables can be accessed by any session.

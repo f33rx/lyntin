@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.36 2002/12/08 21:18:56 willhelm Exp $
+# $Id: textui.py,v 1.37 2002/12/09 04:08:12 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -143,7 +143,10 @@ class Textui(ui.BaseUI):
     If the os is posix and the readline module is present, then we 
     use raw_input to grab user input.
     """
-    return raw_input()
+    try:
+      return raw_input()
+    except EOFError:
+      pass
 
   def _posix_input(self):
     """
@@ -173,9 +176,10 @@ class Textui(ui.BaseUI):
         else:
           data = self._non_posix_input()
 
-        self.handleinput(data)
-        if data.find("#end") == 0:
-          break
+        if data:
+          self.handleinput(data)
+          if data.find("#end") == 0:
+            break
 
 
     except select.error, e:

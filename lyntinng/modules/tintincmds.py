@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.58 2002/12/04 15:18:01 willhelm Exp $
+# $Id: tintincmds.py,v 1.59 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -64,7 +64,7 @@ def end_cmd(ses, args, input):
   """
   Closes all sessions and quits out of Lyntin.
 
-  Note, on most muds this will leave your character in a state of 
+  Note: on most muds this will leave your character in a state of 
   linkdeath--it does not sell all your stuff, return you to town, 
   save your character, tell your friends goodbye, or anything of 
   that nature.
@@ -84,7 +84,6 @@ def help_cmd(ses, args, input):
   With an argument, shows that specific help file.
 
   examples:
-
     #help
     #help help
     #help commands.substitute
@@ -117,7 +116,6 @@ def history_cmd(ses, args, input):
   the !.  You can also do replacements via the sub=repl syntax.
 
   examples:
-
     #history [count=30]
         prints the last count entries in the history buffer
     !
@@ -150,7 +148,6 @@ def if_cmd(ses, args, input):
   Strings should be in single quotes:
 
   examples:
-
     #if {$myhpvar < 100} {#showme PANIC!}
     #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
     #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
@@ -217,11 +214,9 @@ def loop_cmd(ses, args, input):
   the range of numbers specified in <from> and <to>.
 
   example:
-
     #loop {1,5} {reclaim %0.corpse}
 
   will execute:
-
     reclaim 1.corpse
     reclaim 2.corpse
     reclaim 3.corpse
@@ -277,7 +272,6 @@ def math_cmd(ses, args, input):
   variables above and beyond setting them.
 
   examples:
-
     #math {hps} {$hps + 5}
 
   category: commands
@@ -569,8 +563,8 @@ def tick_cmd(ses, args, input):
   When a tick happens, it will look for a TICK!!! alias.  Finding none,
   it will print TICK!!! to the ui.
 
-
   This allows you to perform an event every x number of seconds.
+
   category: commands
   """
   if (ses.getName() == "common"):

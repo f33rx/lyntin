@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.21 2002/12/06 00:33:32 willhelm Exp $
+# $Id: action.py,v 1.22 2002/12/09 15:25:38 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -384,11 +384,10 @@ def action_cmd(ses, args, input):
   itself automatically after it is triggered.
 
   examples:
-
-     #action {^You are hungry} {get bread bag;eat bread}
-     #action {%0 gives you %5} {say thanks for the %5, %0!}
-     #action {r[^%_1 tells\\s+you %2$]} {say %1 just told me %2}
-     #action {r[sven dealt .+? to %1$]i} {say i just killed %1!}
+    #action {^You are hungry} {get bread bag;eat bread}
+    #action {%0 gives you %5} {say thanks for the %5, %0!}
+    #action {r[^%_1 tells\\s+you %2$]} {say %1 just told me %2}
+    #action {r[sven dealt .+? to %1$]i} {say i just killed %1!}
 
   category: commands
   """
@@ -431,7 +430,6 @@ def unaction_cmd(ses, args, input):
   Removes action(s) from the manager.
 
   examples:
-
     #unaction {missed you.}
     #unaction missed*
 

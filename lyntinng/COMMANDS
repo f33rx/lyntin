@@ -6,7 +6,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-Thu, 31 Oct 2002 02:46:40 +0000
+Wed, 18 Dec 2002 04:44:08 +0000
 
 For more up-to-date information and documentation, please check the 
 web-site: http://Lyntin.sourceforge.net/
@@ -381,7 +381,7 @@ COMMANDS.KILLALL
 
 COMMANDS.LOG
 
-   syntax: #log [<LOGFILE>] [<DATABUFFER:BOOLEAN=false>] 
+   syntax: #log [<LOGFILE>] [<DATABUFFER:BOOLEAN=false>] [<STRIPANSI:BOOLEAN=true>] 
    
    Will start or stop logging to a given filename for that session.
    Each session can have its own logfile.
@@ -440,6 +440,42 @@ COMMANDS.NOP
 
 
 
+COMMANDS.POWERGAG
+
+   syntax: #powergag [<GAG>] [<QUIET:BOOLEAN=false>] 
+   
+   With no arguments, prints all powergags.
+   Otherwise creates a powergag.
+   
+   Braces are advised around 'gag'.
+
+
+
+COMMANDS.POWERGAGHIST
+
+   syntax: #powergaghist [<COUNT:INT=30>] 
+   
+   Retrieves history for this powergag session.  All the things that
+   have been gagged are in the history.
+
+
+
+COMMANDS.PPRINT
+
+   syntax: #pprint [MANAGER] [ITEM] 
+   
+   Pulls the variable/alias/action from the appropriate manager and
+   pretty-prints it making it easier to see.
+   
+   ex:
+   
+     #pprint {alias} {killall}
+   
+     will pretty print the killall alias from the alias manager for 
+     this session.
+
+
+
 COMMANDS.RAW
 
    syntax: #raw [<INPUT>] 
@@ -475,6 +511,26 @@ COMMANDS.READ
 
 
 
+COMMANDS.SCHEDULE
+
+   syntax: #schedule [TICK:TIMESPAN] [EVENT] [<QUIET:BOOLEAN=false>] 
+   
+   Very super basic scheduler.  It takes in a tick amount, an event
+   string and an optional boolean quiet argument.:
+   
+   examples:
+   
+     #schedule {5} {#showme blah}
+   
+   will kick off 5 ticks from now (a tick is approx one second) and
+   will execute "#showme blah".
+   
+     #schedule {1m30s} {#showme blah}
+   
+   will kick off in 1 minute and 30 seconds.
+
+
+
 COMMANDS.SESSION
 
    syntax: #session [<SESSIONNAME>] [<HOST>] [<PORT:INT=-1>] 
@@ -499,6 +555,50 @@ COMMANDS.SESSION
 
 
 
+COMMANDS.SETIDLE
+
+   syntax: #setidle [ONOFF:BOOLEAN] [<AMOUNT:INT=-1>] 
+   
+   This allows you to idle and when you're idling at the keyboard it
+   can automatically switch you into an idle mode.  When you come back
+   and enter in a command (like hitting the enter key), then it'll switch
+   you out of idle mode.
+   
+   Switching into the idle mode involves executing the alias for that
+   session called STARTIDLE.
+   
+   Switching out of idle mode involves executing the alis for that session
+   called ENDIDLE.
+   
+   arguments:
+   
+     onoff - sets the idle checker on and off
+   
+     amount - the amount of time that needs to pass before the STARTIDLE
+              alias is executed
+
+
+
+COMMANDS.SETSTATUS
+
+   syntax: #setstatus [NAME] [<VALUE>] [<SORTKEY>] 
+   
+   Allows you to set the title bar in xterms (gnome-terminal, putty, 
+   ...) for the textui and in the Tk title bar for the tkui with status 
+   text formed of a series of name/value pairs.
+   
+   examples:
+   
+     #setstatus hps 400
+   
+   adds "hps: 400" to the title bar.
+   
+     #setstatus hps
+   
+   removes the hps thing from the title bar.
+
+
+
 COMMANDS.SHOWME
 
    syntax: #showme [<INPUT>] 
@@ -508,6 +608,30 @@ COMMANDS.SHOWME
    
    examples:
      #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
+
+
+
+COMMANDS.SHOWME2
+
+   syntax: #showme2 [<INPUT>] 
+   
+   Will display text on your screen.  Doesn't get sent to the mud--
+   just your screen.
+   
+   examples:
+     #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
+
+
+
+COMMANDS.SNOOP
+
+   syntax: #snoop [SESSION] [<MODE:BOOLEANORNONE>] 
+   
+   Sets the session specified into or out of snooping mode.
+   
+   examples:
+     #snoop a          -- tells you whether a is in snoop mode
+     #snoop a on       -- sets snoop mode for a
 
 
 
@@ -791,13 +915,68 @@ Lyntin up in tintin mode.
 
 README.EVALMODES.LYNTINMODE
 
-Explain lyntin evalmode here.
+Lyntin mode strives to provide maximum flexibility and forsake the
+dependancy on tintinmode.  Though not neccessarily better, it does
+provide some abilities that tintinmode does not.
+
+  * Variables and placement variables with a single $ or % are
+    evaluated/expanded.  One layer of $s or %s is then stripped off
+    when this evaluation occurs.
+
+  * Variable expansion is always done on user input before commands 
+    are evaluted.  This means variables can be used as arguments to
+    any commands, etc.
+
+  * Variable expansion happens again when certain expressions are
+    evaluated, such as action triggers, alias expansion, etc.
+    Essentially, when any stored value gets expanded its variables
+    will get expanded (typically whenever tintinmode would do its sole
+    expansion.) 
+
+  * Placement vars in actions and aliases support an expanded syntax
+    based on python array slices.  %0:1 will evaluate to the first and
+    second arguments, while %0: will be all arguments, and %:-1 will be
+    all but the last argumen, etc.
+
+  * Examples:
+     #action {$Myvar} {woo} 
+ 	 --- will trigger whenever the value Myvar holds when this is
+	     entered (the original value of Myvar - it will not change
+             if Myvar's value changes)
+     #action {$$Myvar} {woo}
+         --- Will trigger whenever the current value of Myvar passes
+             by.
+     #action {$$$Myvar} {woo}
+         --- Will trigger whenever the literal string $Myvar is seen.
+             (and thus, place more $s in if you wish to trigger on
+             more of them, the first 2 will be stripped by the
+             variable expansion processes. 
+     #alias {hello} {$moo}
+         --- will bind hello to $moo's current value.
+     #alias {hello} {$$moo}
+         --- will bind hello to always expand to moo's current value,
+             even when it changes.
+     #alias {hello} {$$$moo}
+         --- will bind hello to expand to the literal string "$moo"
 
 
 
 README.EVALMODES.TINTINMODE
 
-Explain tintin evalmode here.
+Tintin eval mode strives to act how Tintin would act.  There are
+probably some minor descrepancies--these should be logged as bugs.
+Basically, tintin eval mode has the following properties:
+
+ * the number of % signs indicates the nesting depth at which the
+   placement variable will be expanded.  If the nesting depth equals
+   the number of %, then the variable will be expanded.  Otherwise
+   it's left as it is.
+
+ * placement variables can start with a % or a $ and the name can
+   start with a _, but must otherwise be entirely of digits.
+
+ * variables are not denested after they've been evaluated by the
+   CommandManager like Lyntin mode does.
 
 
 

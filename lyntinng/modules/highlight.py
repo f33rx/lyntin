@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.12 2002/12/06 00:33:32 willhelm Exp $
+# $Id: highlight.py,v 1.13 2002/12/09 04:08:12 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -404,9 +404,9 @@ def highlight_cmd(ses, args, input):
   with "word" in it.  '*word' will highlight the line up to "word".  
   'word*' will highlight the line from "word" to the end.
 
-  ex:
-     #highlight {green} {Sven arrives.}
-     #highlight {reverse,green} {Sven arrives.}
+  examples:
+    #highlight {green} {Sven arrives.}
+    #highlight {reverse,green} {Sven arrives.}
 
   category: commands
   """
@@ -435,7 +435,6 @@ def unhighlight_cmd(ses, args, input):
   Allows you to remove highlights.
 
   examples:
-
     #highlight {hello}
     #highlight {blah*}
 

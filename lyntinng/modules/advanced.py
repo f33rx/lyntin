@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.26 2002/10/31 02:40:50 willhelm Exp $
+# $Id: advanced.py,v 1.27 2002/11/06 01:56:51 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -52,7 +52,7 @@ def python_cmd(session, words, input):
   such module exists, it will execute the code inside 
   modules.advanced .
 
-  ex:
+  examples:
     #@ print "hello"
     #@ print string.join(exported.get_commands(), "\\n")
 
@@ -90,7 +90,6 @@ def import_cmd(session, args, input):
   NOT safe to import in-game.
 
   examples:
-
     #import modules.action
     #import exportuser
 

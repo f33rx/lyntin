@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.17 2002/11/18 02:43:54 willhelm Exp $
+# $Id: substitute.py,v 1.18 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -236,7 +236,7 @@ def substitute_cmd(ses, args, input):
   With one argument, prints all substitutes which match the argument.
   Otherwise creates a substitution.
 
-  Braces are advised around both 'name' and 'substitution'.
+  Braces are advised around both 'item' and 'substitution'.
 
   category: commands
   """
@@ -296,12 +296,11 @@ def gag_cmd(ses, args, input):
   accepts a quiet argument to supress reporting of what has been
   gagged.  
 
-  ex:
-     #gag {has missed you.}    <-- will prevent any incoming line
-                                   with "has missed you" to be shown.
-  ex:
-     #gag has missed you       <-- will gag any text with "has",
-                                   "missed", or "you"
+  examples:
+    #gag {has missed you.}    <-- will prevent any incoming line
+                                  with "has missed you" to be shown.
+    #gag has missed you       <-- will gag any text with "has",
+                                  "missed", or "you"
 
   category: commands
   """
