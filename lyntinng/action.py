@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.10 2002/03/20 22:39:13 willhelm Exp $
+# $Id: action.py,v 1.11 2002/03/24 21:00:16 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -160,7 +160,7 @@ class ActionManager(manager.Manager):
     for (action, actioncompiled, response) in self._actions.values():
       match = actioncompiled.search(text)
       if match:
-        line = utils.filter_cm(utils.filter_ansi(line))
+        line = utils.filter_cm(utils.filter_ansi(text))
         matched.append((line, action, actioncompiled, response))
 
     # for every match we figure out what the expanded response
