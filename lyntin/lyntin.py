@@ -31,7 +31,8 @@ def setPath():
 
     sys.path.append(ltd)
     sys.path.append(ltd + 'ui')
-
+    sys.path.append(ltd + 'libcore')
+    
 def InstallError():
     ltd = os.environ.get('LYNTINDIR')
     print '\nLyntin was not installed correctly'
@@ -59,14 +60,18 @@ def main():
     import app
     app.Run()
 
+debugging = 1
 if __name__ == '__main__':
-    try:
-	main()
-    except ImportError:
-        InstallError()
-    except SystemExit:
-        pass
-    except KeyboardInterrupt:
-        pass
-    except:
-        InternalError()
+    if debugging:
+        main()
+    else:
+        try:
+            main()
+        except ImportError:
+            InstallError()
+        except SystemExit:
+            pass
+        except KeyboardInterrupt:
+            pass
+        except:
+            InternalError()

@@ -149,7 +149,8 @@ def Putline(line):
     """Putline(line) -> None
 
     Prints a message from the client to the player prepending
-    a "#".  This is Lyntin output.
+    a "#".  This is Lyntin output. 
+    " # studid emacs
     """
     data.theapp.ui.Putline(line)
 
@@ -272,7 +273,7 @@ def Ses(words, input, seslist):
         # try to connect with the given parameters
         try:
             Putline("ses: Trying to connect...")
-            thisses = data.session(name,host,port)
+            thisses = data.UserSession(name,host,port)
             
         except socket.error:
             Putline("ses: Unable to connect!")
@@ -284,14 +285,13 @@ def Ses(words, input, seslist):
         else:
             # it worked
             # initialize new session as copy of common session
-            thisses.InitLocalSession() 
+            thisses.InitLocalSession()
             data.currsession = thisses
             data.sessionlist = data.sessionlist + [thisses]
             data.numsessions = data.numsessions + 1
 
             # pass the session name to the connect_succeeded hook
             hooks.connect_succeeded_hook.run((name, host, port))
-
     else:
         Putline("ses: requires 3 arguments")
         Putline("ses <name> <address> <port>")

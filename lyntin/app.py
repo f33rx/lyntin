@@ -14,99 +14,100 @@ some utility functions are at the end of the file.
 import socket, select, sys, regex, time, regsub
 import os, string, types, traceback
 import data, player, mud, hooks, cmdparse
+import dict_plus
+
 ##################################################################
 # Client class
 # high level application kinda thingy
 ##################################################################
-class client:
+class client(dict_plus.c):
    """
    high level applications kinda thing
    """
 
    def __init__(self):
-      self.too_many_errors = 20
-      self.numerrors = 0
-      self.commands = {}  # holds command mappings above and beyond core
-
+       self.too_many_errors = 20
+       self.numerrors = 0
+       self.commands = {}  # holds command mappings above and beyond core
+      
    def AddCommand(self, name, func):
-      """AddCommand(self) -> None
-
-      Adds a command binding to self.commands .
-      """
-      if callable(func):
-         self.commands[name] = func
-      else:
-         # FIXME (wbg) - do something to indicate that the function
-         # is non-callable like raise an error!
-         pass
+       """AddCommand(self) -> None
+       
+       Adds a command binding to self.commands .
+       """
+       if callable(func):
+           self.commands[name] = func
+       else:
+           # FIXME (wbg) - do something to indicate that the function
+           # is non-callable like raise an error!
+           pass
 
    def RemoveCommand(self, name):
-      """RemoveCommand(self) -> None
-
-      Removes a command binding from self.commands .
-      """
-      try:    del self.commands[name]
-      except: pass
- 
+       """RemoveCommand(self) -> None
+       
+       Removes a command binding from self.commands .
+       """
+       try:    del self.commands[name]
+       except: pass
+       
    def Loop(self):
-      """
-      The main loop.
-      """
-      try:
-         datato = self.ui.GetUserInput()
-         # get input for all connected sessions
-         for ses in data.sessionlist:
-            if ses.connected:
-               datafrom = ses.ReadMud()
-               if datafrom != '':
-                  # handle actions and displaying stuff from mud
-                  mud.HandleMudOutput(datafrom, ses)
-            if ses.ticker:
-               player.TimeUpdate((ses,))
-            if datato == '\n' and ses is data.currsession:
-               self.SendPlainInput('\r')
-            elif ses is data.currsession:
-               self.PreHandleUserInput(datato)
-               break
-         hooks.internal_tick_hook.run(())
-      except KeyboardInterrupt:
-         player.Quit(None,None,None)
-      except SystemExit: # handle sys.exit
-         return None
-      except BadUser, spec:
-         player.Putline('User variable %s unset!  Abort!'%spec.why)
-         return None
+       """
+       The main loop.
+       """
+       try:
+           mud.log('loop through' + str(len(data.sessionlist)) + ' sessions')
+           datato = self.ui.GetUserInput()
+           # get input for all connected sessions
+           for ses in data.sessionlist:
+               if ses.connected:
+                   ses.Poll()
+               if ses.ticker:
+                   ses.TickUpdate()
+               elif ses is data.currsession:
+                   self.PreHandleUserInput(datato)
+                   break
+           hooks.internal_tick_hook.run(())
+       except KeyboardInterrupt:
+           player.Quit(None,None,None)
+       except SystemExit: # handle sys.exit
+           return None
+       except BadUser, spec:
+           player.Putline('User variable %s unset!  Abort!'%spec.why)
+           return None
 
 
-      # if anything else goes wrong, we get ugly and print a traceback.
-      # this is helpful for the user's programs; otherwise lyntin
-      # would crash completely.
-      # FIXME - this fucking sucks.  put a real traceback in.
-      except:
-         player.Putline('######################'+
-                        'ack! error!'+
-                        '######################')
-         from StringIO import StringIO
-         strio = StringIO()
-         oldout = sys.stdout
-         sys.stdout = strio
-         traceback.print_exc()
-         sys.stdout.flush()
-         sys.stdout = oldout
-         for line in strio.readlines():
-            player.PutUntouchedLine(line)
-         player.Putline('########################'
-                        '#################################')
-         self.numerrors = self.numerrors + 1
-         hooks.error_occurred_hook.run(())
-         try:
-            if self.numerrors >= self.too_many_errors:
-               hooks.too_many_errors_hook.run(())
-         except BadUser, spec:
-            player.Putline('User variable %s unset!  Abort!'%spec.why)
-            raise SystemExit
-
-      return 1
+       # if anything else goes wrong, we get ugly and print a traceback.
+       # this is helpful for the user's programs; otherwise lyntin
+       # would crash completely.
+       # FIXME - this fucking sucks.  put a real traceback in.
+       #
+       # agreed, but what to do about it?  the intent of the code below
+       # is to extract the traceback as a string for the ui to print.
+       # how the hell do we do that?   [2000/08/11 :lh]
+       except:
+           player.Putline('######################'+ \
+                          'ack! error!'+ \
+                          '######################')
+           from StringIO import StringIO
+           strio = StringIO()
+           oldout = sys.stdout
+           sys.stdout = strio
+           traceback.print_exc()
+           sys.stdout.flush()
+           sys.stdout = oldout
+           for line in strio.readlines():
+               player.PutUntouchedLine(line)
+           player.Putline('########################' +\
+                          '#################################')
+           self.numerrors = self.numerrors + 1
+           hooks.error_occurred_hook.run(())
+           try:
+               if self.numerrors >= self.too_many_errors:
+                   hooks.too_many_errors_hook.run(())
+           except BadUser, spec:
+               player.Putline('User variable %s unset!  Abort!'%spec.why)
+               raise SystemExit
+       return 1
 
    def CommandLine1(self):
       """
@@ -115,8 +116,13 @@ class client:
       """
       # FIXME - this needs to be changed to adjust for multiple
       # interfaces.
+      # what does that mean?   [2000/08/10 :lh]
 
+      # could even be a socket. hmm...
+      # leave a connection open from a box, and hook up to it
+      # from another one.
       self.ui = None
+      
       if len(sys.argv) > 1:
          if sys.argv[1] == '-curses' and not self.ui:
             import cursesui
@@ -183,15 +189,18 @@ class client:
       registering the command in the history list.
       we can't do this in HandleUserInput because it is recursive
       """
-      if input:
-         self.RecordHistory(input)
+      if input == '\n':
+          self.SendPlainInput('\r')
 
-         # run the received_user_input hook
-         newinput = StripFinalEltIf(input, ['\r', '\n'])
-         hooks.received_user_input_hook.run((newinput,))
+      elif input:
+          self.RecordHistory(input)
 
-         # send it along to the recursive workhorse
-         self.HandleUserInput(input)
+          # run the received_user_input hook
+          newinput = StripFinalEltIf(input, ['\r', '\n'])
+          hooks.received_user_input_hook.run((newinput,))
+
+          # send it along to the recursive workhorse
+          self.HandleUserInput(input)
 
    def HandleUserInput(self, input):
       """
@@ -430,10 +439,30 @@ class client:
 
 def Run():
    """
-   Run?
+   Initialize app and enter main loop.
+
+   -------------------------
+   app bootstrapping order:
+   -------------------------
+   
+   core modules are imported directly.
+   app object is created
+   initial (common) session is created
+   app commands table is initialized
+   lyntin stdlib is added to path
+   app determines which ui to use, imports and instantiates it
+   files are read in and executed from the command line
+   user module is imported -- switch with last step?
+   usercustom variables are loaded and any extra libs are added to path
    """
    cl = client()
    data.theapp = cl
+
+   # The initial session started for the user
+   data.common = data.UserSession('common', None, None)
+   data.currsession = data.common   
+   # global session list
+   data.sessionlist = [data.common]
 
    # needed to wait until data.theapp is there until we can
    # add all the commands (which is what InitPlayer does).
@@ -442,7 +471,7 @@ def Run():
    cl.PreInitialize()
     
    cl.CommandLine1()
-    
+
    def prul(l): player.PutReallyUntouchedLine(l)
    prul('############################################\n')
    prul("#          Welcome to LynTin...            #\n")
@@ -698,5 +727,5 @@ def abort_due_to_errors(arg):
    There have been too many errors.  so we quit.
    """
    player.Putline('too many errors! abort! abort! abort!')
-   player.Quit()
+   player.Quit(None, None, None)
 

@@ -20,7 +20,7 @@ contains global variables
 
 
 import socket, select, regex, os, string, regsub, copy
-import mud, app, player, hooks
+import mud, app, player, hooks, handler
 
 # Close all open connections
 def ClearAll():
@@ -82,13 +82,10 @@ def compile_trigger(trig):
 ##################################################################
 
 class session:
+    """
+    session class the framework knows about
+    """
     def __init__(self, name, domain, port):
-        self.aliases = {}
-        self.actions = {}
-        self.subs = {}
-        self.vars = {}
-        self.reports = [] # tuples of (file, string)
-        self.gags = []
         # we save a certain amount of previous mud output in the 'databuffer'
         # for later inspection by python functions
         self.databuf = databuffer()
@@ -97,21 +94,9 @@ class session:
         self.logfile = None
         self.logging = 0
         self.sorck = None # the socket
-        self.speedwalk = 1
-        self.action_list = [] # a list of pairs of the form
-                              # (action_trigger, trigger_compiled_regex)
-                              # for optimizing action-response
-    
-        self.lastclock = 0
-        self.lastclockdelta = 0
-        self.ticklen = 60
-        self.lasttickclock = 0
-        self.tickwarn = 10
-        self.ticker = 0
-        self.tickaction = ''
-        self.warnedtick = 0
-        self.verbose = 1      # verbose mode
-
+        self.domain = None
+        self.handlers = []
+        
         if name:
             self.name = name
         if domain and port:
@@ -119,19 +104,21 @@ class session:
             self.sorck.connect(domain, port)
             self.domain = domain
             self.name = name
-            self.connected = 1
-        else:
-            self.sorck = None
-            self.domain = None
+            self.connected = 1        
+            
+    def TickUpdate(self):
+        pass
 
-    def __repr__(self):
-        if self.connected:
-            return '<session "%s" at %s>'%(self.name, self.domain)
-        else:
-            return '<session "%s">'%self.name
+    def Poll(self):
+        read = ''        
+        if len(self.handlers) > 0:
+            for handler in self.handlers:
+                (goahead, read) = handler.handle(self, read)
+                
 
     # write anything from our connection to stdout
     def ReadMud(self):
+        mud.log('readmud...')
         try:
             # check if there's anything to read
             if not self.connected:
@@ -146,6 +133,45 @@ class session:
             return ''             # no data
         except socket.error, x:
             self.Die(x)
+
+    
+class UserSession(session):
+    """
+    session class for the user interface
+    """
+    def __init__(self, name, domain, port):
+        session.__init__(self, name, domain, port)
+        self.aliases = {}
+        self.actions = {}
+        self.subs = {}
+        self.vars = {}
+        self.reports = [] # tuples of (file, string)
+        self.gags = []
+        self.speedwalk = 1
+        self.action_list = [] # a list of pairs of the form
+                              # (action_trigger, trigger_compiled_regex)
+                              # for optimizing action-response
+    
+        self.lastclock = 0
+        self.lastclockdelta = 0
+        self.ticklen = 60
+        self.lasttickclock = 0
+        self.tickwarn = 10
+        self.ticker = 0
+        self.tickaction = ''
+        self.warnedtick = 0
+        self.verbose = 1      # verbose mode        
+
+        self.handlers.append(handler.AppHandler())
+
+    def TickUpdate(self):
+        player.TimeUpdate((self,))
+
+    def __repr__(self):
+        if self.connected:
+            return '<session "%s" at %s>'%(self.name, self.domain)
+        else:
+            return '<session "%s">'%self.name
 
     def InitLocalSession(self):
         """InitLocalSession(self) -> None
@@ -370,8 +396,8 @@ class session:
             # run the action hook
             hooks.action_hook.run((self, match, response))
             # make my day
-            theapp.HandleUserInput(response)
-            
+            theapp.HandleUserInput(response)            
+
 
 
 ##################################################################
@@ -390,7 +416,7 @@ class databuffer:
 
     # add a chunk of text
     def add(self, text):
-        self.list = [text] + self.list
+        self.list = [text] + self.list  # ack, optimize
         # chop the storage list if it's too big
         if len(self.list) > self.size:
             while len(self.list) > self.size:
@@ -470,17 +496,16 @@ timeout = .01
 """The timeout value which is how long we wait on a socket for data.  Keep
 this low."""
 
-# common aliases/actions and such
-common = session('common', None, None)
-"""Common aliases/actions and such.  It's the "global session" so to speak.
-Never touch it."""
+common = None
+""" The initial session started for the user, from which other
+sessions inherit """
 
 # the active session
-currsession = common
-"""currsession is the current session.  It starts out as common."""
+currsession = None
+"""currsession is the current session.  It is initialized to common."""
 
 # global session list
-sessionlist = [common]
+sessionlist = None
 """sessionlist is the list of session objects.  Starts out with just the
 common session."""
 
