@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.6 2002/02/03 04:27:50 willhelm Exp $
+# $Id: ticker.py,v 1.7 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -20,6 +20,10 @@ class Ticker:
     # how much before a tick we should warn
     self._tickwarn = 3
 
+    # tickstart -- this is the tick that the ticker started on.
+    # we use this for calculating the next tick.
+    self._tickstart = 0
+
     # name of the session this ticker belongs to
     self._sessionname = ''
 
@@ -29,14 +33,24 @@ class Ticker:
   def setTickLen(self, value):
     """ Sets the tick length.
 
-    This is how often a tick occurs.
+    This is how often a tick occurs.  i.e. if value was 4, then 
+    there would be a tick every 4 seconds.
 
-    i.e. if value was 4, then there would be a tick every 4 seconds.
+    arguments: 
+
+      'value' -- (int) the interval between ticks
+
     """
     self._ticklen = value
 
   def getTickLen(self):
-    """ Returns the ticklength."""
+    """ Returns the ticklength.
+
+    returns:
+
+      (int) the interval between ticks.
+
+    """
     return self._ticklen
 
   def setTickWarn(self, value):
@@ -60,12 +74,19 @@ class Ticker:
     return self._sessionname
 
   def enableTicker(self):
-    """ Enables this ticker."""
+    """ Enables this ticker.
+
+    Has the side-effect of setting the self._tickstart variable
+    as well--this essentially enables tickers as well as resets
+    them.
+    """
     if self._enabled == 0:
       self._enabled = 1
 
       # register with the ticker frequency
       engine.myengine.register(engine.TIMERFREQ, self.tickerUpdate)
+
+    self._tickstart = engine.myengine.getCurrentTick() - 1
 
   def disableTicker(self):
     """ Disables this ticker."""
@@ -85,7 +106,7 @@ class Ticker:
     if session:
 
       # if this is a tick...
-      if (tick % self._ticklen) == 0:
+      if ((tick - self._tickstart) % self._ticklen) == 0:
         action = session.getAliasManager().getAlias("TICK!!!")
         if action:
           input = lyntin.commandchar + self._sessionname + " " + action
@@ -94,7 +115,8 @@ class Ticker:
           engine.write_message("TICK!!!")
 
       # if this is a tickwarn...
-      if tick % self._ticklen == self._ticklen - self._tickwarn:
+      if ((tick - self._tickstart) % self._ticklen == 
+              (self._ticklen - self._tickwarn)):
         engine.write_message("ticker: " +
               repr(self._tickwarn) + " seconds to tick!")
 
@@ -117,8 +139,8 @@ class Ticker:
     string (if it's enabled).
     """
     if self._enabled == 1:
-      return ("ticker enabled with ticksize at " + 
-              repr(self._ticklen) + " seconds.")
+      return ("(size = " + repr(self._ticklen) + ") " +
+              "(start = " + repr(self._tickstart) + ")")
 
     else:
-      return "ticker is disabled."
+      return "<none>"
