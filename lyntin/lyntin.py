@@ -45,7 +45,7 @@ def InternalError():
     traceback.print_exc()
     print '\n\nPlease submit a bug report describing the circumstances ' +\
           'including the traceback above to:'
-    print 'mouse@varium.com'
+    print 'willhelm@users.sourceforge.net'
     sys.exit(1)
     
 def main():

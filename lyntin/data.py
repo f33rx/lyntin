@@ -505,5 +505,5 @@ debug = 1
 """this sets whether we're in debug mode or not.  affects mud.log."""
 
 # current lyntin version number
-version = "lyntin 1.3.4, maintained by mouse@varium.com"
+version = "lyntin 1.3.4, maintained by willhelm@users.sourceforge.net"
 """this is the current lyntin version number and such."""
