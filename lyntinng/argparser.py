@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.21 2002/06/09 17:09:36 jmberne Exp $
+# $Id: argparser.py,v 1.22 2002/06/15 02:45:42 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -576,6 +576,8 @@ class TimeChecker(Checker):
       return time
     else:
       raise ParserException, "Invalid time specified %s" % (arg,)
+
+typecheckers["time"] = TimeChecker
   
 class ChoiceChecker(Checker):
   """
