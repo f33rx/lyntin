@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.22 2002/03/29 23:47:05 willhelm Exp $
+# $Id: session.py,v 1.23 2002/03/30 16:33:48 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -30,7 +30,7 @@ class Session:
     self._logfile = None
     self._ticker = ticker.Ticker()
 
-    self.setManager("deed", deed.DeedManager()
+    self.setManager("deed", deed.DeedManager())
 
     self._databuffer = data.DataBuffer()
 

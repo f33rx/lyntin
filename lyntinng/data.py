@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: data.py,v 1.1 2002/03/29 23:47:05 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -21,6 +21,8 @@ class DataBuffer:
   """
   
   def __init__(self):
+    # buffer is organized oldest to newest.  so _buffer[0] is
+    # the most stale and _buffer[-1] is the most new.
     self._buffer = []
     self._size = 50
   
@@ -33,7 +35,7 @@ class DataBuffer:
     
       'text' -- (string) the text to add to the buffer
     """
-    lines = text.splitlines()
+    lines = text.splitlines(1)
     for mem in lines:
       if len(self._buffer) == 0 or self._buffer[-1][-1] == '\n':
         self._buffer.append(mem)
@@ -41,7 +43,7 @@ class DataBuffer:
         self._buffer[-1] += mem
 
     while (len(self._buffer) > self._size):
-      del self._buffer[-1]
+      del self._buffer[0]
   
   def clear(self):
     """ Removes all the deeds."""
@@ -96,11 +98,11 @@ class DataBuffer:
     ret = []
     cpattern = re.compile(pattern)
 
-    match = cpattern.match(buffer)
+    match = cpattern.search(buffer)
     while match:
       s, e = match.span()
       ret.append(buffer[s:e])
 
-      match = cpattern.match(buffer, e)
+      match = cpattern.search(buffer, e)
 
     return ret

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.46 2002/03/29 21:17:02 willhelm Exp $
+# $Id: basic.py,v 1.47 2002/03/29 23:47:05 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -177,7 +177,7 @@ def datagrep_cmd(session, words, input):
   pattern = utils.strip_braces(input.split(" ", 1)[1])
   ret = session.getDataBuffer().grepbuffer(pattern)
   exported.write_message("datagrep %s results:\n%s"
-                         % (pattern, string.join(ret, "")))
+                         % (pattern, string.join(ret, "\n")))
 
 def datagreplines_cmd(session, words, input):
   """#datagreplines {regularexpression}
