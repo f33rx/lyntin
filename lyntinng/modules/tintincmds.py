@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.2 2002/05/05 15:46:16 willhelm Exp $
+# $Id: tintincmds.py,v 1.3 2002/05/05 17:17:41 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -968,6 +968,8 @@ class Unsomethinger:
       self.plural = plural
     else:
       self.plural = self.singular + "s"
+
+    self.__doc__ = "Used# to remove " + self.plural + " from the current session's " + self.managername + " manager."
 
   def __call__(self, session, args, input):
     """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
