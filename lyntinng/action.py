@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.8 2002/03/01 04:32:47 willhelm Exp $
+# $Id: action.py,v 1.9 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -13,7 +13,7 @@ This module defines the ActionManager which handles managing actions
 import re
 import manager, utils, event, lyntin
 
-# FIXME - should this be here?
+# the placement variable regular expression
 VARREGEXP = re.compile('%(\d+)')
 
 class ActionManager(manager.Manager):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.32 2002/03/19 23:05:44 willhelm Exp $
+# $Id: basic.py,v 1.33 2002/03/20 04:04:54 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -46,7 +46,7 @@ def action_cmd(session, words, input):
     (a, b) = utils.split_braced(inputadjusted)
 
     session.getManager("action").addAction(a, b)
-    exported.write_message("action: {" + a + "} -> {" + b + "} added.")
+    exported.write_message("action: {%s} -> {%s} added." % (a, b))
   except:
     exported.write_error("action: cannot be added.")
     traceback.print_exc()
@@ -83,7 +83,7 @@ def alias_cmd(session, words, input):
     (a, b) = utils.split_braced(input.split(' ', 1)[1])
 
     session.getManager("alias").addAlias(a, b)
-    exported.write_message("alias: {" + a + "} -> {" + b + "} added.")
+    exported.write_message("alias: {%s} -> {%s} added." % (a,b))
   except:
     exported.write_error("alias: cannot be added.")
     traceback.print_exc()
@@ -151,8 +151,7 @@ def clear_cmd(session, words, input):
   """
   try:
     session.clear()
-    exported.write_message("clear: session " + 
-                                 session.getName() + " cleared.")
+    exported.write_message("clear: session %s cleared." % session.getName())
   except:
     exported.write_error("clear: error in clearing session.")
 
@@ -212,7 +211,7 @@ def diagnostics_cmd(session, words, input):
       f.write(message)
       f.close()
     except:
-      exported.write_error("diagnostics: Error writing to file " + words[1] + ".")
+      exported.write_error("diagnostics: Error writing to file %s." % words[1])
       traceback.print_exc()
 
 
@@ -246,7 +245,7 @@ def gag_cmd(session, words, input):
   gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
 
   session.getManager("gag").addGag(gaggedtext)
-  exported.write_message("gag: '" + gaggedtext + "' added.")
+  exported.write_message("gag: '%s' added." % gaggedtext)
 
 
 def help_cmd(session, words, input):
@@ -336,8 +335,8 @@ def highlight_cmd(session, words, input):
     (a, b) = utils.split_braced(inputadjusted)
 
     session.getManager("highlight").addHighlight(a, b)
-    exported.write_message("highlight: '" + b + 
-                                 "' with style " + a + ".")
+    exported.write_message("highlight: '%s' with style '%s'." % (b, a))
+
   except:
     exported.write_error("highlight: cannot be set.")
     traceback.print_exc()
@@ -351,6 +350,32 @@ def history_cmd(session, words, input):
   historylist = exported.get_engine().getHistoryManager().getHistory()
   historylist.reverse()
   exported.write_message("History:\n" + string.join(historylist, "\n"))
+
+
+def if_cmd(session, words, input):
+  """#if <expr> <action>
+
+  Implements the Tintin++ #if command.
+  """
+  # 3/18/2002: originally implemented by Sebastian John
+  # 3/20/2002: mildly editied by Will Guaraldi
+  if len(words) < 3:
+    exported.write_error("syntax: #if {<expr>} {<action>}")
+    return
+
+  inputadjusted = input.split(" ", 1)[1]
+  expr, action = utils.split_braced(inputadjusted)
+
+  expr = expr.replace("&&", "and")
+  expr = expr.replace("||", "or")
+
+  try:
+    if eval(expr):
+      engine.myengine.handleUserData(action)
+  except SyntaxError:
+    exported.write_error("if: invalid syntax / syntax error.")
+  except Exception, e:
+    exported.write_error("if: exception: %s" % e)
 
 
 def info_cmd(session, words, input):
@@ -368,8 +393,7 @@ def killall_cmd(session, words, input):
   """
   for mem in engine.myengine._sessions.values():
     mem.clear()
-    exported.write_message("killall: session " + 
-                                 mem.getName() + " cleared.")
+    exported.write_message("killall: session %s cleared." % mem.getName())
 
 
 def log_cmd(session, words, input):
@@ -384,9 +408,8 @@ def log_cmd(session, words, input):
 
   if session.getLogfile() != None:
     try:
-      exported.write_message("log: stopping logging to '" + 
-                                   session.getLogfileName() + 
-                                   "'.")
+      exported.write_message("log: stopping logging to '%s'." % 
+                             session.getLogfileName())
       session.closeLogfile()
     except:
       exported.write_error("log: logfile cannot be closed.")
@@ -395,9 +418,8 @@ def log_cmd(session, words, input):
     try:
       filename = utils.strip_braces(words[1])
       session.openLogfile(filename)
-      exported.write_message("log: starting logging to '" + 
-                                   session.getLogfileName() + 
-                                   "'.")
+      exported.write_message("log: starting logging to '%s'." % 
+                             session.getLogfileName())
     except:
       exported.write_error("log: logfile cannot be opened for apending.")
 
@@ -429,23 +451,18 @@ def loop_cmd(session, words, input):
     ifrom = int(looprange[0].strip())
     ito = int(looprange[1].strip())
 
-    # we add one because range(2,5) will be 2,3,4 and non-inclusive
-    # of 5 which is what we want.
+    # we need to handle backwards and forwards using the step
+    # and need to adjust ito so the range is correctly bounded.
     if ifrom > ito:
       step = -1
-      if ito > 0:
-        ito = ito - 1
-      else:
-        ito = ito + 1
     else:
       step = 1
-      if ito > 0:
-        ito = ito + 1
-      else:
-        ito = ito - 1
 
+    if ito > 0:
+      ito = ito + step
+    else:
+      ito = ito - step
 
-    print "ifrom ", ifrom, "ito ", ito, "step ", step
     for i in range(ifrom, ito, step):
       loopcommand = command.replace("%0", repr(i))
       event.InputEvent(input=loopcommand, internal=1).enqueue()
@@ -958,6 +975,7 @@ def load():
   engine.myengine.addCommand("help", help_cmd)
   engine.myengine.addCommand("highlight", highlight_cmd)
   engine.myengine.addCommand("history", history_cmd)
+  engine.myengine.addCommand("if", if_cmd)
   # engine.myengine.addCommand("ignore", ignore_cmd)
   # engine.myengine.addCommand("import", import_cmd)
   engine.myengine.addCommand("info", info_cmd)
