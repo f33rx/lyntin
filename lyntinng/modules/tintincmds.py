@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.17 2002/05/16 17:38:02 jmberne Exp $
+# $Id: tintincmds.py,v 1.18 2002/05/22 01:36:38 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -31,6 +31,9 @@ def action_cmd(session, args, input):
   pattern against it, and saves any match it finds so you can 
   use it in the response.  See below for examples.
 
+  the onetime argument can be set to true to have the action remove
+  itself automatically if it is ever executed
+
   The response can be any mud command or Lyntin command and can
   contain placement-variables and the special variable %a which
   means "the whole matched line".
@@ -49,6 +52,7 @@ def action_cmd(session, args, input):
   """
   trigger = args["trigger"]
   action = args["action"]
+  onetime = args["onetime"]
   quiet = args["quiet"]
 
   # they typed '#action'--print out all the current actions
@@ -69,11 +73,11 @@ def action_cmd(session, args, input):
     exported.write_message(data)
     return
 
-  session.getManager("action").addAction(trigger, action)
+  session.getManager("action").addAction(trigger, action, onetime)
   if not quiet:
     exported.write_message("action: {%s} {%s} added." % (trigger, action))
 
-commands_dict["action"] = (action_cmd, "trigger= action= quiet:boolean=false")
+commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false quiet:boolean=false")
 
 
 def alias_cmd(session, args, input):
