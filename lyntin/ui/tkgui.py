@@ -4,7 +4,7 @@ Tkgui is a gui interface based on tk.
 
 from Tkinter import *
 
-import tkhistentry, string, mud, sys, os, font, regex, data
+import tkhistentry, string, mud, sys, os, font, data
 from basegui import BaseGUI
 
 txtAttribs = { } ## 0 -- all off. 1 -- bold  5 -- blinking

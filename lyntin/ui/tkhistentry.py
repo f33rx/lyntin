@@ -10,7 +10,7 @@
 ##################################################################
 from Tkinter import *
 
-import os, exported, regex, string
+import os, exported, string
 
 class CommandEntry(Entry):
     def __init__(self, master, partk, **kw):
