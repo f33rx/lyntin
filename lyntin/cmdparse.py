@@ -9,6 +9,8 @@
 ##################################################################
 """
 contains utility functions for parsing user-commands
+This should be re-written to use commands that make sense to
+normal human beings.
 """
 
 import string, regex, regsub
