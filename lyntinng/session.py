@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.58 2002/06/20 01:20:10 willhelm Exp $
+# $Id: session.py,v 1.59 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -263,65 +263,19 @@ class Session:
       else:
         input = spamtuple[-1]
 
+    # handle lyntin commands
+    spamtuple = self,internal,input,input
+    input = exported.get_manager("command").filter(spamtuple)
+    if not input:
+      if internal == 0:
+        self.prompt()
+      return
+
     # after this point we don't do any more recursion.  so it's
     # safe to unescape things and such.
     input = input.replace("\\;", ";")
-
-    # handle lyntin commands
-    if len(input) > 1 and input[0] == lyntin.commandchar:
-      input = input[1:]
-
-      # splits out the command name from the rest of the command line
-      words = input.split(" ",1)
-
-      # We want an empty argument list if there was one, don't want
-      # array out-of-bounds issues       
-      if len(words) < 2: words.append("")
-
-      # this checks to see if it's a special #@ command.
-      if input[0] == "@":
-        engine.myengine.getCommand("@")(self, input.split(" "), input)
-        if internal==0: self.prompt()
-        return
-
-      # this finds the first matching command and ends there.
-      commands = engine.myengine.getCommands()
-      commands.sort()
-      for mem in commands:
-        command = None
-        if mem[0] == "^":
-          if re.compile(mem).search(words[0]):
-            command = engine.myengine.getCommand(mem)
-        else:
-          if mem.find(words[0]) == 0:
-            command = engine.myengine.getCommand(mem)
-
-        if command:
-          argumentparser = engine.myengine.getArgParser(mem)
-          if argumentparser == None:
-            command(self, input.split(" "), input)
-          else:
-            try:
-              dict = argumentparser.parse(words[1])
-              dict["command"]=mem
-              command(self, dict, input)
-            except ValueError, e:
-              exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                   (mem, e, lyntin.commandchar, mem,
-                                    argumentparser.syntaxline))
-            except argparser.ParserException, e:
-              exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                   (mem, e, lyntin.commandchar, mem,
-                                    argumentparser.syntaxline))
-          if internal == 0:
-            self.prompt()
-          break
-
-      else:
-        exported.write_error("Not a valid command: %s" % (words[0]))
-        if internal == 0:
-          self.prompt()
-      return
+    input = input.replace("\\$", "$")
+    input = input.replace("\\%", "%")
 
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.58 2002/06/21 02:34:21 willhelm Exp $
+# $Id: engine.py,v 1.59 2002/06/27 18:02:00 jmberne Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -24,40 +24,16 @@ To access the engine, access it by 'engine.myengine'.
 It also holds a series of helper functions for making common engine
 calls easier to deal with.
 """
-import Queue, traceback, copy, string, re, thread, inspect, sys
+import Queue, traceback, copy, string, re, thread, sys
 
 import session, ui.ui, lyntin, utils, event, argparser
-import exported, hooks, helpmanager, history, threadmanager
+import exported, hooks, helpmanager, history, threadmanager, commandmanager
 
 """
 myengine is a singleton.  so when it gets instantiated, this
 variable can be used to retrieve the engine singleton.
 """
 myengine = None
-
-class CommandData:
-  """
-  Holds data relating to a command.  It's a helper class.
-  """
-  def __init__(self):
-    self._name = ""
-    self._func = None
-    self._argparser = None
-    self._fqn = ""
-
-  def __repr__(self): return self._name
-  def __str__(self): return self._name
-
-  def setName(self, name): self._name = name
-  def getName(self): return self._name
-  def setNameAdjusted(self, name): self._name_adjusted = name
-  def getNameAdjusted(self): return self._name_adjusted
-  def setFunc(self, func): self._func = func
-  def getFunc(self): return self._func
-  def setArgParser(self, ap): self._argparser = ap
-  def getArgParser(self): return self._argparser
-  def setFQN(self, fqn): self._fqn = fqn
-  def getFQN(self): return self._fqn
 
 class Engine:
   """
@@ -97,6 +73,9 @@ class Engine:
     # our history manager
     self._managers["history"] = history.HistoryManager()
 
+    # our command manager
+    self._managers["command"] = commandmanager.CommandManager()
+
     # there is only one ui in the system.
     self._ui = None
 
@@ -111,9 +90,6 @@ class Engine:
 
     # the current session.  points to a Session object.
     self._current_session = None
-
-    # holds command name -> CommandData mappings
-    self._commands = {}
 
     # we register ourselves with the shutdown hook
     hooks.shutdown_hook.register(self.shutdown)
@@ -645,145 +621,6 @@ class Engine:
   def flushUI(self):
     """ Tells the ui to flush its output."""
     self._ui.flush()
-
-
-  ### ------------------------------------------------
-  ### Command functions
-  ### ------------------------------------------------
-
-  def getCommands(self):
-    """
-    Returns a list of the commands we have registered.
-
-    returns:
-
-      (list of strings) all the commands that have been registered
-
-    """
-    return self._commands.keys()
-
-  def addCommand(self, name, func, arguments=None, argoptions=None, helptext=""):
-    """
-    Registers a command.
-
-    arguments:
-
-      'name' -- (string) the command to add
-
-      'func' -- (function) the function that handles it
-
-      'arguments=None' -- (string) argument specification to create 
-                          the argparser
-
-      'argoptions=None' -- (string) options for how the argument spec
-                           should be parsed
-
-      'helptext=""' -- (string) the help text for this command
-      
-    """
-    if not callable(func):
-      raise ValueError, "%s is uncallable." % name
-
-    cd = CommandData()
-
-    syntaxline = ""
-
-    # try to figure out the arguments and syntax line stuff
-    if arguments != None:
-      try:
-        cd.setName(name)
-        cd.setArgParser(argparser.ArgumentParser(arguments, argoptions))
-        syntaxline = cd.getArgParser().syntaxline
-      except Exception, e:
-        raise Exception, "Error with arguments for command %s, (%s)" % (name,e)
-
-    # add the command to the command list
-    cd.setFunc(func)
-
-    # toss the command thing in the list
-    self._commands[name] = cd
-
-    # deal with the help text
-    if not helptext:
-      if func.__doc__:
-        helptext = inspect.getdoc(func)
-      else:
-        helptext = "\nThis command has no help."
-
-    if name[0] == "^":
-      cd.setNameAdjusted(name[1:])
-    else:
-      cd.setNameAdjusted(name)
-
-    if syntaxline:
-      helptext = ("syntax: %s%s %s\n" % 
-             (lyntin.commandchar, cd.getNameAdjusted(), syntaxline) + helptext)
-
-    fqn = exported.add_help(cd.getNameAdjusted(), helptext)
-    cd.setFQN(fqn)
-        
-  def removeCommand(self, name):
-    """
-    Removes a command (and the help text) for whatever reasons.
-
-    arguments:
-
-      'name' -- (string) the name of the command to remove
-
-    """
-    if self._commands.has_key(name):
-      cd = self._commands[name]
-      del self._commands[name]
-      try:
-        exported.remove_help(cd.getFQN())
-      except:
-        pass
-
-  def getCommand(self, name):
-    """
-    Returns the function for a given command name.
-
-    arguments:
-
-      'name' -- (string) the name of the command to retrieve
-
-    returns:
-
-      (function) the function in question or None
-
-    """
-    if self._commands.has_key(name):
-      return self._commands[name].getFunc()
-
-    if self._commands.has_key("^" + name):
-      return self._commands["^" + name].getFunc()
-
-    # this is kind of a kluge to handle the #@ arbitrary
-    # python stuff so that it can be in its own module.
-    if name[0] == "@" and self._commands.has_key("@"):
-      return self._commands["@"].getFunc()
-
-    return None
-
-  def getArgParser(self, name):
-    """
-    Returns the arguments parser for a given command name.
-
-    arguments:
-
-      'name' -- (string) the name of the command whose arguments should 
-                be retrieved
-
-    returns:
-
-      (ArgParser) -- argument parsing object with parse(string) command 
-                      to convert incoming arguments into a dictionary
-      
-    """
-    if self._commands.has_key(name):
-      return self._commands[name].getArgParser()
-
-    return None
 
   
   ### ------------------------------------------------

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.2 2002/06/18 23:42:22 willhelm Exp $
+# $Id: alias.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -475,5 +475,3 @@ def unload():
   exported.remove_manager("alias")
   hooks.user_filter_hook.unregister(am.filter)
   hooks.write_hook.unregister(am.persist)
-
-

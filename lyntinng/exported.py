@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.22 2002/06/20 03:23:27 willhelm Exp $
+# $Id: exported.py,v 1.23 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -50,7 +50,7 @@ def add_command(command, func, arguments=None, argoptions=None, helptext=""):
     'helptext=""' -- (string) the help text for this command
 
   """
-  get_engine().addCommand(command, func, arguments, argoptions, helptext)
+  get_manager("command").addCommand(command, func, arguments, argoptions, helptext)
 
 def remove_command(str):
   """ Removes a command from Lyntin.
@@ -59,7 +59,7 @@ def remove_command(str):
 
     'str' -- the command name.
   """
-  get_engine().removeCommand(str)
+  get_manager("command").removeCommand(str)
 
 def get_commands():
   """ Returns a list of the commands currently bound.
@@ -68,7 +68,7 @@ def get_commands():
 
     list of strings
   """
-  return get_engine().getCommands()
+  return get_manager("command").getCommands()
 
 def add_manager(name, mgr):
   """ Registers a manager with the engine.
@@ -182,7 +182,6 @@ def set_current_session(session):
   # FIXME - should do some data checking on this first
   get_engine()._current_session = session
     
-  
 def get_num_errors():
   """
   Returns the total number of errors Lyntin has had thus far.
@@ -217,7 +216,6 @@ def write_ui(text):
     get_engine().writeUI(text)
   else:
     print text
-
 
 def write_message(text):
   """ Calls engine.myengine.writeMessage which writes LTDATA message.
