@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.2 2003/08/08 00:15:24 willhelm Exp $
+# $Id: gag.py,v 1.3 2003/08/27 03:19:58 willhelm Exp $
 #######################################################################
 """
 This module defines gag functionality.
@@ -274,7 +274,7 @@ class GagManager(manager.Manager):
     ses = args["session"]
     text = args["dataadj"]
 
-    if not ses._ignoresubs:
+    if exported.get_config("ignoresubs", ses, 0) == 0:
       text = self.expand(ses, text)
     return text
 
