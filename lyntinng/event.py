@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.27 2002/04/29 02:06:18 willhelm Exp $
+# $Id: event.py,v 1.28 2002/05/09 00:10:41 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -14,7 +14,7 @@ by the event handler thread when it pulls the event object off the
 event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
-import string, os, traceback, sys, getopt
+import string, os, traceback, sys, glob
 import engine, hooks, ui.ui, lyntin, exported
 
 class Event:
@@ -63,22 +63,23 @@ class StartupEvent(Event):
 
     try:
       # instantiate a ui
-      # FIXME - do we want to handle arbitrary ui's?
-      if lyntin.options['ui'] == 'tk':
-        from ui.tkgui import TkGui
-        engine.myengine.setUI(TkGui())
+      uiname = lyntin.options['ui']
+      modulename = uiname + "ui"
 
-      elif lyntin.options['ui'] == 'curses':
-        from ui.cursesui import Cursesui
-        engine.myengine.setUI(Cursesui())
+      import ui.__init__
 
-      else:
-        from ui.textui import Textui
-        engine.myengine.setUI(Textui())
+      uiinstance = ui.__init__.get_ui(modulename)
+      if not uiinstance:
+        uiinstance = ui.__init__.get_ui("textui")
+
+      if not uiinstance:
+        raise ValueError, "Can't start ui."
+
+      engine.myengine.setUI(uiinstance)
 
       exported.write_message("UI started.")
-    except:
-      print "Cannot start ui."
+    except Exception, e:
+      print "Cannot start ui: %s" % e
       sys.exit(0)
 
       # import modules listed in modulesinit

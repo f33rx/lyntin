@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.9 2002/04/29 02:06:18 willhelm Exp $
+# $Id: cursesui.py,v 1.10 2002/05/03 23:38:50 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -12,6 +12,13 @@ This module holds the Curses ui.  It could use some _serious_ work.
 import curses, string
 import ui, hooks, event, engine, utils
 
+myui = None
+
+def get_ui_instance():
+  global myui
+  if myui == None:
+    myui = Cursesui()
+  return myui
 
 class Cursesui(ui.BaseUI):
   """

@@ -4,6 +4,37 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.2 2002/02/08 04:05:42 willhelm Exp $
+# $Id: __init__.py,v 1.3 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
+import glob, os
 
+def get_ui(uiname):
+  """
+  Attempts to retrieve the ui by that name.
+
+  arguments:
+
+    'uiname' -- (string) the name of the ui passed in by the
+                command line
+
+  returns:
+
+    a ui.BaseUI subclass instance, or None if it could not
+    be instantiated
+  """
+  index = __file__.rfind(os.sep)
+  if index == -1:
+    path = "." + os.sep
+  else:
+    path = __file__[:index]
+
+  if not glob.glob(os.path.join(path, uiname + ".py")):
+    return None
+
+  try:
+    ui_module = getattr(__import__("ui.%s" % uiname), uiname)
+    return ui_module.get_ui_instance()
+
+  except Exception, e:
+    print "get_ui: %s" % e
+    return None
