@@ -38,20 +38,28 @@ class Client(dict_plus.c):
        return self.commands
 
    def AddCommand(self, name, func):
-       """AddCommand(self) -> None
+       """AddCommand(self) -> 1 if success 0 if failure
        
        Adds a command binding to self.commands .
        """
        if callable(func):
            self.commands[name] = func
+           return 1
        else:
-           # FIXME - we should check to see if it exists in
-           # /path/module.function or something like that
-           # probably need to check to see if the file exists,
-           # import it, and then check to see if the command
-           # exists in the dict, and if it's callable, then
-           # add it.
+           pieces = split(func, ".")
+           if len(pieces) < 2:
+               player.PutError('Please specify function with module.function format.')
+               return 0
+           
+           if sys.modules.has_key(pieces[0]):
+               mod = sys.modules[pieces[0]]
+               if mod.__dict__.has_key(pieces[1]):
+                   if callable(mod.__dict__[pieces[1]]):
+                       self.commands[name] = mod.__dict__[pieces[1]]
+                       return 1
+
            player.PutError(name + ' is uncallable.  Sorry kiddo.')
+           return 0
 
    def RemoveCommand(self, name):
        """RemoveCommand(self) -> None
