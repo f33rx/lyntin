@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.41 2002/08/15 01:26:11 willhelm Exp $
+# $Id: tintincmds.py,v 1.42 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -568,7 +568,6 @@ def textin_cmd(session, args, input):
     file = open(filename, "r")
     contents = file.readlines()
     for mem in contents:
-      mem = mem.strip()
       session.getSocketCommunicator().write(mem + "\n")
     exported.write_message("textin: file %s read and sent to client." % filename)
 
