@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.29 2002/03/14 16:30:06 willhelm Exp $
+# $Id: basic.py,v 1.30 2002/03/16 04:00:05 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -558,13 +558,13 @@ def session_cmd(session, words, input):
   host = utils.strip_braces(words[2])
   port = utils.strip_braces(words[3])
 
-  if utils.is_int(port) == 1:
+  if port.isdigit():
     port = int(port)
   else:
     exported.write_error("session: port must be a number.")
     return
   
-  if utils.is_int(sessionname) == 1:
+  if sessionname.isdigit():
     exported.write_error("session: session names cannot be all numbers.")
     return
 
@@ -764,7 +764,7 @@ def ticksize_cmd(session, words, input):
     return
 
   ticklength = utils.strip_braces(words[1])
-  if utils.is_int(ticklength) == 1:
+  if ticklength.isdigit():
     ticklength = int(ticklength)
   else:
     exported.write_error("syntax: #ticksize {number}")
