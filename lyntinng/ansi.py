@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: ansi.py,v 1.1 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -124,7 +124,7 @@ def filter_ansi(text):
   @returns: text without ANSI color codes
   @rtype: string
   """
-  return ANSI_COLOR_REGEXP('', text)
+  return ANSI_COLOR_REGEXP.sub('', text)
 
 
 def is_color_token(token):
