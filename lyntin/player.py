@@ -51,6 +51,7 @@ def DispatchCommand(input, seslist):
         input = input[1:]
     if not seslist:
         raise SesError, 'No session supplied'
+
     words = string.split(input)
 
     # execute some python code?
@@ -278,6 +279,7 @@ def Ses(words, input, seslist):
     """
     hooks.session_command_hook.run((input, seslist))
     to = words[1:]
+
     if len(to) == 0:
         Putline("sessions: ")
     elif len(to) >= 3:
