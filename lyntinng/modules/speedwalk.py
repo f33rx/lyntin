@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.18 2002/12/22 23:07:20 willhelm Exp $
+# $Id: speedwalk.py,v 1.19 2003/02/15 03:35:06 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.  Speedwalking is highly
@@ -16,7 +16,7 @@ First you want to create maps from a character or characters to
 an expansion using #swdir.  Then every instance of this character/characters
 gets expanded to the expansion.
 
-For example:
+For example::
 
   #swdir {n} {north}
   #swdir {s} {south}
@@ -26,7 +26,7 @@ For example:
 Similarly, "2n3s" will expand to "north;north;south;sout;south".
 
 To handle instances where certain combinations will get expanded, but we
-really don't want them to be, we use #swexclude.
+really don't want them to be, we use #swexclude::
 
   #swexclude {news}
 """
@@ -399,6 +399,14 @@ def swdir_cmd(ses, args, input):
     #swdir {NE} {northeast}
     #swdir {l} {look}
     ...
+
+  This allows you to string characters together to speedwalk:
+
+    4e2sNE
+
+  which using the above swdirs gets expanded to 
+  "east;east;east;east;south;south;northeast" and who wants to type all 
+  that?
 
   see also: swexclude
 

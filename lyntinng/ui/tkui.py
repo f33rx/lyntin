@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.34 2003/02/15 03:35:06 willhelm Exp $
+# $Id: tkui.py,v 1.35 2003/04/08 22:19:08 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -46,7 +46,7 @@ fg_color_codes = {"30": "#000000",
                   "33": "#daa520",
                   "34": "#0000aa",
                   "35": "#bb00bb",
-                  "36": "#00dddd",
+                  "36": "#00cccc",
                   "37": "#aaaaaa",
                   "b30": "#666666",
                   "b31": "#ff3333",
@@ -54,7 +54,7 @@ fg_color_codes = {"30": "#000000",
                   "b33": "#ffff00",
                   "b34": "#2222ff",
                   "b35": "#ff33ff",
-                  "b36": "#90ffff",
+                  "b36": "#70eeee",
                   "b37": "#ffffff" }
 
 # the complete list of background color codes and what color they
@@ -65,7 +65,7 @@ bg_color_codes = {"40": "#000000",
                   "43": "#daa520",
                   "44": "#0000aa",
                   "45": "#ff00ff",
-                  "46": "#00dddd",
+                  "46": "#00cccc",
                   "47": "#bbbbbb",
                   "b40": "#777777",
                   "b41": "#fa6072",
@@ -73,7 +73,7 @@ bg_color_codes = {"40": "#000000",
                   "b43": "#ffff00",
                   "b44": "#2222ff",
                   "b45": "#ee82ee",
-                  "b46": "#90ffff",
+                  "b46": "#70eeee",
                   "b47": "#ffffff" }
 
 # this is the default color--it's what we use when the mud hasn't
@@ -103,6 +103,10 @@ class _OutputEvent(_Event):
 
   def execute(self, tkui):
     tkui.write_internal(self._text)
+
+class _ColorCheckEvent(_Event):
+  def execute(self, tkui):
+    tkui.colorCheck() 
 
 class _TitleEvent(_Event):
   def __init__(self, tk, title):
@@ -192,13 +196,15 @@ class Tkui(ui.BaseUI):
     exported.add_command("colorcheck", colorcheck_cmd)
 
   def dequeue(self):
-    try:
+    qsize = self._event_queue.qsize()
+    if qsize > 10:
+      qsize = 10
+
+    for i in range(qsize):
       ev = self._event_queue.get_nowait()
-      if ev:
-        ev.execute(self)
-    except Exception, e:
-      pass 
-    self._tk.after(100, self.dequeue)
+      ev.execute(self)
+
+    self._tk.after(25, self.dequeue)
 
   def settitle(self, title=""):
     """
@@ -1045,11 +1051,7 @@ def colorcheck_cmd(ses, args, input):
   properly.
   """
   myengine = exported.get_engine()
-  myengine._ui_lock.acquire(1)
-  try:
-    myengine._ui.colorCheck()
-  finally:
-    myengine._ui_lock.release()
+  myengine._ui._event_queue.put(_ColorCheckEvent())
 
 # Local variables:
 # mode:python
