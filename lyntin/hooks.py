@@ -48,7 +48,7 @@ class hook:
 ##################################################################
 # the hooks available in Lyntin
 # (if you think of a hook you would like me to add, by all means
-# mail me your suggestion: willhelm@users.sourceforge.net)
+# do a feature request at http://lyntin.sourceforge.net)
 ##################################################################
 
 

@@ -39,8 +39,7 @@ def InternalError():
     import traceback
     traceback.print_exc()
     print '\n\nPlease submit a bug report describing the circumstances ' +\
-          'including the traceback above to:'
-    print 'willhelm@users.sourceforge.net'
+          'including the traceback at http://lyntin.sourceforget.net'
     sys.exit(1)
     
 def main():
