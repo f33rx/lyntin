@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.9 2002/03/16 04:03:08 willhelm Exp $
+# $Id: utils.py,v 1.10 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -16,6 +16,7 @@ import string, re
 
 SEMI_REGEXP = re.compile('(?<!\\\\);')
 VAR_REGEXP = re.compile('%(\d+)')
+NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 
 def chomp(text):
   """ Removes '\\r' and '\\n' from the input string.
@@ -195,15 +196,56 @@ def split_braced(text):
 
 
 def strip_braces(text):
-  """ Returns text after stripping the braces around the text."""
+  """ Returns text after stripping the braces around the text.
+
+  If the incoming text has a { at the beginning and a } at the
+  end, it removes the braces.
+
+  arguments:
+
+    'text' -- (string) the string to remove the braces from
+
+  returns:
+
+    (string) text with the braces (if matched) removed
+  """
   text = text.strip()
   if text[0] == '{' and text[-1] == '}':
     return text[1:-1]
   return text
 
 
+def replace_nested_vars(text):
+  """ Replaces all the nested variables with appropriate variables.
+
+  arguments:
+
+    'text' -- (string) the text to replace nested vars with
+
+  returns:
+
+    (string) the adjusted text
+  """
+  match = NESTED_VAR_REGEXP.search(text)
+  while match:
+    pat = '%%'+match.group(1)
+    repl = '%'+match.group(1)
+    text = re.sub(pat, repl, text)
+    match = NESTED_VAR_REGEXP.search(text)
+
+  return text
+
 def strip_placement_vars(text):
-  """ Returns a list of all the variables in a string."""
+  """ Returns a list of all the variables in a string.
+
+  arguments:
+
+    'text' -- (string) the text to strip placement vars from
+
+  returns:
+
+    list of replacement var strings
+  """
   ret = []
   match = VAR_REGEXP.search(text)
   while match:
@@ -219,7 +261,20 @@ def replace_vars(input, expansion):
   variables with the components from the input.
 
   Returns the finalized string.
+
+  arguments:
+
+    'input' -- (string) the user's input
+
+    'expansion' -- (string) the expansion of the alias in the 
+                   input
+
+  returns:
+
+    The expansion with all nested_vars replaced and placement
+    vars replaced.
   """
+  expansion = replace_nested_vars(expansion)
   vars = strip_placement_vars(expansion)
 
   if len(vars) > 0:
@@ -252,6 +307,18 @@ def columnize(textlist, screenwidth=72, indent=0):
   """
   Takes a list of data and converts it into a series of columns
   and rows that are evenly spaced and pretty and stuff.
+
+  arguments:
+
+    'textlist' -- (list of strings) the list to columnize
+
+    'screenwidth=72' -- (int) the width to wrap against
+
+    'indent=0' -- (int) the amount to indent each line
+
+  returns:
+
+    the final formatted string
   """
   if screenwidth > 2 + indent:
     screenwidth = screenwidth - 2 - indent

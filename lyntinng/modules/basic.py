@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.34 2002/03/20 22:39:13 willhelm Exp $
+# $Id: basic.py,v 1.35 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -590,9 +590,9 @@ def session_cmd(session, words, input):
     exported.write_error("syntax: #session <sesname> <host> <port>")
     return
 
-  sessionname = utils.strip_braces(words[1])
-  host = utils.strip_braces(words[2])
-  port = utils.strip_braces(words[3])
+  inputadjusted = input.split(' ', 1)[1]
+  sessionname, b = utils.split_braced(inputadjusted)
+  host, port = b.split(" ")
 
   if port.isdigit():
     port = int(port)
