@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.21 2002/03/01 03:46:07 willhelm Exp $
+# $Id: basic.py,v 1.22 2002/03/03 19:09:55 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin, exported
@@ -336,8 +336,9 @@ def history_cmd(session, words, input):
 
   Prints the history list.
   """
-  exported.write_message("History:\n" +
-          exported.get_engine().getHistoryManager().getHistory())
+  historylist = exported.get_engine().getHistoryManager().getHistory()
+  historylist.reverse()
+  exported.write_message("History:\n" + string.join(historylist, "\n"))
 
 def info_cmd(session, words, input):
   """#info

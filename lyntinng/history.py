@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: history.py,v 1.1 2002/03/01 03:46:07 willhelm Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered
@@ -28,6 +28,13 @@ class HistoryManager:
     """
     This retrieves the item (if it exists) and performs the 
     substitutions (if we need to).
+
+    arguments:
+
+      'userinput' -- what the user typed--we'll use this to figure
+                     out which item they're referring to and
+                     whether to apply a substitution
+
     """
     tokens = userinput.split(" ", 1)
 
@@ -48,26 +55,45 @@ class HistoryManager:
     if len(tokens) > 1:
       # this is kind of sketchy--we do a substitution but
       # split the thing based on the first = sign
-      i = tokens[1].find("=")
-      returninput = returninput.replace(tokens[1][:i], tokens[1][i+1:])
+      try:
+        i = tokens[1].find("=")
+        returninput = returninput.replace(tokens[1][:i], tokens[1][i+1:])
+      except:
+        # something's wrong with what they typed, so we don't
+        # do a substitution
+        # FIXME - we should probably error out...  need to think about this
+        pass
 
     # this is a side-effect of this function--if we were called
     # by the user, it means that the item in position 0 of
     # self._history is actually a history command--so we replace
     # it with the something nice we just discovered.
-    self._history[0] = returninput
+    if calledbyuser:
+      self._history[0] = returninput
 
     return returninput
 
   def getHistory(self):
-    """ Returns everything in the history buffer."""
-    data = ''
+    """ Returns everything in the history buffer as a list.
+
+    returns:
+
+      list of strings
+
+    """
+    data = []
     for i in range(0, len(self._history)):
-      data += repr(i) + " " + self._history[i] + "\n"
+      data.append( repr(i) + " " + self._history[i] )
     return data
 
   def recordHistory(self, input):
-    """ Records an item in the history (which is a queue)."""
+    """ Records an item in the history (which is a queue).
+
+    arguments:
+
+      'input' -- the line to record
+
+    """
     # we don't record nothings
     if len(input) == 0:
       return
