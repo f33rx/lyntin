@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.42 2002/08/20 02:39:04 willhelm Exp $
+# $Id: tintincmds.py,v 1.43 2002/08/26 23:45:07 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -424,7 +424,7 @@ def read_cmd(ses, args, input):
 commands_dict["read"] = (read_cmd, "filename")
 
 
-def session_cmd(session, args, input):
+def session_cmd(ses, args, input):
   """
   This command creates a connection to a specific mud.  When you create
   a session, that session becomes the active Lyntin session.
@@ -568,6 +568,7 @@ def textin_cmd(session, args, input):
     file = open(filename, "r")
     contents = file.readlines()
     for mem in contents:
+      mem = utils.chomp(mem)
       session.getSocketCommunicator().write(mem + "\n")
     exported.write_message("textin: file %s read and sent to client." % filename)
 
