@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.86 2002/05/04 04:53:05 jmberne Exp $
+# $Id: basic.py,v 1.87 2002/05/04 17:39:58 jmberne Exp $
 #######################################################################
 import string, traceback
-import net, utils, engine, lyntin, exported, hooks
+import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
 This module holds a series of basic commands.
@@ -442,7 +442,10 @@ def help_cmd(session, words, input):
 
       body = exported.get_engine().getHelp(mem)
 
-      exported.write_message(syntaxline + "\n" + body)
+      if body:
+        exported.write_message(data + syntaxline + "\n" + body)
+      else:
+        exported.write_message("\n%s%s\nThat command has no help." % (data, syntaxline))
       continue
       
     if mem + ".tpc" in helpfiles:
@@ -1292,19 +1295,11 @@ commands_dict["zap"] = (zap_cmd, "")
 
 def load():
   """ Initializes the module by binding all the commands."""
-  for mem in commands_dict.keys():
-    args = commands_dict[mem]
-    if type(args) == type(()):
-      if len(args) == 2:
-        exported.add_command(mem, args[0], args[1])
-      elif len(args) == 3:
-        exported.add_command(mem, args[0], args[1], args[2])
-      elif len(args) == 4:
-        exported.add_command(mem, args[0], args[1], args[2], args[3])
-    else:
-      exported.add_command(mem, args)
+  exported.write_message("binding commands.")
+  modutils.load_commands(commands_dict)
+
 
 def unload():
+  """ Unloads the module by calling any unload/unbind functions."""
   exported.write_message("unbinding commands.")
-  for mem in commands_dict.keys():
-    exported.remove_command(mem)
+  modutils.unload_commands(commands_dict.keys())
