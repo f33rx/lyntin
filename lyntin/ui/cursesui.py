@@ -5,32 +5,42 @@
 # Lyntin is distributed under the GNU General Public License.  See
 # the file COPYING for details.
 #
-# curses ui (2--wbg)
+# curses ui (wbg)
 ##################################################################
 
 import data, string, sys, mud, app, select, os, time, regsub
 import regsub
-import mud
 from basegui import BaseGUI
 
 import curses
 
-
 class Cursesui(BaseGUI):
-   def __init__(self):
+   """
+   This is the second curses ui.  The first one was very unwieldy
+   and even though my curses programming skill suck, I wrote this one
+   to replace that one because I can maintain this one.
+
+   Anyhow, this is a very un-fully-featured curses ui at the moment.
+   It's missing such diverse things as:
+    * ansi colors
+    * scrollback
+    * it should echo back input
+    * speed it up
+    * fix that scrolling bug (prolly bad math)
+    * switch to 4 space indenting
+   """
+   
+   def setup(self):
       self._main = None
       self._input = None
       self._output = None
 
-      BaseGUI.__init__(self)
       self._closing = 0
       self._echoon = 1
       self._newline = ''
       self.support_hash['echo'] = 1
       self._echoon = 1
 
-
-   def setup(self):
       self._stdscr = curses.initscr()
       self._stdscr.refresh()
       if curses.has_colors():
@@ -48,9 +58,8 @@ class Cursesui(BaseGUI):
 
       self._output = self._main.subwin(self._height - 3, self._width, 0, 0)
       self._input = self._main.subwin(self._height - 2, 0)
-      # self._output.box()
+
       self._output.scrollok(1)
-      # self._output.setscrreg(0, self._height - 1)
       self._output.nodelay(1)
       self._input.nodelay(1) 
       self.refresh_all()
@@ -59,7 +68,6 @@ class Cursesui(BaseGUI):
 
    def refresh_all(self):
       self._main.refresh()
-      # self._input.refresh()
 
 
    def close(self):
@@ -71,7 +79,6 @@ class Cursesui(BaseGUI):
       self._closing = 1
       curses.nocbreak()
       self._stdscr.keypad(0)
-      # curses.keypad(0)
       curses.echo()
       curses.endwin()
 
@@ -82,6 +89,7 @@ class Cursesui(BaseGUI):
       return txt
 
 
+   """overridden function"""
    def print_string(self,line,modifiers=None,ending='\n',target=None):
       if modifiers == 'client':
          line = string.replace(line, "\n", "\n## ")
@@ -111,6 +119,7 @@ class Cursesui(BaseGUI):
       self._output.refresh()
 
     
+   """overridden function"""
    def get_input(self):
       newline = self._newline
       newchar = 0
@@ -150,11 +159,8 @@ class Cursesui(BaseGUI):
       self._newline = newline
 
 
-   def prompt(self):
-      # self.print_string('\n> ','user','')
-      pass
 
-
+   """overridden function"""
    def echo(self,yesno):
       self._echoon = yesno
 

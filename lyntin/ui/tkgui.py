@@ -44,6 +44,7 @@ class TkGui(BaseGUI):
     def setup(self):
         self.viewhistory = 0
         self.do_i_echo = 1
+        self.support_hash['echo'] = 1
         self.tk = Tk()
         self.tk.geometry("800x600")
         self.tk.title("Lyntin -- The Hacker's Mud Client")
