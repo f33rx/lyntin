@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.80 2003/02/15 03:35:05 willhelm Exp $
+# $Id: session.py,v 1.81 2003/02/25 00:10:57 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -14,7 +14,6 @@ to any other TCP/IP service.
 """
 import re, copy, string, os
 import exported, engine, utils, ansi, lyntin, event
-import argparser
 
 ESC = chr(27)
 

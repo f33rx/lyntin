@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.85 2003/04/08 22:19:07 willhelm Exp $
+# $Id: engine.py,v 1.86 2003/04/19 17:34:17 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -31,7 +31,7 @@ to access the engine using the "get_engine()" function.
 import Queue, thread, sys
 from threading import Thread
 
-import session, lyntin, utils, event, argparser
+import session, lyntin, utils, event
 import exported, hooks, helpmanager, history, commandmanager
 
 # this is the singleton reference to the Engine instance.
