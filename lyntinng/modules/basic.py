@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.68 2002/04/25 17:13:17 willhelm Exp $
+# $Id: basic.py,v 1.69 2002/04/25 17:29:59 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -213,6 +213,9 @@ def deed_cmd(session, args, input):
     return
 
   deedtext = args["text"]
+  varexpansion = session.getManager("variable").expand(deedtext)
+  if varexpansion:
+    deedtext = varexpansion
 
   if not deedtext:
     data = session.getManager("deed").getInfo()
