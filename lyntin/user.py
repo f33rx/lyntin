@@ -11,6 +11,7 @@ etc here.
 from exported import *
 from scheduler import *
 import hooks
+import re
 
 ##################################################################
 # variables you can set to customize lyntin's behavior
@@ -32,3 +33,12 @@ user_custom = {
 
 # uncomment this line to use the examples
 #from examples import *
+
+def search_history(str):
+    retl=[]
+    hist=get_history()
+    reg=re.compile(str)
+    for n in hist:
+	if reg.match(n):
+	    retl.append(n)
+    return retl

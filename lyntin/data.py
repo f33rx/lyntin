@@ -55,7 +55,7 @@ def GetSes(str):
 # used when logging files
 def filter_crud(txt):
     txt = regsub.gsub('\015\\|\r', '', txt)
-    txt = regsub.gsub('[[0-9;]+[mJ]', '', txt)
+    txt = regsub.gsub('[[0-9;]*[mJ]', '', txt)
     return txt
 
 # filter ^M stuff out of text

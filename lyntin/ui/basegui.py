@@ -123,20 +123,21 @@ class Gui:
 ##             self.entry.clear_input()
 
     def mainloop(self):
-        self.tk.after(100, self.iterate)
-        self.tk.mainloop()
+#        self.tk.after(100, self.iterate)
+#        self.tk.mainloop()
         
-    def iterate(self):
-        if not self.app.Loop():
-            self.tk.quit()
-        self.tk.after(50, self.iterate)
+#    def iterate(self):
+#        if not self.app.Loop():
+#            self.tk.quit()
+#        self.tk.after(50, self.iterate)
 
     def Prompt(self): 
 	"""Prompt(self) -> None
 	
 	Sets a prompt for the user.
 	"""
-	self.txt.insert('end', "\n")
+	pass
+#	self.txt.insert('end', "\n")
 
     def has_echo(self):
 	"""has_echo(self) -> true/false
@@ -174,21 +175,39 @@ class Gui:
 	"""
         pass
 
+    def PrintLineFromClient(self,line):
+	self.PrintString(string.join(['\033[0;45m',line,'\n'],''))
+
+    def PrintLineFromUser(self,line):
+	self.PrintString(string.join(['\033[0;44m',line,'\n'],''))
+
+    def PrintLineFromMud(self,line):
+	self.PrintString(line)
+
+    def PrintString(self,line):
+	"""PrintString(self,line)->None
+
+	Print a string to the UI after processing for escapes such
+	as ANSI colors.
+	"""
+	pass #because this isn't real
+
     def Putline(self, line):
         """PutLine(self, line) -> None
         
         Prints a message from the client to the player
         changing the background color to magenta.
         """
-        if line:
-            self.txt.configure(state='normal')
-            self.txt.insert('end', line, "50")
-            self.txt.insert('end', "\n")
-            self.txt.configure(state='disabled')
-
-            self.txt.yview('moveto', '1')
-            if os.name != 'posix':
-                self.txt.yview('scroll', '20', 'units')
+	self.PrintLineFromClient(line)
+##        if line:
+##            self.txt.configure(state='normal')
+##            self.txt.insert('end', line, "50")
+##            self.txt.insert('end', "\n")
+##            self.txt.configure(state='disabled')
+##
+##            self.txt.yview('moveto', '1')
+##            if os.name != 'posix':
+##                self.txt.yview('scroll', '20', 'units')
 
 
     def PutUserInput(self, line):
@@ -198,17 +217,18 @@ class Gui:
         color and a white foreground color.  Lets you immediately
         discern what's input vs. what's output.
         """
-        if line:
-            # FIXME?
-            line = line[:-1]
-            self.txt.configure(state='normal')
-            self.txt.insert('end', line, "44")
-            self.txt.insert('end', "\n")
-            self.txt.configure(state='disabled')
+	self.PrintLineFromUser(line)
+##        if line:
+##            # FIXME?
+##            line = line[:-1]
+##            self.txt.configure(state='normal')
+##            self.txt.insert('end', line, "44")
+##            self.txt.insert('end', "\n")
+##            self.txt.configure(state='disabled')
 
-            self.txt.yview('moveto', '1')
-            if os.name != 'posix':
-                self.txt.yview('scroll', '20', 'units')
+##            self.txt.yview('moveto', '1')
+##            if os.name != 'posix':
+##                self.txt.yview('scroll', '20', 'units')
 
 
     def PutUntouchedLine(self, line):
@@ -216,142 +236,148 @@ class Gui:
 
 	Prints a line for the user after adding a newline to the end of it
 	"""
-        ## This part actually looks like it'll be portable... fancy that :)
-        if line:
-            self.PutReallyUntouchedLine(line)
-            self.PutReallyUntouchedLine('\n')
+##        if line:
+##            self.PutReallyUntouchedLine(line)
+##            self.PutReallyUntouchedLine('\n')
+	self.PrintString(line+'\n')
 
     def PutReallyUntouchedLine(self, line):
 	"""PutReallyUntouchedLine(self, line) -> None
 
 	Prints a line for the user without any preprocessing
 	"""
-        if line:
-            mud.log('really untouched ' + line)
-            mud.log('last char: ' + line[-1])
-            mud.log("\nlast %d\n"%ord(line[-1]))
-            mud.log("\nfirst %d\n"%ord(line[0]))
+	self.PrintString(line)
+##         if line:
+##             mud.log('really untouched ' + line)
+##             mud.log('last char: ' + line[-1])
+##             mud.log("\nlast %d\n"%ord(line[-1]))
+##             mud.log("\nfirst %d\n"%ord(line[0]))
 
-            index = 0
-            start = 0
-            end = 0
+##             index = 0
+##             start = 0
+##             end = 0
 
-            if self.unfinishedcolor[0] == 1:
-                cstart = index
-                while index < len(line) and line[index] != "m":
-                    index = index + 1
+##             if self.unfinishedcolor[0] == 1:
+##                 cstart = index
+##                 while index < len(line) and line[index] != "m":
+##                     index = index + 1
 
-                self.unfinishedcolor = (self.unfinishedcolor[0], self.unfinishedcolor[1] + line[cstart:index])
-                if index < len(line):
-                    self.colorchange(self.unfinishedcolor[1]) 
-                    self.unfinishedcolor = (0, "")
-                else:
-                    self.unfinishedcolor = (1, self.unfinishedcolor[1] + line[cstart:index - 1])
+##                 self.unfinishedcolor = (self.unfinishedcolor[0], self.unfinishedcolor[1] + line[cstart:index])
+##                 if index < len(line):
+##                     self.colorchange(self.unfinishedcolor[1]) 
+##                     self.unfinishedcolor = (0, "")
+##                 else:
+##                     self.unfinishedcolor = (1, self.unfinishedcolor[1] + line[cstart:index - 1])
                 
-                start = index + 1
+##                 start = index + 1
 
-            while index < len(line):
-                if line[index] == chr(27):
-                    cstart = index
-                    end = index
+##             while index < len(line):
+##                 if line[index] == chr(27):
+##                     cstart = index
+##                     end = index
 
-                    self.txt.configure(state='normal')
-                    if self.currcolors == self.regcolors:
-                        self.txt.insert('end', line[start:end])
-                    else:
-                        self.txt.insert('end', line[start:end], self.currcolors[1])
-                    self.txt.configure(state='disabled')
+##                     self.txt.configure(state='normal')
+##                     if self.currcolors == self.regcolors:
+##                         self.txt.insert('end', line[start:end])
+##                     else:
+##                         self.txt.insert('end', line[start:end], self.currcolors[1])
+##                     self.txt.configure(state='disabled')
 
-                    while index < len(line) and line[index] != "m":
-                        index = index + 1
+##                     while index < len(line) and line[index] != "m":
+##                         index = index + 1
 
-                    if index == len(line):
-                        # if line[index] != "m":
-                        self.unfinishedcolor = (1, line[cstart:index])
-                    else:   
-                        self.colorchange(line[cstart:index])
-                        # index = index + 1
+##                     if index == len(line):
+##                         # if line[index] != "m":
+##                         self.unfinishedcolor = (1, line[cstart:index])
+##                     else:   
+##                         self.colorchange(line[cstart:index])
+##                         # index = index + 1
 
-                    start = index + 1
+##                     start = index + 1
 
-                index = index + 1 
-
-
-            end = index
-            self.txt.configure(state='normal')
-            if self.currcolors == self.regcolors:
-                self.txt.insert('end', line[start:end])
-            else:
-                self.txt.insert('end', line[start:end], self.currcolors[1])
-            self.txt.configure(state='disabled')
+##                 index = index + 1 
 
 
-            self.txt.yview('moveto', '1')
-            if os.name != 'posix':
-                self.txt.yview('scroll', '20', 'units')
+##             end = index
+##             self.txt.configure(state='normal')
+##             if self.currcolors == self.regcolors:
+##                 self.txt.insert('end', line[start:end])
+##             else:
+##                 self.txt.insert('end', line[start:end], self.currcolors[1])
+##             self.txt.configure(state='disabled')
 
-            self.ClipText()
+
+##             self.txt.yview('moveto', '1')
+##             if os.name != 'posix':
+##                 self.txt.yview('scroll', '20', 'units')
+
+##             self.ClipText()
 
     ##
     ## takes in a string, and parses it into a series of numbers, then
     ## sets the current colors accordingly
     ##
-    def colorchange(self, txt):
-        if txt[0] == chr(27):
-        # if txt[0] == chr(27) and txt[len(txt)-1] == "m":
-            newcolor = txt[2:(len(txt))]
+##    def colorchange(self, txt):
+##         if txt[0] == chr(27):
+##         # if txt[0] == chr(27) and txt[len(txt)-1] == "m":
+##             newcolor = txt[2:(len(txt))]
 
-            if newcolor == "0":
-                self.currcolors = self.regcolors
-            else:
-                numbers = string.split(newcolor, ";")
-                for num in numbers:
-                    if fgColorCodes.has_key(num):
-                        self.currcolors = (self.currcolors[0], int(num), self.currcolors[2])
-                    if bgColorCodes.has_key(num):
-                        self.currcolors = (self.currcolors[0], self.currcolors[1], int(num))
-                    if txtAttribs.has_key(num):
-                        self.currcolors = (int(num), self.currcolors[1], self.currcolors[2])
+##             if newcolor == "0":
+##                 self.currcolors = self.regcolors
+##             else:
+##                 numbers = string.split(newcolor, ";")
+##                 for num in numbers:
+##                     if fgColorCodes.has_key(num):
+##                         self.currcolors = (self.currcolors[0], int(num), self.currcolors[2])
+##                     if bgColorCodes.has_key(num):
+##                         self.currcolors = (self.currcolors[0], self.currcolors[1], int(num))
+##                     if txtAttribs.has_key(num):
+##                         self.currcolors = (int(num), self.currcolors[1], self.currcolors[2])
 
 
              
-    ##
-    ## set up Tk tags for the text widget (fg/bg)
-    ##
-    def InitColorTags(self):
-        codes = fgColorCodes
-        colorKeys = codes.keys()
-        for ck in colorKeys:
-            self.txt.tag_config(ck, foreground=codes[ck])
+##     ##
+##     ## set up Tk tags for the text widget (fg/bg)
+##     ##
+##     def InitColorTags(self):
+##         codes = fgColorCodes
+##         colorKeys = codes.keys()
+##         for ck in colorKeys:
+##             self.txt.tag_config(ck, foreground=codes[ck])
 
-        codes = bgColorCodes
-        colorKeys = codes.keys()
-        for ck in colorKeys:
-            self.txt.tag_config(ck, background=codes[ck])
+##         codes = bgColorCodes
+##         colorKeys = codes.keys()
+##         for ck in colorKeys:
+##             self.txt.tag_config(ck, background=codes[ck])
 
 
     # check for stuff from input
     def GetUserInput(self):
-        if self.entry.input:
-            retval = self.entry.input[0]
-            del self.entry.input[0]
-            if retval == '\n':
-                self.PutUserInput(retval)
-                # self.PutReallyUntouchedLine('\n')
-            else:
-                if self.echo:
-                    self.PutUserInput(retval)
-                    # self.PutUntouchedLine(retval[:-1])
-            return retval
+    """GetUserInput(self)->string
+
+    returns the user input once enter has been hit and None otherwise
+    """
+	return None
+##         if self.entry.input:
+##             retval = self.entry.input[0]
+##             del self.entry.input[0]
+##             if retval == '\n':
+##                 self.PutUserInput(retval)
+##                 # self.PutReallyUntouchedLine('\n')
+##             else:
+##                 if self.echo:
+##                     self.PutUserInput(retval)
+##                     # self.PutUntouchedLine(retval[:-1])
+##             return retval
                 
-    def ClipText(self):
-        temp = self.txt.index("end")
-        ind = string.find(temp, ".")
-        temp = temp[:ind]
-        if (string.atoi(temp) > 800):
-            self.txt.config(state=NORMAL)
-            self.txt.delete ("1.0", "100.end")
-            self.txt.config(state=DISABLED)
+##     def ClipText(self):
+##         temp = self.txt.index("end")
+##         ind = string.find(temp, ".")
+##         temp = temp[:ind]
+##         if (string.atoi(temp) > 800):
+##             self.txt.config(state=NORMAL)
+##             self.txt.delete ("1.0", "100.end")
+##             self.txt.config(state=DISABLED)
 
 if __name__ == '__main__':
     Gui()
