@@ -22,6 +22,96 @@ contains global variables
 import socket, select, regex, os, string, regsub, copy
 import mud, app, player, hooks, handler
 
+
+
+##################################################################
+#  Global Variables (ick)
+##################################################################
+
+"""this is the current lyntin version number and such."""
+version = "lyntin 2.0b3, copyright 2000, see http://lyntin.sourceforge.net"
+
+
+
+
+"""The application global variable.  It becomes an instance of app.client."""
+theapp = None
+
+"""initdir is the base directory to look for lyntin files and other such
+goodies in."""
+initdir = ''
+if os.environ.has_key('LYNTINDIR'):
+    initdir = os.environ['LYNTINDIR']
+    if not initdir:
+        initdir = os.getcwd()
+else:
+    initdir = os.getcwd()
+if initdir[-1] != os.sep:
+    initdir = initdir + os.sep
+
+"""datadir is the directory to store the log in. Default to initdir"""
+datadir = ''
+if os.environ.has_key('LYNTINDATADIR'):
+	datadir = os.environ['LYNTINDATADIR']
+	if not datadir:
+		datadir = initdir
+else:
+	datadir = initdir
+if datadir[-1] != os.sep:
+	datadir = datadir + os.sep
+
+
+"""the logfile."""
+logfile = ''
+try:
+    logfile = open(datadir + 'mudlog', 'w')
+except:
+    player.Putline('\nUnable to write log to LYNTINDATADIR %s!'%datadir)
+    logfile = None
+
+"""The lyntin character: prepended to all lyntin commands."""
+ltchar = '#'
+
+"""Current number of derived sessions.  (Heck if i know what this is.)"""
+numsessions = 0
+
+"""The timeout value which is how long we wait on a socket for data.  Keep
+this low."""
+timeout = .01
+
+""" The initial session started for the user, from which other
+sessions inherit """
+common = None
+
+"""currsession is the current session.  It is initialized to common."""
+currsession = None
+
+"""sessionlist is the list of session objects.  Starts out with just the
+common session."""
+sessionlist = None
+
+"""BUFSIZE is the amount of data that we read each loop."""
+BUFSIZE = 4096
+
+"""var_regex is the regular expression that matches variables."""
+var_regex = regex.compile('%\([0-9]+\)')
+
+"""history is the list of the last 30 or so commands the user has
+recently typed."""
+history = []
+
+"""this is the maximum size of the history list."""
+histsize = 30
+
+"""this sets whether we're in debug mode or not.  affects mud.log."""
+debug = 1
+
+
+##################################################################
+#  Functions
+##################################################################
+
+
 def clear_all():
     """clear_all() -> None
 
@@ -465,96 +555,3 @@ class databuffer:
         return build
 
 
-##################################################################
-# Global Variables (ick)
-##################################################################
-
-# The application
-theapp = None
-"""The application global variable.  It becomes an instance of app.client."""
-
-# base directory to look for lyntin files in
-initdir = ''
-"""initdir is the base directory to look for lyntin files and other such
-goodies in."""
-if os.environ.has_key('LYNTINDIR'):
-    initdir = os.environ['LYNTINDIR']
-    if not initdir:
-        initdir = os.getcwd()
-else:
-    initdir = os.getcwd()
-if initdir[-1] != os.sep:
-    initdir = initdir + os.sep
-
-# datadir
-datadir = ''
-"""datadir is the directory to store the log in. Default to initdir"""
-if os.environ.has_key('LYNTINDATADIR'):
-	datadir = os.environ['LYNTINDATADIR']
-	if not datadir:
-		datadir = initdir
-else:
-	datadir = initdir
-if datadir[-1] != os.sep:
-	datadir = datadir + os.sep
-
-
-# the lyntin character: prepended to all commands
-ltchar = '#'
-"""The lyntin character: prepended to all lyntin commands."""
-
-# current number of derived sessions
-numsessions = 0
-"""Current number of derived sessions.  (Heck if i know what this is.)"""
-
-# log file
-logfile = ''
-"""the logfile."""
-try:
-    logfile = open(datadir + 'mudlog', 'w')
-except:
-    player.Putline('\nUnable to write log to LYNTINDATADIR %s!'%datadir)
-    logfile = None
-
-# how long we'll wait on a socket for new data
-timeout = .01
-"""The timeout value which is how long we wait on a socket for data.  Keep
-this low."""
-
-common = None
-""" The initial session started for the user, from which other
-sessions inherit """
-
-# the active session
-currsession = None
-"""currsession is the current session.  It is initialized to common."""
-
-# global session list
-sessionlist = None
-"""sessionlist is the list of session objects.  Starts out with just the
-common session."""
-
-# how much data we'll read at once from a host
-BUFSIZE = 4096
-"""BUFSIZE is the amount of data that we read each loop."""
-
-# what a variable looks like
-var_regex = regex.compile('%\([0-9]+\)')
-"""var_regex is the regular expression that matches variables."""
-
-# latest commands mudder typed
-history = []
-"""history is the list of the last 30 or so commands the user has
-recently typed."""
-
-# size of history
-histsize = 30
-"""this is the maximum size of the history list."""
-
-# whether we're debugging (affects the function mud.log)
-debug = 1
-"""this sets whether we're in debug mode or not.  affects mud.log."""
-
-# current lyntin version number
-version = "lyntin 2.0b2, maintained by willhelm@users.sourceforge.net"
-"""this is the current lyntin version number and such."""
