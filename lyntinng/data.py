@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.6 2002/04/21 03:49:31 willhelm Exp $
+# $Id: data.py,v 1.7 2002/04/26 23:34:17 jmberne Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -70,7 +70,7 @@ class DataBuffer:
       'pattern' -- (string) the match pattern
  
       'numlines' -- (int) number of lines to search back through.  0
-      will get all lines in buffer 
+                    will get all lines in buffer 
 
     returns:
 
@@ -85,6 +85,16 @@ class DataBuffer:
         ret.append(mem)
     return ret
 
+  def fetchbuffer(self):
+    """
+    Grabs the whole buffer.
+
+    returns:
+
+      string
+    """
+    return string.join(self._buffer, "")
+
   def grepbuffer(self, pattern, numlines=300):
     """
     Similar to greplines, except this greps the buffer
@@ -95,7 +105,7 @@ class DataBuffer:
       'pattern' -- (string) the match pattern
 
       'numlines' -- (int) number of lines to search back through.  0
-      will get all lines in buffer 
+                    will get all lines in buffer 
 
     returns:
 
@@ -111,5 +121,3 @@ class DataBuffer:
       ret.append(match)
 
     return ret
-
-

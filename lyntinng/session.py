@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.43 2002/04/29 00:31:42 jmberne Exp $
+# $Id: session.py,v 1.44 2002/04/29 01:06:46 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -341,6 +341,7 @@ class Session:
     try:
       # FIXME - this assumes unix files
       self._logfile.write(utils.filter_ansi(utils.filter_cm(input)))
+      self._logfile.flush()
     except:
       exported.write_error("Logfile cannot be written to.")
       self._logfile = None
@@ -356,6 +357,9 @@ class Session:
 
   def openLogfile(self, filename):
     self._logfile = open(filename, "a")
+
+  def setLogfile(self, fileob):
+    self._logfile = fileob
 
   def getLogfileName(self):
     if self._logfile:

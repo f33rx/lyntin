@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.79 2002/04/28 02:47:57 jmberne Exp $
+# $Id: basic.py,v 1.80 2002/04/29 04:21:40 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -524,33 +524,36 @@ def log_cmd(session, args, input):
       exported.write_message("Logging is disabled.")
     return
 
-  if session.isConnected():
-    if session.getLogfile() != None:
-      try:
-        exported.write_message("log: stopping logging to '%s'." % (session.getLogfileName()))
-        session.closeLogfile()
-      except Exception, e:
-        exported.write_error("log: logfile cannot be closed (%s)." % (e))
+  if not session.isConnected():
+    exported.write_error("log: You must have a session to log")
+    return
+
+  # handle stopping logging
+  if session.getLogfile() != None:
+    try:
+      exported.write_message("log: stopping logging to '%s'." % (session.getLogfileName()))
+      session.closeLogfile()
+    except Exception, e:
+      exported.write_error("log: logfile cannot be closed (%s)." % (e))
+    return
+
+
+  # handle starting logging
+  try:
+    if databuffer:
+      f = open(logfile, "w")
+      buffer = session.getDataBuffer().fetchbuffer()
+      f.write(buffer)
+      exported.write_message("log: dumped %d lines of databuffer to logfile" % buffer.count("\n"))
+      session.setLogfile(f)
+
     else:
-      try:
-        if databuffer:
-          if session.getName() == "common":
-            exported.write_error("databuffer cannot be dumped to log from common session.")
-            return
-          dumped=0
-          f = open(logfile, "w")
-          for line in session.getDataBuffer().greplines(".*",0):
-            f.write(line)
-            dumped=dumped + 1
-          f.close()
-          exported.write_message("log: dumped %s lines of databuffer to logfile" % (dumped))
-        session.openLogfile(logfile)
-        exported.write_message("log: starting logging to '%s'." % 
+      session.openLogfile(logfile)
+
+    exported.write_message("log: starting logging to '%s'." % 
                              session.getLogfileName())
-      except Exception, e:
-        exported.write_error("log: logfile cannot be opened for appending. %s" % (e))
-  else:
-    exported.write_message("log: You must have a session to log")
+  except Exception, e:
+    exported.write_error("log: logfile cannot be opened for appending. %s" % (e))
 
 
 commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false")

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.36 2002/04/29 00:31:42 jmberne Exp $
+# $Id: engine.py,v 1.37 2002/04/29 02:06:17 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -529,17 +529,6 @@ class Engine:
     for mem in self._sessions.values():
       # we do some fancy footwork here to make it print nicely
       data += '   ' + string.join(mem.getInfo().split('\n'), '\n   ') + "\n"
-
-
-    # print info from all the hooks
-    data = (data + "Hooks:\n" + 
-            "   total hooks: " + 
-            repr(len(self._listeners.keys())) + "\n")
-
-    for mem in self._listeners.keys():
-      data = (data + "   " + mem + ":\n")
-      for mem2 in self._listeners[mem]:
-        data = data + "      " + repr(mem2) + "\n"
 
     return data
 

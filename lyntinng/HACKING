@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.7 2002/03/30 16:33:48 willhelm Exp $
+$Id: HACKING,v 1.8 2002/04/03 03:14:15 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -14,18 +14,16 @@ http://lyntin.sourceforge.net/
 * NOTES
 
 This entire document is written off the top of my head and the contents
-of it are likely to change before 3.0 actually gets released.  It's
-possible this document will at some point get merged with the ARCHITECTURE
-document.
+of it are likely to change before 3.0 actually gets released.  When
+in doubt, read the code.
 
 
 
 * SYNOPSIS
 
-Lyntin was built for the hacker/mudder.  This is a special breed of
-person who is mudding and has a series of complex problems they want
-to solve and mere aliases and triggers just aren't going to do the
-trick.
+Lyntin was built for the hacker mudder.  This is a special breed of
+person who muds and has a series of complex problems they want to
+solve and mere aliases and triggers just aren't going to do the trick.
 
 Tintin++ has a series of commands that almost but not quite implements
 (ed. bad word choice) a programming language.  Building "macros" in 
@@ -37,7 +35,7 @@ to enhance Lyntin.
 Because Lyntin is so inextricably intertwined with Python, you can
 extend Lyntin to do anything without going through hoops: check your
 email, record URLs you see and open up a browser to visit them, export
-mudmail, building complex bots....
+mudmail, building complex bots, automappers....
 
 There a a few different methods of hacking Lyntin to suit your needs.  
 They are briefly outlined here and described in more detail in their 
@@ -127,7 +125,7 @@ all the same.  Adding new managers is much easier because of this.
 * DATA HANDLING
 
 Data comes from one of a couple of sources: the user or the mud.
-User data (sometimes called Input) is received from the ui.BaseUI
+User data (sometimes called "input") is received from the ui.BaseUI
 subclasses and tossed into an 'event.InputEvent'.
 
 Data can also come from the mud.  Mud data comes from the 
@@ -220,7 +218,8 @@ use them as an example for writing your own.
 * COMMAND LINE HACKING
 
 Lyntin allows you to execute arbitrary Python at the command line.
-The code will be executed in some module--(to be determined).
+If you have a 'modules.user' module, then the code will be executed
+in there.  Otherwise the code is executed in the 'advanced' module.
 
 For example:
 
