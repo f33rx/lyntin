@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.8 2002/08/13 02:22:49 willhelm Exp $
+# $Id: substitute.py,v 1.9 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -165,9 +165,9 @@ class SubstituteManager(manager.Manager):
       else:
         file.write(data + "\n")
 
-  def filter(self, args):
+  def mudfilter(self, args):
     """
-    Mud_filter_hook function to perform substitutions on data 
+    mud_filter_hook function to perform substitutions on data 
     that comes from the mud.
     """
     ses = args[0]
@@ -302,7 +302,7 @@ def load():
   # FIXME - the number controls the order this gets called in the grand
   # scheme of things.  we should probably do something to make this
   # more obvious.
-  hooks.mud_filter_hook.register(sm.filter, 50)
+  hooks.mud_filter_hook.register(sm.mudfilter, 50)
   hooks.write_hook.register(sm.persist)
 
 def unload():
@@ -310,7 +310,7 @@ def unload():
   global sm
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("substitute")
-  hooks.mud_filter_hook.unregister(sm.filter)
+  hooks.mud_filter_hook.unregister(sm.mudfilter)
   hooks.write_hook.unregister(sm.persist)
 
 # Local variables:

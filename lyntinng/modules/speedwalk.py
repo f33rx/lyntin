@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.9 2002/08/18 00:57:24 willhelm Exp $
+# $Id: speedwalk.py,v 1.10 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -341,7 +341,7 @@ class SpeedwalkManager(manager.Manager):
       else:
         file.write(data + "\n")
 
-  def filter(self, args):
+  def userfilter(self, args):
     """
     user_filter_hook function to check for speedwalking expansion.
     """
@@ -506,7 +506,7 @@ def load():
   # FIXME - the number controls the order this gets called in the grand
   # scheme of things.  we should probably do something to make this
   # more obvious.
-  hooks.user_filter_hook.register(sm.filter, 80)
+  hooks.user_filter_hook.register(sm.userfilter, 80)
   hooks.write_hook.register(sm.persist)
 
 def unload():
@@ -514,7 +514,7 @@ def unload():
   global sm
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("speedwalk")
-  hooks.user_filter_hook.unregister(sm.filter)
+  hooks.user_filter_hook.unregister(sm.userfilter)
   hooks.write_hook.unregister(sm.persist)
 
 # Local variables:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.9 2002/08/20 02:39:04 willhelm Exp $
+# $Id: alias.py,v 1.10 2002/08/31 16:36:17 jmberne Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -216,7 +216,7 @@ class AliasManager(manager.Manager):
       else:
         file.write(data + "\n")
 
-  def filter(self, args):
+  def userfilter(self, args):
     """ 
     Handle the filtering of input through the current aliases.
     If input gets changed then we pass it back to
@@ -354,7 +354,7 @@ def load():
   # FIXME - the number controls the order this gets called in the grand
   # scheme of things.  we should probably do something to make this
   # more obvious.
-  hooks.user_filter_hook.register(am.filter, 20)
+  hooks.user_filter_hook.register(am.userfilter, 20)
   hooks.write_hook.register(am.persist)
 
 def unload():
@@ -362,7 +362,7 @@ def unload():
   global am
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("alias")
-  hooks.user_filter_hook.unregister(am.filter)
+  hooks.user_filter_hook.unregister(am.userfilter)
   hooks.write_hook.unregister(am.persist)
 
 # Local variables:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.7 2002/08/20 02:39:04 willhelm Exp $
+# $Id: action.py,v 1.8 2002/08/25 17:23:40 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -292,7 +292,7 @@ class ActionManager(manager.Manager):
     if self._actions.has_key(ses):
       self._actions[ses].recompileRegexps()
 
-  def filter(self, args):
+  def mudfilter(self, args):
     """
     mud_filter_hook function to check for actions when data
     comes from the mud.
@@ -473,7 +473,7 @@ def load():
   am = ActionManager()
   exported.add_manager("action", am)
 
-  hooks.mud_filter_hook.register(am.filter, 75)
+  hooks.mud_filter_hook.register(am.mudfilter, 75)
   hooks.write_hook.register(am.persist)
 
   hooks.evalmode_change_hook.register(evalmodechange)
@@ -484,7 +484,7 @@ def unload():
   global am, var_module
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("alias")
-  hooks.mud_filter_hook.unregister(am.filter)
+  hooks.mud_filter_hook.unregister(am.mudfilter)
   hooks.write_hook.unregister(am.persist)
 
   hooks.evalmode_change_hook.unregister(evalmodechange)

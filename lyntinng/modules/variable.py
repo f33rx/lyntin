@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.9 2002/08/20 02:39:05 willhelm Exp $
+# $Id: variable.py,v 1.10 2002/08/31 16:36:17 jmberne Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -305,8 +305,9 @@ class VariableManager(manager.Manager):
 
     return utils.denest_vars(text, self._variables)
 
-  def filter(self, args):
-    """ Handle the filtering of input through the current variables.
+  def userfilter(self, args):
+    """
+    Handle the filtering of input through the current variables.
     If input gets changed then we pass it back to
     engine.myengine.HandleUserData and return None to stop this
     chain of filtering.
@@ -445,7 +446,7 @@ def load():
   modutils.load_commands(commands_dict)
   vm = VariableManager()
   exported.add_manager("variable", vm)
-  hooks.user_filter_hook.register(vm.filter, 10)
+  hooks.user_filter_hook.register(vm.userfilter, 10)
   hooks.write_hook.register(vm.persist)
 
   hooks.evalmode_change_hook.register(evalmodechange)
@@ -456,7 +457,7 @@ def unload():
   global vm
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("variable")
-  hooks.user_filter_hook.unregister(vm.filter)
+  hooks.user_filter_hook.unregister(vm.userfilter)
   hooks.write_hook.unregister(vm.persist)
 
   hooks.evalmode_change_hook.unregister(evalmodechange)

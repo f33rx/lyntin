@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.5 2002/08/20 02:39:04 willhelm Exp $
+# $Id: highlight.py,v 1.6 2002/08/23 02:34:24 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -371,7 +371,7 @@ class HighlightManager(manager.Manager):
       else:
         file.write(data + "\n")
 
-  def filter(self, args):
+  def mudfilter(self, args):
     ses = args[0]
     text = args[-1]
 
@@ -465,7 +465,7 @@ def load():
   # FIXME - the number controls the order this gets called in the grand
   # scheme of things.  we should probably do something to make this
   # more obvious.
-  hooks.mud_filter_hook.register(hm.filter, 90)
+  hooks.mud_filter_hook.register(hm.mudfilter, 90)
   hooks.write_hook.register(hm.persist)
 
 def unload():
@@ -473,7 +473,7 @@ def unload():
   global hm
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("highlight")
-  hooks.mud_filter_hook.unregister(hm.filter)
+  hooks.mud_filter_hook.unregister(hm.mudfilter)
   hooks.write_hook.unregister(hm.persist)
 
 # Local variables:
