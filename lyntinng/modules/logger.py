@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: logger.py,v 1.1 2002/11/15 02:36:24 willhelm Exp $
+# $Id: logger.py,v 1.2 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the LoggerManager which handles logging.
@@ -190,7 +190,7 @@ def log_cmd(ses, args, input):
 
     if databuffer:
       f = open(logfile, "w")
-      buffer = ses.getDataBuffer().fetchbuffer()
+      buffer = "".join(ses.getDataBuffer())
       f.write(buffer)
       exported.write_message("log: dumped %d lines of databuffer to logfile" % buffer.count("\n"), ses)
       loggerdata.setLogFile(f, stripansi)

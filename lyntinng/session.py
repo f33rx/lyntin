@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.74 2002/12/04 03:46:28 willhelm Exp $
+# $Id: session.py,v 1.75 2003/01/22 03:09:28 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -37,7 +37,8 @@ class Session:
     self._ticker = ticker.Ticker()
     self._colorbuffer = ''
 
-    self._databuffer = data.DataBuffer()
+    self._databuffer = []
+    self._databuffersize = 10000
 
     # allows users to toggle whether we're handling actions.
     # 0 for handling actions, 1 if we're ignoring actions.
@@ -105,15 +106,6 @@ class Session:
     @type  snoop: boolean
     """
     self._snoop = snoop
-
-  def getDataBuffer(self):
-    """
-    Returns the DataBuffer instance for this session.
-
-    @returns: the DataBuffer instance
-    @rtype: DataBuffer
-    """
-    return self._databuffer
 
   def shutdown(self, args):
     """
@@ -286,6 +278,54 @@ class Session:
 
 
   ### ------------------------------------------------
+  ### Data buffer stuff
+  ### ------------------------------------------------
+  def getDataBuffer(self):
+    """
+    Returns the DataBuffer instance for this session.
+
+    @returns: list of strings
+    @rtype: list of strings
+    """
+    return self._databuffer
+
+  def addToDataBuffer(self, text):
+    """
+    Adds data to the buffer by thinking about everything
+    in terms of lines.
+    
+    @param text: the text to add to the buffer
+    @type  text: string
+    """
+    text = ansi.filter_ansi(utils.filter_cm(text))
+    lines = text.splitlines(1)
+
+    for mem in lines:
+      if len(self._databuffer) == 0 or self._databuffer[-1][-1] == '\n':
+        self._databuffer.append(mem)
+      else:
+        self._databuffer[-1] += mem
+
+    if len(self._databuffer) > self._databuffersize:
+      self._databuffer = self._databuffer[-self._size:]
+
+  def clearDataBuffer(self):
+    """ 
+    Clears the databuffer.
+    """
+    self._databuffer = []
+  
+  def resizeDataBuffer(self, newsize=10000):
+    """ 
+    Changes the buffer max.
+
+    @param newsize: the new buffer max size
+    @type  newsize: int
+    """
+    self._databuffersize = newsize
+
+
+  ### ------------------------------------------------
   ### User input functions
   ### ------------------------------------------------
 
@@ -360,7 +400,7 @@ class Session:
       input = input[:index]
 
     # we add the new input to the databuffer
-    self._databuffer.addData(input)
+    self.addToDataBuffer(input)
 
     # we split the input into a series of lines and operate on
     # those

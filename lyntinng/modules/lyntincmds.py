@@ -4,9 +4,9 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.27 2002/12/24 03:25:10 willhelm Exp $
+# $Id: lyntincmds.py,v 1.28 2003/01/14 01:21:07 willhelm Exp $
 #######################################################################
-import types
+import types, re
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
@@ -142,45 +142,38 @@ def config_cmd(ses, args, input):
       
 commands_dict["config"] = (config_cmd, "name= value= quiet:boolean=false")
   
-def datagrep_cmd(ses, args, input):
+def grep_cmd(ses, args, input):
   """
-  Searches this session's databuffer with a regular expression printing 
-  all matches in their entirety.
+  Similar to the unix grep command, this allows you to extract 
+  information from the session's data buffer using regular expressions.
+
+  It prints matching lines in their entirety.
+
+  examples:
+    #grep {says:} 1000
+
+    Greps the last 1000 lines of the databuffer for lines that have
+    "says:" in them.
 
   category: commands
   """
   if (ses.getName() == "common"):
-    exported.write_error("datagrep cannot be applied to common session.", ses)
+    exported.write_error("grep cannot be applied to common session.", ses)
     return
 
   pattern = args["pattern"]
   size = args["size"]
+  buffer = ses.getDataBuffer()
 
-  ret = ses.getDataBuffer().grepbuffer(pattern,size)
-  exported.write_message("datagrep %s results:\n%s"
-                         % (pattern, "\n".join(ret)), ses)
+  ret = []
+  cpattern = re.compile(pattern)
+  for mem in buffer[-size:]:
+    if cpattern.search(mem):
+      ret.append(mem)
 
-commands_dict["datagrep"] = (datagrep_cmd, "pattern size:int=300")
+  exported.write_message("grep %s results:\n%s" % (pattern, "".join(ret)), ses)
 
-
-def datagreplines_cmd(ses, args, input):
-  """
-  Searches the lines in this session's databuffer with a regular 
-  expression printing all matching lines in their entirety.
-
-  category: commands
-  """
-  if (ses.getName() == "common"):
-    exported.write_error("datagrep cannot be applied to common session.", ses)
-    return
-
-  pattern = args["pattern"]
-  size = args["size"]
-  ret = ses.getDataBuffer().greplines(pattern,size)
-  exported.write_message("datagreplines %s results:\n%s"
-                         % (pattern, "".join(ret)), ses)
-
-commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
+commands_dict["grep"] = (grep_cmd, "pattern size:int=300")
 
 
 def diagnostics_cmd(ses, args, input):
