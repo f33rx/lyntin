@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.13 2002/06/26 22:50:42 willhelm Exp $
+# $Id: testserver.py,v 1.14 2002/06/26 23:59:30 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -39,6 +39,12 @@ class InputEvent(Event):
   def execute(self, world):
     self._conn.handleInput(world, self._input)
 
+class HeartbeatEvent(Event):
+  def __init__(self, source):
+    self._source = source
+
+  def execute(self, world):
+    self._source.heartbeat(world)
 
 class NPC:
   def __init__(self, world):
@@ -50,9 +56,9 @@ class NPC:
     self._random = Random()
 
   def blab(self):
-    self._world.spammroom(self._name + " looks fidgety.\n")
+    self._world.spamroom(self._name + " looks fidgety.\n")
 
-  def heartbeat(self):
+  def heartbeat(self, world):
     g = (self._random.random() * 10)
     if (g < 5):
       self.blab()
@@ -66,11 +72,11 @@ class Neil(NPC):
   def blab(self):
     g = (self._random.random() * 10)
     if (g < 2):
-      self._world.spammroom(self._name + " flicks a bug off his bar.\n")
+      self._world.spamroom(self._name + " flicks a bug off his bar.\n")
     elif (g < 5):
-      self._world.spammroom(self._name + " scrubs some glasses with his dishrag.\n")
+      self._world.spamroom(self._name + " scrubs some glasses with his dishrag.\n")
     else:
-      self._world.spammroom(self._name + " says, \"Mighty fine morning, isn't it?\"\n")
+      self._world.spamroom(self._name + " says, \"Mighty fine morning, isn't it?\"\n")
 
 
 class World:
@@ -103,8 +109,15 @@ class World:
     self._ms = MasterServer(self, self._options)
     self._ms.startup()
 
+    beat = 0
+
     # this is our main loop thingy!
     while 1:
+      beat += 1
+      if beat % 30 == 0:
+        beat = 0
+        self.heartbeat()
+
       self._ms.networkLoop()
 
       if not self._event_queue.empty():
@@ -123,6 +136,12 @@ class World:
               conn.write("exception: %s" % e)
             except: pass
 
+      
+  def heartbeat(self):
+    # we don't do heartbeats when no one is connected.
+    if len(self._ms._conns) > 1:
+      for mem in self._npcs:
+        self.enqueue(HeartbeatEvent(mem))
 
   def disconnect(self, conn):
     if conn in self._ms._conns:

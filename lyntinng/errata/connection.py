@@ -5,15 +5,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: connection.py,v 1.1 2002/06/26 22:50:42 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
 and code I wrote for the Varium mud server way back when.  It is actually
 a functional mini-mud now.
 """
-import string, time
-import testserver, utils
+import string, testserver, utils
 from utils import color
 
 
@@ -81,7 +80,7 @@ class Connection:
     else:
       # CATCH ALL for bad commands
       self.write(color("huh? '%s'\n" % input, 35))
-    self.write(time.ctime() + " > ")
+    self.write(" > ")
 
   def handle_set(self, world, input):
     """ Lets you set things: (name, desc...)."""
@@ -97,24 +96,12 @@ class Connection:
     else:
       self.write("Nothing to set.\n")
 
-  def handle_name(self, world, input):
-    """ Allows you to rename your character."""
-    if " " in input:
-      self._name = input.split(" ", 1)[1]
-    self.write("Name set to '%s'.\n" % self._name)
-
-  def handle_desc(self, world, input):
-    """ Allows you to change your description."""
-    if " " in input:
-      self._desc = input.split(" ", 1)[1]
-    self.write("Description set to '%s'.\n" % self._desc)
-
   def handle_say(self, world, input):
     """ Talk to your fellow mudders!"""
     if " " in input:
       text = input.split(" ", 1)[1]
-      self.write("You say: %s\n" % text)
-      world.spamroom("%s says: %s\n" % (self._name, text))
+      self.write(utils.wrap_text("You say: %s" % text, 72, 5, 0) + "\n")
+      world.spamroom(utils.wrap_text("%s says: %s" % (self._name, text), 72, 5, 0) + "\n")
     else:
       self.write("say what?\n")
 
@@ -124,7 +111,7 @@ class Connection:
     if " " in input:
       item = input.split(" ", 1)[1].replace("at", "").strip()
     
-    self.write(world.look(self, item))
+    self.write(world.look(self, item.lower()))
 
   def handle_quit(self, world, input):
     """ Quits out."""
