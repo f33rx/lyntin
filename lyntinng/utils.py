@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.41 2002/07/23 00:19:14 jmberne Exp $
+# $Id: utils.py,v 1.42 2002/07/30 04:03:16 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -610,28 +610,35 @@ def figure_color(textlist, currentcolor, leftover=""):
   for mem in textlist:
     if is_color_token(mem):
       color = mem[2:-1]
-      color = color.split(";")
-      for i in color:
-        if not i.isdigit():
-          continue
 
-        i = int(i)
+      # handles the case where it's ESC[m
+      if color == "":
+        currentcolor = [-1, -1, -1]
 
-        if i == 0:
-          # 0 is a reset
-          currentcolor = [-1, -1, -1]
+      # handles other cases!
+      else:
+        color = color.split(";")
+        for i in color:
+          if not i.isdigit():
+            continue
+
+          i = int(i)
+
+          if i == 0:
+            # 0 is a reset
+            currentcolor = [-1, -1, -1]
       
-        elif 0 < i and i < 10:
-          # these are ansi color attributes
-          currentcolor[0] = i
+          elif 0 < i and i < 10:
+            # these are ansi color attributes
+            currentcolor[0] = i
 
-        elif 30 <= i and i < 40:
-          # these are foreground attributes
-          currentcolor[1] = i
+          elif 30 <= i and i < 40:
+            # these are foreground attributes
+            currentcolor[1] = i
 
-        elif 40 <= i and i < 50:
-          # these are background attributes
-          currentcolor[2] = i
+          elif 40 <= i and i < 50:
+            # these are background attributes
+            currentcolor[2] = i
 
   # we're looking for leftover pieces here
   if len(textlist) > 0:
