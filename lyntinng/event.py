@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.46 2002/11/09 04:21:59 willhelm Exp $
+# $Id: event.py,v 1.47 2002/11/18 02:43:53 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -14,7 +14,7 @@ by the event handler thread when it pulls the event object off the
 event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
-import string, os, sys, glob
+import string, os, sys, traceback
 import ui.ui, lyntin, exported
 
 class Event:
@@ -81,6 +81,7 @@ class StartupEvent(Event):
     """
     import utils
 
+    uiinstance = None
     try:
       # instantiate a ui
       uiname = lyntin.options['ui']
@@ -90,17 +91,26 @@ class StartupEvent(Event):
 
       uiinstance = ui.__init__.get_ui(modulename)
       if not uiinstance:
-        uiinstance = ui.__init__.get_ui("textui")
-
-      if not uiinstance:
-        raise ValueError, "Can't start ui."
-
+        raise ValueError, "No ui instance."
       exported.get_engine().setUI(uiinstance)
-
       exported.write_message("UI started.")
     except Exception, e:
-      print "Cannot start ui: %s" % e
-      sys.exit(0)
+      print "Cannot start '%s': %s" % (uiname, e)
+      traceback.print_exc()
+      if not uiinstance:
+        try:
+          # if we had problems, we try to instantiate the textui
+          uiinstance = ui.__init__.get_ui("textui")
+          if not uiinstance:
+            raise ValueError, "No ui instance."
+          exported.get_engine().setUI(uiinstance)
+          exported.write_message("UI started.")
+        except Exception, e2:
+          print "Cannot start textui either: %s" % e
+          traceback.print_exc()
+          sys.exit(0)
+      else:
+        sys.exit(0)
 
 
     # tests to see if dirs provided exist

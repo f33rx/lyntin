@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.21 2002/12/04 03:46:29 willhelm Exp $
+# $Id: tkui.py,v 1.22 2002/12/06 02:19:40 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -303,36 +303,36 @@ class Tkui(ui.BaseUI):
     if type(message) == type(''):
       message = ui.Message(message, ui.LTDATA)
 
-    if message.data == '' or self.showTextForSession(ses) == 0:
+    line = message.data
+    ses = message.session
+
+    if line == '' or self.showTextForSession(ses) == 0:
       return
 
     if message.type == ui.ERROR:
-      if message.data[-1] == "\n":
-        self._txt.insert('end', message.data[:-1], "44")
+      if line[-1] == "\n":
+        self._txt.insert('end', line[:-1], "44")
         self._txt.insert('end', "\n")
       else:
-        self._txt.insert('end', message.data, "44")
+        self._txt.insert('end', line, "44")
 
     elif message.type == ui.USERDATA:
       if lyntin.mudecho == 1:
-        if message.data[-1] == "\n":
-          self._txt.insert('end', message.data[:-1], "44")
+        if line[-1] == "\n":
+          self._txt.insert('end', line[:-1], "44")
           self._txt.insert('end', "\n")
         else:
-          self._txt.insert('end', message.data, "44")
+          self._txt.insert('end', line, "44")
 
     elif message.type == ui.LTDATA:
-      if message.data[-1] == "\n":
-        message.data = "# " + message.data[:-1].replace("\n", "\n# ") + "\n"
+      if line[-1] == "\n":
+        line = "# " + line[:-1].replace("\n", "\n# ") + "\n"
       else:
-        message.data = "# " + message.data.replace("\n", "\n# ")
+        line = "# " + line.replace("\n", "\n# ")
 
-      self._txt.insert('end', message.data)
+      self._txt.insert('end', line)
 
     elif message.type == ui.MUDDATA:
-      line = message.data
-      ses = message.session
-
       index = 0
       start = 0
 
