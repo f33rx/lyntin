@@ -5,7 +5,7 @@
 VERSION
 =======
 
-$Id: HACKING,v 1.13 2002/07/14 15:14:00 willhelm Exp $
+$Id: HACKING,v 1.14 2002/07/21 17:37:05 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -166,16 +166,16 @@ USER DATA
 User data (sometimes called "input") is received from the ui.BaseUI
 subclasses and tossed into an ``event.InputEvent``.  When the
 engine handles the event, it is first passed to the engine's
-``handleUserInput`` method which deals with global things such
+``handleUserData`` method which deals with global things such
 as splitting the input into a series of separate commands.  Read
 the docstring for more information.
 
 The user input is then passed to the session in question's 
-``handleUserInput`` method which does some stuff and passes it
+``handleUserData`` method which does some stuff and passes it
 through the ``user_filter_hook``.  This is where the magic happens.
 All user input handlers in Lyntin (the alias manager, the variable
 manager ...) register with the user_filter_hook at various 
-priorities.  The ``handleUserInput`` hook then cycles through the
+priorities.  The ``user_filter_hook`` then cycles through the
 user filters in order of priority.
 
 For more specific information, read through the docstrings of

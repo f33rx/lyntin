@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.40 2002/07/21 04:14:48 willhelm Exp $
+# $Id: utils.py,v 1.41 2002/07/23 00:19:14 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -783,13 +783,8 @@ def lyntin_denest_vars_worker(varchar, text):
   return text
 
 def sort_by_length(item1, item2):
-  li1 = len(item1)
-  li2 = len(item2)
-  if li1 < li2:
-    return -1
-  if li1 == li2:
-    return 0
-  return 1
+  """ Takes two strings and compares them by length."""
+  return cmp(len(item1), len(item2))
 
 def tintin_expand_vars(text, varmap):
   """
@@ -1108,6 +1103,3 @@ def lyntin_expand_placement_vars(input, expansion):
 # py-indent-offset:2
 # tab-width:2
 # End:
-
-
-
