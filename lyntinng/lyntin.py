@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.18 2002/04/11 03:58:22 willhelm Exp $
+# $Id: lyntin.py,v 1.19 2002/04/16 03:44:37 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -46,7 +46,7 @@ HELPTEXT = """syntax: lyntin.py [--help] [--read <file>] [--datadir <dir>] [--ui
 
 # the wizlist of folks without whom Lyntin wouldn't exist.
 WIZLIST = """This is the wizlist--people who have worked to bring you Lyntin:
-Lyn Headley, Will Guaraldi, James, Aquarius, Sebastian John
+Lyn Headley, Will Guaraldi, James, Aquarius, Sebastian John, Joshua Berne
 """
 
 # bosstext - code derived from the original Lyntin
