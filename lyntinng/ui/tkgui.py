@@ -4,14 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: tkgui.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
 Lyntin, but largely re-coded in various areas.
 """
 
-# from Tkinter import *
 import string, os, Tkinter, tkFont
 import ui, event, engine
 
@@ -79,15 +78,21 @@ class TkGui(ui.BaseUI):
                                 insertwidth='2')
 
       self._txt = Tkinter.Text(self._tk, {'fg': 'white', 
-                                        'bg': 'black',
-                                        'font': fnt,
-                                        'state': 'disabled', 
-                                        'height': 20})
+                                          'bg': 'black',
+                                          'font': fnt,
+                                          'height': 20})
+
+      # handles improper keypresses
+      self._txt.bind("<Key>", self.ignoreThis)
 
       self._txtbuffer = Tkinter.Text(self._tk, {'fg': 'white', 
-                                              'bg': 'black', 
-                                              'font': fnt, 
-                                              'height': 20})
+                                                        'bg': 'black', 
+                                                        'font': fnt, 
+                                                        'height': 20})
+
+      # these deal with catching improper keypresses
+      self._txtbuffer.bind("<KeyPress-Escape>", self.escape)
+      self._txtbuffer.bind("<Key>", self.ignoreThis)
 
       # set up the scrollbar for the txtbuffer widget
       self._scrollVertical = Tkinter.Scrollbar(self._tk, 
@@ -121,6 +126,12 @@ class TkGui(ui.BaseUI):
          self._tk.title("Lyntin -- The Hacker's Mudclient")
 
 
+   def ignoreThis(self, tkevent):
+      """ This catches keypresses from the history buffer."""
+      self._entry.focus()
+      return "break"
+
+
    def pageUp(self):
       """ Handles prior (Page-Up) events."""
       if self._viewhistory == 0:
@@ -129,7 +140,6 @@ class TkGui(ui.BaseUI):
                               'fill': 'both', 
                               'expand': 1})
          self._viewhistory = 1
-         # self._txtbuffer.configure(state='normal')
          self._txtbuffer.delete ("1.0", "end")
          lotofstuff = self._txt.get ('1.0', 'end')
          self._txtbuffer.insert ('end', lotofstuff)
@@ -143,7 +153,6 @@ class TkGui(ui.BaseUI):
                else:
                   tst=0
                   self._txtbuffer.tag_add(t,str(taux),str(e))
-         # self._txtbuffer.configure(state='disabled')
 
          self._txtbuffer.yview('moveto', '1')
          if os.name != 'posix':
@@ -165,7 +174,7 @@ class TkGui(ui.BaseUI):
          self._txtbuffer.yview('scroll', '15', 'units')
 
 
-   def escape(self):
+   def escape(self, tkevent):
       """ Handles escape (Escape) events."""
       if self._viewhistory == 1:
          self._txtbuffer.forget()
@@ -199,41 +208,33 @@ class TkGui(ui.BaseUI):
          return
 
       if message.type == ui.ERROR:
-         self._txt.configure(state='normal')
          self._txt.insert('end', message.data, "44")
          self._txt.insert('end', "\n")
-         self._txt.configure(state='disabled')
 
          self._txt.yview('moveto', '1')
          if os.name != 'posix':
             self._txt.yview('scroll', '20', 'units')
 
       elif message.type == ui.SBDATA:
-         self._txt.configure(state='normal')
          message.data = "# " + string.replace(message.data, "\n", "\n# ")
          self._txt.insert('end', message.data)
          self._txt.insert('end', "\n")
-         self._txt.configure(state='disabled')
 
          self._txt.yview('moveto', '1')
          if os.name != 'posix':
             self._txt.yview('scroll', '20', 'units')
 
       elif message.type == ui.TESTDATA:
-         self._txt.configure(state='normal')
          self._txt.insert('end', message.data, "42")
          self._txt.insert('end', "\n")
-         self._txt.configure(state='disabled')
 
          self._txt.yview('moveto', '1')
          if os.name != 'posix':
             self._txt.yview('scroll', '20', 'units')
 
       elif message.type == ui.USERDATA:
-         self._txt.configure(state='normal')
          self._txt.insert('end', message.data, "44")
          self._txt.insert('end', "\n")
-         self._txt.configure(state='disabled')
 
          self._txt.yview('moveto', '1')
          if os.name != 'posix':
@@ -261,7 +262,6 @@ class TkGui(ui.BaseUI):
 
             start = index + 1
 
-         self._txt.configure(state='normal')
          while index < len(line):
             if line[index] == chr(27):
                cstart = index
@@ -288,7 +288,6 @@ class TkGui(ui.BaseUI):
             self._txt.insert('end', line[start:end])
          else:
             self._txt.insert('end', line[start:end], self._currcolors[1])
-         self._txt.configure(state='disabled')
 
          self._txt.yview('moveto', '1')
          if os.name != 'posix':
@@ -588,7 +587,7 @@ VK_SCROLL
         
    def callEsc(self, tkevent):
       """ Handles the <KeyPress-Escape> event."""
-      self._partk.escape()
+      self._partk.escape(tkevent)
     
    def callKillLine(self, tkevent): 
       """ Handles the <Control-KeyPress-u> event."""
