@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.7 2002/03/10 04:49:31 willhelm Exp $
+# $Id: gag.py,v 1.8 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This module defines the GagManager which handles gags in Lyntin.
@@ -77,18 +77,16 @@ class GagManager(manager.Manager):
     return self._gags
 
   def removeGaggedText(self, text):
-    """ Takes text in and removes anything that is gagged."""
+    """ Takes text in if it's to be gagged, returns an empty string
+
+    arguments:
+      
+      'text' -- (string) input string
+
+    """
     if text and self._gagregexp:
-      lines = text.split('\r\n')
-      ret = []
-
-      # shoot through looking for matches of the regexp
-      for line in lines:
-        # if we find one--we WHACK it!
-        if not self._gagregexp.search(line):
-          ret.append(line)
-
-      text = string.join(ret, '\r\n')
+      if self._gagregexp.search(text):
+        text = ''
 
     return text
 

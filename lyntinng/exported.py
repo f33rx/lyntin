@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.3 2002/03/02 23:57:49 willhelm Exp $
+# $Id: exported.py,v 1.4 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -22,7 +22,7 @@ def lyntin_command(str):
 
     'str' -- the command to execute.  ex. "#help"
   """
-  engine.myengine.handleUserData(action)
+  get_engine().handleUserData(action)
 
 def add_command(str, func):
   """ The best way to add commands to Lyntin.
@@ -33,7 +33,7 @@ def add_command(str, func):
 
     'func' -- the function to call when that command is executed.
   """
-  engine.myengine.addCommand(str, func)
+  get_engine().addCommand(str, func)
 
 def get_commands():
   """ Returns a list of the commands currently bound.
@@ -42,7 +42,7 @@ def get_commands():
 
     list of strings
   """
-  return engine.myengine.getCommands()
+  return get_engine().getCommands()
 
 def get_session(name):
   """
@@ -56,7 +56,7 @@ def get_session(name):
 
     session.Session instance or None if it doesn't exist
   """
-  return engine.myengine.getSession(name)
+  return get_engine().getSession(name)
 
 def get_active_sessions():
   """
@@ -66,7 +66,7 @@ def get_active_sessions():
 
     list of session.Session instances
   """
-  engine.myengine.getSessions()
+  get_engine().getSessions()
 
 def get_current_session():
   """
@@ -76,7 +76,7 @@ def get_current_session():
 
     a session.Session instance
   """
-  return engine.myengine.currentSession()
+  return get_engine().currentSession()
 
 def set_current_session(session):
   """
@@ -87,7 +87,7 @@ def set_current_session(session):
     'session' -- a session.Session instance
   """
   # FIXME - should do some data checking on this first
-  engine.myengine._current_session = session
+  get_engine()._current_session = session
     
   
 def get_num_errors():
@@ -120,8 +120,8 @@ def write_ui(text):
               to the ui
 
   """
-  if engine.myengine:
-    engine.myengine.writeUI(text)
+  if get_engine():
+    get_engine().writeUI(text)
   else:
     print text
 
@@ -134,8 +134,8 @@ def write_test(text):
     'text' -- (string) the message to send
 
   """
-  if engine.myengine:
-    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.TESTDATA))
+  if get_engine():
+    get_engine().writeUI(ui.ui.Message(text, ui.ui.TESTDATA))
   else:
     print "test:", text
 
@@ -147,8 +147,8 @@ def write_message(text):
     'text' -- (string) the message to send
 
   """
-  if engine.myengine:
-    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.LTDATA))
+  if get_engine():
+    get_engine().writeUI(ui.ui.Message(text, ui.ui.LTDATA))
   else:
     print "message:", text
 
@@ -159,8 +159,8 @@ def write_error(text):
 
     'text' -- (string) the message to send
   """
-  if engine.myengine:
-    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.ERROR))
+  if get_engine():
+    get_engine().writeUI(ui.ui.Message(text, ui.ui.ERROR))
   else:
     print "error:", text
 
@@ -171,8 +171,8 @@ def write_user_data(text):
 
     'text' -- (string) the message to send
   """
-  if engine.myengine:
-    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.USERDATA))
+  if get_engine():
+    get_engine().writeUI(ui.ui.Message(text, ui.ui.USERDATA))
   else:
     print "userdata:", text
 
@@ -184,8 +184,8 @@ def write_mud_data(text):
     'text' -- (string) the message to send
 
   """
-  if engine.myengine:
-    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.MUDDATA))
+  if get_engine():
+    get_engine().writeUI(ui.ui.Message(text, ui.ui.MUDDATA))
   else:
     print "muddata:", text
 
@@ -197,7 +197,7 @@ def get_history():
     list of strings
 
   """
-  return engine.myengine.getHistoryManager().getHistory()
+  return get_engine().getHistoryManager().getHistory()
 
 def grep_databuffer(str, session):
   """ Not yet implemented."""
@@ -223,4 +223,4 @@ def tally_error():
   if we're over our limit.  If we are, it enqueues a shutdown
   event which will shutdown Lyntin.
   """
-  engine.myengine.tallyError()
+  get_engine().tallyError()

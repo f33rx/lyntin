@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.16 2002/03/02 23:21:34 willhelm Exp $
+# $Id: session.py,v 1.17 2002/03/02 23:57:49 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
-import re, copy
+import re, copy, string
 import exported, engine, utils, lyntin, event, ticker
 
 # this is the regular expression that matches speedwalking stuff
@@ -261,22 +261,25 @@ class Session:
     if self._logfile:
       self.log(input)
 
-    # handle gags
-    input = self.getManager("gag").removeGaggedText(input)
+    inputlines = input.splitlines(1)
+    for mem in inputlines:
+      # handle gags
+      mem = self.getManager("gag").removeGaggedText(mem)
 
-    # handle substitutions
-    input = self.getManager("substitute").expand(input)
+      # handle substitutions
+      mem = self.getManager("substitute").expand(mem)
 
-    # handle actions
-    self.getManager("action").checkActions(input)
+      # handle actions
+      self.getManager("action").checkActions(mem)
 
-    if lyntin.ansicolor == 0:
-      input = utils.filter_ansi(input)
-    else:
-      # handle highlights 
-      input = self.getManager("highlight").expand(input)
+      if lyntin.ansicolor == 0:
+        mem = utils.filter_ansi(mem)
+      else:
+        # handle highlights 
+        mem = self.getManager("highlight").expand(mem)
 
-    exported.write_mud_data(input)
+      if mem:
+        exported.write_mud_data(mem)
 
   def log(self, input):
     """ Logs text to a file instance in self._logfile.

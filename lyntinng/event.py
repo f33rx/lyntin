@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.14 2002/03/14 22:33:31 willhelm Exp $
+# $Id: event.py,v 1.15 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -200,19 +200,23 @@ class MudEvent(Event):
   A mud event is when the connected mud sends data to us.  We
   spam that data to the mud event hook.
   """
-  def __init__(self, input):
+  def __init__(self, session, input):
     """ Initialize.
 
     arguments:
 
+      'session' -- (session) the session handling this mud
+                   connection
+
       'input' -- (string) the data sent from the mud
 
     """
+    self._session = session
     self._input = input
 
   def execute(self):
     """ Execute."""
-    engine.myengine.handleMudData(self._input)
+    engine.myengine.handleMudData(self._session, self._input)
 
 
 class InputEvent(Event):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.8 2002/02/23 21:10:32 willhelm Exp $
+# $Id: net.py,v 1.9 2002/03/14 22:33:31 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -97,12 +97,14 @@ class SocketCommunicator:
           if IAC in data or self._nego_buffer != '':
             data = self._handlenego(self._nego_buffer + data)
 
-          event.MudEvent(data).enqueue()
+          event.MudEvent(self._session, data).enqueue()
 
     except SystemExit:
       if self._shutdownflag == 0 and self._session:
         self._session.shutdown(())
-    except:
+
+    except Exception, e:
+      print e
       if self._shutdownflag == 0 and self._session:
         self._session.shutdown(())
 

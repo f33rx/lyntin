@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.36 2002/03/22 02:40:18 willhelm Exp $
+# $Id: basic.py,v 1.37 2002/03/22 02:42:49 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -347,7 +347,7 @@ def history_cmd(session, words, input):
 
   Prints the history list.
   """
-  historylist = exported.get_engine().getHistoryManager().getHistory()
+  historylist = exported.get_history()
   for i in range(0, len(historylist)):
     historylist[i] = repr(i) + " " + historylist[i]
   historylist.reverse()
@@ -617,21 +617,9 @@ def session_cmd(session, words, input):
   ses = None
 
   try:
-    # connect to the mud...
+    # create a SocketCommunicator
     sock = net.SocketCommunicator()
-    sock.connect(host, port, sessionname)
 
-  except:
-    # close/shutdown the socket if there is no session
-    try:
-      sock.shutdown()
-    except:
-      pass
-
-    exported.write_error("session: unable to connect.")
-    return
-
-  try:
     # create a session for it...
     ses = engine.myengine.createSession()
     ses.setName(sessionname)
@@ -639,6 +627,9 @@ def session_cmd(session, words, input):
     sock.setSession(ses)
     engine.myengine.registerSession(ses, sessionname)
     engine.myengine.changeSession(sessionname)
+
+    # connect to the mud...
+    sock.connect(host, port, sessionname)
 
     # start the network thread
     engine.myengine.startthread("network", sock.run)
@@ -648,9 +639,10 @@ def session_cmd(session, words, input):
     try: 
       engine.myengine.unregisterSession(sessionname)
       engine.myengine.closeSession(sessionname)
+      sock.shutdown()
     except:
       pass
-
+    exported.write_error("session: unable to connect.")
     exported.write_error("session: had problems creating the session.")
 
 

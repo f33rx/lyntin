@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.6 2002/02/27 02:25:22 willhelm Exp $
+# $Id: substitute.py,v 1.7 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -47,17 +47,21 @@ class SubstituteManager(manager.Manager):
     list.sort()
     return list
 
-  def expand(self, input):
+  def expand(self, text):
     """ Looks at mud data and performs any substitutes.
 
     It returns the final text--even if there were no substitutes.
     # FIXME -- this isn't done correctly.
     """
-    if len(input) > 0:
+    if len(text) > 0:
       for mem in self._substitutes.keys():
-        input = input.replace(mem, self._substitutes[mem])
+        if self._substitutes[mem] == ".":
+          if text.find(mem) > -1:
+            text = ''
+        else:
+          text = text.replace(mem, self._substitutes[mem])
 
-    return input
+    return text 
 
   def getInfo(self, text=''):
     """ Returns information about the substitutes in here.

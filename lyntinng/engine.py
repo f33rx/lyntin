@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.19 2002/03/10 04:49:31 willhelm Exp $
+# $Id: engine.py,v 1.20 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -195,7 +195,7 @@ class Engine:
   def handleUserData(self, input, internal=0, session=None):
     """ This handles input lines from the user in a session-less context.
 
-    The engine.handleUserInput deals with global stuff and then
+    The engine.handleUserData deals with global stuff and then
     passes the modified input to the session for session-oriented
     handling.  The session can call this method again with
     expanded input--this method is considered recursive.
@@ -228,7 +228,7 @@ class Engine:
 
       # spam the hook with the raw input statement first...
       if internal:
-        myengine.spamhook(INPUT_HOOK, (mem,))
+        self.spamhook(INPUT_HOOK, (mem,))
 
       # FIXME - handle history stuff
       if mem[0] == "!":
@@ -243,7 +243,7 @@ class Engine:
         ses = mem.split(" ", 1)[0][1:]
 
         # is it a loop (aka repeating command)?
-        if re.compile('^\d+$').match(ses):
+        if ses.isdigit():
           num = int(ses)
           if mem.find(" ") != -1:
             for i in range(num):
@@ -271,17 +271,20 @@ class Engine:
       session.handleUserData(mem, internal)
 
 
-  def handleMudData(self, text):
+  def handleMudData(self, session, text):
     """ Handle input coming from the mud.
 
     We toss this to the current session to deal with.
 
     arguments:
 
+      'session' -- (session) the session this mud data
+                   applies to
+
       'text' -- (string) text coming from the mud
 
     """
-    self._current_session.handleMudData(text)
+    session.handleMudData(text)
 
 
   ### ------------------------------------------
@@ -721,7 +724,7 @@ class Engine:
       self._command_list[name] = func
       return 1
 
-    engine.myengine.writeError(name + ' is uncallable.')
+    self.writeError(name + ' is uncallable.')
 
   def removeCommand(self, name):
     """

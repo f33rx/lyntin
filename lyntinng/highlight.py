@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.11 2002/03/19 23:05:44 willhelm Exp $
+# $Id: highlight.py,v 1.12 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -90,26 +90,46 @@ class HighlightManager(manager.Manager):
     list.sort()
     return list
 
-  def expand(self, input):
+  def expand(self, text):
     """ Looks at mud data and performs any highlights.
 
     It returns the final text--even if there were no highlights.
-    """
-    if len(input) > 0:
-      for text in self._highlights.keys():
-        if text[0] == "*" and text[-1] == "*":
-          input = self._highlights[text][1] + input + "[0m"
-        elif text[1] == "*":
-          input = input.replace(text, self._highlights[text][1] +
-                                      text + chr(27) + "[0m")
-        elif text[-1] == "*":
-          input = input.replace(text, self._highlights[text][1] +
-                                      text + chr(27) + "[0m")
-        else:
-          input = input.replace(text, self._highlights[text][1] +
-                                      text + chr(27) + "[0m")
 
-    return input
+    arguments:
+
+      'text' -- (string) input text
+
+    returns:
+
+      (string) the finalized text
+
+    """
+    if text:
+      for mem in self._highlights.keys():
+        if mem[0] == "*" and mem[-1] == "*":
+          if text.find(mem[1:-1]) > -1:
+            text = self._highlights[mem][1] + text + chr(27) + "[0m"
+
+        elif mem[0] == "*":
+          end = text.find(mem[1:])
+          while (end > -1):
+            end = end + len(mem) - 1
+            text = (self._highlights[mem][1] + text[:end] + 
+                                     chr(27) + "[0m" + text[end:])
+            end = text.find(mem[1:], end + len(self._highlights[mem][1]) + 1)
+
+        elif mem[-1] == "*":
+          begin = text.find(mem[:-1])
+          while (begin > -1):
+            text = (text[:begin] + self._highlights[mem][1] + text[begin:] + 
+                                     chr(27) + "[0m")
+            begin = text.find(mem[:-1], begin + len(self._highlights[mem][1]) + 1)
+                                   
+        else:
+          text = text.replace(mem, self._highlights[mem][1] + mem + 
+                                     chr(27) + "[0m")
+
+    return text
 
   def getInfo(self, text=''):
     """ Returns information about the highlights in here.

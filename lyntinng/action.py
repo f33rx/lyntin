@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.9 2002/03/19 23:05:44 willhelm Exp $
+# $Id: action.py,v 1.10 2002/03/20 22:39:13 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -141,15 +141,15 @@ class ActionManager(manager.Manager):
 
     return keylist
 
-  def checkActions(self, muddata):
+  def checkActions(self, text):
     """
-    Checks to see if muddata triggered any actions.  Any resulting 
+    Checks to see if text triggered any actions.  Any resulting 
     actions will get added as an InputEvent to the queue.
 
     arguments:
 
-      'muddata' -- (string) the data coming from the mud to check
-                   for triggers on
+      'text' -- (string) the data coming from the mud to check
+                for triggers on
 
     FIXME - make sure this works even when lines are broken up.
     """
@@ -157,12 +157,11 @@ class ActionManager(manager.Manager):
 
     # go through all the lines in the data and see if we have
     # any matches
-    for line in muddata.splitlines():
-      for (action, actioncompiled, response) in self._actions.values():
-        match = actioncompiled.search(line)
-        if match:
-          line = utils.filter_cm(utils.filter_ansi(line))
-          matched.append((line, action, actioncompiled, response))
+    for (action, actioncompiled, response) in self._actions.values():
+      match = actioncompiled.search(text)
+      if match:
+        line = utils.filter_cm(utils.filter_ansi(line))
+        matched.append((line, action, actioncompiled, response))
 
     # for every match we figure out what the expanded response
     # is and add it as an InputEvent in the queue.  the reason
