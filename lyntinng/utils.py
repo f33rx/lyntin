@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.26 2002/05/17 00:07:34 willhelm Exp $
+# $Id: utils.py,v 1.27 2002/05/17 01:46:56 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -88,8 +88,24 @@ def is_color_token(token):
   if len(token) == 0:
     return 0
 
-  return token[0] == chr(27)
+  return token[0:2] == chr(27) + "[" and token[-1] == "m"
 
+
+def fix_color(color):
+  """
+  Helper function for debugging--it'll fix a color token
+  so it's readable in ascii.
+
+  arguments:
+
+    'color' -- (string) the color token
+
+  returns:
+
+    string
+  """
+  color = color.replace(chr(27), "ESC")
+  return color
 
 def split_ansi_from_text(text):
   """ Takes in a string and returns a list of text and ansi tokens.

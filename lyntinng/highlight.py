@@ -4,11 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.18 2002/05/05 16:34:51 willhelm Exp $
+# $Id: highlight.py,v 1.19 2002/05/15 00:16:55 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
 """
+import string
 import manager, utils, lyntin
 
 STYLEMAP = {
@@ -45,6 +46,8 @@ class HighlightManager(manager.Manager):
   """ Manages highlights."""
   def __init__(self):
     self._highlights = {}
+    self._currcolor = [-1,-1,-1]
+    self._colorleftover = ''
 
   def addHighlight(self, style, text):
     """ Adds a highlight to the dict.
@@ -131,32 +134,139 @@ class HighlightManager(manager.Manager):
       (string) the finalized text
     """
     if text:
+      faketext = utils.filter_ansi(text)
+      textlist = utils.split_ansi_from_text(text)
       for mem in self._highlights.keys():
-        if mem[0] == "*" and mem[-1] == "*":
-          if text.find(mem[1:-1]) > -1:
-            text = (self._highlights[mem][1] + utils.filter_ansi(text) + 
-                                     chr(27) + "[0m")
+        i = faketext.find(mem)
+        while i != -1:
+          begin = i
+          hl = self._highlights[mem][1]
+          textlist = self.highlight(textlist, i, len(mem), hl)
+          i = faketext.find(mem, begin + 1)
 
-        elif mem[0] == "*":
-          end = text.find(mem[1:])
-          while (end > -1):
-            end = end + len(mem[1:])
-            text = (self._highlights[mem][1] + utils.filter_ansi(text[:end]) + 
-                                     chr(27) + "[0m" + text[end:])
-            end = text.find(mem[1:], end + len(self._highlights[mem][1]) + 1)
+      self._currcolor, self._colorleftover = self.figureColor(textlist, self._currcolor)
 
-        elif mem[-1] == "*":
-          begin = text.find(mem[:-1])
-          while (begin > -1):
-            text = (text[:begin] + self._highlights[mem][1] + 
-                          utils.filter_ansi(text[begin:]) + chr(27) + "[0m")
-            begin = text.find(mem[:-1], begin + len(self._highlights[mem][1]) + 1)
-                                   
-        else:
-          text = text.replace(mem, self._highlights[mem][1] + mem + 
-                                     chr(27) + "[0m")
+      text = string.join(textlist, "")
 
     return text
+
+  def highlight(self, textlist, place, memlength, hl):
+    """
+    Takes a bunch of stuff and applies the highlight involved.  
+    It's messy.
+    """
+    # first we find the place to stick the highlight thingy.
+    for i in range(0, len(textlist)):
+      if not utils.is_color_token(textlist[i]):
+        if place > len(textlist[i]):
+          place -= len(textlist[i])
+        else:
+          break
+
+    newlist = []
+    for mem in textlist[:i]:
+      newlist.append(mem)
+    newlist.append(textlist[i][:place])
+    newcolor = self.figureColor(newlist, self._currcolor)[0]
+    newlist.append(hl)
+
+    # if the string to highlight begins and ends in the
+    # same token we deal with that and eject
+    if len(textlist[i][place:]) > memlength:
+      newlist.append(textlist[i][place:place + memlength])
+      newlist.append(chr(27) + "[0m")
+      color = self.convertColor(newcolor)
+      if color:
+        newlist.append(color)
+      newlist.append(textlist[i][place + memlength:])
+      for mem in textlist[i+1:]:
+        newlist.append(mem)
+
+      return newlist
+
+
+    newlist.append(textlist[i][place:])
+
+    # now we have to find the end of the highlight
+    memlength -= len(textlist[i][place:])
+    for j in range(i+1, len(textlist)):
+      if not utils.is_color_token(textlist[j]):
+        if memlength > len(textlist[j]):
+          memlength -= len(textlist[j])
+          newlist.append(mem)
+        else:
+          break
+      else:
+        newcolor = self.figureColor([mem], newcolor, '')[0]
+
+    newlist.append(textlist[j][:memlength])
+    newlist.append(chr(27) + "[0m")
+    color = self.convertColor(newcolor)
+    if color:
+      newlist.append(color)
+    newlist.append(textlist[j][memlength:])
+
+    for mem in textlist[j+1:]:
+      newlist.append(mem)
+
+    return newlist
+
+  def convertColor(self, color):
+    c = []
+    if color[0] != -1:
+      c.append(str(color[0]))
+    if color[1] != -1:
+      c.append(str(color[1]))
+    if color[2] != -1:
+      c.append(str(color[2]))
+
+    if len(c) == 0:
+      c = ''
+    else:
+      c = chr(27) + "[" + string.join(c, ";") + "m"
+    return c
+
+  def figureColor(self, textlist, currentcolor, leftover=-1):
+    """ 
+    Takes a textlist of text and color tokens and figures out
+    the latest current color.
+    """
+    if leftover == -1:
+      leftover = self._colorleftover
+
+    if leftover:
+      textlist[0] = leftover + textlist[0]
+      leftover = ''
+
+    for mem in textlist:
+      if utils.is_color_token(mem):
+        color = mem[2:-1]
+        color = color.split(";")
+        for i in color:
+          i = int(i)
+
+          if i == 0:
+            # 0 is a reset
+            currentcolor = [-1, -1, -1]
+      
+          elif 0 < i and i < 10:
+            # these are ansi color attributes
+            currentcolor[0] = i
+
+          elif 30 <= i and i < 40:
+            # these are foreground attributes
+            currentcolor[1] = i
+
+          elif 40 <= i and i < 50:
+            # these are background attributes
+            currentcolor[2] = i
+
+    if len(textlist) > 0:
+      mem = textlist[-1]
+      if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
+        leftover = mem
+
+    return currentcolor, leftover
 
   def getInfo(self, text=""):
     """ Returns information about the highlights in here.
