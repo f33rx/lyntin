@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.2 2001/12/11 06:34:08 willhelm Exp $
+# $Id: tkgui.py,v 1.3 2001/12/11 18:57:38 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -354,9 +354,7 @@ class TkGui(ui.BaseUI):
       temp = temp[:ind]
       try:
          if (int(temp) > 800):
-            self._txt.config(state=Tkinter.NORMAL)
             self._txt.delete ("1.0", "100.end")
-            self._txt.config(state=Tkinter.DISABLED)
       except:
          pass
 
