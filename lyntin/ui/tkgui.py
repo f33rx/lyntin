@@ -212,11 +212,6 @@ class Gui:
 
     def PutReallyUntouchedLine(self, line):
         if line:
-            mud.log('really untouched ' + line)
-            mud.log('last char: ' + line[-1])
-            mud.log("\nlast %d\n"%ord(line[-1]))
-            mud.log("\nfirst %d\n"%ord(line[0]))
-
             index = 0
             start = 0
             end = 0

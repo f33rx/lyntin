@@ -60,7 +60,6 @@ class client(dict_plus.c):
        The main loop.
        """
        try:
-           mud.log('loop through' + str(len(data.sessionlist)) + ' sessions')
            datato = self.ui.GetUserInput()
            # get input for all connected sessions
            for ses in data.sessionlist:
@@ -213,7 +212,6 @@ class client(dict_plus.c):
       if not input:
          return
       ses = None
-      mud.log('HandleUserInput: received ' + input)
       # trim leading/trailing whitespace
       #input = string.strip(input)
 
@@ -380,7 +378,6 @@ class client(dict_plus.c):
             # FIXME?
             input = input + '\r'
          mud.log(input)
-         mud.log(str(len(input)))
          data.currsession.WriteTo(input)
 
       elif not data.numsessions:
@@ -515,13 +512,13 @@ def GetAppropriateFile(str, Access):
 
    return a file opened from the given string, with the given 
    access paramter.  if they give us a full path name, try to open it.
-   otherwise prepend the initdir to the argument.
+   otherwise prepend the datadir to the argument.
    may raise exception IOError.
    """
    if str[0] == os.sep:
       filename = str
    else:
-      filename = data.initdir + str
+      filename = data.datadir + str
         
    try:
       file = open(filename, Access)
@@ -539,7 +536,6 @@ def SplitBraced(str):
    one = ''
    two = ''
    parsed = ''
-   mud.log(str)
    if string.find(str, '{') == -1:
       # unbraced, just chop it into two parts and return it
       sp = string.split(str)

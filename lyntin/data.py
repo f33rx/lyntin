@@ -474,6 +474,19 @@ else:
 if initdir[-1] != os.sep:
     initdir = initdir + os.sep
 
+# datadir
+datadir = ''
+"""datadir is the directory to store the log in. Default to initdir"""
+if os.environ.has_key('LYNTINDATADIR'):
+	datadir = os.environ['LYNTINDATADIR']
+	if not datadir:
+		datadir = initdir
+else:
+	datadir = initdir
+if datadir[-1] != os.sep:
+	datadir = datadir + os.sep
+
+
 # the lyntin character: prepended to all commands
 ltchar = '#'
 """The lyntin character: prepended to all lyntin commands."""
@@ -486,9 +499,9 @@ numsessions = 0
 logfile = ''
 """the logfile."""
 try:
-    logfile = open(initdir + 'mudlog', 'w')
+    logfile = open(datadir + 'mudlog', 'w')
 except:
-    player.Putline('\nunable to find LyntinDir %s!'%initdir)
+    player.Putline('\nUnable to write log to LYNTINDATADIR %s!'%datadir)
     logfile = None
 
 # how long we'll wait on a socket for new data

@@ -47,6 +47,8 @@ def HandleMudOutput(output, ses):
     # stuff each character in here -- a significant optimization
     charlist = [] 
     for c in output:
+	# First, we turn echo on by default
+	OnEcho()
         # see if we're negotiating an option
         if opt:
             if opt == WILL:

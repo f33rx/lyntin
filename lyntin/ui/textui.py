@@ -81,8 +81,6 @@ class Textui:
     def PutReallyUntouchedLine(self, line):
         if line:
             line = filter_crud(line)
-            mud.log('really untouched ' + line)
-            mud.log('last char: ' + line[-1])
             sys.stdout.write(line)
             sys.stdout.flush()
 

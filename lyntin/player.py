@@ -585,11 +585,11 @@ def Textin(words, input, seslist):
             return
 
         # if they give us a full path name, we try to open it.
-        # otherwise we prepend the initdir to the argument
+        # otherwise we prepend the datadir to the argument
         if words[1][0] == os.sep:
             filename = words[1]
         else:
-            filename = data.initdir + words[1]
+            filename = data.datadir + words[1]
 
         try:
             f = open(filename, 'r')
@@ -718,11 +718,11 @@ def Log(words, input, seslist):
             Putline("log: this session is not connected--nothing to log.")
             return
         # if they give us a full path name, we try to open it.
-        # otherwise we prepend the initdir to the argument
+        # otherwise we prepend the datadir to the argument
         if words[1][0] == os.sep:
             fullfile = words[1]
         else:
-            fullfile = data.initdir + words[1]
+            fullfile = data.datadir + words[1]
 
         try:
             f = open(fullfile, 'w')
