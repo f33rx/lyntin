@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.31 2003/01/14 01:21:06 willhelm Exp $
+# $Id: net.py,v 1.32 2003/02/15 03:35:05 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -309,7 +309,7 @@ class SocketCommunicator:
         data = data[:i] + data[i+2:]
         # FIXME - right now we're taking out the EOR because I don't
         # know what we should do with it yet
-        self.logControl("receive: IAC EOR")
+        self.logControl("receive: IAC TELOPT EOR")
 
       else:
         if i + 2 >= len(data):
