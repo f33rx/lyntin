@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.48 2002/06/01 15:49:05 willhelm Exp $
+# $Id: engine.py,v 1.49 2002/06/01 15:51:44 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -204,8 +204,8 @@ class Engine:
 
       'input' -- (string) data from the user
 
-      'internal=0' -- (int) 0 if we should spam the input hook 
-                      1 if we shouldn't
+      'internal=0' -- (int) 0 if we should spam the input hook
+                      and record to history, 1 if we shouldn't
 
       'session=self._current_session' -- (session.Session instance)
                                          allows you to execute this
@@ -216,6 +216,7 @@ class Engine:
     if session == None:
       session = self._current_session
 
+    historyitems = []
     for mem in inputlist:
       mem = mem.strip()
 
@@ -228,9 +229,12 @@ class Engine:
 
       if mem[0] == "!":
         memhistory = self.getHistoryManager().getHistoryItem(mem)
+        historyitems.append(memhistory)
         if memhistory != -1:
-          self.handleUserData(memhistory)
+          self.handleUserData(memhistory, 1, session)
           continue
+      else:
+        historyitems.append(mem)
 
       # if it starts with a # it's a loop, session or command
       if len(mem) > 0 and mem[0] == lyntin.commandchar:
@@ -243,7 +247,7 @@ class Engine:
           num = int(ses)
           if mem.find(" ") != -1:
             for i in range(num):
-              self.handleUserData(mem.split(" ", 1)[1], internal )
+              self.handleUserData(mem.split(" ", 1)[1], internal, session)
           continue
 
         # is it a session?
@@ -268,6 +272,11 @@ class Engine:
       # no command char, so we pass it on to the session.handleUserData
       # to do session oriented things
       session.handleUserData(mem, internal)
+
+    # we don't record internal stuff or input that isn't supposed
+    # to be echo'd
+    if internal == 0 and lyntin.echo == 1:
+      exported.get_engine().getHistoryManager().recordHistory(";".join(historyitems))
 
 
   def handleMudData(self, session, text):

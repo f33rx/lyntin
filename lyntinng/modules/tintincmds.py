@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.20 2002/06/01 15:49:05 willhelm Exp $
+# $Id: tintincmds.py,v 1.21 2002/06/01 15:51:45 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -358,9 +358,9 @@ def history_cmd(session, args, input):
   """
   count = args["count"]
   
-  historylist = exported.get_history(count)
+  historylist = exported.get_history(count)[1:]
   for i in range(0, len(historylist)):
-    historylist[i] = repr(i) + " " + historylist[i]
+    historylist[i] = repr(i+1) + " " + historylist[i]
   historylist.reverse()
   exported.write_message("History:\n" + string.join(historylist, "\n"))
 
@@ -584,7 +584,7 @@ def math_cmd(session, args, input):
     rvalue = eval(ops)
     session.getManager("variable").addVariable(var, str(rvalue))
     if not quiet:
-      exported.write_message("math: %s = %s." % (var, ops))
+      exported.write_message("math: %s = %s = %s." % (var, ops, str(rvalue)))
   except Exception, e:
     exported.write_error("math: exception: %s\n%s" % (ops, e))
 

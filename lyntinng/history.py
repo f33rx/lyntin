@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.6 2002/05/08 02:07:03 jmberne Exp $
+# $Id: history.py,v 1.7 2002/05/31 02:08:30 willhelm Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered
@@ -55,10 +55,10 @@ class HistoryManager:
     # if it's very short, we're looking at the last thing typed
     # (prior to this thing they typed)
     if len(index) == 0:
-      returninput = self._history[1]
+      returninput = self._history[0]
     else:
       try:
-        returninput = self._history[int(index)+1]
+        returninput = self._history[int(index)]
       except:
         return -1
 
@@ -75,12 +75,15 @@ class HistoryManager:
         # FIXME - we should probably error out...  need to think about this
         pass
 
-    # this is a side-effect of this function--if we were called
-    # by the user, it means that the item in position 0 of
-    # self._history is actually a history command--so we replace
-    # it with the something nice we just discovered.
-    if calledbyuser:
-      self._history[0] = returninput
+    ## this is a side-effect of this function--if we were called
+    ## by the user, it means that the item in position 0 of
+    ## self._history actually contains a history command--so we replace
+    ## it with the something nice we just discovered.
+    #if calledbyuser:
+    #  if self._history[0].find(userinput) == -1:
+    #    self.history[0] = returninput
+    #  else:
+    #    self._history[0] = returninput.join(self._history[0].split(userinput,1))
 
     return returninput
 
@@ -92,7 +95,7 @@ class HistoryManager:
       list of strings
 
     """
-    return self._history[:count]
+    return ["-"] + self._history[:count]
 
   def recordHistory(self, input):
     """ Records an item in the history (which is a queue).
@@ -107,5 +110,7 @@ class HistoryManager:
       return
 
     self._history.insert(0, input)
-    if len(self._history) > 500:
+    if len(self._history) > 1000:
       del self._history[-1]
+
+
