@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.6 2002/02/04 01:10:16 willhelm Exp $
+# $Id: action.py,v 1.7 2002/02/27 02:25:21 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -36,7 +36,7 @@ class ActionManager(manager.Manager):
       (SRE_Pattern) returns a compiled regexp pattern ob
 
     """
-    regexp = re.sub('%[0-9]+', '(.*)', trigger)
+    regexp = re.sub('%[0-9]+', '(.+?)', trigger)
     return re.compile(regexp)
 
   def addAction(self, trigger, response):

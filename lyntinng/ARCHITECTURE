@@ -3,7 +3,7 @@
 
 * VERSION
 
-$Id: ARCHITECTURE,v 1.4 2002/02/23 21:10:32 willhelm Exp $
+$Id: ARCHITECTURE,v 1.5 2002/02/27 02:25:21 willhelm Exp $
 
 
 * SYNOPSIS
@@ -30,6 +30,7 @@ engine.Engine
    |      |-- 1 variable.VariableManager     (inherited from common)
    |      |-- 1 ticker.Ticker                (not inherited from common)
    |
+   |-- 1 history.HistoryManager
    |-- 1 threadmanager.ThreadManager
    |-- 1 ui.Baseui subclass
 ^>>

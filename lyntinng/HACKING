@@ -4,10 +4,10 @@
 
 * VERSION
 
-$Id: HACKING,v 1.2 2002/02/23 21:10:32 willhelm Exp $
+$Id: HACKING,v 1.3 2002/02/27 03:39:34 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
-http://Lyntin.sourceforge.net/
+http://lyntin.sourceforge.net/
 
 
 
@@ -116,3 +116,34 @@ Lyntin.
 If you don't have a user.py module, raw Python code gets executed in 
 the advanced.py module where the #@ functionality exists.
 
+A basic user.py module would be as follows:
+
+^<<
+"""
+This is my user.py module.  I can do whatever I want in here.
+"""
+import exported
+
+myvar = "hello"
+
+def myfunc():
+  exported.write_message(myvar)
+
+
+def load():
+  """
+  This is required for this module to dynamically load.
+  You can put startup bindings in this function.  Look
+  at the other Lyntin modules for examples.
+  """
+  pass
+^>>
+
+Now at the Lyntin command prompt I can do things like:
+
+^<<
+> #@print myvar
+hello
+> #@myfunc()
+lyntin: hello
+^>>
