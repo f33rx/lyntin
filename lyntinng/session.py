@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.79 2003/02/14 00:20:38 willhelm Exp $
+# $Id: session.py,v 1.80 2003/02/15 03:35:05 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -230,7 +230,7 @@ class Session:
     """
     return self._socket != None
 
-  def writeSocket(self, message, tag = None):
+  def writeSocket(self, message, tag=None):
     """
     Writes data to the socket.
 
@@ -249,6 +249,12 @@ class Session:
       retval = self._socket.write(str(message))
       if retval:
         exported.write_error("socket write: %s" % retval)
+
+    else:
+      # if we don't have a socket then we can't do any non-lyntin-command
+      # stuff.
+      exported.write_error("No connection.  Create a session.\n(See also: #help, #help session)")
+      return
 
 
   ### ------------------------------------------------
@@ -322,7 +328,6 @@ class Session:
         output for internal stuff too.  1 if internal, 0 if not.
     @type  internal: boolean
     """
-
     # this is the point of much recursion.  everything is registered
     # as a filter and recurses accordingly.
     spamtuple = self,internal,self._verbatim,input,input
@@ -337,14 +342,6 @@ class Session:
     input = input.replace("\\;", ";")
     input = input.replace("\\$", "$")
     input = input.replace("\\%", "%")
-
-    # if we don't have a socket then we can't do any non-lyntin-command
-    # stuff.
-    if not self.isConnected():
-      exported.write_error("No connection.  Create a session.\n(See also: #help, #help session)")
-      if internal == 0:
-        self.prompt()
-      return
 
     # just regular data to the mud
     self.writeSocket(input + "\n")
