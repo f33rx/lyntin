@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.16 2002/02/05 03:39:22 willhelm Exp $
+# $Id: basic.py,v 1.17 2002/02/07 02:09:05 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -191,6 +191,10 @@ def diagnostics_cmd(session, words, input):
   except:
     message = message + "   os.name not available.\n"
  
+  message = message + "Lyntin Options:\n"
+  for mem in lyntin.options.keys():
+    message = message + "   " + mem + ": " + lyntin.options[mem] + "\n"
+
   engine.write_message(message)
   engine.write_message("This information can be dumped to a "
         "file by doing:\n   #diagnostics dumpfile.txt")

@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.4 2002/01/20 07:21:02 willhelm Exp $
+# $Id: lyntin.py,v 1.5 2002/02/04 01:10:16 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -14,7 +14,7 @@ as the main function which starts Lyntin off.
 import sys, os, getopt
 
 # version information
-VERSION = """Lyntin version 3.0 alpha 1
+VERSION = """Lyntin version 3.0 alpha 2
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 
@@ -22,10 +22,15 @@ Lyntin is copyright 2001, 2002 Will Guaraldi
 """
 
 # help text which gets printed to stdout if you do 'Lyntin.py --help'
-HELPTEXT = """syntax: Lyntin.py [--help] [--readfile <file>] [--ui <ui>]
+HELPTEXT = """syntax: Lyntin.py [--help] [--readfile <file>] [--datadir <dir>] [--ui <ui>]
 
   --help
          displays this text and exits.
+
+  --datadir
+         If you don't set your datadir, Lyntin will set the datadir to
+         the HOME environment variable.  Using this option allows you to
+         set it manually.
 
   --readfile
          reads a file in at startup populating the common
@@ -78,7 +83,7 @@ BOSSTEXT = """
 
 # holds the application options--these are adjusted
 # by command-line arguments only
-options = {'ui': 'textui', 'readfile': ''}
+options = {'ui': 'textui', 'readfile': '', 'datadir': ''}
 
 # the character used to denote variables.
 variablechar = '$'
@@ -116,23 +121,43 @@ if __name__ == '__main__':
 
     # read through options and arguments
     optlist, args = getopt.getopt(sys.argv[1:], 
-                                  'u:r:vh',
-                                  ['ui=', 'readfile=', 'help', 'version'])
+                                  'u:r:d:vh',
+                                  ['ui=', 
+                                   'readfile=', 
+                                   'datadir=', 
+                                   'help', 
+                                   'version'])
 
     for mem in optlist:
       if mem[0] == '--ui' or mem[0] == '-u':
         lyntin.options['ui'] = mem[1]
 
-      if mem[0] == '--readfile' or mem[0] == '-r':
+      elif mem[0] == '--readfile' or mem[0] == '-r':
         lyntin.options['readfile'] = mem[1]
 
-      if mem[0] == '--help':
+      elif mem[0] == '--datadir' or mem[0] == '-d':
+        if mem[1][-1] != os.sep:
+          lyntin.options['datadir'] = mem[1] + os.sep
+        else:
+          lyntin.options['datadir'] = mem[1]
+
+      elif mem[0] == '--help':
         print HELPTEXT
         sys.exit(0)
 
-      if mem[0] == '--version':
+      elif mem[0] == '--version':
         print VERSION
         sys.exit(0)
+
+    # if they haven't set the datadir via the command line, then
+    # we go see if they have a HOME in their environment variables....
+    if lyntin.options['datadir'] == '':
+      datadir = os.environ["HOME"]
+      if datadir:
+        if datadir[-1] != os.sep: 
+          datadir = datadir + os.sep
+        lyntin.options['datadir'] = datadir
+
 
     # instantiate an engine
     engine.myengine = engine.Engine()

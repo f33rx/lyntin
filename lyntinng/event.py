@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.6 2002/02/04 01:10:16 willhelm Exp $
+# $Id: event.py,v 1.7 2002/02/07 02:09:05 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -96,8 +96,15 @@ class StartupEvent(Event):
     # spam the startup frequency
     engine.myengine.spamfreq(engine.STARTUPFREQ, ())
 
+    # if we don't have a readfile set by --read flag, then we
+    # try to use ~/.lyntinrc
+    if lyntin.options['readfile'] == '' and lyntin.options['datadir'] != '':
+      lyntin.options['readfile'] = lyntin.options['datadir'] + ".lyntinrc"
+      engine.write_message("Setting readfile to " + lyntin.options['readfile'])
+
     # handle command files
     f = lyntin.options['readfile']
+
     if f != '':
       engine.write_message("Reading in file " + f)
       engine.myengine.getSession('common').handleUserData('#read ' + f)

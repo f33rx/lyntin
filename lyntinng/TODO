@@ -20,8 +20,6 @@ TODO:
    not there)
  - centralize all manager stuff into a Manager superclass and subclass 
    it lots
- - default command file should be .lyntinrc
- - handle $HOME/.lyntinrc
  - add a #datadir command for setting the datadir (defaults to current dir)
  - add a #usermoduledir command for setting the user's module directory
    (this would go first in the command file) (defaults to current dir)
