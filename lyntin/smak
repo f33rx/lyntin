@@ -1,0 +1,56 @@
+#al {fe} {goto c;fermi;hoodlum}
+#al {gc} {get all all.corpse;#all save}
+#al {lv} {l $vic}
+#al {mud} {sma;re;fe;#all #cr;#all #3 1}
+#al {back} {#@say_backwards('%0')}
+#al {go} {sesa;smak;hoodlum}
+#al {re} {goto b;rek;hoodlum}
+#al {all} {#all}
+#al {ak} {all assist $tank}
+#al {showme} {#showme}
+#al {df} {#all #20 drink fountain}
+#al {swv} {#all #var {vic} {%%1}}
+#al {ri} {goto b;rik;hoodlum;#cr;1;1}
+#al {sc} {all sco}
+#al {ac} {#ac}
+#al {kk} {kill $vic}
+#al {wa} {all wak;all sta}
+#al {ki} {all kick}
+#al {looton} {ac {pitiful death cry} {gc};ac {last scream for mercy} {gc}}
+#al {dgl} {#datagrepline}
+#al {sl} {all sle}
+#al {grr} {#all follow smak;#a grou all}
+#al {al} {#al}
+#al {swk} {#all #var {tank} {%%1}}
+#al {aac} {#all #ac}
+#al {recl} {#@code.record_location()}
+#al {write} {#a #write smak;#b #write rek;#c #write fermi}
+#al {load} {#a #read smak;#b #read rek;#c #read fermi}
+#al {goto} {#ses %1 tdome.montana.com 5555}
+#al {ll} {l n;l e;l s;l w}
+#al {aak} {all kill $vic}
+#al {testh} {#@import testhooks;#@testhooks.add_hooks(); #showme hooks added}
+#al {c} {#c}
+#al {a} {#a}
+#al {aal} {#all #al}
+#al {b} {#b}
+#al {lootoff} {#unac *pitiful death*}
+#al {qq} {#quit}
+#al {sma} {goto a;smak;hoodlum}
+#ac {pitiful death cry} {gc}
+#ac {%1 telepaths to you %2} {showme %1 told $name %2}
+#ac {Your rent cost: %1 bucks per day.} {#showme $name: %1 bucks rent}
+#ac {last scream for mercy} {gc}
+#ac {^You are getting kind of sleepy} {showme $name is sleepy}
+#ac {pitiful death cry assaults} {gc}
+#ac {see you can't afford} {#showme $name CANT AFFORD RENT!!}
+#ac {^You feel drowsy} {showme $name is drowsy}
+#ac {^You have been awake 24 hours} {showme $name -- 24 hours awake!!}
+#ac {Your current balance is %1 dollars} {showme $name: %1 coins.}
+#ac {^A noise wakens you.} {sle}
+#ac {^You have been idle} {sc}
+#ac {You can rent for %1 days with the money} {#showme $name: %1 days rent}
+#ac {^PANIC!} {flee}
+#var {tank} {smak}
+#var {vic} {clown}
+#var {name} {smak}
