@@ -13,3 +13,7 @@ And read can handle HTTP urls:
   lyntin --read http://lyntin.sourceforge.net/lyntinrc
 
   #read http://lyntin.sourceforge.net/lyntinrc
+
+Note: the first non-whitespace char is used to set the Lyntin
+command character.  If you use non Lyntin commands in your file,
+make sure the first one is a command char.  If not, use #nop .
