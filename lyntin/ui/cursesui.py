@@ -2,6 +2,9 @@
 # This file is part of Lyntin
 # copyright (c) Lyn Headley 1996-1998
 #
+# ... and the Lyntin curses frontend
+# copyright (c) Manuel Klimek
+#
 # Lyntin is distributed under the GNU General Public License.  See
 # the file COPYING for details.
 #
@@ -14,158 +17,82 @@ fine.
 """
 
 import data, string, sys, mud, app, select, os, time, regsub
-import curses
+ltd = os.environ.get('LYNTINDIR')
+if ltd[-1] != os.sep:
+    ltd = ltd + os.sep
+sys.path.append(ltd + 'ui/cui')
 
-if os.name != 'posix':
-    import thread
+from basegui import BaseGUI
+from cui_curses import CUI_Curses
+from cui_window import CUI_Window
+from cui_textwindow import CUI_TextWindow
+from cui_lineinput import CUI_LineInput
 
-# see if they have termios
-try:
-    import termios, TERMIOS
-except ImportError:
-    tio = 0
-else:
-    tio = 1
+curslib = 'curses'
+exec 'import ' + curslib
 
-# whether echo is on
-echo = 1
-if tio:
-    stdinfd = sys.stdin.fileno()
-    echonew = termios.tcgetattr(stdinfd)
-    onecho_attr = echonew
-    offecho_attr = echonew
+class Textui(BaseGUI):
+    
+    def setup(self):
+        self.line_read = ''
+	self.support_hash['echo'] = 1
 
-# a thread-function for windows which polls for user input
-def GetInputLine(host):
-    while 1:
-        while host.line_read != '':
-            time.sleep(0.1)
-        host.line_read = sys.stdin.readline()
+	self.__cui_curses = CUI_Curses()
+	self.__main_window = self.__cui_curses.get_main_window()
+	self.__output_window = CUI_TextWindow(
+	    self.__cui_curses,
+	    location=(self.__main_window.get_x(),
+		      self.__main_window.get_y(),
+		      self.__main_window.get_width(),
+		      self.__main_window.get_height() - 1
+		      )
+	    )
+	self.__input_window = CUI_LineInput( 
+	    self.__cui_curses,
+	    location=(self.__main_window.get_x(),
+		      self.__main_window.get_y() +
+		      self.__main_window.get_height() - 1 ,
+		      self.__main_window.get_width(),
+		      1
+		      )
+	    )
 
-def filter_crud(txt):
-    txt = regsub.gsub('\015\\|\r', '', txt)
-    # txt = regsub.gsub(chr(27) + '[[0-9;]+[mJ]', '', txt)
-    return txt
-
-class Textui:
-    stdscr = None
-
-    def __init__(self):
-        if os.name != 'posix':
-            self.line_read = ''
-            thread.start_new_thread(GetInputLine, (self,))
-        self.stdscr = curses.initscr()
-        curses.noecho()
-        self.stdscr.keypad(1)
-            
-
-    def CloseUI(self):
+    def close(self):
         """CloseUI(self) -> None
 
         Any routines for closing down the ui go here.
         """
-        curses.endwin()
+        self.__cui_curses.close()
 
+    def CloseUI(self):
+        self.close()
 
-    def Putline(self, line):
-        """Putline (self, line) -> None
-
-        Prints a line from the client to the user.
-        """
-        if line:
+    def print_string(self,line,modifiers=None,ending='\n',target=None):
+	mud.log(line)
+	if modifiers == 'client':
             line = string.replace(line, "\n", "\n## ")
-            print "##", line
-            sys.stdout.flush()
+	self.__output_window.put_text(line + ending)
+	self.__output_window.refresh()
+	
+    def get_input(self):
+	retval = ''
+	self.__input_window.update_input()
+	if self.__input_window.has_line():
+	    retval = self.__input_window.get_line()
+	    self.__output_window.set_colors('7', '4')
+	    if self.__input_window.is_echo():
+		self.__output_window.put_text(retval + '\n')
+	    else:
+		self.__output_window.put_text('*' * len(retval) + '\n')
+	    self.__output_window.reset_colors()
 
-    def PutUserInput(self, line):
-        if line:
-            print line
-            sys.stdout.flush()
+	return retval
 
-    def PutUntouchedLine(self, line):
-        if line:
-            line = filter_crud(line)
-            print line
-            sys.stdout.flush()
-        
-    def PutReallyUntouchedLine(self, line):
-        if line:
-            line = filter_crud(line)
-            mud.log('really untouched ' + line)
-            mud.log('last char: ' + line[-1])
-            sys.stdout.write(line)
-            sys.stdout.flush()
+    def prompt(self):
+        self.print_string('\n> ','user','')
 
-
-    # check for stuff from stdin
-    def GetUserInput(self):
-        if os.name == 'posix':
-            readers,w,e = select.select([sys.stdin], [], [], data.timeout)
-            if not readers: # timer expired
-                return
-            for R in readers:
-                thedata = R.readline()
-                if thedata == chr(10):
-                    thedata = "#cr"
-                return thedata
-        else:
-            retval = self.line_read
-            self.line_read = ''
-            return retval
-
-    def Prompt(self):
-        self.PutReallyUntouchedLine('\n>')
-
+    def echo(self,yesno):
+	self.__input_window.set_echo(yesno)
+	
     def has_echo(self):
-        return tio
-
-    # turn on echo
-    def OnEcho(self):
-        if not tio:
-            return
-        global echo
-        global offecho_attr
-        global onecho_attr
-
-        echo = 1
-        fd = sys.stdin.fileno()
-        new = termios.tcgetattr(fd)
-        offecho_attr = new[:]
-        try:
-            termios.tcsetattr(fd, TERMIOS.TCSADRAIN, onecho_attr)
-        except:
-            raise 'lt_echo_error', 'unable to turn on echo'
-
-    # turn off echo
-    def OffEcho(self):
-        if not tio:
-            return
-        global echo
-        global onecho_attr
-        global offecho_attr
-
-        echo = 0
-        fd = sys.stdin.fileno()
-        new = termios.tcgetattr(fd)
-        onecho_attr = new[:]
-        new[3] = new[3] & ~TERMIOS.ECHO          # lflags
-        offecho_attr = new[:]
-        try:
-            termios.tcsetattr(fd, TERMIOS.TCSADRAIN, new)
-        except:
-            raise 'lt_echo_error', 'unable to turn off echo'
-
-    def WarnNoEcho(self):
-        self.Putline('Warning, noecho unavailable. '+
-                       'Your password will be visible')
-        if os.name == 'posix':
-            self.Putline('Install the termios module or Tkinter to enable '+
-                         'echo toggling')
-
-    def mainloop(self):
-        while 1:
-            try:
-                if not self.app.Loop():
-                    return
-            except SystemExit:
-                return
+        return 1
