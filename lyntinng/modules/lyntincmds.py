@@ -4,9 +4,9 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.18 2002/10/23 23:59:09 willhelm Exp $
+# $Id: lyntincmds.py,v 1.19 2002/10/24 23:07:04 willhelm Exp $
 #######################################################################
-import string, traceback
+import string
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """

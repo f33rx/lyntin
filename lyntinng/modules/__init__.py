@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.15 2002/10/24 23:07:04 willhelm Exp $
+# $Id: __init__.py,v 1.16 2002/10/25 23:44:29 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -14,7 +14,7 @@ Modules get loaded when Lyntin starts up unless:
 2. the module's name starts with an _
 """
 
-import glob, os, sys, traceback
+import glob, os, sys
 import exported, lyntin
 
 
@@ -52,7 +52,6 @@ def load_modules():
 
       # toss the moduledir in the sys.path
       sys.path.append(moduledir)
-      # sys.path.insert(0, moduledir)
 
       # and toss all the contents of the directory in our _module_list
       for mem in _module_list:
@@ -70,9 +69,7 @@ def load_modules():
           _module.__dict__["lyntin_import"] = 1
           lyntin.lyntinmodules.append(mem)
         except:
-          exported.write_error("Module '%s' refuses to load." % name)
-          # FIXME - need to print this to the ui
-          traceback.print_exc()
+          exported.write_traceback("Module '%s' refuses to load." % mem)
 
 
   # handle modules.*
@@ -103,9 +100,7 @@ def load_modules():
       _module.__dict__["lyntin_import"] = 1
       lyntin.lyntinmodules.append(mem)
     except:
-      exported.write_error("Module '%s' refuses to load." % name)
-      # FIXME - need to print this to the ui
-      traceback.print_exc()
+      exported.write_traceback("Module '%s' refuses to load." % name)
 
 # Local variables:
 # mode:python

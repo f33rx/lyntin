@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.28 2002/10/26 04:32:40 willhelm Exp $
+# $Id: textui.py,v 1.29 2002/10/26 04:37:19 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
 """
-import string, re, sys, traceback, os
+import string, re, sys, os
 import lyntin, ansi, engine, hooks, event, utils, ui, exported
 
 HELP_TEXT = """
@@ -66,7 +66,6 @@ class Textui(ui.BaseUI):
                 data = mem.readline()
                 self.handleinput(data)
               except IOError:
-                # traceback.print_exc()
                 pass
 
       else:
@@ -85,7 +84,7 @@ class Textui(ui.BaseUI):
       event.ShutdownEvent().enqueue()
 
     except:
-      traceback.print_exc()
+      exported.write_traceback()
       event.ShutdownEvent().enqueue()
 
 

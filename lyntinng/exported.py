@@ -4,13 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.29 2002/10/13 03:16:22 willhelm Exp $
+# $Id: exported.py,v 1.30 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
 very rarely even though we might change Lyntin's internals.  If
 it does change it'll be between major Lyntin versions.
 """
+import sys, traceback
 import engine, ui.ui, lyntin
 
 def lyntin_command(text, internal=0, session=None):
@@ -337,6 +338,24 @@ def write_mud_data(text, ses=None):
     get_engine().writeUI(ui.ui.Message(text, ui.ui.MUDDATA, ses))
   else:
     print "muddata:", text
+
+def write_traceback(message=""):
+  """
+  Convenience method for grabbing the traceback, formatting it, 
+  piping it through write_error, with a message for the user.
+
+  @param message: any message you want to pass to the user--this
+      gets printed first
+  @type  message: string
+  """
+  exc = "\n".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
+
+  if message:
+    message = message + "\n" + exc
+  else:
+    message = exc
+  write_error(message)
+
 
 def get_history(count=30):
   """

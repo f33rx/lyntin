@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.42 2002/10/23 23:59:08 willhelm Exp $
+# $Id: event.py,v 1.43 2002/10/24 23:07:03 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -14,7 +14,7 @@ by the event handler thread when it pulls the event object off the
 event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
-import string, os, traceback, sys, glob
+import string, os, sys, glob
 import hooks, ui.ui, lyntin, exported
 
 class Event:
@@ -138,18 +138,16 @@ class StartupEvent(Event):
       import modules.__init__
       modules.__init__.load_modules()
     except:
-      exported.write_error("Modules did not load correctly.")
+      exported.write_traceback("Modules did not load correctly.")
       ShutdownEvent().enqueue()
-      traceback.print_exc()
 
     # import help stuff
     try:
       import help.__init__
       help.__init__.load_help()
     except:
-      exported.write_error("Help did not load correctly.")
+      exported.write_traceback("Help did not load correctly.")
       ShutdownEvent().enqueue()
-      traceback.print_exc()
 
     # spam the startup hook 
     hooks.startup_hook.spamhook()

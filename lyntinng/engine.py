@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.70 2002/10/13 03:16:22 willhelm Exp $
+# $Id: engine.py,v 1.71 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -20,7 +20,7 @@ The Engine class is a singleton and the reference to it is stored in
 "engine.myengine".  However, you should use the exported module
 to access the engine using the "get_engine()" function.
 """
-import Queue, traceback, copy, string, re, thread, sys
+import Queue, copy, string, re, thread, sys
 
 import session, ui.ui, lyntin, utils, event, argparser
 import exported, hooks, helpmanager, history, threadmanager, commandmanager
@@ -161,7 +161,7 @@ class Engine:
       except SystemExit:
         return
       except:
-        traceback.print_exc()
+        exported.write_traceback("ticker: ticker hiccupped.")
 
   def getCurrentTick(self):
     """
@@ -500,7 +500,7 @@ class Engine:
         return
       except:
         self.tallyError()
-        traceback.print_exc()
+        exported.write_traceback("engine: unhandled error in engine.")
       self._num_events_processed += 1
         
   def tallyError(self):

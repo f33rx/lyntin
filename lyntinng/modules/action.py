@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.13 2002/10/21 23:08:51 willhelm Exp $
+# $Id: action.py,v 1.14 2002/10/23 23:59:08 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -419,14 +419,12 @@ def action_cmd(ses, args, input):
     exported.write_message("actions:\n" + data)
     return
 
-  import traceback
   try:
     am.addAction(ses, trigger, action, onetime)
     if not quiet:
       exported.write_message("action: {%s} {%s} added." % (trigger, action))
-  except Exception, e:
-    exported.write_error("action: exception '%s'." % e)
-    traceback.print_exc()
+  except:
+    exported.write_traceback("action: exception thrown.")
 
 commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false quiet:boolean=false")
 

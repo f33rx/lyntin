@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.57 2002/10/26 02:47:59 willhelm Exp $
+# $Id: utils.py,v 1.58 2002/10/26 04:32:39 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -677,10 +677,6 @@ def _lyntin_expand_vars(text, varmap):
   """
   if not ("%" in text or "$" in text) or len(text) == 0:
     return text
-
-  #import exported, traceback
-  #exported.write_message("utils.lyntin_expand_vars input: %s" % (text,))
-  #traceback.print_stack(limit=3)
 
   varmapkeys = varmap.keys()
   i = 0

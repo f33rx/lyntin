@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.23 2002/10/26 04:32:40 willhelm Exp $
+# $Id: advanced.py,v 1.24 2002/10/26 04:36:37 jmberne Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
 and attempts to execute it in the lyntinuser.py module.  If no such
 module exists, it executes it in this module.
 """
-import traceback, os, sys, string
+import os, sys, string
 import exported, engine, ui.ui, utils, lyntin
 
 usermodule = None
@@ -63,8 +63,7 @@ def python_cmd(session, words, input):
     else:
       exec input[1:].lstrip() in usermodule.__dict__
   except:
-    exported.write_error("Error in raw python stuff.")
-    exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
+    exported.write_traceback("@: error in raw python stuff.")
     exported.tally_error()
 
 
@@ -87,9 +86,8 @@ def import_cmd(session, args, input):
           _module.__dict__.has_key("lyntin_import"))):
         try:
           _module.unload()
-        except Exception, e:
-          exported.write_error("import: module %s didn't unload properly. %s" % (mod, e))
-          exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
+        except:
+          exported.write_traceback("import: module %s didn't unload properly." % mod)
 
       reload(_module)
 
@@ -102,9 +100,8 @@ def import_cmd(session, args, input):
         lyntin.lyntinmodules.append(mod)
 
       exported.write_message("import: module %s reloaded." % mod)
-    except Exception, e:
-      exported.write_error("import: had problems with %s. %s" % (mod, e))
-      exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
+    except:
+      exported.write_traceback("import: had problems with %s." % mod)
       return
 
   else:
@@ -120,10 +117,8 @@ def import_cmd(session, args, input):
       if mod not in lyntin.lyntinmodules:
         lyntin.lyntinmodules.append(mod)
 
-    except Exception, e:
-      exported.write_error("import: had problems with %s. %s" % (mod, e))
-      exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
-
+    except:
+      exported.write_traceback("import: had problems with %s." % mod)
 
 
 def load():

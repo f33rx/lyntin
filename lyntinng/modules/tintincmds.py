@@ -4,9 +4,9 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.50 2002/10/24 23:07:04 willhelm Exp $
+# $Id: tintincmds.py,v 1.51 2002/10/26 02:42:10 willhelm Exp $
 #######################################################################
-import string, traceback, os
+import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
@@ -500,11 +500,8 @@ def session_cmd(ses, args, input):
     # start the network thread
     exported.get_engine().startthread("network", sock.run)
 
-  except Exception, e:
-    # import traceback
-    # traceback.print_exc()
-    exported.write_error("session: unable to connect. %s" % e)
-    exported.write_error("session: had problems creating the session.")
+  except:
+    exported.write_traceback("session: had problems creating the session.")
 
     try:    exported.get_engine().unregisterSession(ses)
     except: pass

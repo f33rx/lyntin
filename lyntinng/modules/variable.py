@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.13 2002/10/23 23:59:09 willhelm Exp $
+# $Id: variable.py,v 1.14 2002/10/26 04:36:37 jmberne Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -425,7 +425,6 @@ def evalmodechange(args):
 
 def load():
   """ Initializes the module by binding all the commands."""
-  print "Variable Module Loading"
   global vm
   modutils.load_commands(commands_dict)
   vm = VariableManager()

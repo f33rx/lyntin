@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.24 2002/10/13 03:16:22 willhelm Exp $
+# $Id: hooks.py,v 1.25 2002/10/20 16:09:57 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -23,7 +23,6 @@ a whole lot of documentation on which hooks exist, and what is
 passed to them.
 """
 
-import traceback
 import session
 
 # These are priority constants.  They should rarely be used.
