@@ -59,7 +59,7 @@ class CUI_Curses:
 	if curses.has_colors():
             # start color support
             curses.start_color()
-            __hasColorSupport = 1
+            self.__hasColorSupport = 1
 
 	# don't echo characters we type
         curses.noecho()

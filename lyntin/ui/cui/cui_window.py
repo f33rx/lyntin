@@ -195,29 +195,32 @@ class CUI_AnsiWriter(CUI_AnsiParser):
 	self.x = x
 	self.y = y
 	self.cur = cur
+        self.cur_fgcolor = self.win.std_fgcolor
+        self.cur_bgcolor = self.win.std_bgcolor
+        self.cur_attr = self.win.cur_attr
 
     def newline(self):
 	self.y = self.y + 1
     
     def fgcolor(self, color):
-	self.win.cur_fgcolor = color
+	self.cur_fgcolor = color
     
     def bgcolor(self, color):
-	self.win.cur_bgcolor = color
+	self.cur_bgcolor = color
     
     def attribute(self, attr):
 	if attr == '0':
-	    self.win.cur_attr = ''
-	    self.win.cur_fgcolor = self.win.std_fgcolor
-	    self.win.cur_bgcolor = self.win.std_bgcolor
+	    self.cur_attr = ''
+	    self.cur_fgcolor = self.win.std_fgcolor
+	    self.cur_bgcolor = self.win.std_bgcolor
 	elif attr == '8':
-	    self.win.cur_attr = '8'
+	    self.cur_attr = '8'
 	else:
-	    self.win.cur_attr = self.win.cur_attr + attr
+	    self.cur_attr = self.cur_attr + attr
 
     def plain(self, text):
-	fg = self.win.cur_fgcolor
-	bg = self.win.cur_bgcolor
+	fg = self.cur_fgcolor
+	bg = self.cur_bgcolor
 	(last_y, last_x)  = self.cur_win.getmaxyx()
 #	(y, x) = self.cur_win.getbegyx()
 	if self.x < last_x:
@@ -227,8 +230,8 @@ class CUI_AnsiWriter(CUI_AnsiParser):
 
 	    attr = 0
             col = 0
-	    if not (self.win.cur_attr == '8'):
-		for a in self.win.cur_attr:
+	    if not (self.cur_attr == '8'):
+		for a in self.cur_attr:
 		    attr = attr | self.cur.get_attribute(a)
                 if self.cur.has_colors():
                     mud.log(str(self.cur.get_color_pair_nr(fg, bg)))
