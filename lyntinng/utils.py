@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.43 2002/08/15 00:30:40 willhelm Exp $
+# $Id: utils.py,v 1.44 2002/08/20 02:39:04 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -157,7 +157,7 @@ def split_ansi_from_text(text):
     if marker < len(text):
       esc = text.find('\33', marker)
       if esc != -1:
-        for i in range(marker, len(text)):
+        for i in range(esc, len(text)):
           c = text[i]
           if esc != -1:
             if c == '\33':
