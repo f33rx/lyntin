@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.58 2002/04/12 03:13:37 willhelm Exp $
+# $Id: basic.py,v 1.59 2002/04/13 05:10:33 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -852,7 +852,7 @@ def substitute_cmd(session, words, input):
     (a, b) = utils.split_braced(inputadjusted)
 
     session.getManager("substitute").addSubstitute(a, b)
-    exported.write_message("substitute: '" + a + "' -> '" + b + "'")
+    exported.write_message("substitute: '%s' -> '%s'" % (a, b))
   except Exception, e:
     exported.write_error("substitute: cannot be set. %s" % e)
 
@@ -878,12 +878,10 @@ def textin_cmd(session, words, input):
     for mem in contents:
       mem = mem.strip()
       session.getSocketCommunicator().write(mem + "\n")
-    exported.write_message("textin: file " + filename + 
-                                   " read and sent to client.")
+    exported.write_message("textin: file %s read and sent to client." % filename)
 
   except IOError:
-    exported.write_error("textin: file " + filename + 
-                                 " is not readable.")
+    exported.write_error("textin: file %s is not readable." % filename)
   except:
     exported.write_error("textin: exception thrown.")
 
@@ -902,8 +900,8 @@ def tick_cmd(session, words, input):
     currenttick = exported.get_engine().getCurrentTick()
     ticklen = session.getTicker().getTickLen()
     tickstart = session.getTicker().getTickStart()
-    nexttick = repr(ticklen - ((currenttick - tickstart) % ticklen))
-    exported.write_message("tick: next tick in " + nexttick + " seconds.")
+    nexttick = ticklen - ((currenttick - tickstart) % ticklen)
+    exported.write_message("tick: next tick in %d seconds." % nexttick)
   else:
     exported.write_message("tick: ticker is not enabled.")
 
@@ -918,8 +916,7 @@ def tickon_cmd(session, words, input):
     return
 
   session.getTicker().enableTicker()
-  exported.write_message("tickon: session " + session.getName() + 
-                               " ticker enabled.")
+  exported.write_message("tickon: session %s ticker enabled." % session.getName())
 
 
 def tickoff_cmd(session, words, input):
@@ -932,8 +929,7 @@ def tickoff_cmd(session, words, input):
     return
 
   session.getTicker().disableTicker()
-  exported.write_message("tickoff: session " + session.getName() + 
-                               " ticker disabled.")
+  exported.write_message("tickoff: session %s ticker disabled." % session.getName())
 
 
 def ticksize_cmd(session, words, input):
@@ -956,8 +952,7 @@ def ticksize_cmd(session, words, input):
     return
 
   session.getTicker().setTickLen(int(ticklength))
-  exported.write_message("ticksize: tick length set to " + 
-                               words[1] + ".")
+  exported.write_message("ticksize: tick length set to %s." % words[1])
 
 
 def togglesubs_cmd(session, words, input):
@@ -987,7 +982,7 @@ def unsomething_cmd(session, words, input):
   handles all these commands.
   """
   if len(words) == 1:
-    exported.write_error("syntax: #" + words[0] + " <text>")
+    exported.write_error("syntax: #%s <text>" % words[1])
     return
 
   removedthings = []
@@ -1022,8 +1017,7 @@ def unsomething_cmd(session, words, input):
       
 
   if len(removedthings) == 0:
-    exported.write_message("un" + singular + 
-                                 ": No " + plural + " removed.")
+    exported.write_message("un%s: No %s removed." % (singular, plural))
     return
 
   data = ''
@@ -1067,7 +1061,7 @@ def variable_cmd(session, words, input):
     (a, b) = utils.split_braced(inputadjusted)
 
     session.getManager("variable").addVariable(a, b)
-    exported.write_message("variable: " + a + " -> '" + b + "'.")
+    exported.write_message("variable: %s -> '%s'." % (a, b))
   except Exception, e:
     exported.write_error("variable: cannot be set. %s", e)
 
@@ -1123,8 +1117,7 @@ def write_cmd(session, words, input):
     f = open(filename, "w")
     f.write(session.getWriteFileInfo())
     f.close()
-    exported.write_message("write: file " + filename +
-                                 " has been written.")
+    exported.write_message("write: file %s has been written." % filename)
   except Exception, e:
     exported.write_error("write: error writing to file %s. %s" % (filename, e))
 
@@ -1136,9 +1129,7 @@ def zap_cmd(session, words, input):
   the SocketCommunicator to garbage collect.
   """
   if exported.get_engine().closeSession(session):
-    exported.write_message("zap: session " + 
-                                 session.getName() + 
-                                 " zapped!")
+    exported.write_message("zap: session %s zapped!" % session.getName())
   else:
     exported.write_message("zap: session cannot be zapped!")
 

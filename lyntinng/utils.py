@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.13 2002/04/11 03:58:22 willhelm Exp $
+# $Id: utils.py,v 1.14 2002/04/13 05:10:33 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -68,7 +68,7 @@ def expand(str, list):
 
     # escaping the string will replace * with \* so we unreplace
     # it with .*
-    str = re.sub('\\\*', '.*', str)
+    str = str.replace("\\*", ".*")
 
     str = '^' + str + '$'
     regex = re.compile(str)

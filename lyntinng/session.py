@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.31 2002/04/11 03:58:22 willhelm Exp $
+# $Id: session.py,v 1.32 2002/04/13 05:10:33 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -218,6 +218,10 @@ class Session:
     we won't spam hooks and may at some point prevent
     output for internal stuff too.  1 if internal, 0 if not.
     """
+    spamtuple = self,input,input
+    spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
+    input = spamtuple[2]
+
     # we deal with possible variables...
     if self._verbatim == 0 or (len(input) > 0 and input[0] == lyntin.commandchar):
       varexpansion = self.getManager("variable").expand(input)

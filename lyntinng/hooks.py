@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.3 2002/04/12 03:13:37 willhelm Exp $
+# $Id: hooks.py,v 1.4 2002/04/13 05:10:33 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -186,11 +186,14 @@ arg tuple will contain the session, the original text and the currently filtered
 mud_filter_hook = Hook()
 mud_filter_hook.defaultMapper=filter_mapper
 
-#"""
-#
-#"""
-#user_filter_hook = Hook()
-#user_filter_hook.defaultMapper=filter_mapper
+"""
+Whenever data comes fro the user it will first be passed through
+all filter functions.
+These should return the text that should be sent to the mud.
+arg tuple will contain the session, the original text and the currently filtered text
+"""
+user_filter_hook = Hook()
+user_filter_hook.defaultMapper=filter_mapper
 
 
 
