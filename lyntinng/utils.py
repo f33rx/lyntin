@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.69 2003/02/15 03:35:05 willhelm Exp $
+# $Id: utils.py,v 1.70 2003/03/12 22:04:35 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -677,8 +677,18 @@ def escape(s):
   @rtype: string
   """
   s = s.replace("\\", "\\\\")
+
   if lyntin.evalmode == lyntin.EVALMODE_LYNTIN:
-    s = s.replace("$", "\\$")
+    # FIXME - this is a bit of a hack and won't work if people do
+    # funky regexps that involve $ in the middle somewhere.  we
+    # should probably build a regexp to do the substitution with
+    # which handles the various situations.  or something along
+    # those lines.
+    if side.endswith("$") or side.endswith("$]"):
+      s = s[:-1].replace("$", "\\$") + "$"
+    else:
+      s = s.replace("$", "\\$")
+
   return s
 
 

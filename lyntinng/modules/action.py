@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.25 2003/02/15 03:35:06 willhelm Exp $
+# $Id: action.py,v 1.26 2003/03/12 22:04:36 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -209,7 +209,8 @@ class ActionData:
       actup = self._actions[mem]
 
       data.append("%saction {%s} {%s} onetime={%s}" % 
-              (lyntin.commandchar, mem, utils.escape(actup[2]), actup[3]))
+              (lyntin.commandchar, utils.escape(mem), 
+               utils.escape(actup[2]), actup[3]))
 
     return string.join(data, "\n")
 
