@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.17 2002/05/02 23:39:07 willhelm Exp $
+# $Id: highlight.py,v 1.18 2002/05/05 16:34:51 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -47,7 +47,14 @@ class HighlightManager(manager.Manager):
     self._highlights = {}
 
   def addHighlight(self, style, text):
-    """ Adds a highlight to the dict."""
+    """ Adds a highlight to the dict.
+
+    arguments:
+      
+      'style' -- (string) the style to highlight the text as
+
+      'text' -- (string) the text to highlight
+    """
     self._highlights[text] = (style, self._getMarkup(style))
     return 1
 
@@ -55,6 +62,14 @@ class HighlightManager(manager.Manager):
     """
     Looks at the style (which is a comma separated list of 
     styles) and figures out the markup string and returns it.
+
+    arguments:
+
+      'style' -- (string) the style to retrieve markup for
+
+    returns:
+
+      (string) the ansi code markup for the given style
     """
     styles = style.split(",")
     markup = ""
@@ -73,6 +88,14 @@ class HighlightManager(manager.Manager):
 
     Returns a list of tuples of highlight item/highlight that
     were removed.
+
+    arguments:
+
+      'text' -- (string) the text to match on
+
+    returns:
+
+      list of tuples of (text, style)
     """
     badhighlights = utils.expand(text, self._highlights.keys())
 
@@ -84,7 +107,12 @@ class HighlightManager(manager.Manager):
     return ret
 
   def getHighlights(self):
-    """ Returns the keys of the highlight dict."""
+    """ Returns the keys of the highlight dict.
+
+    returns:
+      
+      sorted list of strings
+    """
     list = self._highlights.keys()
     list.sort()
     return list
@@ -101,7 +129,6 @@ class HighlightManager(manager.Manager):
     returns:
 
       (string) the finalized text
-
     """
     if text:
       for mem in self._highlights.keys():
@@ -131,12 +158,20 @@ class HighlightManager(manager.Manager):
 
     return text
 
-  def getInfo(self, text=''):
+  def getInfo(self, text=""):
     """ Returns information about the highlights in here.
 
     This is used by #highlight to tell all the highlights involved
     as well as #write which takes this information and dumps
     it to the file.
+
+    arguments:
+
+      'text=""' -- (string) the text to match on
+
+    returns:
+
+      one big string of things.
     """
     if len(self._highlights.keys()) == 0:
       return ''
@@ -146,15 +181,20 @@ class HighlightManager(manager.Manager):
     else:
       list = utils.expand(text, self._highlights.keys())
 
-    data = ''
+    data = []
     for mem in list:
-      data = (data + lyntin.commandchar + 
-              "highlight {" + self._highlights[mem][0] + "} {" + mem + "}\n")
+      data.append("%shighlight {%s} {%s}" % 
+                  (lyntin.commandchar, self._highlights[mem][0], mem))
 
-    return data[:-1]
+    return string.join(data, "\n")
 
   def getCount(self):
-    """ Returns the total number of highlights we're managing."""
+    """ Returns the total number of highlights we're managing.
+
+    returns:
+      
+      (int) the number of highlights we're managing
+    """
     return len(self._highlights.keys())
 
 

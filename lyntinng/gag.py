@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.12 2002/05/05 16:34:51 willhelm Exp $
+# $Id: gag.py,v 1.13 2002/05/05 17:49:52 willhelm Exp $
 #######################################################################
 """
 This module defines the GagManager which handles gags in Lyntin.
@@ -100,12 +100,12 @@ class GagManager(manager.Manager):
     if len(self._gags) == 0:
       return ''
 
-    data = ''
+    data = []
     self._gags.sort()
     for mem in self._gags:
-      data += "%sgag {%s}\n" % (lyntin.commandchar, mem)
+      data.append("%sgag {%s}" % (lyntin.commandchar, mem))
 
-    return data[:-1]
+    return string.join(data, "\n")
 
   def getCount(self):
     """ Returns the number of gags we're managing."""

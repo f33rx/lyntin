@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.13 2002/05/02 23:39:07 willhelm Exp $
+# $Id: variable.py,v 1.14 2002/05/05 16:34:51 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -190,13 +190,13 @@ class VariableManager(manager.Manager):
     else:
       list = utils.expand(text, self._variables.keys())
 
-    data = ''
+    data = []
     for mem in list:
       if mem != "TIMESTAMP":
-        data = (data + lyntin.commandchar + 
-                "variable {" + mem + "} {" + self._variables[mem] + "}\n")
+        data.append("%svariable {%s} {%s}" % 
+                    (lyntin.commandchar, mem, self._variables[mem]))
 
-    return data[:-1]
+    return string.join(data, "\n")
 
   def getCount(self):
     """ Returns a count of all the variables."""

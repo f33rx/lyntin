@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.23 2002/05/02 23:39:07 willhelm Exp $
+# $Id: action.py,v 1.24 2002/05/05 16:34:51 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -224,12 +224,12 @@ class ActionManager(manager.Manager):
     else:
       list = utils.expand(text, self._actions.keys())
 
-    data = ''
+    data = []
     for mem in list:
-      data = ("%s%saction {%s} {%s}\n" % 
-              (data, lyntin.commandchar, mem, self._actions[mem][2]))
+      data.append("%saction {%s} {%s}" % 
+              (lyntin.commandchar, mem, self._actions[mem][2]))
 
-    return data[:-1]
+    return string.join(data, "\n")
 
   def getCount(self):
     """ Returns how many aliases we're managing.

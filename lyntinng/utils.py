@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.20 2002/04/30 02:42:08 willhelm Exp $
+# $Id: utils.py,v 1.21 2002/05/03 19:28:23 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -19,7 +19,7 @@ VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 
 def chomp(text):
-  """ Removes '\\r' and '\\n' from the input string.
+  """ Removes all '\\r' and '\\n' from the input string.
 
   arguments:
 
@@ -36,6 +36,20 @@ def chomp(text):
 
 
 def http_get(url):
+  """ Retrieves the data at a given url and returns it as a big string.
+
+  arguments:
+
+    'url' -- (string) the url of the resource to retrieve
+
+  returns:
+
+    one big string of the resource
+
+  raises:
+
+    ValueError if the url is not valid or if the resource doesn't exist
+  """
   import httplib
   if url.find("http://") == -1:
     raise ValueError, "This is not a valid url."
