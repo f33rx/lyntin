@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.43 2003/02/15 03:35:06 willhelm Exp $
+# $Id: textui.py,v 1.44 2003/03/12 21:27:23 jmberne Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -21,9 +21,12 @@ To enable GNU readline support (if it's available) use:
 
    --readline on
 
-at the command line.  Also, depending on what terminal you're running
-Lyntin from, it might help to set the TERMTYPE at the commandline.
-Lyntin returns "lyntin" when asked, but doing something like:
+at the command line.  It'll look for a "readlinerc" file in your
+datadir and set readline options from that.
+
+Also, depending on what terminal you're running Lyntin from, it might 
+help to set the TERMTYPE at the commandline.  Lyntin returns "lyntin" 
+when asked, but doing something like:
 
    --term xterm
 
@@ -98,9 +101,20 @@ class Textui(ui.BaseUI):
       else:
         self._rline = 1
 
-        readline.read_init_file("readlinerc")
+        # we do some stuff to grab the readlinerc file if they have one
+        # so the user can set some readline oriented things which makes 
+        # things a little nicer for the user.
+        if lyntin.options.has_key("datadir"):
+          d = lyntin.options["datadir"]
+        else:
+          d = "." + os.sep
+
+        try:
+          readline.read_init_file(d + "readlinerc")
+        except:
+          exported.write_error("Note: No readlinerc file available in %s." % d)
         
-        exported.write_error("Readline enabled.")
+        exported.write_message("Readline enabled.")
 
     if self._tio == 0 or self._rline == 1:
       exported.write_error("Warming: echo off is unavailable.  " +
@@ -192,6 +206,14 @@ class Textui(ui.BaseUI):
 
         if data != None:
           self.handleinput(data)
+
+          # FIXME - this is just plain icky.  the issue is that
+          # we need to know we're ending _before_ we block for
+          # the next input.  otherwise Lyntin will shut down except
+          # for this thread which will hang around blocking until
+          # the user hits the enter key.
+          # 
+          # any good ideas for dealing with this are more than welcome.
           if data.find("#end") == 0:
             break
 
