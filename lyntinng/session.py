@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.34 2002/04/18 02:56:48 willhelm Exp $
+# $Id: session.py,v 1.35 2002/04/21 03:49:31 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -198,6 +198,7 @@ class Session:
 
   def writeSocket(self, message):
     """ Writes data to the socket."""
+    hooks.to_mud_hook.spamhook(message)
     if self._socket:
       self._socket.write(message)
 
