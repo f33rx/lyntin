@@ -118,7 +118,6 @@ class session:
 
     # write anything from our connection to stdout
     def ReadMud(self):
-        mud.log('readmud...')
         try:
             # check if there's anything to read
             if not self.connected:
@@ -544,5 +543,5 @@ debug = 1
 """this sets whether we're in debug mode or not.  affects mud.log."""
 
 # current lyntin version number
-version = "lyntin 1.3.4, maintained by willhelm@users.sourceforge.net"
+version = "lyntin 2.0b2, maintained by willhelm@users.sourceforge.net"
 """this is the current lyntin version number and such."""
