@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.15 2002/05/28 03:42:40 willhelm Exp $
+# $Id: speedwalk.py,v 1.16 2002/05/29 23:58:03 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -315,6 +315,7 @@ class SpeedwalkManager(manager.Manager):
     if output == text:
       return text
     else:
-      engine.myengine.handleUserData(output, internal, session)
+      # anything that gets recursed on should be recursed internally
+      engine.myengine.handleUserData(output, 1, session)
       return None
 

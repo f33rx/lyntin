@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.29 2002/05/18 03:45:59 willhelm Exp $
+# $Id: utils.py,v 1.30 2002/06/01 15:51:44 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -118,6 +118,8 @@ def split_ansi_from_text(text):
 
     list of text and ansi tokens (all strings)
   """
+  global ANSI_COLOR_REGEXP
+
   matchob = ANSI_COLOR_REGEXP.search(text)
   if matchob:
     textlist = []
@@ -210,6 +212,7 @@ def split_commands(text):
   This method takens in text and parses it into separate commands
   on the ;.
   """
+  global SEMI_REGEXP
   marker = 0
   ret = []
 
@@ -303,6 +306,7 @@ def replace_nested_vars(text):
 
     (string) the adjusted text
   """
+  global NESTED_VAR_REGEXP
   match = NESTED_VAR_REGEXP.search(text)
   while match:
     pat = '%%'+match.group(1)
@@ -323,6 +327,8 @@ def strip_placement_vars(text):
 
     list of replacement var strings
   """
+  global VAR_REGEXP
+
   ret = []
   match = VAR_REGEXP.search(text)
   while match:

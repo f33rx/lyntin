@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.23 2002/06/02 16:06:03 jmberne Exp $
+# $Id: tintincmds.py,v 1.24 2002/06/02 21:34:14 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -431,10 +431,10 @@ def ignore_cmd(session, args, input):
                            % session.getName())
   else:
     if session._ignoreactions:
-      exported.write_message("ignore: enabled for %s." 
+      exported.write_message("ignore: currently enabled for %s." 
                              % session.getName())
     else:
-      exported.write_message("ignore: disabled for %s."
+      exported.write_message("ignore: currently disabled for %s."
                              % session.getName())
 
 commands_dict["ignore"] = (ignore_cmd, "option:booleanornone=")

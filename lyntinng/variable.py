@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.16 2002/05/16 13:59:20 willhelm Exp $
+# $Id: variable.py,v 1.17 2002/05/28 03:42:40 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -118,6 +118,8 @@ class VariableManager(manager.Manager):
     It'll return the expansion if there is one.  Otherwise
     it returns None.
     """
+    global localvarchar, VARIABLE_REGEXP
+
     self._setBuiltinVars()
     replacedvars = 0
     if len(text) > 0:
@@ -210,9 +212,9 @@ class VariableManager(manager.Manager):
 
   def filter(self, args):
     """ Handle the filtering of input through the current variables.
-        If input gets changed then we pass it back to
-        engine.myengine.HandleUserData and return None to stop this
-        chain of filtering.
+    If input gets changed then we pass it back to
+    engine.myengine.HandleUserData and return None to stop this
+    chain of filtering.
 
     arguments:
 
@@ -228,7 +230,7 @@ class VariableManager(manager.Manager):
     text = args[-1]
     varexpansion = self.expand(text)
     if varexpansion:
-      engine.myengine.handleUserData(varexpansion, internal, session)
+      engine.myengine.handleUserData(varexpansion, 1, session)
       return None
     else:
       return text
