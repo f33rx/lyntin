@@ -59,9 +59,7 @@ class NPC:
     self._world.spamroom(self._name + " looks fidgety.\n")
 
   def heartbeat(self, world):
-    g = (self._random.random() * 10)
-    if (g < 5):
-      self.blab()
+    pass
 
 class Neil(NPC):
   def __init__(self, world):
@@ -69,13 +67,13 @@ class Neil(NPC):
     self._name = "Neil"
     self._desc = "Neil is the bartender at this little mini-tavern."
 
-  def blab(self):
+  def heartbeat(self, world):
     g = (self._random.random() * 10)
     if (g < 2):
       self._world.spamroom(self._name + " flicks a bug off his bar.\n")
-    elif (g < 5):
+    elif (g < 4):
       self._world.spamroom(self._name + " scrubs some glasses with his dishrag.\n")
-    else:
+    elif (g < 5):
       self._world.spamroom(self._name + " says, \"Mighty fine morning, isn't it?\"\n")
 
 
@@ -109,14 +107,16 @@ class World:
     self._ms = MasterServer(self, self._options)
     self._ms.startup()
 
+    do_heartbeat = self._options["heartbeat"]
     beat = 0
 
     # this is our main loop thingy!
     while 1:
-      beat += 1
-      if beat % 30 == 0:
-        beat = 0
-        self.heartbeat()
+      if do_heartbeat == "yes":
+        beat += 1
+        if beat % 30 == 0:
+          beat = 0
+          self.heartbeat()
 
       self._ms.networkLoop()
 
@@ -273,7 +273,7 @@ if __name__ == '__main__':
 
     i = i + 1
 
-  options = {"host": "localhost", "port": "3000"}
+  options = {"host": "localhost", "port": "3000", "heartbeat":"yes"}
   print "Handling arguments."
   for mem in optlist:
     if mem[0] == "--host" or mem[0] == "-h":
@@ -288,6 +288,13 @@ if __name__ == '__main__':
         options["port"] = mem[1]
       else:
         print_syntax("Port needs to be a number.")
+        sys.exit(1)
+
+    elif mem[0] == "--heartbeat":
+      if mem[1].lower() == "yes" or mem[1].lower() == "no":
+        options["heartbeat"] = mem[1].lower()
+      else:
+        print_syntax("Hearbeat can be set to 'yes' or 'no'.")
         sys.exit(1)
 
   print "Host: %s" % options["host"]
