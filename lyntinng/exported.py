@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.16 2002/05/05 17:49:52 willhelm Exp $
+# $Id: exported.py,v 1.17 2002/05/08 02:07:03 jmberne Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -70,25 +70,42 @@ def get_commands():
   """
   return get_engine().getCommands()
 
-def add_help(helpname, helptext):
-  """ Creates a help topic.
+def add_help(helpname, helptext, categorylist=[]):
+  """ Adds a help topic to the structure.
+
+  see corresponding helpmanager.HelpManager.addHelp method.
 
   arguments:
 
-    'helpname' -- (string) the help topic name
+    'helpname' -- (string) name of the help text
 
     'helptext' -- (string) the help text
-  """
-  get_engine().addHelp(helpname, helptext)
 
-def remove_help(helpname):
+    'categorylist=[]' -- (list of strings) category of the help 
+                         text
+
+  """
+  get_engine().getHelpManager().addHelp(helpname, helptext, categorylist)
+
+def remove_help(fqn):
   """ Removes a help topic from Lyntin.
 
   arguments:
 
-    'helpname' -- (string) the help topic name
+    'fqn' -- (string) a . delmited string of categories ending
+             with a help name.
   """
-  get_engine().removeHelp(helpname)
+  get_engine().getHelpManager().removeHelp(fqn)
+
+def get_help(fqn):
+  """ Retrieves a help topic via a fully qualified name.
+
+  arguments:
+
+    'fqn' -- (string) a . delimited string of categories ending
+             with a help name.
+  """
+  return get_engine().getHelpManager().getHelp(fqn)
 
 def get_session(name):
   """

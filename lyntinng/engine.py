@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.40 2002/05/04 17:39:26 jmberne Exp $
+# $Id: engine.py,v 1.41 2002/05/05 18:45:32 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -26,9 +26,9 @@ calls easier to deal with.
 """
 import Queue, traceback, copy, string, re, thread
 
-import threadmanager, session, ui.ui, alias, lyntin, utils, event, argparser
+import session, ui.ui, alias, lyntin, utils, event, argparser
 import action, alias, gag, highlight, history, substitute, variable, speedwalk
-import exported, hooks
+import exported, hooks, helpmanager, threadmanager
 
 """
 myengine is a singleton.  so when it gets instantiated, this
@@ -64,7 +64,14 @@ class Engine:
 
     # the thread manager manages all the threads in the engine.
     # there is only one thread manager
-    self._threadman = threadmanager.ThreadManager()
+    self._threadmanager = threadmanager.ThreadManager()
+
+    # the help manager manages all the help content in a hierarchical
+    # structure.
+    self._helpmanager = helpmanager.HelpManager()
+
+    # our history manager
+    self._historymanager = history.HistoryManager()
 
     # there is only one ui in the system.
     self._ui = None
@@ -74,9 +81,6 @@ class Engine:
 
     # counts the total number of events processed--for diagnostics
     self._num_events_processed = 0
-
-    # our history manager
-    self._historymanager = history.HistoryManager()
 
     # holds all the sessions
     self._sessions = {}
@@ -90,12 +94,8 @@ class Engine:
     # holds argparsers for commands that get arguments pre-parsed
     self._command_arguments = {}
 
-    # holds help information for the commands
-    self._help = {}
-
     # we register ourselves with the shutdown hook
     hooks.shutdown_hook.register(self.shutdown)
-
 
 
   def initialize(self):
@@ -129,7 +129,7 @@ class Engine:
       'func' -- (function) the function to run in the thread
 
     """
-    self._threadman.startThread(name, func)
+    self._threadmanager.startThread(name, func)
 
   def checkthreads(self):
     """
@@ -142,7 +142,7 @@ class Engine:
       (list of strings) of the thread status
 
     """
-    return self._threadman.checkThreadsStatus()
+    return self._threadmanager.checkThreadsStatus()
 
 
   ### ------------------------------------------
@@ -517,7 +517,7 @@ class Engine:
     data = ("   events processed: " + repr(self._num_events_processed) + "\n" +
             "   queue size: " + repr(self._event_queue.qsize()) + "\n" +
             "   ui: " + repr(self._ui) + "\n" + 
-            "   thread manager: " + repr(self._threadman) + "\n" + 
+            "   thread manager: " + repr(self._threadmanager) + "\n" + 
             "   speedwalking: " + repr(lyntin.speedwalk) + "\n" +
             "   ansicolor: " + repr(lyntin.ansicolor) + "\n" +
             "   ticks: " + repr(self._tick) + "\n" +
@@ -623,12 +623,29 @@ class Engine:
     if not callable(func):
       raise ValueError, "%s is uncallable." % name
 
-    self._command_list[name] = func
+    syntaxline = ""
+
+    # first, try to figure out the arguments thing
     if arguments != None:
       try:
         self._command_arguments[name] = argparser.ArgumentParser(arguments, argoptions)
+        syntaxline = self._command_arguments[name].syntaxline
       except Exception, e:
         raise Exception, "Error with arguments for command %s, (%s)" % (name,e)
+
+    # second, add the command to the command list
+    self._command_list[name] = func
+
+    # third, deal with the help text
+    if func.__doc__:
+      helptext = func.__doc__
+    else:
+      helptext = "\nThis command has no help."
+
+    if name[0] == "^":
+      exported.add_help(name[1:], helptext)
+    else:
+      exported.add_help(name, helptext)
         
   def removeCommand(self, name):
     """
@@ -671,27 +688,6 @@ class Engine:
 
     return None
 
-  def addHelp(self, helpname, helptext):
-    """ Creates a help topic.
-
-    arguments:
-
-      'helpname' -- (string) the help topic name
-
-      'helptext' -- (string) the help text
-    """
-    self._help[helpname] = helptext
-
-  def removeHelp(self, helpname):
-    """ Removes a help topic.
-
-    arguments:
-
-      'helpname' -- (string) the name of the help topic
-    """
-    if self._help.has_key(helpname):
-      del self._help[helpname]
-
   def getArgParser(self, name):
     """
     Returns the arguments parser for a given command name.
@@ -712,23 +708,6 @@ class Engine:
 
     return None
     
-  def getHelp(self, name):
-    """
-    Returns the help text for a given command if it exists.
-
-    arguments:
-
-      'name' -- (string) the name fo the command
-
-    returns:
-
-      (string) the help text or "" if there is no text.
-    """    
-    if self._help.has_key(name):
-      return self._help[name]
-    else:
-      return ""
-
   def getHistoryManager(self):
     """ Retrieves the history manager.
 
@@ -738,3 +717,21 @@ class Engine:
 
     """
     return self._historymanager
+
+  def getHelpManager(self):
+    """ Retrieves the help manager.
+
+    returns:
+
+      helpmanager.HelpManager instance
+    """
+    return self._helpmanager
+
+  def getThreadManager(self):
+    """ Retrieves the thread manager.
+
+    returns:
+
+      threadmanager.ThreadManager instance
+    """
+    return self._threadmanager

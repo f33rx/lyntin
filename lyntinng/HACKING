@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.8 2002/04/03 03:14:15 willhelm Exp $
+$Id: HACKING,v 1.9 2002/04/29 23:14:13 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -196,9 +196,9 @@ a Python module found in the modules/ subdirectory which has a
 'load' method.
 
 Lyntin modules are cool.  All of Lyntin's commands are implemented 
-in the 'basic', 'advanced', and 'unittest' Lyntin modules.  Because
-Lyntin modules are written in Python, they have full access to
-the full Python API--they're not run in any kind of rexec bastion
+in the 'tintincmds', 'lyntincmds', and 'advanced' Lyntin modules.  
+Because Lyntin modules are written in Python, they have full access 
+to the full Python API--they're not run in any kind of rexec bastion
 or anything.
 
 Lyntin modules use the 'exported' module to access Lyntin internals.

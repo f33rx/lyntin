@@ -1,17 +1,13 @@
-Here's a super quick tutorial that should be re-written at some 
-point:
+category: general
+Lyntin is not the most user-friendly mud client in the world in the
+sense that everything is oriented towards the command line interface.
 
-1. To connect to a mud type:
-   #ses sessname hostname port
+The "#session" command will allow you to start a session.  When you're
+done, "#end" will close Lyntin.
 
-   replacing hostname with the ip address or host name, and port 
-   with the port number of the mud you want to connect to.
+Type "#help <command>" for help on commands.  These will be of
+interest to you.
 
-2. Type:
-   #help
-
-   and read through the various help topics which will help you
-   use Lyntin.
-
-3. When you want to quit Lyntin, type:
-   #end
+   action               alias
+   end                  gag
+   highlight            session

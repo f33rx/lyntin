@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.6 2002/05/05 18:45:37 willhelm Exp $
+# $Id: tintincmds.py,v 1.7 2002/05/08 02:07:04 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -230,84 +230,25 @@ def help_cmd(session, args, input):
 With no arguments, shows all the help files available.
 With an argument, shows that specific help file.
   """
-  import dircache
-
-  helpdir = lyntin.lyntindir + "help"
-  data = "::lyntin help::\n"
-
   item = args["item"]
 
-  if not item:
-    file_list = dircache.listdir(helpdir)
-    file_list.sort()
+  keys = item.split(".")
+  data = "::Lyntin Help::\n\n"
 
-    topic_list = []
-    command_list = []
+  error, breadcrumbs, text = exported.get_help(item)
 
-    data += "\nCommands Available:\n"
-    command_list = exported.get_commands()
-    for i in range(len(command_list)):
-      if len(command_list[i]) > 0 and command_list[i][0] == "^":
-        command_list[i] = command_list[i][1:]
-    command_list.sort()
-    data += utils.columnize(textlist=command_list, indent=3)
+  if error:
+    data += error + "\n\n"
+  if breadcrumbs:
+    data += "category: " + breadcrumbs + "\n\n"
 
-    for mem in file_list:
-      if len(mem) < 5:
-        continue
-
-      if mem[-4:] == ".tpc":
-        topic_list.append(mem[:-4])
-
-    data += "\n\nOther topics Available:\n"
-    topic_list.sort()
-    data += utils.columnize(textlist=topic_list, indent=3)
-
-    exported.write_message(data)
-    return
-
-
-  command_list = exported.get_commands()
-  helpfiles = dircache.listdir(helpdir + "/")
-
-  if item[0] == lyntin.commandchar:
-    item = item[1:]
-
-  if "^" + item in command_list:
-    commandname = "^" + item
-  else:
-    commandname = item
-
-  if commandname in command_list:
-    ap = exported.get_engine().getArgParser(commandname)
+  if keys:
+    ap = exported.get_engine().getArgParser(keys[-1])
     if ap:
-      data += "syntax: %s%s %s\n" % (lyntin.commandchar, item, ap.syntaxline)
+      data += "syntax: %s%s %s\n\n" % (lyntin.commandchar, keys[-1], ap.syntaxline)
 
-    command = exported.get_engine().getCommand(commandname)
-    helptext = ""
-    if command and command.__doc__:
-      helptext = command.__doc__
-
-    if not helptext:
-      helptext = exported.get_engine().getHelp(item)
-
-    if helptext:
-      data += helptext
-    else:
-      data += "\nThat command has no help text."
-
-    exported.write_message(data)
-    return
-      
-  if item + ".tpc" in helpfiles:
-    f = open(helpdir + "/" + item + ".tpc", "r")
-    lines = f.readlines()
-    f.close()
-    data += (string.join(lines, "") + "\n")
-    exported.write_message(data)
- 
-  exported.write_message("%s\nSorry, but %s is not a valid help topic.\n" % 
-                         (data, item))
+  data += text
+  exported.write_message(data)
 
 commands_dict["help"] = (help_cmd, "item=")
 
@@ -979,7 +920,8 @@ class Unsomethinger:
     else:
       self.plural = self.singular + "s"
 
-    self.__doc__ = "Used# to remove " + self.plural + " from the current session's " + self.managername + " manager."
+    self.__doc__ = ("Used to remove %s from the current session's %s manager." % 
+                   (self.plural, self.managername))
 
   def __call__(self, session, args, input):
     """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
