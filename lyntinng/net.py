@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.15 2002/04/16 03:44:37 willhelm Exp $
+# $Id: net.py,v 1.16 2002/04/16 03:56:07 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -105,7 +105,6 @@ class SocketCommunicator:
         self._session.shutdown(())
 
     except Exception, e:
-      print e
       if self._shutdownflag == 0 and self._session:
         self._session.shutdown(())
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.32 2002/04/13 05:10:33 willhelm Exp $
+# $Id: session.py,v 1.33 2002/04/14 03:58:18 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -236,7 +236,8 @@ class Session:
     if len(input) > 1 and input[0] == lyntin.commandchar:
       input = input[1:]
 
-      words = input.split(" ")
+      # splits on globbed whitespace characters
+      words = input.split()
 
       # this checks to see if it's a special #@ command.
       if input[0] == "@":

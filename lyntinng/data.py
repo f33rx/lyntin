@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.3 2002/04/01 18:24:36 willhelm Exp $
+# $Id: data.py,v 1.4 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -100,11 +100,8 @@ class DataBuffer:
     ret = []
     cpattern = re.compile(pattern)
 
-    match = cpattern.search(buffer)
-    while match:
-      s, e = match.span()
-      ret.append(buffer[s:e])
-
-      match = cpattern.search(buffer, e)
+    matches = cpattern.findall(buffer)
+    for match in matches:
+      ret.append(match)
 
     return ret
