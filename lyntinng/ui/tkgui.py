@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Will Guaraldi 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.6 2002/01/23 01:28:15 willhelm Exp $
+# $Id: tkgui.py,v 1.7 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -21,35 +21,42 @@ import ui, event, engine
 7 -- reverse  (which we don't support)
 8 -- hidden   (which we don't support)
 """
-txtAttribs = { "0": "off", 
-               "1": "bold" }
+txt_attribs = {"0": "off",
+               "1": "bold"}
 
-fgColorCodes = {"30": "#000000",
-                "31": "#c00000",
-                "32": "#008000",
-                "33": "#808000",
-                "34": "#0000c0",
-                "35": "#c000c0",
-                "36": "#008080",
-                "37": "#c0c0c0",
-                "2030": "#808080",
-                "2031": "#ff6060",
-                "2032": "#00ff00",
-                "2033": "#ffff00",
-                "2034": "#8080ff",
-                "2035": "#ff40ff",
-                "2036": "#00ffff",
-                "2037": "#ffffff" }
+fg_color_codes = {"30": "#000000",
+                  "31": "#c00000",
+                  "32": "#008000",
+                  "33": "#808000",
+                  "34": "#0000c0",
+                  "35": "#c000c0",
+                  "36": "#008080",
+                  "37": "#c0c0c0",
+                  "b30": "#808080",
+                  "b31": "#ff6060",
+                  "b32": "#00ff00",
+                  "b33": "#ffff00",
+                  "b34": "#8080ff",
+                  "b35": "#ff40ff",
+                  "b36": "#00ffff",
+                  "b37": "#ffffff" }
 
-bgColorCodes = { "40": "#000000", 
-                 "41": "red", 
-                 "42": "#004411",
-                 "43": "yellow", 
-                 "44": "blue", 
-                 "45": "magenta",
-                 "46": "cyan", 
-                 "47": "white", 
-                 "50": "purple" }
+bg_color_codes = {"40": "#000000",
+                  "41": "#c00000",
+                  "42": "#008000",
+                  "43": "#808000",
+                  "44": "#0000c0",
+                  "45": "#c000c0",
+                  "46": "#008080",
+                  "47": "#c0c0c0",
+                  "b40": "#808080",
+                  "b41": "#ff6060",
+                  "b42": "#00ff00",
+                  "b43": "#ffff00",
+                  "b44": "#8080ff",
+                  "b45": "#ff40ff",
+                  "b46": "#00ffff",
+                  "b47": "#ffffff" }
 
 
 class TkGui(ui.BaseUI):
@@ -59,8 +66,13 @@ class TkGui(ui.BaseUI):
   def __init__(self):
     """ Initializes."""
     ui.BaseUI.__init__(self)
-    self._currcolors = (0, 37, 40)
-    self._regcolors = (0, 37, 40)
+
+    # (bold, foreground, background)
+    self._currcolors = [0, "37", "40"]
+
+    # (bold, foreground, background)
+    self._regcolors = [0, "37", "40"]
+
     self._unfinishedcolor = (0, "")
     self._viewhistory = 0
     self._do_i_echo = 1
@@ -144,6 +156,7 @@ class TkGui(ui.BaseUI):
                             'side': 'bottom', 
                             'fill': 'both', 
                             'expand': 1})
+
       self._viewhistory = 1
       self._txtbuffer.delete ("1.0", "end")
       lotofstuff = self._txt.get ('1.0', 'end')
@@ -201,10 +214,16 @@ class TkGui(ui.BaseUI):
       self._entry.configure(show='*')
 
 
+  def _yadjust(self):
+    """ Handles y scrolling after text insertion."""
+    self._txt.yview('moveto', '1')
+    if os.name != 'posix':
+      self._txt.yview('scroll', '20', 'units')
+
   def write(self, message):
     """ This writes text to the text buffer for viewing by the user.
 
-    This is overridden from the baseui.
+    This is overridden from the 'ui.BaseUI'.
     """
     if type(message) == type(''):
       message = ui.Message(message, ui.LTDATA)
@@ -212,138 +231,119 @@ class TkGui(ui.BaseUI):
     if message.data == '':
       return
 
-    if message.type == ui.ERROR:
+    if message.type == ui.ERROR or message.type == ui.USERDATA:
       self._txt.insert('end', message.data, "44")
       self._txt.insert('end', "\n")
-
-      self._txt.yview('moveto', '1')
-      if os.name != 'posix':
-        self._txt.yview('scroll', '20', 'units')
 
     elif message.type == ui.LTDATA:
       message.data = "# " + string.replace(message.data, "\n", "\n# ")
       self._txt.insert('end', message.data)
       self._txt.insert('end', "\n")
 
-      self._txt.yview('moveto', '1')
-      if os.name != 'posix':
-        self._txt.yview('scroll', '20', 'units')
-
     elif message.type == ui.TESTDATA:
       self._txt.insert('end', message.data, "42")
       self._txt.insert('end', "\n")
 
-      self._txt.yview('moveto', '1')
-      if os.name != 'posix':
-        self._txt.yview('scroll', '20', 'units')
-
-    elif message.type == ui.USERDATA:
-      self._txt.insert('end', message.data, "44")
-      self._txt.insert('end', "\n")
-
-      self._txt.yview('moveto', '1')
-      if os.name != 'posix':
-        self._txt.yview('scroll', '20', 'units')
-
     elif message.type == ui.MUDDATA:
       index = 0
       start = 0
-      end = 0
+
+      # first we remove all \\r stuff
       line = string.replace(message.data, "\r", "")
 
+      # then we handle unfinished colors--ansi color codes can
+      # be split between calls to write.
       if self._unfinishedcolor[0] == 1:
-        cstart = index
-        while index < len(line) and line[index] != "m":
-          index = index + 1
+        index = line.find("m")
 
-        self._unfinishedcolor = (self._unfinishedcolor[0], 
-                                 self._unfinishedcolor[1] + 
-                                 line[cstart:index])
-        if index < len(line):
-          self.colorchange(self._unfinishedcolor[1]) 
-          self._unfinishedcolor = (0, "")
-        else:
-          self._unfinishedcolor = (1, 
+        if index == -1:
+          self._unfinishedcolor = (1,
                                    self._unfinishedcolor[1] + 
-                                   line[cstart:index - 1])
+                                   line[:index])
+
+        else:
+          self.colorchange(self._unfinishedcolor[1] + line[:index]) 
+          self._unfinishedcolor = (0, "")
 
         start = index + 1
 
-      while index < len(line):
-        if line[index] == chr(27):
-          cstart = index
-          end = index
 
-          if self._currcolors == self._regcolors:
-            self._txt.insert('end', line[start:end])
-          else:
-            self._txt.insert('end', line[start:end], self._currcolors[1])
+      # now we handle all the text
+      index = line.find(chr(27), index)
+      while index > -1:
+        cstart = index
 
-          while index < len(line) and line[index] != "m":
-            index = index + 1
+        self._txt.insert('end', 
+                         line[start:index], 
+                         (self._currcolors[1], self._currcolors[2]))
 
-          if index == len(line):
-            self._unfinishedcolor = (1, line[cstart:index])
-          else:   
-            self.colorchange(line[cstart:index])
+        temp = line.find("m", index)
+        if temp == -1:
+          self._unfinishedcolor = (1, line[cstart:])
+          line = line[:cstart]
+        else:   
+          self.colorchange(line[cstart:temp])
+          start = temp + 1
 
-          start = index + 1
-        index = index + 1 
-      end = index
+        index = line.find(chr(27), index+1)
 
-      if self._currcolors == self._regcolors:
-        self._txt.insert('end', line[start:end])
+
+      if self._unfinishedcolor[0] == 1:
+        self._txt.insert('end', 
+                         line[start:cstart], 
+                         (self._currcolors[1], self._currcolors[2]))
       else:
-        self._txt.insert('end', line[start:end], self._currcolors[1])
+        self._txt.insert('end', 
+                         line[start:], 
+                         (self._currcolors[1], self._currcolors[2]))
 
-      self._txt.yview('moveto', '1')
-      if os.name != 'posix':
-        self._txt.yview('scroll', '20', 'units')
-
-      self.ClipText()
+    self.ClipText()
+    self._yadjust()
 
 
-  def colorchange(self, txt):
+  def colorchange(self, text):
     """
     Takes in a string and parses it into a series of numbers,
     then sets the current colors accordingly.
     """
-    if txt[0] == chr(27):
-    # if txt[0] == chr(27) and txt[len(txt)-1] == "m":
-      newcolor = txt[2:(len(txt))]
-      # if newcolor == "0":
-      if newcolor == "0" or newcolor == "":
-        self._currcolors = self._regcolors
-      else:
-        numbers = string.split(newcolor, ";")
-        for num in numbers:
-          if fgColorCodes.has_key(num):
-            self._currcolors = (self._currcolors[0], int(num), self._currcolors[2])
-          if bgColorCodes.has_key(num):
-            self._currcolors = (self._currcolors[0], self._currcolors[1], int(num))
-          if txtAttribs.has_key(num):
-            self._currcolors = (int(num), self._currcolors[1], self._currcolors[2])
-            if num == "0":
-              self._currcolors = self._regcolors
+    if text[0] == chr(27):
+      newcolor = text[2:]
 
-        self._currcolors = (self._currcolors[0], self._currcolors[1] % 2000, self._currcolors[2])
-        if self._currcolors[0] == 1:
-           self._currcolors = (self._currcolors[0], self._currcolors[1] + 2000, self._currcolors[2])
+      if newcolor == '' or newcolor == "0":
+        self._currcolors[:] = self._regcolors[:]
+        return
+
+      numlist = string.split(newcolor, ";")
+      numlist.sort()
+
+      for num in numlist:
+        if txt_attribs.has_key(num):
+          if num == "1":
+            self._currcolors[0] = 1
+
+        elif fg_color_codes.has_key(num):
+          if self._currcolors[0] == 1:
+            self._currcolors[1] = "b" + num
+          else:
+            self._currcolors[1] = num
+
+        elif bg_color_codes.has_key(num):
+          if self._currcolors[0] == 1:
+            self._currcolors[2] = "b" + num
+          else:
+            self._currcolors[2] = num
 
 
   def initColorTags(self):
     """ Sets up Tk tags for the text widget (fg/bg)."""
-    codes = fgColorCodes
-    colorKeys = codes.keys()
-    for ck in colorKeys:
-      self._txt.tag_config(ck, foreground=codes[ck])
-      self._txtbuffer.tag_config(ck, foreground=codes[ck])
 
-    codes = bgColorCodes
-    colorKeys = codes.keys()
-    for ck in colorKeys:
-      self._txt.tag_config(ck, background=codes[ck])
-      self._txtbuffer.tag_config(ck, background=codes[ck])
+    for ck in fg_color_codes.keys():
+      self._txt.tag_config(ck, foreground=fg_color_codes[ck])
+      self._txtbuffer.tag_config(ck, foreground=fg_color_codes[ck])
+
+    for ck in bg_color_codes.keys():
+      self._txt.tag_config(ck, background=bg_color_codes[ck])
+      self._txtbuffer.tag_config(ck, background=bg_color_codes[ck])
 
 
   def ClipText(self):

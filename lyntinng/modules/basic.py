@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Will Guaraldi 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.13 2002/02/03 04:27:50 willhelm Exp $
+# $Id: basic.py,v 1.14 2002/02/03 04:32:37 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin

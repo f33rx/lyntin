@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Will Guaraldi 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: unittest.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: unittest.py,v 1.3 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 import string, traceback, sys
 import utils, engine

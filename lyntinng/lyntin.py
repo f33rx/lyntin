@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Will Guaraldi 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.3 2001/12/02 18:44:24 willhelm Exp $
+# $Id: lyntin.py,v 1.4 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -18,7 +18,7 @@ VERSION = """Lyntin version 3.0 alpha 1
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 
-Lyntin is copyright 2001 Will Guaraldi
+Lyntin is copyright 2001, 2002 Will Guaraldi
 """
 
 # help text which gets printed to stdout if you do 'Lyntin.py --help'

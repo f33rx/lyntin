@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Will Guaraldi 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.4 2002/02/02 22:43:47 willhelm Exp $
+# $Id: utils.py,v 1.5 2002/02/03 04:27:50 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to

@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Will Guaraldi 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.4 2002/01/25 20:18:13 willhelm Exp $
+# $Id: action.py,v 1.5 2002/02/03 04:27:50 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
