@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.20 2002/02/27 02:25:22 willhelm Exp $
+# $Id: basic.py,v 1.21 2002/03/01 03:46:07 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin, exported
@@ -387,6 +387,44 @@ def log_cmd(session, words, input):
       exported.write_error("log: logfile cannot be opened for apending.")
 
          
+def loop_cmd(session, words, input):
+  """#loop {<from>,<to>} {command}
+
+  Implements the loop command (which is more like a range).
+  """
+  import event
+  if len(words) < 3:
+    exported.write_error("syntax: #loop {<from>,<to>} {command}")
+    return
+
+  try:
+    # knock off the first word which is the command
+    inputadjusted = input.split(' ', 1)[1]
+
+    # split it into parts
+    (looprange, command) = utils.split_braced(inputadjusted)
+    looprange = looprange.split(',')
+
+    if len(looprange) != 2:    
+      exported.write_error("syntax: #loop {<from>,<to>} {command}")
+      return
+
+    # remove trailing and leading whitespace and convert to ints
+    # so we can use them in a range function
+    ifrom = int(looprange[0].strip())
+    ito = int(looprange[1].strip())
+
+    # we add one because range(2,5) will be 2,3,4 and non-inclusive
+    # of 5 which is what we want.
+    for i in range(ifrom, ito+1):
+      loopcommand = command.replace("%0", repr(i))
+      event.InputEvent(input=loopcommand, internal=1).enqueue()
+
+  except:
+    exported.write_error("loop: error in the loop.")
+    traceback.print_exc()
+
+
 def mudecho_cmd(session, words, input):
   """#echo <on|off>
 
@@ -850,7 +888,7 @@ def load():
   engine.myengine.addCommand("info", info_cmd)
   engine.myengine.addCommand("killall", killall_cmd)
   engine.myengine.addCommand("log", log_cmd)
-  # engine.myengine.addCommand("loop", loop_cmd)
+  engine.myengine.addCommand("loop", loop_cmd)
   # engine.myengine.addCommand("map", map_cmd)
   # engine.myengine.addCommand("mark", mark_cmd)
   # engine.myengine.addCommand("message", message_cmd)
