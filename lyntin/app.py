@@ -20,6 +20,13 @@ import dict_plus
 _ltd = ''
 
 
+class LTSyntaxError:
+   def __init__(self, value):
+      self.value = value
+
+   def __str__(self):
+      return `self.value`
+
 class Client(dict_plus.c):
    """
    High level applications kinda thing
@@ -602,7 +609,7 @@ def split_braced(str):
          parsed = parsed + c
 
    if nesting < 0:
-      raise 'LTSyntaxError', 'unmatched braces'
+      raise LTSyntaxError('unmatched braces')
    return one, two
 
 def strip_vars(s):

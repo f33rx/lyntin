@@ -545,7 +545,11 @@ def Variable(words, input, seslist):
       else:
          # more than one argument: define
          # a new variable for the current session
-         name, expansion = app.split_braced(string.join(words[1:]))
+         try:
+            name, expansion = app.split_braced(string.join(words[1:]))
+         except app.LTSyntaxError:
+            # FIXME - do we want to pass here?
+            pass
          if name and (not expansion):
             # display just the matching variables
             Variable(['#var', name], [ses])
@@ -874,9 +878,12 @@ def Alias(words, input, seslist):
       count = 0
 
       if len(words) > 2:
-         name, expansion = app.split_braced(string.join(words[1:]))
-         ses.aliases[name] = expansion
-         PutMessage('ok, {%s} aliases {%s}'%(name, expansion))
+         try:
+            name, expansion = app.split_braced(string.join(words[1:]))
+            ses.aliases[name] = expansion
+            PutMessage('ok, {%s} aliases {%s}'%(name, expansion))
+         except app.LTSyntaxError:
+            PutError('alias: error - mismatched braces.')
 
       elif len(words) == 2:
          # print alias definition
@@ -1084,9 +1091,12 @@ def Substitute(words, input, seslist):
       if len(words) < 3:
          PutError('substitute: command requires at least two arguments')
          continue
-      pattern, replacement = app.split_braced(string.join(words[1:]))
-      ses.subs[pattern] = replacement
-      PutMessage('ok, ' + pattern + ' is now replaced by ' + replacement)
+      try:
+         pattern, replacement = app.split_braced(string.join(words[1:]))
+         ses.subs[pattern] = replacement
+         PutMessage('ok, ' + pattern + ' is now replaced by ' + replacement)
+      except app.LTSyntaxError:
+         PutError('substitute: error - unmatched braces.')
 
 def UnSubstitute(words, input, seslist):
    """UnSubstitute(words, seslist) -> None
