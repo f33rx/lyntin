@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.10 2002/07/07 04:53:45 willhelm Exp $
+# $Id: lyntincmds.py,v 1.11 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -43,36 +43,52 @@ def ansi_cmd(session, args, input):
 commands_dict["ansi"] = (ansi_cmd, "option:booleanornone=")
 
 
-def config_cmd(session, args, input):
+def bv(bool):
+  if bool:
+    return "on"
+  return "off"
+
+def config_cmd(ses, args, input):
   """
   Allows you to set a wide variety of options, some of which are
   session oriented and some of which are global.  Typing "#config"
   by itself will print out all the options it knows about.
+
+  category: commands
   """
   name = args["name"]
   value = args["value"]
 
   if not name:
-    # print out the current configuration: globals then this session.
-    return
+    output = "Global:\n" + \
+             "   ansicolor     " + bv(lyntin.ansicolor) + "  (boolean)\n" + \
+             "   commandchar   " + lyntin.commandchar + "  (char)\n" + \
+             "   echo          " + bv(lyntin.echo) + "  (boolean)\n"
+    if lyntin.evalmode == lyntin.LYNTIN:
+      output += "   evalmode      lyntin  (\"lyntin\" or \"tintin\")\n"
+    else:
+      output += "   evalmode      tintin  (\"lyntin\" or \"tintin\")\n"
 
-  if not value:
-    # print out the value for this variable
-    pass
+    output += "Session:\n" + \
+              "   ignoreactions " + bv(ses._ignoreactions) + "  (boolean)\n" + \
+              "   ignoresubs    " + bv(ses._ignoresubs) + "  (boolean)\n" + \
+              "   verbatim      " + bv(ses._verbatim) + "  (boolean)\n"
+    exported.write_message(output)
+    return
 
   # set the variable to this value
   if name in ["ignoreactions", "ignoresubs", "verbatim"]:
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
-      eval("ses._%s = value" % name)
+      exec("ses._%s = value" % name)
       exported.write_message("config: %s set to %s." % (name, value))
     else:
-      exported.write_error("config: %s is not a valid boolean value." % (value))
+      exported.write_error("config: '%s' is not a valid boolean value." % (value))
     return
 
   if name in ["variablechar", "commandchar"]:
     if len(value) == 1:
-      eval("lyntin.%s = value" % name)
+      exec("lyntin.%s = value" % name)
       exported.write_message("config: %s set to '%s'." % (name, value))
     else:
       exported.write_error("config: '%s' is not a valid %s value." % (value, name))
@@ -81,10 +97,10 @@ def config_cmd(session, args, input):
   if name in ["ansicolor", "echo"]:
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
-      eval("lyntin.%s = value" % name)
+      exec("lyntin.%s = value" % name)
       exported.write_message("config: %s set to %s." % (name, value))
     else:
-      exported.write_error("config: %s is not a valid boolean value." % (value))
+      exported.write_error("config: '%s' is not a valid boolean value." % (value))
     return
 
   if name == "evalmode":
@@ -98,7 +114,7 @@ def config_cmd(session, args, input):
       hooks.evalmode_change_hook.spamhook((old, lyntin.LYNTIN))
       exported.write_message("config: %s set to %s." % (name, value))
     else:
-      exported.write_error("config: %s is not a valid value." % (value))
+      exported.write_error("config: '%s' is not a valid value." % (value))
     return
       
 commands_dict["config"] = (config_cmd, "name= value=")
