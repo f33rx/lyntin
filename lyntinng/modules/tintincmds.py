@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.44 2002/08/30 02:26:20 willhelm Exp $
+# $Id: tintincmds.py,v 1.45 2002/08/31 16:36:17 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -410,7 +410,7 @@ def read_cmd(ses, args, input):
   if len(contents) == 0:
     exported.write_message("read: %s had no data." % filename)
     return
-      
+
   if contents[0][0] != lyntin.commandchar:
     exported.lyntin_command(lyntin.commandchar + "char " + contents[0][0], internal=1, session=ses)
 
@@ -568,7 +568,7 @@ def textin_cmd(session, args, input):
     for mem in contents:
       mem = utils.chomp(mem)
       session.getSocketCommunicator().write(mem + "\n")
-    exported.write_message("textin: file %s read and sent to client." % filename)
+    exported.write_message("textin: file %s read and sent to mud." % filename)
 
   except IOError:
     exported.write_error("textin: file %s is not readable." % filename)
@@ -703,7 +703,7 @@ def wizlist_cmd(session, args, input):
 commands_dict["wizlist"] = (wizlist_cmd, "")
 
 
-def write_cmd(session, args, input):
+def write_cmd(ses, args, input):
   """
   Writes all aliases, actions, gags, etc to the file specified.
   You can then use the #read command to read this file in and
@@ -723,9 +723,10 @@ def write_cmd(session, args, input):
 
   try:
     f = open(filename, "w")
-    hooks.write_hook.spamhook((session, f, quiet))
+    hooks.write_hook.spamhook((ses, f, quiet))
     f.close()
-    exported.write_message("write: file %s has been written." % filename)
+    exported.write_message("write: file %s has been written for session %s." % 
+                           (filename, ses.getName()))
   except Exception, e:
     exported.write_error("write: error writing to file %s. %s" % (filename, e))
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.10 2002/08/20 02:39:04 willhelm Exp $
+# $Id: speedwalk.py,v 1.11 2002/09/04 05:36:37 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -49,7 +49,7 @@ class SpeedwalkHash:
     
     """
     for mem in self._dirs.keys():
-      if mem.find(alias) != -1 or mem.find(dir) != -1:
+      if mem.find(dir) != -1:
         raise ValueError, "possible ambiguity"
     self._dirs[alias] = dir
     self.compileRegexp()
