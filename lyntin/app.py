@@ -16,6 +16,8 @@ import os, string, types, traceback
 import data, player, mud, hooks, cmdparse
 import dict_plus
 
+_ltd = ''           # LYNTINDIR
+
 ##################################################################
 # Client class
 # high level application kinda thingy
@@ -122,6 +124,11 @@ class client(dict_plus.c):
          if sys.argv[1] == '-ui' and not self.ui:
             # need to do arbitrary importing here of argv[2]
             ui = null
+            self.ui = ui
+            ui.app = self
+         if sys.argv[1] == '-c2' and not self.ui:
+            import cursesui2
+            ui = cursesui2.Cursesui()
             self.ui = ui
             ui.app = self
          if sys.argv[1] == '-curses' and not self.ui:
@@ -433,9 +440,25 @@ class client(dict_plus.c):
          else: 
             return 0
 
+
+class BadUser:
+   """
+   BadUser exception
+   """
+   def __init__(self, why):
+      self.why = why
+
 ##################################################################
 # Utility Functions
 ##################################################################
+
+def setPath(path):
+   global _ltd
+   _ltd = path
+
+def getPath():
+   global _ltd
+   return _ltd
 
 def Run():
    """
@@ -698,13 +721,6 @@ def HistNumber(input):
    if rx.search(input) == -1:
       return 0
    return string.atoi(rx.group(1))
-
-class BadUser:
-   """
-   BadUser exception
-   """
-   def __init__(self, why):
-      self.why = why
 
 def GetUserCustom(var):
    """GetUserCustom(var) -> depends

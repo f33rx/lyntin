@@ -37,9 +37,13 @@ if tio:
 # a thread-function for windows which polls for user input
 def GetInputLine(host):
     # this can't be good--FIXME
+    """
     while 1:
         while host.line_read != '':
             time.sleep(0.1)
+        host.line_read = sys.stdin.readline()
+    """
+    while not host.closing:
         host.line_read = sys.stdin.readline()
 
 def filter_crud(txt):
@@ -48,6 +52,8 @@ def filter_crud(txt):
     return txt
 
 class Textui:
+    closing = 0
+
     def __init__(self):
         if os.name != 'posix':
             self.line_read = ''
@@ -55,6 +61,7 @@ class Textui:
             
     def CloseUI(self):
         print "closing text ui"
+        self.closing = 1
         pass
 
     def Putline(self, line):

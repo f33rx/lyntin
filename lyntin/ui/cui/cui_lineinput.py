@@ -22,7 +22,7 @@ class CUI_LineInput(CUI_Window):
     def __init__(self, cur, **args):
 	CUI_Window.__init__(self, cur, **args)
 	self.line = ''
-	self.curses_window.nodelay(1)
+	self.curses_window.nodelay(0)
 	self.refresh()
 
     def is_echo(self):

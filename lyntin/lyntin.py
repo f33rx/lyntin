@@ -21,18 +21,6 @@ if os.name != 'posix':
 ##################################################################
 
 
-def setPath():
-    ltd = os.environ.get('LYNTINDIR')
-    if ltd:
-        if ltd[-1] != os.sep:
-            ltd = ltd + os.sep
-    else:
-        InstallError()
-
-    sys.path.append(ltd)
-    sys.path.append(ltd + 'ui')
-    sys.path.append(ltd + 'libcore')
-    
 def InstallError():
     ltd = os.environ.get('LYNTINDIR')
     print '\nLyntin was not installed correctly'
@@ -56,8 +44,19 @@ def InternalError():
     sys.exit(1)
     
 def main():
-    setPath()
+    ltd = os.environ.get('LYNTINDIR')
+    if ltd:
+        if ltd[-1] != os.sep:
+            ltd = ltd + os.sep
+    else:
+        InstallError()
+
+    sys.path.append(ltd)
+    sys.path.append(ltd + 'ui')
+    sys.path.append(ltd + 'libcore')
+
     import app
+    app.setPath(ltd)
     app.Run()
 
 debugging = 1
