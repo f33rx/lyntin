@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.39 2002/07/17 01:21:58 willhelm Exp $
+# $Id: utils.py,v 1.40 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -766,7 +766,6 @@ def lyntin_denest_vars(text):
     (string) the adjusted text
   """
   text = lyntin_denest_vars_worker("$", text)
-  text = lyntin_denest_vars_worker("%", text)
   return text
 
 def lyntin_denest_vars_worker(varchar, text):
@@ -998,7 +997,7 @@ def tintin_expand_placement_vars(input, expansion):
   return expansion
 
 
-VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
+VAR_REGEXP = re.compile('(?<!%)%(-?(?:\d+):?-?(?:\d*)|:-?(?:\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 
 def replace_nested_vars(text):
@@ -1038,9 +1037,10 @@ def strip_placement_vars(text):
   ret = []
   match = VAR_REGEXP.search(text)
   while match:
-    (b, e) = match.span() 
-    if text[b+1:e] not in ret:
-      ret.append(text[b+1:e])
+    (b,e) = match.span()
+    val = match.groups()[0]
+    if val not in ret:
+      ret.append(val)
     match = VAR_REGEXP.search(text, e)
   return ret
 
@@ -1063,7 +1063,7 @@ def lyntin_expand_placement_vars(input, expansion):
     The expansion with all nested_vars replaced and placement
     vars replaced.
   """
-  expansion = replace_nested_vars(expansion)
+  # expansion = replace_nested_vars(expansion)
   vars = strip_placement_vars(expansion)
 
   if len(vars) > 0:
@@ -1093,11 +1093,13 @@ def lyntin_expand_placement_vars(input, expansion):
 
     # run through the replacements
     for mem in varlookup.keys():
-      expansion = re.sub("%" + mem, varlookup[mem], expansion)
+      expansion = re.sub("(?<!%)%" + mem, varlookup[mem], expansion)
 
   else:
     if input.find(' ') > -1:
       expansion = expansion + ' ' + input.split(' ', 1)[1]
+
+  expansion = lyntin_denest_vars_worker("%", expansion)
 
   return expansion
 
@@ -1106,3 +1108,6 @@ def lyntin_expand_placement_vars(input, expansion):
 # py-indent-offset:2
 # tab-width:2
 # End:
+
+
+
