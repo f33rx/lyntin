@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.77 2002/12/09 04:30:48 willhelm Exp $
+# $Id: engine.py,v 1.78 2002/12/22 23:07:20 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -556,7 +556,7 @@ class Engine:
 
     for mem in self._sessions.values():
       # we do some fancy footwork here to make it print nicely
-      info = "\n   ".join(self.getStatus(mem)
+      info = "\n   ".join(self.getStatus(mem))
       data.append('   %s\n' % info)
 
     return "\n".join(data)
