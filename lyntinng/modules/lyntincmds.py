@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.2 2002/05/09 23:20:12 willhelm Exp $
+# $Id: lyntincmds.py,v 1.3 2002/05/12 04:40:39 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -182,6 +182,7 @@ def diagnostics_cmd(session, args, input):
               "\n\n")
       f.write(message)
       f.close()
+      exported.wirte_message("diagnostics: written out to file %s." % logfile)
     except Exception, e:
       exported.write_error("diagnostics: Error writing to file %s. %s" 
                             % (logfile, e))

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.46 2002/05/31 00:01:48 willhelm Exp $
+# $Id: engine.py,v 1.47 2002/05/31 02:08:30 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -519,26 +519,28 @@ class Engine:
       mud client
 
     """
-    data = ("   events processed: " + repr(self._num_events_processed) + "\n" +
-            "   queue size: " + repr(self._event_queue.qsize()) + "\n" +
-            "   ui: " + repr(self._ui) + "\n" + 
-            "   thread manager: " + repr(self._threadmanager) + "\n" + 
-            "   speedwalking: " + repr(lyntin.speedwalk) + "\n" +
-            "   ansicolor: " + repr(lyntin.ansicolor) + "\n" +
-            "   ticks: " + repr(self._tick) + "\n" +
-            "   errors: " + repr(lyntin.errorcount) + "\n")
-
+    data = []
+    data.append("   events processed: %d" % self._num_events_processed)
+    data.append("   queue size: %d" % self._event_queue.qsize())
+    data.append("   ui: %s" % repr(self._ui))
+    data.append("   thread manager: %s" % repr(self._threadmanager))
+    data.append("   speedwalking: %d" % lyntin.speedwalk)
+    data.append("   ansicolor: %d" % lyntin.ansicolor)
+    data.append("   ticks: %d" % self._tick)
+    data.append("   errors: %d" % lyntin.errorcount)
 
     # print info from each session
-    data = (data + "Sessions:\n" + 
-            "   total sessions: " + repr(len(self._sessions)) + "\n" +
-            "   current session: " + self._current_session.getName() + "\n")
+    data.append("Sessions:")
+    data.append("   total sessions: %d" % len(self._sessions))
+    data.append("   current session: %s" % self._current_session.getName())
 
     for mem in self._sessions.values():
       # we do some fancy footwork here to make it print nicely
-      data += '   ' + string.join(mem.getInfo().split('\n'), '\n   ') + "\n"
+      info = mem.getInfo().replace("\n", "\n   ")
 
-    return data
+      data.append('   %s\n' % info)
+
+    return string.join(data, "\n")
 
 
   ### ------------------------------------------
@@ -718,7 +720,7 @@ class Engine:
       return self._command_arguments[name]
 
     return None
-    
+
   def getHistoryManager(self):
     """ Retrieves the history manager.
 

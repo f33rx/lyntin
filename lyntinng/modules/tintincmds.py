@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.18 2002/05/22 01:36:38 jmberne Exp $
+# $Id: tintincmds.py,v 1.19 2002/05/25 18:43:45 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -124,6 +124,10 @@ def alias_cmd(session, args, input):
       data = "alias: no aliases defined."
 
     exported.write_message(data)
+    return
+
+  if name == command:
+    exported.write_error("alias: name and command cannot be the same.")
     return
 
   session.getManager("alias").addAlias(name, command)
