@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.65 2003/01/22 03:09:28 willhelm Exp $
+# $Id: tintincmds.py,v 1.67 2003/01/25 01:05:23 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -43,7 +43,7 @@ def clear_cmd(ses, words, input):
     ses.clear()
     exported.write_message("clear: session %s cleared." % ses.getName(), ses)
   except Exception, e:
-    exported.write_error("clear: error in clearing session.  %s" % e, ses)
+    exported.write_traceback("clear: error in clearing session %s" % ses)
 
 commands_dict["clear"] = (clear_cmd, "")
   
