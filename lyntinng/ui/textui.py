@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.42 2003/02/05 02:12:00 willhelm Exp $
+# $Id: textui.py,v 1.43 2003/02/15 03:35:06 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -97,6 +97,9 @@ class Textui(ui.BaseUI):
         exported.write_error("Readline not available for your system.")
       else:
         self._rline = 1
+
+        readline.read_init_file("readlinerc")
+        
         exported.write_error("Readline enabled.")
 
     if self._tio == 0 or self._rline == 1:
@@ -187,7 +190,7 @@ class Textui(ui.BaseUI):
         else:
           data = self._non_posix_input()
 
-        if data:
+        if data != None:
           self.handleinput(data)
           if data.find("#end") == 0:
             break
