@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.14 2002/05/16 13:59:20 willhelm Exp $
+# $Id: speedwalk.py,v 1.15 2002/05/28 03:42:40 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -121,11 +121,11 @@ class SpeedwalkManager(manager.Manager):
     
     cmdchar = lyntin.commandchar
     
-    data = ""
+    data = []
     for mem in list:
-      data = data + "%sswdir {%s} {%s}\n" % (cmdchar, mem, self._dirs[mem])
+      data.append("%sswdir {%s} {%s}" % (cmdchar, mem, self._dirs[mem]))
     
-    return data[:-1]
+    return string.join(data, "\n")
   
   def getDirsCount(self):
     """
@@ -232,11 +232,11 @@ class SpeedwalkManager(manager.Manager):
     
     cmdchar = lyntin.commandchar
     
-    data = ""
+    data = []
     for mem in list:
-      data = data + "%sswexclude {%s}\n" % (cmdchar, mem)
+      data.append("%sswexclude {%s}" % (cmdchar, mem))
     
-    return data[:-1]
+    return string.join(data, "\n")
   
   def getExcludesCount(self):
     """
@@ -287,16 +287,16 @@ class SpeedwalkManager(manager.Manager):
     session = args[0]
     internal = args[1]
     text = args[-1]
-     
+    
     if lyntin.speedwalk == 0 or not self._dirs or not self._regexp:
       return text
-
+    
     if text in self._excludes or text in self._aliases:
       return text
-
+    
     if not self._regexp.match(text):
       return text
-
+    
     swdirs = []
     dir = num = ""
     for char in text:
@@ -310,12 +310,11 @@ class SpeedwalkManager(manager.Manager):
           for i in range(count):
             swdirs.append(self._dirs[dir])
           dir = num = ""
-
+    
     output = ";".join(swdirs)
     if output == text:
       return text
     else:
       engine.myengine.handleUserData(output, internal, session)
       return None
-
 

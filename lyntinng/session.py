@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.52 2002/05/22 01:29:36 willhelm Exp $
+# $Id: session.py,v 1.53 2002/05/22 01:35:50 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -63,7 +63,7 @@ class Session:
     return ses
       
   def __repr__(self):
-    return "session.Session " + self._name
+    return "session.Session %s" % self._name
      
 
 
@@ -113,39 +113,41 @@ class Session:
       
       (string)
     """
-    data = ("Session name: " + self._name + "\n" +
-            "   socket: " + repr(self._socket) + "\n")
+    data = []
+    
+    data.append("Session name: %s" % self._name)
+    data.append("   socket: %s" % repr(self._socket))
 
     managerkeys = self._managers.keys()
     managerkeys.sort()
 
     for mem in managerkeys:
-      data += "   " + mem + ": " +  repr(self.getManager(mem).getCount()) + "\n"
+      data.append("   %s: %d" % (mem, self.getManager(mem).getCount()))
 
-    data += ("   ticker: " + self.getTicker().getInfo() + "\n" +
-             "   logfile: " + self.getLogfileName() + "\n")
+    data.append("   ticker: %s" % self.getTicker().getInfo())
+    data.append("   logfile: %s" % self.getLogfileName())
 
     if lyntin.speedwalk == 1:
-      data += "   speedwalk: on\n"
+      data.append("   speedwalk: on")
     else: 
-      data += "   speedwalk: off\n"
+      data.append("   speedwalk: off")
 
     if self._ignoreactions == 0:
-      data += "   ignore: actions are active.\n"
+      data.append("   ignore: actions are active.")
     else:
-      data += "   ignore: actions are ignored.\n"
+      data.append("   ignore: actions are ignored.")
 
     if self._ignoresubs == 0:
-      data += "   togglesubs: substitutions are active.\n"
+      data.append("   togglesubs: substitutions are active.")
     else:
-      data += "   togglesubs: substitutions are ignored.\n"
+      data.append("   togglesubs: substitutions are ignored.")
 
     if self._verbatim == 0:
-      data += "   verbatim: input is parsed."
+      data.append("   verbatim: input is parsed.")
     else:
-      data += "   verbatim: imput is passed verbatim."
+      data.append("   verbatim: imput is passed verbatim.")
 
-    return data
+    return string.join(data, "\n")
 
   def setManager(self, manager, object):
     """ Sets a manager in the manager hash.
@@ -199,32 +201,27 @@ class Session:
 
       (string)
     """
-    data = ''
+    data = []
 
     # saves speedwalking state
     if lyntin.speedwalk == 1:
-      data += lyntin.commandchar + "speedwalk on\n"
+      data.append(lyntin.commandchar + "speedwalk on")
     else: 
-      data += lyntin.commandchar + "speedwalk off\n"
+      data.append(lyntin.commandchar + "speedwalk off")
 
     # saves ansi state
     if lyntin.ansicolor == 1:
-      data += lyntin.commandchar + "ansi on\n"
+      data.append(lyntin.commandchar + "ansi on")
     else: 
-      data += lyntin.commandchar + "ansi off\n"
-
-    def fixinfo(item):
-      if item:
-        return item + "\n"
-      return ""
+      data.append(lyntin.commandchar + "ansi off")
 
     managerkeys = self._managers.keys()
     managerkeys.sort()
 
     for mem in managerkeys:
-      data += fixinfo(self._managers[mem].getInfo())
+      data.append(self._managers[mem].getInfo())
 
-    return data
+    return string.join(data, "\n") + "\n"
 
   def clear(self):
     """ Clears the session (except for connections)."""

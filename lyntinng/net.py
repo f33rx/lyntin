@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.19 2002/05/04 04:31:48 willhelm Exp $
+# $Id: net.py,v 1.20 2002/05/22 01:29:36 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -63,7 +63,7 @@ class SocketCommunicator:
   def __init__(self):
     self._sessionname = ''
     self._host = ''
-    self._port = ''
+    self._port = 0
     self._sock = None
     self._ansimode = 1
     self._nego_buffer = ''
@@ -71,7 +71,7 @@ class SocketCommunicator:
     self._session = None
 
   def __repr__(self):
-    return ("connection " + self._host + " " + repr(self._port))
+    return "connection %s %d" % (self._host, self._port)
 
   def setSession(self, newsession):
     """ Sets the local session.
@@ -112,7 +112,7 @@ class SocketCommunicator:
     if type(port) == type(''):
       port = int(port)
 
-    exported.write_message("Trying to connect to " + host + ".")
+    exported.write_message("Trying to connect to %s." % host)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, port))
     sock.setblocking(1)
@@ -122,7 +122,7 @@ class SocketCommunicator:
     self._sock = sock
     self._sessionname = sessionname
     exported.write_message("Connection made.")
-         
+  
   def run(self):
     """ Polls a socket and returns any data sitting there."""
     try:

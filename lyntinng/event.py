@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.28 2002/05/09 00:10:41 willhelm Exp $
+# $Id: event.py,v 1.29 2002/05/14 22:46:26 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -82,8 +82,8 @@ class StartupEvent(Event):
       print "Cannot start ui: %s" % e
       sys.exit(0)
 
-      # import modules listed in modulesinit
-      exported.write_message("Importing modules in modules directory.")
+    # import modules listed in modulesinit
+    exported.write_message("Importing modules in modules directory.")
 
     try:
       import modules.__init__
@@ -189,9 +189,9 @@ class ReloadEvent(Event):
     """ Execute."""
     try:
       reload(self._mod)
-      message = "reload successful: " + self._name
+      message = "reload successful: %s" % self._name
     except:
-      message = "reload unsuccessful: " + self._name
+      message = "reload unsuccessful: %s" % self._name
 
     exported.write_message(message)
  
