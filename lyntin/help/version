@@ -1,0 +1,3 @@
+   syntax: #version
+   Gives you the version number and the email address of the current
+   maintainer.

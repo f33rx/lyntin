@@ -1,0 +1,4 @@
+   syntax: #<number> {<commands>}
+   Repeats <commands> <number> number of times.
+
+   ex: #5 {say hello}                <-- will say hello 5 times

@@ -1,0 +1,22 @@
+#al {fe} {goto c;fermi;hoodlum}
+#al {mud} {sma;re;fe;#all #cr;#all #3 1}
+#al {back} {#@say_backwards('%0')}
+#al {go} {sesa;smak;hoodlum}
+#al {all} {#all}
+#al {df} {#all #20 drink fountain}
+#al {swv} {#all #var {vic} {%%1}}
+#al {ri} {goto b;rik;hoodlum;#cr;1;1}
+#al {ac} {#ac}
+#al {re} {goto b;sik;hoodlum}
+#al {dgl} {#datagreplines}
+#al {al} {#al}
+#al {recl} {#@code.record_location()}
+#al {load} {#a #read smak;#b #read rek;#c #read fermi}
+#al {goto} {#ses %1 tdome.montana.com 5555}
+#al {testh} {#@import testhooks;#@testhooks.add_hooks(); #showme hooks added}
+#al {c} {#c}
+#al {a} {#a}
+#al {b} {#b}
+#al {qq} {#quit}
+#al {sma} {goto a;smak;hoodlum}
+#ac {^PANIC!} {flee}

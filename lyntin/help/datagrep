@@ -1,0 +1,3 @@
+   syntax: #datagreplines <string>
+   Searches through the databuffer for the string.  Prints the
+   databuffer as well as how many matches it found.

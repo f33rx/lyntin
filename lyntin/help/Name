@@ -1,0 +1,2 @@
+   syntax: #<session_name> <commands>
+   Sends <commands> to <session_name> session.

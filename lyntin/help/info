@@ -1,0 +1,3 @@
+   syntax: #info
+   Prints all the information about the session: actions, aliases,
+   gags, variables, ticker, verbose, and speedwalking.

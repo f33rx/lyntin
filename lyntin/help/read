@@ -1,0 +1,2 @@
+   syntax: #read <filename>
+   Will read in a file running all the commands in there.

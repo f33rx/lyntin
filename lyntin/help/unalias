@@ -1,0 +1,8 @@
+   syntax: #unalias pattern
+   Removes all aliases that correspond to a given pattern.  Use
+   of the * as a wildcard is supported.
+   
+   ex: #unalias ra*
+   This will remove all aliases that start with ra.
+   
+   See also: alias

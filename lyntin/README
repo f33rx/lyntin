@@ -1,0 +1,458 @@
+For more up-to-date information, please check the web-site:
+http://www.varium.com/lyntin
+
+
+WHY SHOULD YOU USE LYNTIN?
+==========================
+
+lyntin is: 1) a featureful and highly extensible mud client
+           2) A Bot/Agent development environment
+
+Lyntin is implemented and extensible in Python, an insanely easy and
+powerful very-high-level programming language invented by a guy named
+Guido (see www.python.org).  This means that your actions (or
+triggers, or autos, or whatever you call them) are no longer
+restricted to simple 'if you see this then send this' kinds of things.
+They can be python functions which do anything from setting a variable
+to forking a web spider.  Anything Python allows (which is a lot),
+lyntin allows.  In addition, your code can interface with lyntin's
+code.  I once tried to write a mud agent in plain tintin, and while it
+was kinda cool, a 'program' it was not.  So if you want to try
+something like that, or even if you just think a programmable mud
+client would be kinda cool, give lyntin a try.  Oh yeah, besides that,
+lyntin has lots of cool features which make mudding easier.
+
+
+INSTALLATION
+============
+
+- see the file INSTALL.
+- NOTE: you will need Python 1.3 or greater installed at your site.
+- NOTE: lyntin testing has been limited.  Should work fine on Win98/NT
+  and Linux in TkGUI and Text modes.
+
+BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
+=========================================
+
+lyntin was written by Lyn Headley, laheadle@cs.uchicago.edu
+lyntin is currently being maintained by Will Guaraldi, mouse@varium.com
+(as of 1.3.2)
+I appreciate ALL of the above sources of feedback.
+
+Hell, if you even USE this, drop me a line. That would make my day,
+and I could send you bug fixes, patches, christmas cards etc.
+mouse@varium.com
+
+OTHER CONCERNS
+==============
+
+The latest release of lyntin is always available from
+http://www.varium.com/lyntin
+
+Lyntin is still under development, and there aren't many testers, so
+we apologize profusely for any bugs you may encounter and such.
+
+
+====================
+DOCUMENTATION 
+====================
+
+lyntin incorporates the 'look and feel' of tintin, so it should be
+pretty easy to make the transition.  It offers all the major features
+of tintin, including multiple sessions, but leaves a few minor things
+out.  If you've never used tintin, this document should be complete
+enough to get you up to speed.
+
+In addition, there are now "in-game" help files which can be
+accessed with the #help command.
+
+--------------------------------------------------------------------
+SEQUENCING
+
+- All lyntin commands can be sequenced with ';'. 
+
+EXAMPLES:
+  l n;l e;l s;l w  -- sends one command, then the next, etc.
+  #al jj jump;#al bb bounce
+
+--------------------------------------------------------------------
+FILES
+
+- Any commands dealing with files are assumed to be located
+  in the directory specified by the environment variable 'LYNTINDIR',
+  unless they begin with '/'.  In this case they are interpreted as 
+  absolute pathnames.
+
+--------------------------------------------------------------------
+HOOKS (for Python hackers)
+
+- A hook is a (possibly empty) list of user-defined functions, which
+  lyntin calls at certain times to allow the user a chance to customize
+  lyntin's behavior.
+- Lyntin is sprinkled with dozens of hooks, each of which is called
+  at a certain time.
+- a list of all hooks can be found in the file hooks.py
+- each hook may receive an argument tuple.  If so, this is specified 
+  via a comment above the relevant hook in hooks.py.
+- add a function to a hook by calling the hook's 'add' method with the
+  function as an argument
+- clear a hook of all functions by calling the hook's 'clear' method.
+
+EXAMPLE:
+  hooks.death_hook.add(my_death_function) -- adds the function
+  my_death_function to the list of functions in the hook death_hook.
+  remember, my_death_function must be a predeclared function which
+  accepts the right type of argument tuple.
+
+--------------------------------------------------------------------
+INIT FILE
+
+- when lyntin starts up, it imports the file user.py
+- fill this file with python code you want to execute as soon
+  as lyntin starts up.  you could e.g. initialize variables, set hooks,
+  define functions, send spam to the president, etc.
+
+
+COMMANDS (these can all be abbreviated, except #quit and #clear):
+=================================================================
+
+--------------------------------------------------------------------
+![number] [old]=[new]
+- redo a command from the history list.  [number] defaults to 0,
+  so ! and !0 are the same.  If [old] and [new] are present, all
+  occurrences of [old] are replaced by [new].
+
+examples:
+  !
+  !0
+  !4 jeff=jay
+
+--------------------------------------------------------------------
+#@ (for Python hackers)
+- this is the biggy.  Execute an _arbitrary_ python statement in
+  the context of user.py's global variables.  I suggest you write your
+  own files of python code, then define an alias called 'loadcode' or
+  something, which consists of the command '#@import mycode' or whatever
+  the name of your file is. Then you can do stuff like
+  '#@mycode.func()', etc
+
+- since you have access to all of lyntin's global variables, you can
+  call any of lyntin's functions too (although to use any of lyntin's
+  names from a file of your own code your file must import the proper
+  lyntin module.)  A handy one is the function SendPlainInput, which
+  resides in the module 'app.' Thus, app.SendPlainInput('flee') causes
+  the active session to send 'flee' to the mud.  Many other functions
+  can be found in the voluminously commented sourcecode. See the file
+  'data.py' for the global variables.  NOTE: your code is evaluated from
+  the module 'player', so when calling any functions from that module,
+  do NOT preface the call with the module name (i.e. player).  doing so
+  results in a name error.
+
+examples:
+  #@for c in 'hello': print c
+  #@Putline('this is lyntin speaking')
+  #@myvars.dead = 'yep'
+  #@mycode.doit()
+
+--------------------------------------------------------------------
+#action [trigger] [response]
+
+- with no arguments, prints all actions
+
+- with a single argument(with or witout braces), prints all actions which match
+  the argument (with wildcard expansion supported)
+
+- With two brace-enclosed arguments, define an action.  Basically,
+  whenever lyntin sees anything from the mud which contains the text
+  [trigger], it executes the command [response].  [response] is handled
+  just as if you had typed it yourself, so it can be plain text to send
+  to the mud, or any lyntin command.  Actions are handy for automating
+  things you do a lot, and speeding up reaction time in critical
+  situations.  When defining an action, braces ( '{' and '}' ) are
+  mandatory around _both_ the trigger and the response.  Actions can be
+  'anchored' to the beginning of a line by prepending the trigger with
+  '^'.  Then, the action will not be triggered unless it occurs at the
+  beginning of a line.
+
+- actions can contain lyntin pattern-variables, which look like
+  %[integer]. when lyntin sees a pattern-variable in an action trigger,
+  it tries to match any pattern against it, and saves any match it finds
+  so you can use it in the response.  see below for examples.  responses
+  can contain the special variable %a, which means "the whole matched
+  line."
+
+EXAMPLES:
+  #ac {^You are hungry} {get bread bag;eat bread}
+  #ac {EVISCERATES joey} {rescue joey}
+  #ac {%0 gives you %5} {say thanks for the %5, %0!}
+  #ac {%1 tells you %2} {say %1 just told me %2}
+
+--------------------------------------------------------------------
+#alias [name] [expansion]
+
+- an alias is a shorthand for an oft-typed command
+
+- with no arguments, #alias simply print all aliases.
+
+- with one argument, it prints the alias(es) which correspond to that
+  argument (wildcard expansion of '*' is supported). 
+
+- otherwise, create an alias called name which expands to expansion.
+  from here on out, typing name at the beginning of a mud command will
+  invoke the alias expansion, which will be sent instead of what you
+  typed.  The expansion can contain lyntin pattern-variables, which look
+  like %[number].  The variable %0 contains the entire text typed after
+  the alias.  Other than that, %n is the nth word after the alias. If
+  the expansion contains no pattern-variables, and you type in arguments
+  to the alias, lyntin just appends whatever arguments you typed to the
+  expansion, and sends that.
+
+- when defining an alias braces are only necessary around the
+  expansion if the expansion contains semicolons.  however, braces are
+  advised around both the name and the expansion.
+
+examples:
+  #al insult {say you know, you're a %1, a complete and total %1}
+  #al kk kill dog (define an alias named kk which expands to kill dog)
+  #al lookround {l n;l e;l s;l w}
+  #al {k} {kill} (typing 'k dog' now sends 'kill dog')
+  #al k* (print all aliases starting with k)
+  #al al #al (define an alias named al which expands to #al)
+  #al kkk kill %1 (define an alias named kkk which expands to "kill arguments")
+
+--------------------------------------------------------------------
+#all (command)
+- apply command to all sessions.
+
+EXAMPLES:
+  #all n
+  #all #al kk kill dog
+
+--------------------------------------------------------------------
+#char [character]
+
+- the Lyntin character is the character you type before each lyntin
+  command. (by default, it is '#').
+- with no arguments, print the current lyntin character.
+- with a single character argument, change the lyntin character to
+  that argument.
+
+--------------------------------------------------------------------
+#clear
+
+- clear the current session of all aliases, actions, etc
+
+--------------------------------------------------------------------
+#cr
+
+- send a carriage return to the mud from the current session.  Useful
+  when aliases need to send a return.
+
+--------------------------------------------------------------------
+#databuffer 
+
+- a 'databuffer' is a repository of previous output from
+  the mud.  It is mainly meant to be examined from python programs,
+  but two commands are provided for searching databuffers, '#datagrep' 
+  and '#datagreplines'. 
+
+- with no arguments, display the size of the session's databuffer
+
+- with one numeric argument, set the size of the session's databuffer
+ 
+--------------------------------------------------------------------
+#datagrep (pattern)
+
+- search for pattern in the current session's databuffer.  print any 
+  entries (in their entirety) in which a match was found.
+
+- pattern can be any python regular expression
+
+EXAMPLES:
+  #datagrep gossip
+  #datagrep leather.*here
+--------------------------------------------------------------------
+#datagreplines (pattern)
+
+- search for pattern in the current session's databuffer.  print any 
+  _lines_ in which a match was found.
+
+- pattern can be any python regular expression
+
+EXAMPLES:
+  #datagreplines gossip
+  #datagreplines leather.*here
+ 
+--------------------------------------------------------------------
+#gag [text]
+
+- with no arguments, print all current gags
+
+- with one argument, define text as a gag for the current session.
+  From here on out, any time lyntin sees text, it won't display the line
+  which contains it. useful for shutting up spammers.
+
+--------------------------------------------------------------------
+#history [number] (regsub)
+
+- with no arguments, print the current history list.  The history list
+  is a list of previous commands you entered.  These can be reexecuted with
+  the '!' command.
+
+- with one argument, set the size of the history list to number.
+
+--------------------------------------------------------------------
+#killall
+
+- clear all sessions of actions/aliases/subs/gags/variables
+
+--------------------------------------------------------------------
+#log (file)
+
+- start a logging file for the current session in the file file.  From
+  here out any output from the mud will be recorded in file, and anything you
+  send to the mud will be too.  Useful for recording your exploits.
+
+- with no arguments, if you are logging, lyntin stops logging.
+
+- see FILES, above.
+--------------------------------------------------------------------
+#quit
+
+- kill lyntin immediately.  This will cut you off from any muds you
+  are currently connected to.
+
+--------------------------------------------------------------------
+#read (file)
+
+- load file as a set of lyntin actions/aliases/substitutes/gags/variables
+
+- see FILES, above.
+
+EXAMPLES:
+  #a #read biff
+  #read /usr/local/lib/file1
+
+--------------------------------------------------------------------
+#report [file textstring]
+
+- if file and textstring are not present, print all reports.
+
+- if args _are_ present, establish a report which prints any line
+  containing textstring (which may contain multiple words and python
+  regular expressions. All word borders are collapsed into a single
+  whitespace.) to file.
+
+
+EXAMPLES:
+  #a #report  -- prints all of session a's reports
+  #report myfile janey gossips -- records all of janey's gossips
+
+--------------------------------------------------------------------
+#session name host port
+
+- create a session called name, connected to the mud specified by
+  (host) (port).  From here on out, you can switch sessions by typing
+  #name, or you can make a certain session do something by typing #name
+  something, or you can make _all_ sessions do something by typing #all
+  something.
+
+EXAMPLES:
+  #ses a tdome.montana.com 5555 <------ a cool mud
+
+--------------------------------------------------------------------
+#showme (text)
+
+- display text.  useful for sending messages to yourself.
+
+EXAMPLES:
+  #ac {%1 tells you %2} {#showme %1 just told me %2}
+
+--------------------------------------------------------------------
+#speedwalk
+
+- toggle speedwalking for the current session.  If speedwalk is on,
+  any command which consists solely of the letters nwseud combined with
+  digits (eg nnnwu, 3e5nnnn) will be interpreted as a speedwalking
+  directive, and lyntin will send the appropriate number of directional
+  commands to your mud. If speedwalking is off, lyntin will just send
+  such commands directly to your mud without breaking them up or
+  interpreting them.
+
+--------------------------------------------------------------------
+#substitute [pattern replacement]
+
+- the argument scheme is just like actions. **2
+
+- define a substitute such that, whenever lyntin encounters the text
+  pattern, it will replace it with replacement.  
+
+EXAMPLES:
+  #sub {a green dragon is here.} {VERY DANGEROUS GREEN DRAGON PRESENT}
+  #sub ralph {cousin ralph}
+
+**2 currently pattern-variables are not supported in substitutes.
+    This should change soon.
+
+--------------------------------------------------------------------
+#textin (file)
+
+- execute file as a sequence of commands.  handy for posting messages
+  and doing character creation, to name a couple.
+
+- see FILES, above.
+
+--------------------------------------------------------------------
+#unaction (pattern)
+
+- remove any actions which match pattern from the current session.
+
+EXAMPLES:
+  #unac *fountain*
+  #unac {^Bill is here}
+
+--------------------------------------------------------------------
+#unalias (pattern)
+
+- remove all aliases which match pattern from the current session.
+
+--------------------------------------------------------------------
+#ungag (pattern)
+
+- remove all gags which match pattern from the current session.
+
+--------------------------------------------------------------------
+#unsubstitute (pattern)
+
+- remove all substitutes which match pattern from the current session.
+
+--------------------------------------------------------------------
+#var [name value]
+
+- with no arguments, display all variables for the current session
+
+- with one argument, display any variables matching the argument, with
+  wildcard expansion supported
+
+- with two arguments, define a variable name whose value is value.
+  variables are different from pattern-variables in that they stay in memory
+  as long as lyntin does.
+
+- the value of name can be referenced at anytime with $name.
+
+EXAMPLES:
+  #var water fountain
+
+  #al swv {#all #var {victim} {%%1}} <-- note the nested braces.  A pattern
+  variable must contain as many %'s as its nesting depth.
+
+  #al kk {kill $victim} <-- note the braces.  they are necessary because
+  otherwise kk would be defined as kill (whatever the value of victim happens
+  to be when you define the alias)
+
+--------------------------------------------------------------------
+#write (file)
+
+- save the current session's actions/aliases/subs/gags/vars to file.
+
+- see FILES, above.
