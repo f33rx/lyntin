@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.6 2002/03/25 23:08:58 willhelm Exp $
+$Id: HACKING,v 1.7 2002/03/30 16:33:48 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -141,7 +141,7 @@ All user interfaces extend the ui.BaseUI class in the ui module.
 It has a series of methods which need to be overridden to give
 the ui functionality.  In addition, ui's can specify additional
 Lyntin commands, they can bind to Lyntin hooks (most ui's bind
-to the STARTUPHOOK allowing them to perform certain functionality
+to the hooks.startup_hook allowing them to perform certain functionality
 on Lyntin startup rather than module loading time), and anything
 else that modules can do.
 
@@ -164,11 +164,12 @@ The engine is augmented by a series of hooks which allow modules to
 execute functions without having to change Lyntin's internals.  An
 example of this would be the startup and shutdown hooks.  Any functions
 that hook into these hooks will be executed upon startup or shutdown
-of Lyntin.  Lyntin also uses these hooks to implement some of its
-functionality.
+of Lyntin.  Lyntin also uses these hooks to implement its functionality.
 
-For example, the TkGui uses the STARTUPHOOK to instantiate its gui 
+For example, the TkGui uses the hooks.startup_hook to instantiate its gui 
 interface and set itself up.
+
+All hooks and the Hook class are in the hooks module.
 
 
 

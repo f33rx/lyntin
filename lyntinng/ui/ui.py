@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.8 2002/03/02 22:28:47 willhelm Exp $
+# $Id: ui.py,v 1.9 2002/04/01 18:24:36 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -13,7 +13,7 @@ to the user through the ui.  Messages have types and the ui
 will display the message differently depending on the type.
 """
 import string, re, sys
-import engine, event, utils, lyntin
+import engine, hooks, event, utils, lyntin
 
 """ The message type constants."""
 ERROR = "ERROR: "
@@ -67,7 +67,7 @@ class BaseUI:
        'BaseUI.__init__(self)'
     """
     self.shutdownflag = 0
-    engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
+    hooks.shutdown_hook.register(self.shutdown)
 
   def startui(self):
     """ Initializes your user interface.

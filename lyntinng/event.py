@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.16 2002/03/24 21:00:17 willhelm Exp $
+# $Id: event.py,v 1.17 2002/04/01 18:24:36 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -15,7 +15,7 @@ event queue.  You can use the __init__ function to initialize
 your event as it is not used in the base Event class.
 """
 import string, os, traceback, sys, getopt
-import engine, ui.ui, lyntin, exported
+import engine, hooks, ui.ui, lyntin, exported
 
 class Event:
   """ Base Event class.
@@ -94,7 +94,7 @@ class StartupEvent(Event):
       traceback.print_exc()
 
     # spam the startup hook 
-    engine.myengine.spamhook(engine.STARTUP_HOOK, ())
+    hooks.startup_hook.spamhook()
 
     # if we don't have a readfile set by --read flag, then we
     # try to use ~/.lyntinrc
@@ -139,7 +139,7 @@ class ShutdownEvent(Event):
     """ Execute the shutdown."""
     import time
     exported.write_message("shutting down...  goodbye.")
-    engine.myengine.spamhook(engine.SHUTDOWN_HOOK)
+    hooks.shutdown_hook.spamhook()
     sys.exit(0)
 
 
@@ -161,7 +161,7 @@ class EchoEvent(Event):
 
   def execute(self):
     """ 1 means turn echo on, 0 means turn it off."""
-    engine.myengine.spamhook(engine.ECHO_HOOK, (self._state))
+    hooks.echo_hook.spamhook((self._state))
 
 
 class ReloadEvent(Event):
@@ -216,6 +216,7 @@ class MudEvent(Event):
 
   def execute(self):
     """ Execute."""
+    hooks.mud_data_hook.spamhook((self._session, self._input))
     engine.myengine.handleMudData(self._session, self._input)
 
 
@@ -279,14 +280,14 @@ class SpamEvent(Event):
   Certain things can kick off a call to spam a hook.  Rather
   than doing it "inline" so to speak, it's sometimes nice to kick
   it off in its own event.  The timer uses this to handle kicking
-  anything that's listening to the TIMER_HOOK.
+  anything that's listening to the hooks.timer_hook.
   """
   def __init__(self, hook, args):
     """ Initialize.
 
     arguments:
 
-      'hook' -- (string) the hook to spam
+      'hook' -- (hooks.Hook instance) the hook to spam
 
       'args' -- (list of arguments) the arguments to send to
                 the functions--refer to the documentation on 
@@ -298,4 +299,4 @@ class SpamEvent(Event):
 
   def execute(self):
     """ Execute."""
-    engine.myengine.spamhook(self._hook, self._args)
+    self._hook.spamhook(self._args)

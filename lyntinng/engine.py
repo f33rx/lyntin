@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.24 2002/04/01 18:24:36 willhelm Exp $
+# $Id: engine.py,v 1.25 2002/04/02 03:22:45 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -28,23 +28,13 @@ import Queue, traceback, copy, string, re, thread
 
 import threadmanager, session, ui.ui, alias, lyntin, utils, event
 import action, alias, gag, highlight, history, substitute, variable
-import exported
+import exported, hooks
 
 """
 myengine is a singleton.  so when it gets instantiated, this
 variable can be used to retrieve the engine singleton.
 """
 myengine = None
-
-INPUT_HOOK = "inputhook"
-MUD_HOOK = "mudhook"
-SHUTDOWN_HOOK = "shutdownhook"
-STARTUP_HOOK = "startuphook"
-ECHO_HOOK = "echohook"
-TIMER_HOOK = "timerhook"
-
-FIRST = 0
-LAST = 99
 
 
 class Engine:
@@ -98,7 +88,7 @@ class Engine:
     self._command_list = {}
 
     # we register ourselves with the shutdown hook
-    self.register(SHUTDOWN_HOOK, self.shutdown)
+    hooks.shutdown_hook.register(self.shutdown)
 
 
 
@@ -167,7 +157,7 @@ class Engine:
     while not self._shutdownflag:
       try:
         time.sleep(1)
-        event.SpamEvent(TIMER_HOOK, (self._tick,)).enqueue()
+        event.SpamEvent(hooks.timer_hook, (self._tick,)).enqueue()
         self._tick += 1
       except KeyboardInterrupt:
         return
@@ -229,7 +219,7 @@ class Engine:
 
       # spam the hook with the raw input statement first...
       if internal:
-        self.spamhook(INPUT_HOOK, (mem,))
+        hooks.user_data_hook.spamhook((mem,))
 
       # FIXME - handle history stuff
       if mem[0] == "!":
@@ -502,7 +492,9 @@ class Engine:
     If we see more than 20 errors, we shutdown.
     """
     lyntin.errorcount = lyntin.errorcount + 1
+    hooks.error_occurred_hook.spamhook(lyntin.errorcount)
     if lyntin.errorcount > 20:
+      hooks.too_many_errors_hook.spamhook()
       exported.write_error("Error count exceeded--shutting down.")
       event.ShutdownEvent().enqueue()
 
@@ -554,92 +546,6 @@ class Engine:
         data = data + "      " + repr(mem2) + "\n"
 
     return data
-
-
-  ### ------------------------------------------
-  ### hook stuff
-  ### ------------------------------------------
-
-  def register(self, hook, func, place=LAST):
-    """ Registers a function with a hook.
-
-    hook should be one of the hook constants.  func 
-    should be a callable function.  place is optional--it allows 
-    you to put yourself earlier in the hook lineup.
-
-    arguments:
-
-      'hook' -- (string) the name of the hook 
-
-      'func' -- (function) the function to call
-
-      'place=LAST' -- (int) the function will get this place in 
-                      the call order
-
-    """
-    if not callable(func):
-      # print "func not callable"
-      return
-
-    if self._listeners.has_key(hook):
-      if place == LAST or place > len(self._listeners[hook]):
-        self._listeners[hook].append(func)
-      else:
-        self._listeners[hook].insert(place, func)
-    else:
-      self._listeners[hook] = [func]
-
-  def unregister(self, hook, func):
-    """
-    Tries to remove a registrant from a hook--does pretty well.
-
-    arguments:
-
-      'hook' -- (string) the hook to unregister this function
-
-      'func' -- (function) the function to unregister
-
-    """
-    if self._listeners.has_key(hook):
-      if func in self._listeners[hook]:
-        self._listeners[hook].remove(func)
-
-  def gethook(self, hook):
-    """ Returns the listeners for a specific hook.
-
-    arguments:
-
-      'hook' -- (string) the hook in question
-
-    returns:
-
-      (list of functions)
-
-    """
-    try:
-      return self._listeners[hook]
-    except:
-      return []
-
-  def spamhook(self, hook, arglist=()):
-    """ Sends out input to all the registrants of a hook.
-
-    arguments:
-
-      'hook' -- (string) the hook to spam
-
-      'arglist' -- (list of arguments--depends on hook)
-                   the list of arguments that gets passed to
-                   each function in the hook 
-
-    """
-    import traceback
-    if self._listeners.has_key(hook):
-      for mem in self._listeners[hook]:
-        try:
-          mem(arglist)
-        except:
-          traceback.print_exc()
 
 
   ### ------------------------------------------

@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.14 2002/03/10 05:03:52 willhelm Exp $
+# $Id: ticker.py,v 1.15 2002/03/10 05:12:28 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
 """
-import lyntin, event, engine, exported
+import hooks, lyntin, event, engine, exported
 
 class Ticker:
   """ Manages ticker data."""
@@ -129,7 +129,7 @@ class Ticker:
       self._enabled = 1
 
       # register with the ticker hook 
-      engine.myengine.register(engine.TIMER_HOOK, self.tickerUpdate)
+      hooks.timer_hook.register(self.tickerUpdate)
 
     self._tickstart = engine.myengine.getCurrentTick() - 1
 
@@ -137,11 +137,11 @@ class Ticker:
     """ Disables this ticker."""
     if self._enabled == 1:
       self._enabled = 0
-      engine.myengine.unregister(engine.TIMER_HOOK, self.tickerUpdate)
+      hooks.timer_hook.unregister(self.tickerUpdate)
 
   def tickerUpdate(self, args):
     """
-    This gets called by the TIMER_HOOK in the engine every
+    This gets called by the timer_hook in the engine every
     second.  It figures out if this current second marks a tick
     or a tickwarning and does accordingly.
 

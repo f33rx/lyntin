@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.22 2002/04/01 18:24:36 willhelm Exp $
+# $Id: tkgui.py,v 1.23 2002/04/01 18:45:20 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -12,7 +12,7 @@ Lyntin, but largely re-coded in various areas.
 """
 
 import string, os, Tkinter, tkFont
-import ui, event, engine, exported, lyntin
+import ui, hooks, event, engine, exported, lyntin
 
 """
 0 -- all off
@@ -121,8 +121,8 @@ class TkGui(ui.BaseUI):
     self._txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
 
     self._initColorTags()
-    engine.myengine.register(engine.ECHO_HOOK, self.echo)
-    engine.myengine.register(engine.STARTUP_HOOK, self.startui)
+    hooks.echo_hook.register(self.echo)
+    hooks.startup_hook.register(self.startui)
 
 
   def startui(self, args):
