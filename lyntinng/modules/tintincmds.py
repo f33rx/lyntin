@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.8 2002/05/09 00:10:41 willhelm Exp $
+# $Id: tintincmds.py,v 1.9 2002/05/09 03:53:06 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -903,7 +903,7 @@ commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
 
 
 class Unsomethinger:
-  def __init__(self, managername, removalfunction, singular=None, plural=None ):
+  def __init__(self, managername, removalfunction, singular=None, plural=None, doc=None, wildcarding=1):
     self.managername = managername
     self.removalfunction = removalfunction
     if singular:
@@ -915,17 +915,23 @@ class Unsomethinger:
     else:
       self.plural = self.singular + "s"
 
-    self.__doc__ = ("Used to remove %s from the current session's %s manager." % 
-                   (self.plural, self.managername))
+    if doc:
+      self.__doc__ = doc
+    else:
+      self.__doc__ = ("\nRemoves %s matching {pattern}.\n\n" % (self.plural)
+                      + "ex: #un%s {kill}    <-- remove %s 'kill'\n" % (self.singular,self.singular))
+      if wildcarding:
+        self.__doc__ = (self.__doc__
+                        + "ex: #un%s {*kill*}   <-- remove all %s with 'kill' in them\n" % (self.singular, self.plural))
 
   def __call__(self, session, args, input):
     """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
 
-    Allows you to remove gags|substitutes|variables|actions|aliases|swdirs|
+    Allows you to remove gags|substitutes|variables|actions|aliases|swdirs|swexcludes
     swexcludes from whatever manager is handling that thing.  This function
     handles all these commands.
     """
-    text = args["var"]
+    text = args["pattern"]
     quiet = args["quiet"]
 
     removedthings = self.removalfunction(session.getManager(self.managername),text)
@@ -943,23 +949,23 @@ class Unsomethinger:
 
       exported.write_message(data[:-1])
 
-  
+
 commands_dict["unaction"] = (
-  Unsomethinger("action",lambda m,t:m.removeActions(t)), "var quiet:boolean=false")
+  Unsomethinger("action",lambda m,t:m.removeActions(t)), "pattern quiet:boolean=false")
 commands_dict["unalias"] = (
-  Unsomethinger("alias",lambda m,t:m.removeAliases(t)), "var quiet:boolean=false")
+  Unsomethinger("alias",lambda m,t:m.removeAliases(t)), "pattern quiet:boolean=false")
 commands_dict["ungag"] = (
-  Unsomethinger("gag",lambda m,t:m.removeGags(t)), "var quiet:boolean=false")
+  Unsomethinger("gag",lambda m,t:m.removeGags(t)), "pattern quiet:boolean=false")
 commands_dict["unhighlight"] = (
-  Unsomethinger("highlight",lambda m,t:m.removeHighlights(t)), "var quiet:boolean=false")
+  Unsomethinger("highlight",lambda m,t:m.removeHighlights(t)), "pattern quiet:boolean=false")
 commands_dict["unswdir"] = (
-  Unsomethinger("speedwalk",lambda m,t:m.removeDir(t),"swdir","speedwalking dirs"), "var quiet:boolean=false")
+  Unsomethinger("speedwalk",lambda m,t:m.removeDir(t),singular="swdir",plural="speedwalking dirs",wildcarding=0), "pattern quiet:boolean=false")
 commands_dict["unswexclude"] = (
-  Unsomethinger("speedwalk",lambda m,t:m.removeExclude(t),"swexclude","speedwalking excludes"), "var quiet:boolean=false")
+  Unsomethinger("speedwalk",lambda m,t:m.removeExclude(t),singular="swexclude",plural="speedwalking excludes",wildcarding=0), "pattern quiet:boolean=false")
 commands_dict["unsubstitute"] = (
-  Unsomethinger("substitute",lambda m,t:m.removeSubstitutes(t)), "var quiet:boolean=false")
+  Unsomethinger("substitute",lambda m,t:m.removeSubstitutes(t)), "pattern quiet:boolean=false")
 commands_dict["unvariable"] = (
-  Unsomethinger("variable",lambda m,t:m.removeVariables(t)), "var quiet:boolean=false")
+  Unsomethinger("variable",lambda m,t:m.removeVariables(t)), "pattern quiet:boolean=false")
 
 
 def variable_cmd(session, args, input):
