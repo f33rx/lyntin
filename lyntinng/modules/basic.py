@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.40 2002/03/25 23:08:58 willhelm Exp $
+# $Id: basic.py,v 1.41 2002/03/28 01:03:41 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -408,6 +408,22 @@ def if_cmd(session, words, input):
     exported.write_error("if: exception: %s" % e)
 
   # end copyright 2002 Sebastian John
+
+
+def ignore_cmd(session, words, input):
+  """#ignore
+
+  Turns on and shuts off ignoring of actions for this session.
+  """
+  if session._ignore == 1:
+    session._ignore = 0
+    exported.write_message("ignore: actions are active for session %s." 
+                           % session.getName())
+  else:
+    session._ignore = 1
+    exported.write_message("ignore: now ignoring actions for session %s." 
+                           % session.getName())
+
 
 def info_cmd(session, words, input):
   """#info
@@ -822,13 +838,11 @@ def ticksize_cmd(session, words, input):
     return
 
   ticklength = utils.strip_braces(words[1])
-  if ticklength.isdigit():
-    ticklength = int(ticklength)
-  else:
+  if not ticklength.isdigit() or int(ticklength) < 1:
     exported.write_error("syntax: #ticksize {number}")
     return
 
-  session.getTicker().setTickLen(ticklength)
+  session.getTicker().setTickLen(int(ticklength))
   exported.write_message("ticksize: tick length set to " + 
                                words[1] + ".")
 
@@ -1003,7 +1017,7 @@ def load():
   exported.add_command("highlight", highlight_cmd)
   exported.add_command("history", history_cmd)
   exported.add_command("if", if_cmd)
-  # exported.add_command("ignore", ignore_cmd)
+  exported.add_command("ignore", ignore_cmd)
   # exported.add_command("import", import_cmd)
   exported.add_command("info", info_cmd)
   exported.add_command("killall", killall_cmd)

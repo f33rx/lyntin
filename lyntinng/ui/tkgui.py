@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.17 2002/03/27 00:24:08 willhelm Exp $
+# $Id: tkgui.py,v 1.18 2002/03/27 04:59:09 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -422,7 +422,6 @@ class CommandEntry(Tkinter.Entry):
 
     self.hist_index = -1
     self._partk = partk
-    self.inputstack = []
     self.saveinputhighlight = 0
         
   def createInputEvent(self, tkevent):
@@ -430,9 +429,9 @@ class CommandEntry(Tkinter.Entry):
     val = self.get()
     self._partk.handleinput(val)
 
-    self.inputstack.insert(0, val)
-    if len(self.inputstack) > 30:
-      self.inputstack = self.inputstack[:-1]
+    # self.inputstack.insert(0, val)
+    # if len(self.inputstack) > 30:
+    #   self.inputstack = self.inputstack[:-1]
 
     if self.saveinputhighlight == 1:
       self.selection_range(0, 'end')
@@ -583,17 +582,17 @@ class CommandEntry(Tkinter.Entry):
         
   def insertPrevCommand(self, tkevent):
     """ Handles the <KeyPress-Up> event."""
-    hist = self.inputstack
+    hist = exported.get_history()
     if self.hist_index == -1:
       self.current_input = self.get()
     if self.hist_index < len(hist) - 1:
       self.hist_index = self.hist_index + 1
       self.delete(0, 'end')
-      self.insert(0, hist[self.hist_index][:])
+      self.insert(0, hist[self.hist_index])
 
   def insertNextCommand(self, tkevent):
     """ Handles the <KeyPress-Down> event."""
-    hist = self.inputstack
+    hist = exported.get_history()
     if self.hist_index == -1:
       return
     self.hist_index = self.hist_index - 1
@@ -603,4 +602,4 @@ class CommandEntry(Tkinter.Entry):
             
     else:
       self.delete(0, 'end')
-      self.insert(0, hist[self.hist_index][:])
+      self.insert(0, hist[self.hist_index])

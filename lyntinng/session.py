@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.17 2002/03/02 23:57:49 willhelm Exp $
+# $Id: session.py,v 1.18 2002/03/24 21:00:18 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -29,6 +29,10 @@ class Session:
     self._managers = {}
     self._logfile = None
     self._ticker = ticker.Ticker()
+
+    # allows users to toggle whether to allow actions to kick off
+    # or not.
+    self._ignore = 0
 
     # register with the shutdown hook 
     engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
@@ -83,9 +87,14 @@ class Session:
              "   logfile: " + self.getLogfileName() + "\n")
 
     if lyntin.speedwalk == 1:
-      data += "   speedwalk: on"
+      data += "   speedwalk: on\n"
     else: 
-      data += "   speedwalk: off"
+      data += "   speedwalk: off\n"
+
+    if self._ignore == 0:
+      data += "   ignore: actions are active"
+    else:
+      data += "   ignore: actions are ignored"
 
     return data
 
@@ -262,7 +271,9 @@ class Session:
       self.log(input)
 
     inputlines = input.splitlines(1)
-    for mem in inputlines:
+
+    for i in range(0, len(inputlines)):
+      mem = inputlines[i]
       # handle gags
       mem = self.getManager("gag").removeGaggedText(mem)
 
@@ -270,7 +281,8 @@ class Session:
       mem = self.getManager("substitute").expand(mem)
 
       # handle actions
-      self.getManager("action").checkActions(mem)
+      if self._ignore == 0:
+        self.getManager("action").checkActions(mem)
 
       if lyntin.ansicolor == 0:
         mem = utils.filter_ansi(mem)
@@ -278,8 +290,11 @@ class Session:
         # handle highlights 
         mem = self.getManager("highlight").expand(mem)
 
-      if mem:
-        exported.write_mud_data(mem)
+      inputlines[i] = mem
+
+    input = string.join(inputlines, "")
+    exported.write_mud_data(input)
+
 
   def log(self, input):
     """ Logs text to a file instance in self._logfile.
