@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.14 2002/10/23 23:59:08 willhelm Exp $
+# $Id: __init__.py,v 1.15 2002/10/24 23:07:04 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -16,6 +16,27 @@ Modules get loaded when Lyntin starts up unless:
 
 import glob, os, sys, traceback
 import exported, lyntin
+
+
+def test_for_conflicts(name, module):
+  """
+  Tests a module we just imported with the name the path the module
+  should have.  This allows us to test Lyntin modules we just dynamically
+  loaded to verify it's the one we intended to load.
+
+  Right now we don't really do anything except kick up an error to the
+  user.  Let them deal with the issue.
+
+  @param name: the full name of the module we wanted to load
+  @type  name: string
+
+  @param module: the actual module we loaded
+  @type  module: module instance
+  """
+  if module.__file__ != name + "c" and module.__file__ != name:
+    exported.write_error("possible name conflict: '%s' and '%s'" % 
+                         (name, module.__file__))
+
 
 def load_modules():
   """
@@ -30,7 +51,8 @@ def load_modules():
       _module_list = glob.glob( os.path.join( moduledir, "*.py"))
 
       # toss the moduledir in the sys.path
-      sys.path.insert(0, moduledir)
+      sys.path.append(moduledir)
+      # sys.path.insert(0, moduledir)
 
       # and toss all the contents of the directory in our _module_list
       for mem in _module_list:
@@ -40,9 +62,10 @@ def load_modules():
 
         try:
           _module = __import__(mem2)
-
           if _module.__dict__.has_key("load"):
             _module.load()
+
+          test_for_conflicts(mem, _module)
 
           _module.__dict__["lyntin_import"] = 1
           lyntin.lyntinmodules.append(mem)

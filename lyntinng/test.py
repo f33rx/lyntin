@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.5 2002/10/12 22:14:47 willhelm Exp $
+# $Id: test.py,v 1.6 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -121,6 +121,8 @@ it to see if we can handle wrapping with it \33[1;37mtoo.
 
   print
 
+  # FIXME - these always fail because we don't get the precision right.
+  # not sure what to do about that.
   from utils import parse_time
   _pass_fail("parse_time 1", parse_time("4:20p"), 1029878400.0)
   _pass_fail("parse_time 2", parse_time("4m"), 1029796956.9)
