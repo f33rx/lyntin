@@ -19,7 +19,7 @@ contains global variables
 """
 
 
-import socket, select, regex, os, string, regsub, copy
+import socket, select, re, regex, os, string, regsub, copy
 import mud, app, player, hooks, handler
 
 
@@ -81,7 +81,7 @@ except:
 ltchar = '#'
 
 
-"""Current number of derived sessions.  (Heck if i know what this is.)"""
+"""Current number of derived (non-common) sessions."""
 numsessions = 0
 
 
@@ -90,7 +90,7 @@ this low."""
 timeout = .01
 
 
-""" The initial session started for the user, from which other
+""" The initial session started for the user, from which other, derived,
 sessions inherit """
 common = None
 
@@ -109,7 +109,7 @@ BUFSIZE = 4096
 
 
 """var_regex is the regular expression that matches variables."""
-var_regex = regex.compile('%\([0-9]+\)')
+var_regex = re.compile('%(\d+)')
 
 
 """history is the list of the last 30 or so commands the user has
@@ -196,8 +196,8 @@ def compile_trigger(trig):
     Convert a trigger with pattern variables into a
     compiled regular expression
     """
-    regx = regsub.gsub('%[0-9]+', '\(.*\)', trig)
-    return regex.compile(regx)
+    regx = re.sub('%[0-9]+', '(.*)', trig)
+    return re.compile(regx)
 
 
 
@@ -476,11 +476,13 @@ class UserSession(Session):
             # adding the variables to the keylist
             # each time we process one, delete it from the string
             # thus the loop halts when there are no more variables
-            while var_regex.search(str) != -1:
-                var = var_regex.group(1)
+            match = var_regex.search(str)
+            while match:
+                var = match.group(1)
                 keylist.append('%' + var)
                 # this is not a gsub!
-                str = regsub.sub('%[0-9]+', '', str)
+                str = re.sub('%[0-9]+', '', str, 1)
+                match = var_regex.search(str)
             return keylist
 
 
@@ -489,14 +491,15 @@ class UserSession(Session):
         matched = [] # list of lines that match
         for line in split_into_lines(output):
             for (ac, regac) in acs:
-                if regac.search(line) != -1:
+                match = regac.search(line)
+                if match:
                     line = filter_crud(line)
                     matched.append((line, ac, regac))
 
         for (match, ac, regac) in matched:
             
             # register the backreferences ('group' method on regex objects)
-            regac.search(match)
+            matchobj = regac.search(match)
             response = self.actions[ac] # the response
 
             # get variables from the action
@@ -506,7 +509,7 @@ class UserSession(Session):
             # fill in values for all the variables in the match
             for i in xrange(len(actionvars)):
                  #varvals[actionvars[i]]=string.replace(regac.group(i+1),';','_')
-                 varvals[actionvars[i]]=regac.group(i+1)
+                 varvals[actionvars[i]]=matchobj.group(i+1)
 
             # add special variables
             varvals['%a'] = string.replace(match,';','_')
@@ -516,9 +519,10 @@ class UserSession(Session):
             for var in varvals.keys():
                 # replace occurrences of '%i' with val
                 if string.find(var, response):
-                    response = regsub.sub(var, varvals[var], response)
+                    response = re.sub(var, varvals[var], response)
                 if string.find("$" + var[1:], response):
-                    response = regsub.sub("$" + var[1:], string.replace(varvals[var], ";", "\;"), response)
+                    response = re.sub("$" + var[1:],
+                                      string.replace(varvals[var], ";", "\;"), response, 1)
 
             # run the action hook
             hooks.action_hook.run((self, match, response))
