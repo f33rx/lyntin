@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.2 2002/04/21 20:20:45 willhelm Exp $
+# $Id: argparser.py,v 1.3 2002/04/21 22:37:58 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -14,12 +14,19 @@ automatically into a dictionary.
 import string, re
 import utils
 
-defaultOptions={"stripBraces":1}
+defaultOptions={"stripBraces":1,
+                "noparsing":0
+                }
 optionParser = None
 
 class ArgumentParser:
   """
   This is the actual argumentparser class
+
+  Supported options:
+  stripBraces (default=on) - whether all arguments should have braces
+      stripped before being parsed.
+  noparsing (default=off) - puts input into dict["input"] and does no parsing.
   """
   
   def __init__(self,argspec,argoptions):
@@ -36,8 +43,6 @@ class ArgumentParser:
       return self.options[optionname]
     else:
       return None
-
-  
 
   def buildOptions(self,argoptions):
     """
@@ -62,6 +67,8 @@ class ArgumentParser:
       if key=="otherOptions":
         for otherOption in dict[key]:
           self.options[otherOption] = 1
+          if len(otherOption)>3 and otherOption[0:2]=="no":
+            self.options[otherOption[2:]] = 0
       elif key=="otherValuedOptions":
         for otherKey in dict[key].keys():
           self.options[otherkey] = dict[key][otherkey]
@@ -182,46 +189,48 @@ class ArgumentParser:
     matching self's argspec.  Raises an error if extra arguments are
     encounterd (without appropriate oollection arguments specified),
     required arguments are missing or types aren't valid.
-    """
+    """    
     dict = {}
 
-    arguments = self.split(input)
+    if self.getOption("noparsing"):
+      dict["input"]=input
+    else:
+      arguments = self.split(input)
 
+      foundNamedArg = 0
+      for i in range(0,len(arguments)):
+        key,val = arguments[i]
 
-    foundNamedArg = 0
-    for i in range(0,len(arguments)):
-      key,val = arguments[i]
-
-      if val == None:
-        if foundNamedArg:
-          raise Exception, "Non-named argument (%s) found after Named argument" % (key)
-        if i < len(self.indexparsers):
-          parser = self.indexparsers[i]
-        elif self.extraindexparser:
-          parser = self.extraindexparser
+        if val == None:
+          if foundNamedArg:
+            raise Exception, "Non-named argument (%s) found after Named argument" % (key)
+          if i < len(self.indexparsers):
+            parser = self.indexparsers[i]
+          elif self.extraindexparser:
+            parser = self.extraindexparser
+          else:
+            raise Exception, "Unexpected argument received %s" % (key)
+          parser.parseInto(i,key,dict)
         else:
-          raise Exception, "Unexpected argument received %s" % (key)
-        parser.parseInto(i,key,dict)
-      else:
-        foundNamedArg = 1
-        if self.parsers.has_key(key):
+          foundNamedArg = 1
+          if self.parsers.has_key(key):
+            parser = self.parsers[key]
+          elif self.extranamedparser:
+            parser = self.extranamedparser
+          else:
+            raise Exception, "Invalid named argument: %s=%s" % (key,val)
+          parser.parseInto(key,val,dict)
+
+      # now check that everything has been specified, putting in defaults 
+      # where available
+      for key in self.parsers.keys():
+        if not dict.has_key(key):
           parser = self.parsers[key]
-        elif self.extranamedparser:
-          parser = self.extranamedparser
-        else:
-          raise Exception, "Invalid named argument: %s=%s" % (key,val)
-        parser.parseInto(key,val,dict)
-
-    # now check that everything ahs been specified, puttingin defaults 
-    # where available
-    for key in self.parsers.keys():
-      if not dict.has_key(key):
-        parser = self.parsers[key]
-        if parser.default == None:
-          raise Exception, "Must specify a value for argument %s" % (key)
-        else:
-          defval = parser.parse(parser.default)
-          dict[key] = defval
+          if parser.default == None:
+            raise Exception, "Must specify a value for argument %s" % (key)
+          else:
+            defval = parser.parse(parser.default)
+            dict[key] = defval
     
     return dict
 
@@ -322,7 +331,7 @@ class Parser:
       dict[self.argname] = self.parse(val)
 
   def parse(self, val):
-    if self.argparser.options["stripBraces"]:
+    if self.argparser.getOption("stripBraces"):
       val = utils.strip_braces(val)
     if self.typechecker:
       return self.typechecker.check(val)
