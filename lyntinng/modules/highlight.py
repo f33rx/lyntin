@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.15 2002/12/27 02:08:41 willhelm Exp $
+# $Id: highlight.py,v 1.16 2002/12/27 02:10:47 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -370,26 +370,33 @@ def highlight_cmd(ses, args, input):
   With multiple arguments, creates a highlight.
 
   Highlights enable you to colorfully "tag" text that's of interest
-  to you with the given style.  This may not work or fully work in
-  all ui's.
+  to you with the given style.
 
   Styles available are:
-     bold     black    grey           b black
-     blink    red      light red      b red
-     reverse  green    light green    b green
-              yellow   light yellow   b yellow
-              blue     light blue     b blue
-              magenta  light magenta  b magenta
-              cyan     light cyan     b cyan
-              white    light white    b white
+     styles    foreground colors        background colors
+     bold      black    grey            b black
+     blink     red      light red       b red
+     reverse   green    light green     b green
+               yellow   light yellow    b yellow
+               blue     light blue      b blue
+               magenta  light magenta   b magenta
+               cyan     light cyan      b cyan
+               white    light white     b white
 
-  Highlights also handle *.  So '*word*' will highlight an entire line
-  with "word" in it.  '*word' will highlight the line up to "word".  
-  'word*' will highlight the line from "word" to the end.
+  Highlights handle * at the beginning and end of non-regular expression
+  texts.  Highlights will handle regular expression texts as well.  See
+  "#help regexp" for more details.
+
+  Note: blink and reverse may not be available in all ui's.
 
   examples:
     #highlight {green} {Sven arrives.}
     #highlight {reverse,green} {Sven arrives.}
+    #highlight {blue} {r[^.*?says:]}
+
+      which is the same as:
+
+    #highlight {blue} {*says:}
 
   category: commands
   """
@@ -400,21 +407,28 @@ def highlight_cmd(ses, args, input):
 
   if not text and not style:
     data = exported.get_manager("highlight").getInfo(ses)
-    if data == '':
+    if not data:
       data = "highlight: no highlights defined."
 
     exported.write_message(data, ses)
     return
 
-  if text and style:
-    style = style.lower()
-    if style not in STYLEMAP:
-      exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (style, lyntin.commandchar))
-      return
+  if not text:
+    data = exported.get_manager("highlight").getInfo(ses, style)
+    if not data:
+      data = "highlight: no highlights defined."
+
+    exported.write_message("highlights:\n" + data, ses)
+    return
     
-    exported.get_manager("highlight").addHighlight(ses, style, text)
-    if not quiet:
-      exported.write_message("highlight: {%s} {%s} added." % (style, text), ses)
+  style = style.lower()
+  if style not in STYLEMAP:
+    exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (style, lyntin.commandchar))
+    return
+    
+  exported.get_manager("highlight").addHighlight(ses, style, text)
+  if not quiet:
+    exported.write_message("highlight: {%s} {%s} added." % (style, text), ses)
 
 commands_dict["highlight"] = (highlight_cmd, "style= text= quiet:boolean=false")
 
