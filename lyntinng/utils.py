@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.23 2002/05/15 02:41:42 willhelm Exp $
+# $Id: utils.py,v 1.24 2002/05/16 01:59:15 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -17,7 +17,7 @@ import string, re
 SEMI_REGEXP = re.compile('(?<!\\\\);')
 VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
-ANSI_CODE_REGEXP = re.compile('\[[0-9;]*[mJ]')
+ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
 
 def chomp(text):
   """ Removes all '\\r' and '\\n' from the input string.
@@ -108,9 +108,11 @@ def split_ansi_from_text(text):
     marker = 0
     while matchob:
       (b, e) = matchob.span()
-      if marker != b:
-        textlist.append(text[marker:b])
+
+      if marker == b:
+        textlist.append(text[b:e])
       else:
+        textlist.append(text[marker:b])
         textlist.append(text[b:e])
 
       marker = e
@@ -118,8 +120,9 @@ def split_ansi_from_text(text):
 
     # we do this to handle ansi color sequences which are broken
     # between two network chunks
-    b = text[marker:].find(chr(27))
-    if b == -1:
+    b = text.rfind(chr(27))
+
+    if b < marker:
       textlist.append(text[marker:])
     else:
       textlist.append(text[marker:b])
@@ -436,6 +439,17 @@ if __name__ == '__main__':
             ['#alias sv {put all in vortex;get all}', 'test'])
 
   print 
+
+  _pass_fail(split_ansi_from_text("This is some text."),
+            ["This is some text."])
+  _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0m text."),
+            ["\33[1;37m", "This is", "\33[0m", " text."])
+  _pass_fail(split_ansi_from_text("Hi \33[1;37mThis is\33[0m text."),
+            ["Hi ", "\33[1;37m", "This is", "\33[0m", " text."])
+  _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0"),
+            ["\33[1;37m", "This is", "\33[0"])
+
+  print
 
   print "replace_vars tests"
   print replace_vars("#test 1 2 3", "#test")
