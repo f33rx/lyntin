@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.79 2002/12/22 23:18:38 willhelm Exp $
+# $Id: engine.py,v 1.80 2003/01/22 03:09:28 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -439,6 +439,9 @@ class Engine:
 
     else:
       exported.write_error("No session of that name.")
+      return
+
+    exported.write_message("Switching to session '%s'." % self._current_session.getName())
 
   def writeSession(self, message):
     """
@@ -467,7 +470,7 @@ class Engine:
       exported.write_error("Can't close the common session.")
       return 0
          
-    ses.shutdown(())
+    ses.shutdown((1,))
     self.unregisterSession(ses)
     exported.hook_unregister("shutdown_hook", ses.shutdown)
     return 1
