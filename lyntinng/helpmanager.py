@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.5 2002/05/11 18:56:59 willhelm Exp $
+# $Id: helpmanager.py,v 1.6 2002/05/12 04:51:23 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -58,12 +58,24 @@ class HelpManager:
     place = self._help_tree
     for mem in categorylist:
       if place.has_key(mem):
-        place = place[mem]
+        if type(place[mem]) == type({}):
+          place = place[mem]
+        else:
+          tmp = place[mem]
+          place[mem] = {}
+          place[mem]["__doc__"] = tmp
+          place = place[mem]
       else:
         place[mem] = {}
         place = place[mem]
 
-    place[helpname] = helptext
+    if place.has_key(helpname):
+      if type(place[helpname]) == type({}):
+        place[helpname]["__doc__"] = helptext
+      else:
+        place[helpname] = helptext
+    else:
+      place[helpname] = helptext
 
 
   def removeHelp(self, fqn):
@@ -202,7 +214,12 @@ class HelpManager:
     if type(tree) == type({}):
       list = tree.keys()
       list.sort()
-      return (error, breadcrumbs, utils.columnize(textlist=list, indent=3))
+      if tree.has_key("__doc__"):
+        list.remove("__doc__")
+        helphead = tree["__doc__"] + "\nOther topics in this category:\n"
+      else:
+        helphead = ""
+      return (error, breadcrumbs, helphead + utils.columnize(textlist=list, indent=3))
     return (error, breadcrumbs, tree)
     
   def printTree(self, tree=None, tab=""):
