@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.1 2002/02/07 02:09:05 willhelm Exp $
+$Id: HACKING,v 1.2 2002/02/23 21:10:32 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -14,16 +14,18 @@ http://Lyntin.sourceforge.net/
 * NOTES
 
 This entire document is written off the top of my head and the contents
-of it are likely to change before 3.0 actually gets released.
+of it are likely to change before 3.0 actually gets released.  It's
+possible this document will at some point get merged with the ARCHITECTURE
+document.
 
 
 
 * SYNOPSIS
 
 Lyntin was built for the hacker/mudder.  This is a special breed of
-person that's mudding and has a series of complex problems they want
-to solve and mere aliases and triggers just aren't going to meet
-that need.
+person who is mudding and has a series of complex problems they want
+to solve and mere aliases and triggers just aren't going to do the
+trick.
 
 Tintin++ has a series of commands that almost but not quite implements
 (ed. bad word choice) a programming language.  Building "macros" in 
@@ -31,6 +33,11 @@ this way is complex and solves a small set of problems, but the more
 complex problems really need a full language and a library to solve.  
 As such, Lyntin was built with Python and allows hackers to use Python 
 to enhance Lyntin.
+
+Because Lyntin is so inextricably intertwined with Python, you can
+extend Lyntin to do anything without going through hoops: check your
+email, record URLs you see and open up a browser to visit them, export
+mudmail, building complex bots....
 
 There a a few different methods of hacking Lyntin to suit your needs.  
 They are briefly outlined here and described in more detail in their 
@@ -43,17 +50,24 @@ respective sections:
 Before you continue in this document, you should read through the
 ARCHITECTURE guide which walks you through how Lyntin is architected
 from a bird's eye view.  Understanding that will make this document
-much more interesting.
+much more interesting and more clear.
+
 
 
 * EDITING THE SOURCE CODE
 
 Lyntin is entirely written in Python.  The source code is well organized
-(as of 3.0) and there will be plenty of documentation available on the
-website for supporting people who want to just change the internals of
-Lyntin.
+(as of 3.0) and documentation exists on the web-site as well as in the 
+source code distribution on how Lyntin is architected and details on
+the internals.
 
-FIXME - More on this at some point in time.
+Lyntin is distributed under the GPL.  You should read this prior to
+making changes to the source code and distributing them so you don't
+accidentally find yourself in violation.
+
+If you patch Lyntin, we'd love to see your work!  Send it to the
+Lyntin developers list and depending on what the patch does, it may
+get incorporated into the Lyntin base code.
 
 
 
@@ -63,15 +77,42 @@ FIXME - This is likely to change in the near future prior to the final
 3.0 release.
 
 Lyntin has a modules package and all the commands are implemented in
-the 'basic' module.  You can add modules at your whim.
+the basic and advanced modules.  You can add modules at your whim.
+The purpose of Lyntin modules is to centralize your efforts into one
+file that you have control over.  This enables you to have one file
+you can drop into a Lyntin installation and it works without editing
+configuration files or installation files.
+
+This is cool because then your module is easy to install should you
+upgrade your version of Lyntin.  And it's easy to distribute too because
+it's one file.
 
 
 
 * COMMAND LINE
 
-FIXME - This isn't quite implemented yet--but soon.
-
 Lyntin allows you to execute arbitrary Python at the command line.
 The code will be executed in some module--(to be determined).
 
+For example:
+
+^<<
+	#@print "hello"
+^>>
+
+will print hello to the console.  There are some significant differences
+between Lyntin 2.x and 3.x in how this works.  In the 2.x series, 
+raw Python was executed in the user.py module.  It was encouraged that
+you add your own functions to the user.py module and then these would
+be available to you at the Lyntin command line.
+
+In 3.0 user.py is a module in the modules directory.  It does not come
+with Lyntin--it's something you'll have to create.  This is a little
+weird in that you have to go write your own user.py module, but on the
+flip side, it helps when you upgrade Lyntin--you won't accidentally
+overwrite your user.py Lyntin module because it doesn't come with
+Lyntin.
+
+If you don't have a user.py module, raw Python code gets executed in 
+the advanced.py module where the #@ functionality exists.
 
