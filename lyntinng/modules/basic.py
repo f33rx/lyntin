@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: basic.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -244,7 +244,7 @@ def help_cmd(session, words, input):
    """
    import os
 
-   helpdir = lyntin.datadir + "help"
+   helpdir = lyntin.lyntindir + "help"
    data = "::lyntin help::\n"
 
    if len(words) == 1:

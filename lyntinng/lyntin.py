@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: lyntin.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -99,10 +99,20 @@ ansicolor = 1
 # from.
 datadir = "./"
 
+# this is the lyntin directory--where all the help files and
+# such are located.
+lyntindir = "./"
+
 
 if __name__ == '__main__':
    try:
       import engine, event, lyntin
+
+      # figure out where the lyntin files are
+      tmp = sys.argv[0]
+      if len(tmp) == 0:
+         raise Exception, "Lyntin root dir cannot be determined."
+      lyntin.lyntindir = tmp[:tmp.rfind("/")+1]
 
       # read through options and arguments
       optlist, args = getopt.getopt(sys.argv[1:], 
