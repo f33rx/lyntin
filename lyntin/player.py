@@ -16,7 +16,7 @@ hash by importing exported.py and using the lyntin_add_command function
 there.
 """
 
-import string, regex, sys, regsub, socket, time
+import string, sys, re, socket, time
 import data, mud, app, hooks, cmdparse, os
 
 # delay import of user module until we have more state
@@ -66,7 +66,7 @@ def dispatch_command(input, seslist):
     for mem in clist:
         # this means it has to be matched exactly
         if mem[0] == "^":
-            if regex.search(mem, words[0]) != -1:
+            if re.compile(mem).search(words[0]):
                 return data.theapp.commands[mem](words, input, seslist)
         else:
             if string.find(mem, words[0]) == 0:
@@ -93,12 +93,12 @@ def expand_command(s, list):
     wildcard = string.count(str, '*')
     if wildcard:
         # convert '*' to '.*'
-        str = regsub.gsub('\*', '.*', str)
+        str = re.sub('\*', '.*', str)
         # insert anchors
         str = '^' + str + '$'
     for s in list:
         if wildcard:
-            if regex.match(str, s) != -1:
+            if re.compile(str).match(s):
                 ret = ret + [s]
         else:
             if str == s:
@@ -522,7 +522,7 @@ def Variable(words, input, seslist):
                 PutError("variable: that variable is not defined")
             else:
                 for w in whichl:
-                    PutMessage("  " + ses.GetVarDisplayString(var))
+                    PutMessage("  " + ses.GetVarDisplayString(w))
         else:
             # more than one argument: define
             # a new variable for the current session
