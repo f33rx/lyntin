@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.36 2003/02/01 01:52:58 willhelm Exp $
+# $Id: argparser.py,v 1.37 2003/02/15 03:35:04 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses X{command argument}s
@@ -250,7 +250,7 @@ class ArgumentParser:
     @param defaultresolver: A function that will take an argument 
         name and return a default value (None if there should be none) 
         to override builtin defaults.
-    @type  function
+    @type  defaultresolver: function
 
     @return: the populated dictionary of all the args and values
     @rtype: dict

@@ -6,7 +6,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-Tue, 31 Dec 2002 01:28:28 +0000
+Thu, 06 Mar 2003 02:12:01 +0000
 
 For more up-to-date information and documentation, please check the 
 web-site: http://Lyntin.sourceforge.net/
@@ -77,8 +77,57 @@ Lyntin has a series of command line flags which change its behavior.
 
 
 
-EVALMODES
-=========
+COMMAND LINE ARGUMENTS
+======================
+
+syntax: lyntin.py [[OPTIONS] | [--help] | [--version]]
+
+  --help
+       displays this text and exits.
+
+  -v or --version
+       prints out the version information and exits.
+
+
+OPTIONS:
+
+  -d or --datadir
+       If you don't set your datadir, Lyntin will set the 
+       datadir to the HOME environment variable.  Using this 
+       option allows you to set it manually.  You can specify 
+       only one --datadir flag.  Specifying additional ones 
+       will overwrite the last one.
+
+  -e or --evalmode
+       Lyntin has two user input evaluation modes: lyntin and 
+       tintin.  This allows you to set the mode at the command 
+       line.
+
+  -m or --moduledir
+       Lyntin dynamically loads everything in the lyntin/modules 
+       dir, but will additionally dynamically load modules in dirs 
+       specified by this flag.  You can specify multiple --moduledir 
+       flags.
+         
+  -r or --read or --readfile
+       Reads a file in at startup populating the common session 
+       with aliases, actions, and whatnot.  You can specify multiple 
+       files to read with multiple --read flags.
+
+  --nosnoop
+       Lyntin defaults to snooping.  This sets it so Lyntin will
+       default to no snooping.
+
+  -u or --ui
+       Launches a specific ui for Lyntin.  Lyntin comes with two 
+       ui's: 'text' and 'tk'.  Other ui's can be dropped into the 
+       ui/ subdirectory and this switch can be used for starting 
+       them as well.
+
+
+
+A NOTE ABOUT EVALMODES
+======================
 
 There are two user input evaluation modes in Lyntin: Lyntin mode and
 Tintin mode.  You can switch modes using the command-line argument:
@@ -103,8 +152,8 @@ Lyntin up in tintin mode.
 
 
 
-REGULAR EXPRESSIONS
-===================
+LYNTIN'S REGULAR EXPRESSION SYNTAX
+==================================
 
 Lyntin allows the use of regular expressions in various arguments
 for commands like #action, #highlight, and such.  It uses a specific
