@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.6 2002/07/30 23:08:33 willhelm Exp $
+# $Id: speedwalk.py,v 1.7 2002/08/12 15:17:52 jmberne Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -425,7 +425,7 @@ def swdir_cmd(ses, args, input):
     if not quiet:
       exported.write_message("swdir: {%s} {%s} added." % (alias, dir))
   except ValueError, e:
-    exported.write_error("swdir: cannot add alias: %s." % e)
+    exported.write_error("swdir: cannot add alias '%s': %s." % (alias, e))
 
 commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
 
