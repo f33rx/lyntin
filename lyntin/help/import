@@ -1,0 +1,4 @@
+   syntax: #import <filename>
+   Where filename is something like testme.  Don't include the py
+   extension, though.
+   This will import/reload the module <filename>.

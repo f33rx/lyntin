@@ -1,3 +1,8 @@
+"""
+a hander intercepts server output at a primitive level and can
+respond to it or change the input for the next handler.
+"""
+
 ##################################################################
 # This file is part of Lyntin
 # copyright (c) Lyn Headley 1996-1998
@@ -9,7 +14,7 @@
 #
 # a handler intercepts server output at a primitive level,
 # and can respond to it or change the input for the next handler.
-# $Id$
+# $Id: handler.py,v 1.1 2000/08/11 17:25:29 laheadle Exp $
 ##################################################################
 
 (CONTINUE, STOP) = range(2)
