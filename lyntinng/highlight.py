@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.3 2001/12/15 07:05:33 willhelm Exp $
+# $Id: highlight.py,v 1.4 2001/12/15 07:25:22 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -42,85 +42,85 @@ STYLEMAP = {
            }
 
 class HighlightManager:
-   """ Manages highlights."""
-   def __init__(self):
-      self._highlights = {}
+  """ Manages highlights."""
+  def __init__(self):
+    self._highlights = {}
 
-   def addHighlight(self, style, text):
-      """ Adds a highlight to the dict."""
-      self._highlights[text] = (style, self._getMarkup(style))
-      return 1
+  def addHighlight(self, style, text):
+    """ Adds a highlight to the dict."""
+    self._highlights[text] = (style, self._getMarkup(style))
+    return 1
 
-   def _getMarkup(self, style):
-      """
-      Looks at the style (which is a comma separated list of 
-      styles) and figures out the markup string and returns it.
-      """
-      styles = style.split(",")
-      markup = ""
-      for mem in styles:
-         mem = mem.strip()
-         if STYLEMAP.has_key(mem):
-            markup = markup + STYLEMAP[mem] + ";"
-      return chr(27) + "[" + markup[:-1] + "m"
+  def _getMarkup(self, style):
+    """
+    Looks at the style (which is a comma separated list of 
+    styles) and figures out the markup string and returns it.
+    """
+    styles = style.split(",")
+    markup = ""
+    for mem in styles:
+      mem = mem.strip()
+      if STYLEMAP.has_key(mem):
+        markup = markup + STYLEMAP[mem] + ";"
+    return chr(27) + "[" + markup[:-1] + "m"
 
-   def clearHighlights(self):
-      """ Removes all the highlights."""
-      for mem in self._highlights.keys():
-         del self._highlights[mem]
+  def clearHighlights(self):
+    """ Removes all the highlights."""
+    for mem in self._highlights.keys():
+      del self._highlights[mem]
 
-   def removeHighlights(self, text):
-      """ Removes highlights from the list.
+  def removeHighlights(self, text):
+    """ Removes highlights from the list.
 
-      Returns a list of tuples of highlight item/highlight that
-      were removed.
-      """
-      badhighlights = utils.expand(text, self._highlights.keys())
+    Returns a list of tuples of highlight item/highlight that
+    were removed.
+    """
+    badhighlights = utils.expand(text, self._highlights.keys())
 
-      ret = []
-      for mem in badhighlights:
-         ret.append((mem, self._highlights[mem][0]))
-         del self._highlights[mem]
+    ret = []
+    for mem in badhighlights:
+      ret.append((mem, self._highlights[mem][0]))
+      del self._highlights[mem]
 
-      return ret
+    return ret
 
-   def getHighlights(self):
-      """ Returns the keys of the highlight dict."""
+  def getHighlights(self):
+    """ Returns the keys of the highlight dict."""
+    list = self._highlights.keys()
+    list.sort()
+    return list
+
+  def expand(self, input):
+    """ Looks at mud data and performs any highlights.
+
+    It returns the final text--even if there were no highlights.
+    """
+    if len(input) > 0:
+      for text in self._highlights.keys():
+        input = input.replace(text, self._highlights[text][1] +
+                                    text + chr(27) + "[0m")
+
+    return input
+
+  def getHighlightInfo(self, text=''):
+    """ Returns information about the highlights in here.
+
+    This is used by #highlight to tell all the highlights involved
+    as well as #write which takes this information and dumps
+    it to the file.
+    """
+    if self._highlights.keys() == []:
+      return ''
+
+    list = []
+    if text=='':
       list = self._highlights.keys()
-      list.sort()
-      return list
+    else:
+      list = utils.expand(text, self._highlights.keys())
 
-   def expand(self, input):
-      """ Looks at mud data and performs any highlights.
+    data = ''
+    for mem in list:
+      data = (data + "#highlight {" + mem + "} {" + 
+              self._highlights[mem] + "}\n")
 
-      It returns the final text--even if there were no highlights.
-      """
-      if len(input) > 0:
-         for text in self._highlights.keys():
-            input = input.replace(text, self._highlights[text][1] +
-                                        text + chr(27) + "[0m")
-
-      return input
-
-   def getHighlightInfo(self, text=''):
-      """ Returns information about the highlights in here.
-
-      This is used by #highlight to tell all the highlights involved
-      as well as #write which takes this information and dumps
-      it to the file.
-      """
-      if self._highlights.keys() == []:
-         return ''
-
-      list = []
-      if text=='':
-         list = self._highlights.keys()
-      else:
-         list = utils.expand(text, self._highlights.keys())
-
-      data = ''
-      for mem in list:
-         data = (data + "#highlight {" + mem + "} {" + 
-                        self._highlights[mem] + "}\n")
-
-      return data[:-1]
+    return data[:-1]

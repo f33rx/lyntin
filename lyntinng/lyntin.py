@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.2 2001/12/02 18:35:22 willhelm Exp $
+# $Id: lyntin.py,v 1.3 2001/12/02 18:44:24 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -105,51 +105,51 @@ lyntindir = "."
 
 
 if __name__ == '__main__':
-   try:
-      import engine, event, lyntin
+  try:
+    import engine, event, lyntin
 
-      # figure out where the lyntin files are
-      tmp = sys.argv[0]
-      if len(tmp) == 0:
-         raise Exception, "Lyntin root dir cannot be determined."
-      lyntin.lyntindir = tmp[:tmp.rfind("/")+1].replace("/", os.sep)
+    # figure out where the lyntin files are
+    tmp = sys.argv[0]
+    if len(tmp) == 0:
+      raise Exception, "Lyntin root dir cannot be determined."
+    lyntin.lyntindir = tmp[:tmp.rfind("/")+1].replace("/", os.sep)
 
-      # read through options and arguments
-      optlist, args = getopt.getopt(sys.argv[1:], 
-                                    'u:r:vh',
-                                    ['ui=', 'readfile=', 'help', 'version'])
+    # read through options and arguments
+    optlist, args = getopt.getopt(sys.argv[1:], 
+                                  'u:r:vh',
+                                  ['ui=', 'readfile=', 'help', 'version'])
 
-      for mem in optlist:
-         if mem[0] == '--ui' or mem[0] == '-u':
-            lyntin.options['ui'] = mem[1]
+    for mem in optlist:
+      if mem[0] == '--ui' or mem[0] == '-u':
+        lyntin.options['ui'] = mem[1]
 
-         if mem[0] == '--readfile' or mem[0] == '-r':
-            lyntin.options['readfile'] = mem[1]
+      if mem[0] == '--readfile' or mem[0] == '-r':
+        lyntin.options['readfile'] = mem[1]
 
-         if mem[0] == '--help':
-            print HELPTEXT
-            sys.exit(0)
+      if mem[0] == '--help':
+        print HELPTEXT
+        sys.exit(0)
 
-         if mem[0] == '--version':
-            print VERSION
-            sys.exit(0)
+      if mem[0] == '--version':
+        print VERSION
+        sys.exit(0)
 
-      # instantiate an engine
-      engine.myengine = engine.Engine()
-      engine.myengine.initialize()
+    # instantiate an engine
+    engine.myengine = engine.Engine()
+    engine.myengine.initialize()
 
-      # generate a startup event.
-      # StartupEvent handles all the rest of the initialization
-      # including parsing command-line arguments and such.
-      event.StartupEvent(sys.argv).enqueue()
+    # generate a startup event.
+    # StartupEvent handles all the rest of the initialization
+    # including parsing command-line arguments and such.
+    event.StartupEvent(sys.argv).enqueue()
 
-      # start the engine which will execute the startupevent
-      # and start executing.
-      engine.myengine.runengine()
+    # start the engine which will execute the startupevent
+    # and start executing.
+    engine.myengine.runengine()
 
-   except SystemExit:
-      pass
-   except:
-      import traceback
-      traceback.print_exc()
-      sys.exit(1)
+  except SystemExit:
+    pass
+  except:
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: unittest.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
 #######################################################################
 import string, traceback, sys
 import utils, engine
@@ -59,60 +59,60 @@ test_lookup = {
 
 
 def test_cmd(session, words, input):
-   """ Implements the test command.
+  """ Implements the test command.
 
-   '#test [<test>]'
+  '#test [<test>]'
 
-   With no arguments, lists the tests available.
-   With one argument, runs the test specified.
+  With no arguments, lists the tests available.
+  With one argument, runs the test specified.
 
-   #test only deals with registered test.  Registered tests come
-   from the module--you can't register tests by commands.
-   """
-   if len(words) == 1:
-      if len(test_lookup.keys()) > 0:
-         list = test_lookup.keys()
-         list.sort()
-         data = ("Unit tests available:\n" + 
-                 utils.columnize(list, indent=3))
-      else:
-         data = "There are no tests registered."
+  #test only deals with registered test.  Registered tests come
+  from the module--you can't register tests by commands.
+  """
+  if len(words) == 1:
+    if len(test_lookup.keys()) > 0:
+      list = test_lookup.keys()
+      list.sort()
+      data = ("Unit tests available:\n" + 
+              utils.columnize(list, indent=3))
+    else:
+      data = "There are no tests registered."
 
-      engine.myengine.writeMessage(data)
-      return
+    engine.myengine.writeMessage(data)
+    return
 
-   if words[1] == 'all':
-      engine.myengine.writeTest("Running all tests.")
-      for mem in test_lookup.keys():
-         run_test(test_lookup[mem])
-      return
+  if words[1] == 'all':
+    engine.myengine.writeTest("Running all tests.")
+    for mem in test_lookup.keys():
+      run_test(test_lookup[mem])
+    return
 
-   if test_lookup.has_key(words[1]):
-      engine.myengine.writeTest("Running test: " + words[1])
-      run_test(test_lookup[words[1]])
-   else:
-      engine.myengine.writeError("There is no test for '" + words[1] + "'")
+  if test_lookup.has_key(words[1]):
+    engine.myengine.writeTest("Running test: " + words[1])
+    run_test(test_lookup[words[1]])
+  else:
+    engine.myengine.writeError("There is no test for '" + words[1] + "'")
 
 
 def run_test(testsequence):
-   """ Runs a test sequence."""
-   engine.myengine.writeTest("BEGINNING OF TEST.")
-   for mem in testsequence:
-      # we use print to allow tests to tell the user what they
-      # should be looking for
-      if mem.find("print") == 0:
-         engine.myengine.writeTest(mem.split(' ', 1)[1])
-         continue
+  """ Runs a test sequence."""
+  engine.myengine.writeTest("BEGINNING OF TEST.")
+  for mem in testsequence:
+    # we use print to allow tests to tell the user what they
+    # should be looking for
+    if mem.find("print") == 0:
+      engine.myengine.writeTest(mem.split(' ', 1)[1])
+      continue
 
-      engine.myengine.writeTest("test: '" + mem + "'")
-      # if it's not a print, then it's a lyntin command
-      try:
-         engine.myengine.handleUserData(input=mem, internal=1)
-      except:
-         engine.myengine.writeTest("exception:\n" + 
-            string.join(traceback.format_list(traceback.extract_tb()), '\n'))
+    engine.myengine.writeTest("test: '" + mem + "'")
+    # if it's not a print, then it's a lyntin command
+    try:
+      engine.myengine.handleUserData(input=mem, internal=1)
+    except:
+      engine.myengine.writeTest("exception:\n" + 
+         string.join(traceback.format_list(traceback.extract_tb()), '\n'))
 
-   engine.myengine.writeTest("END OF TEST.")
+  engine.myengine.writeTest("END OF TEST.")
 
 
 engine.myengine.addCommand("^test", test_cmd)

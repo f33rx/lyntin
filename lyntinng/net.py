@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: net.py,v 1.2 2001/12/09 06:31:15 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -15,125 +15,126 @@ import engine, event
 
 
 class SocketCommunicator:
-   """
-   The SocketCommunicator handles all incoming and outgoing
-   data from and to the mud.
-   """
-   def __init__(self):
-      self._sessionname = ''
-      self._host = ''
-      self._port = ''
+  """
+  The SocketCommunicator handles all incoming and outgoing
+  data from and to the mud.
+  """
+  def __init__(self):
+    self._sessionname = ''
+    self._host = ''
+    self._port = ''
+    self._sock = None
+    self._ansimode = 1
+    self._nego_buffer = ''
+    self._shutdownflag = 0
+    self._session = None
+
+  def __repr__(self):
+    return ("connection " + self._host + " " + repr(self._port))
+
+  def setSession(self, ses):
+    """ Sets the local session."""
+    self._session = ses
+
+  def shutdown(self):
+    """ Shuts down a socket connection and the thread polling it."""
+    self._shutdownflag = 1
+    if self._sock:
+      event.OutputEvent("Lost connection to: " + self._host).enqueue()
+      # engine.myengine.writeMessage("Lost connection to: " + self._host)
+      self._sock.shutdown(2)
+      self._sock.close()
       self._sock = None
-      self._ansimode = 1
-      self._nego_buffer = ''
-      self._shutdownflag = 0
       self._session = None
 
-   def __repr__(self):
-      return ("connection " + self._host + " " + repr(self._port))
+  def connect(self, host, port, sessionname):
+    """ Takes in a host and a port and connects the socket."""
+    if type(port) == type(''):
+      port = int(port)
 
-   def setSession(self, ses):
-      """ Sets the local session."""
-      self._session = ses
+    engine.myengine.writeMessage("Trying to connect to " + host + ".")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((host, port))
+    sock.setblocking(1)
 
-   def shutdown(self):
-      """ Shuts down a socket connection and the thread polling it."""
-      self._shutdownflag = 1
-      if self._sock:
-         event.OutputEvent("Lost connection to: " + self._host).enqueue()
-         # engine.myengine.writeMessage("Lost connection to: " + self._host)
-         self._sock.shutdown(2)
-         self._sock.close()
-         self._sock = None
-         self._session = None
-
-   def connect(self, host, port, sessionname):
-      """ Takes in a host and a port and connects the socket."""
-      if type(port) == type(''):
-         port = int(port)
-
-      engine.myengine.writeMessage("Trying to connect to " + host + ".")
-      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      sock.connect((host, port))
-      sock.setblocking(1)
-
-      self._host = host
-      self._port = port
-      self._sock = sock
-      self._sessionname = sessionname
-      engine.myengine.writeMessage("Connection made.")
+    self._host = host
+    self._port = port
+    self._sock = sock
+    self._sessionname = sessionname
+    engine.myengine.writeMessage("Connection made.")
          
-   def run(self):
-      """ Polls a socket and returns any data sitting there."""
+  def run(self):
+    """ Polls a socket and returns any data sitting there."""
+    try:
+      while not self._shutdownflag:
+        readers,e,w = select.select([self._sock], [], [], .1)
+        if readers:
+          data = readers[0].recv(1024)
+          if data == '':
+            if self._shutdownflag == 0 and self._session: 
+              self._session.shutdown(())
+            return
+
+          if IAC in data or self._nego_buffer != '':
+            data = self._handlenego(self._nego_buffer + data)
+
+          event.MudEvent(data).enqueue()
+
+    except SystemExit:
+      if self._shutdownflag == 0 and self._session:
+        self._session.shutdown(())
+    except:
+      if self._shutdownflag == 0 and self._session:
+        self._session.shutdown(())
+
+  def write(self, data, convert=1):
+    """ Writes data to the mud."""
+    try:
+      if convert:
+        self._sock.send(string.replace(data, "\n", "\r\n"))
+      else:
+        self._sock.send(data)
+    except:
+      if self._shutdownflag == 0 and self._session:
+        # FIXME - this might not be prudent--might want to create
+        # an event for shutting down sessions.
+        self._session.shutdown(())
+
+  def _handlenego(self, data):
+    """
+    Removes telnet negotiation stuff from the stream and handles 
+    it.
+    """
+    i = string.find(data, IAC)
+
+    while (i != -1):
       try:
-         while not self._shutdownflag:
-            readers,e,w = select.select([self._sock], [], [], .1)
-            if readers:
-               data = readers[0].recv(1024)
-               if data == '':
-                  if self._shutdownflag == 0 and self._session: 
-                     self._session.shutdown(())
-                  return
+        if data[i+1] in DDWW:
+          if data[i+2] == ECHO:
+            if data[i+1] == WILL:
+              event.EchoEvent(0).enqueue()
+            elif data[i+1] == WONT:
+              event.EchoEvent(1).enqueue()  
+          elif data[i+1] in DD:
+            self.write(IAC + WONT + data[i+2])
 
-               if IAC in data or self._nego_buffer != '':
-                  data = self._handlenego(self._nego_buffer + data)
+          data = data[:i] + data[i+3:]
 
-               event.MudEvent(data).enqueue()
-      except SystemExit:
-         if self._shutdownflag == 0 and self._session:
-            self._session.shutdown(())
-      except:
-         if self._shutdownflag == 0 and self._session:
-            self._session.shutdown(())
+        elif data[i+1] == SB:
+          end = string.find(data, SE, i)
+          data = data[:i] + data[end+1:]
 
-   def write(self, data, convert=1):
-      """ Writes data to the mud."""
-      try:
-         if convert:
-            self._sock.send(string.replace(data, "\n", "\r\n"))
-         else:
-            self._sock.send(data)
-      except:
-         if self._shutdownflag == 0 and self._session:
-            # FIXME - this might not be prudent--might want to create
-            # an event for shutting down sessions.
-            self._session.shutdown(())
+        else:
+          pass
 
-   def _handlenego(self, data):
-      """
-      Removes telnet negotiation stuff from the stream and handles 
-      it.
-      """
-      i = string.find(data, IAC)
+      except IndexError:
+        self._nego_buffer = data[i:]
+        data = data[:i]
+        break
 
-      while (i != -1):
-         try:
-            if data[i+1] in DDWW:
-               if data[i+2] == ECHO:
-                  if data[i+1] == WILL:
-                     event.EchoEvent(0).enqueue()
-                  elif data[i+1] == WONT:
-                     event.EchoEvent(1).enqueue()  
-               elif data[i+1] in DD:
-                  self.write(IAC + WONT + data[i+2])
+      i = string.find(data, IAC, i)
 
-               data = data[:i] + data[i+3:]
-
-            elif data[i+1] == SB:
-               end = string.find(data, SE, i)
-               data = data[:i] + data[end+1:]
-
-            else:
-               pass
-
-         except IndexError:
-            self._nego_buffer = data[i:]
-            data = data[:i]
-            break
-
-         i = string.find(data, IAC, i)
-
-      return data
+    return data
 
 
 ### --------------------------------------------
