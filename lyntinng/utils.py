@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.71 2003/03/19 23:49:24 willhelm Exp $
+# $Id: utils.py,v 1.72 2003/03/22 03:14:23 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -920,7 +920,7 @@ def _lyntin_denest_vars_worker(varchar, text):
 
   while (index != -1):
     if (index == 0 or text[index] != "\\") and \
-        (index == len(text)-1 or text[index+2] != varchar):
+        (index == len(text)-2 or text[index+2] != varchar):
       text = text[:index] + text[index+1:]
     
     index = text.find(varchar2, index+1) 
