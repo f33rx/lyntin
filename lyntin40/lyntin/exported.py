@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.14 2004/03/30 00:22:00 willhelm Exp $
+# $Id: exported.py,v 1.15 2004/03/30 22:05:11 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -433,7 +433,7 @@ def set_current_session(ses):
   @param ses: the session instance to set the current session to
   @type  ses: session.Session
   """
-  myengine._current_session = ses
+  myengine.set_current_session(ses)
     
 def get_num_errors():
   """
