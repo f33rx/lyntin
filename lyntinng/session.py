@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.46 2002/05/02 23:39:07 willhelm Exp $
+# $Id: session.py,v 1.47 2002/05/05 16:34:51 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -262,9 +262,13 @@ class Session:
                 dict["command"]=mem
                 command(self, dict, input)
               except ValueError, e:
-                exported.write_error("%s: %s" % (mem, e))
+                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
+                                     (mem, e, lyntin.commandchar, mem,
+                                      argumentparser.syntaxline))
               except argparser.ParserException, e:
-                exported.write_error("%s: %s" % (mem, e))
+                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
+                                     (mem, e, lyntin.commandchar, mem,
+                                      argumentparser.syntaxline))
             if internal==0: self._prompt()
             break
         else:
@@ -279,9 +283,13 @@ class Session:
                 dict["command"]=mem
                 command(self, dict, input)
               except ValueError, e:
-                exported.write_error("%s: %s" % (mem, e))
+                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
+                                     (mem, e, lyntin.commandchar, mem,
+                                      argumentparser.syntaxline))
               except argparser.ParserException, e:
-                exported.write_error("%s: %s" % (mem, e))
+                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
+                                     (mem, e, lyntin.commandchar, mem,
+                                      argumentparser.syntaxline))
             if internal==0: self._prompt()
             break
 
