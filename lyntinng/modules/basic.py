@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.67 2002/04/22 00:08:12 willhelm Exp $
+# $Id: basic.py,v 1.68 2002/04/25 17:13:17 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -986,29 +986,30 @@ def unsomething_cmd(session, args, input):
   singular = ''
   plural = ''
 
+  command = args["command"]
   text = args["var"]
 
-  if "unaction".find(words[0]) == 0:
+  if "unaction".find(command) == 0:
     removedthings = session.getManager("action").removeActions(text)
     singular = "action"
     plural = "actions"
-  elif "unalias".find(words[0]) == 0:
+  elif "unalias".find(command) == 0:
     removedthings = session.getManager("alias").removeAliases(text)
     singular = "alias"
     plural = "aliases"
-  elif "ungag".find(words[0]) == 0:
+  elif "ungag".find(command) == 0:
     removedthings = session.getManager("gag").removeGags(text)
     singular = "gag"
     plural = "gags"
-  elif "unhighlight".find(words[0]) == 0:
+  elif "unhighlight".find(command) == 0:
     removedthings = session.getManager("highlight").removeHighlights(text)
     singular = "highlight"
     plural = "highlights"
-  elif "unsubstitute".find(words[0]) == 0:
+  elif "unsubstitute".find(command) == 0:
     removedthings = session.getManager("substitute").removeSubstitutes(text)
     singular = "substitute"
     plural = "substitutes"
-  elif "unvariable".find(words[0]) == 0:
+  elif "unvariable".find(command) == 0:
     removedthings = session.getManager("variable").removeVariables(text)
     singular = "variable"
     plural = "variables"
