@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.77 2003/01/28 22:47:23 willhelm Exp $
+# $Id: session.py,v 1.78 2003/01/31 15:20:55 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -13,7 +13,7 @@ to a mud--though it should be noted that sessions could also connect
 to any other TCP/IP service.
 """
 import re, copy, string, os
-import exported, engine, utils, ansi, lyntin, event, ticker
+import exported, engine, utils, ansi, lyntin, event
 import argparser
 
 ESC = chr(27)
@@ -34,7 +34,6 @@ class Session:
     self._name = ""
     self._host = "none"
     self._port = 0
-    self._ticker = ticker.Ticker()
     self._colorbuffer = ''
 
     self._databuffer = []
@@ -83,7 +82,6 @@ class Session:
     @type  name: string
     """
     self._name = name
-    self.getTicker().setSessionName(name)
     if self._socket:
       self._socket.setSessionName(name)
 
@@ -109,8 +107,7 @@ class Session:
 
   def shutdown(self, args):
     """
-    Shuts down the session, shuts down the underlying SocketCommunicator
-    and clears the ticker.
+    Shuts down the session, shuts down the underlying SocketCommunicator.
 
     @param args: the args tuple for the shutdown_hook.
     @type  args: tuple
@@ -125,7 +122,6 @@ class Session:
     if self.getName() != "common":
       if quiet == 0:
         event.OutputEvent("Session %s disconnected.\n\"#zap %s\" to kill the session.\n" % (self._name, self._name)).enqueue()
-      self._ticker.clear()
       exported.get_hook("disconnect_hook").spamhook((self, self._host, self._port))
 
       if self._socket:
@@ -138,7 +134,7 @@ class Session:
   def getStatus(self):
     """
     Returns status of the session.  Most specifically the session name,
-    the socket we're connected to and the ticker status
+    the socket we're connected to.
 
     @returns: the status string
     @rtype: string
@@ -151,27 +147,8 @@ class Session:
     else:
       data.append("   snoop: off")
     data.append("   socket: %s" % repr(self._socket))
-    data.append("   ticker: %s" % self.getTicker().getInfo())
 
     return data
-
-  def setTicker(self, ticker):
-    """
-    Sets the ticker.
-
-    @param ticker: the new Ticker instance for this session
-    @type  ticker: ticker.Ticker
-    """
-    self._ticker = ticker
-
-  def getTicker(self):
-    """
-    Returns the ticker instance.
-
-    @returns: the ticker instance for this session
-    @rtype: ticker.Ticker
-    """
-    return self._ticker
 
   def getWriteFileInfo(self, args):
     """
@@ -214,14 +191,11 @@ class Session:
     Clears the session (except for connections).  Goes through
     the list of managers registered with the engine and calls
     the clear method with itself.
-
-    Also clears the ticker and the databuffer.
     """
     engine = exported.get_engine()
     for mem in engine._managers.values():
       mem.clear(self)
 
-    self._ticker.clear()
     self._databuffer = []
 
 
