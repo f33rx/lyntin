@@ -1,5 +1,3 @@
-#!/usr/local/bin/python1.4
-
 """
 The general style of the functions in this file is like the
 following and is different from the former style to improve
@@ -13,12 +11,38 @@ functions will be supported for a time but seeing that they
 did not follow a standard anyway, I picked from the two
 choices the one which I believed the most programmer
 friendly.  -- James
+
+To implement a ui override the following functions:
+   def setup(self)
+   setup your ui
+
+   def scrollback_scroll(self,direction='back')
+   scrollback for your ui
+
+   def prompt(self)
+   print a prompt in your ui
+
+   def echo(self, yesno)
+   turns on or off echo
+
+   def warn_no_echo(self)
+
+   def close(self)
+   closes the ui
+
+   def print_string(self,line,modifiers=None,ending='\n',target=None)
+   prints strings to the user.  these could be user strings or
+   strings from lyntin or the mud.
+
+   def get_input(self)
+   retrieves a line of input from the ui
+
 """
 
 class BaseGUI:
     def __init__(self):
         self.support_hash = {'echo':0}
-        self.status_hash={'echo':1,'scollback':0}
+        self.status_hash = {'echo':1,'scollback':0}
         self.setup()
 
     def setup(self):
@@ -41,7 +65,7 @@ class BaseGUI:
 
     def status(self,var,*arg):
         if len(arg) == 1:
-            self.status_hash[var]=arg[0]
+            self.status_hash[var] = arg[0]
         else:
             try:
                 return self.status_hash[var]
@@ -62,7 +86,6 @@ class BaseGUI:
         also UI independant.
         """
         self.status('scrollback',1)
-        pass
 
     def scrollback_backward(self):
         """scrollback_backward(self)->None
@@ -72,7 +95,6 @@ class BaseGUI:
         """
         if self.status('scrollback')==1:
             scrollback_scroll('back')
-            pass
         else:
             self.scrollback_open()
         return None
@@ -89,11 +111,12 @@ class BaseGUI:
         return None
 
     def scrollback_scroll(self,direction='back'):
-        """scroll_forward(self,direction='back')->None
+        """scroll_scroll(self,direction='back')->None
 
         Actually does the scrolling.  Override me.
+        direction = 'forward'|'back'
         """
-        return None
+        pass
 
     def scrollback_close(self):
         """ScrollbackClose(self)->None
@@ -138,21 +161,20 @@ class BaseGUI:
     def warn_no_echo(self):
         pass
     
-    def echo(self,yesno):
-        """echo(self,yesno)->None
+    def echo(self, yesno):
+        """echo(self, yesno) -> None
 
-        turns echo on or off depending on if the argument is true or false.
+        Turn on/off echo--override me.
+        yesno = 0|1
         """
-        if yesno:
-            self.status('echo',1)
-        else:
-            self.status('echo',0)
+        pass
 
     def OnEcho(self):
         """OnEcho(self) -> None
 
         Turn on echo
         """
+        self.status('echo',1)
         self.echo(1)
     
     def OffEcho(self):
@@ -160,14 +182,11 @@ class BaseGUI:
 
         Turn off echo
         """
+        self.status('echo',0)
         self.echo(0)
 
 
     def close(self):
-        """close(self) -> None
-
-        override me!
-        """
         pass
 
 
@@ -252,5 +271,3 @@ class BaseGUI:
         """
         return self.get_input()
 
-if __name__ == '__main__':
-    BaseGUI()

@@ -22,9 +22,8 @@ contains global variables
 import socket, select, regex, os, string, regsub, copy
 import mud, app, player, hooks, handler
 
-# Close all open connections
-def ClearAll():
-    """ClearAll() -> None
+def clear_all():
+    """clear_all() -> None
 
     Closes all open sessions which are stored in the ses global
     variable.
@@ -32,9 +31,12 @@ def ClearAll():
     for ses in sessionlist:
         ses.Close()
 
-# retrieve session by name
-# return None if unfound
-def GetSes(str):
+
+def get_session(str):
+    """get_session(str) -> Session
+
+    retrieves the session by name or None if it's not found.
+    """
     global sessionlist
 
     # remove the common session and return the rest
@@ -51,39 +53,50 @@ def GetSes(str):
             return [ses]
     return None
 
-# filter ansi and ^M stuff out of text
-# used when logging files
 def filter_crud(txt):
+    """filter_crud(txt) -> string
+
+    filter ansi and ^M stuff out of text used when logging 
+    files.
+    """
     txt = regsub.gsub('\015\\|\r', '', txt)
     txt = regsub.gsub('[[0-9;]*[mJ]', '', txt)
     return txt
 
-# filter ^M stuff out of text
 def filter_cm(txt):
+    """filter_cm(txt) -> string
+ 
+    filter ^M stuff out of text.
+    """
     txt = regsub.gsub('\015\\|\r', '', txt)
     return txt
 
-# split a string into a list of lines
 def split_into_lines(str):
+    """split_into_lines(str) -> []
+
+    Split a string into a list of lines.
+    """
     if string.find(str, '\r') != -1:
         return string.splitfields(str, '\r')
     else:
         return string.splitfields(str, '\n')
 
-# convert a trigger with pattern variables into a
-# compiled regular expression
+
 def compile_trigger(trig):
+    """compile_trigger(trig) -> regex
+
+    Convert a trigger with pattern variables into a
+    compiled regular expression
+    """
     regx = regsub.gsub('%[0-9]+', '\(.*\)', trig)
     return regex.compile(regx)
 
-##################################################################
-# session class
-# specific connection to a mud
-##################################################################
 
-class session:
+
+
+class Session:
     """
-    session class the framework knows about
+    Session class the framework knows about
     """
     def __init__(self, name, domain, port):
         # we save a certain amount of previous mud output in the 'databuffer'
@@ -106,7 +119,7 @@ class session:
             self.name = name
             self.connected = 1        
             
-    def TickUpdate(self):
+    def tickUpdate(self):
         pass
 
     def Poll(self):
@@ -134,12 +147,12 @@ class session:
             self.Die(x)
 
     
-class UserSession(session):
+class UserSession(Session):
     """
     session class for the user interface
     """
     def __init__(self, name, domain, port):
-        session.__init__(self, name, domain, port)
+        Session.__init__(self, name, domain, port)
         self.aliases = {}
         self.actions = {}
         self.subs = {}
@@ -163,7 +176,7 @@ class UserSession(session):
 
         self.handlers.append(handler.AppHandler())
 
-    def TickUpdate(self):
+    def tickUpdate(self):
         player.TimeUpdate((self,))
 
     def __repr__(self):

@@ -56,8 +56,8 @@ def main():
     sys.path.append(ltd + 'libcore')
 
     import app
-    app.setPath(ltd)
-    app.Run()
+    app.set_path(ltd)
+    app.run()
 
 debugging = 1
 if __name__ == '__main__':

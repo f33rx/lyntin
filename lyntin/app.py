@@ -18,13 +18,10 @@ import dict_plus
 
 _ltd = ''           # LYNTINDIR
 
-##################################################################
-# Client class
-# high level application kinda thingy
-##################################################################
-class client(dict_plus.c):
+
+class Client(dict_plus.c):
    """
-   high level applications kinda thing
+   High level applications kinda thing
    """
 
    def __init__(self):
@@ -68,7 +65,7 @@ class client(dict_plus.c):
                if ses.connected:
                    ses.Poll()
                if ses.ticker:
-                   ses.TickUpdate()
+                   ses.tickUpdate()
                if ses is data.currsession:
                    self.PreHandleUserInput(datato)
                    break
@@ -172,11 +169,11 @@ class client(dict_plus.c):
       """
       Initializes stuff like the sys.path and cmdparse.
       """
-      self.too_many_errors = GetUserCustom('too_many_errors')
-      data.histsize = GetUserCustom('history_size')
-      cmdparse.Initialize()
+      self.too_many_errors = get_user_custom('too_many_errors')
+      data.histsize = get_user_custom('history_size')
+      cmdparse.initialize()
       # add source code directories to sys.path
-      for dir in GetUserCustom('extra_source_dirs'):
+      for dir in get_user_custom('extra_source_dirs'):
          if dir[0] == os.sep:
             sys.path.append(dir)
          else:
@@ -204,7 +201,7 @@ class client(dict_plus.c):
           self.RecordHistory(input)
 
           # run the received_user_input hook
-          newinput = StripFinalEltIf(input, ['\r', '\n'])
+          newinput = strip_final_elt_if(input, ['\r', '\n'])
           hooks.received_user_input_hook.run((newinput,))
 
           # send it along to the recursive workhorse
@@ -223,25 +220,25 @@ class client(dict_plus.c):
       #input = string.strip(input)
 
       # check for a sequence of commands separated by ';'
-      whether, result = IsSequence(input)
+      whether, result = is_sequence(input)
       if whether:
          for s in result:
             self.HandleUserInput(s)
          return
         
-      # IsSequence() returns new value for input
+      # is_sequence() returns new value for input
       input = result
       if not input:
          return
         
       # check for a braced command
-      if IsBrace(input):
+      if is_brace(input):
          input = input[1:-1]
          self.HandleUserInput(input)
          return
 
       # fill in values for any variables
-      whether, input = cmdparse.SubVars(input)
+      whether, input = cmdparse.substitute_vars(input)
       if whether:
          self.HandleUserInput(input)
          return
@@ -252,7 +249,7 @@ class client(dict_plus.c):
          return
 
       # work input over for aliases/speedwalking
-      whether, input = cmdparse.WorkOver(input, data.currsession)
+      whether, input = cmdparse.work_over(input, data.currsession)
 
       if whether == 'speed':
          # speedwalk
@@ -293,7 +290,7 @@ class client(dict_plus.c):
 
          # see if the command applies to a certain session
          try:
-            seslist = data.GetSes(words[0])
+            seslist = data.get_session(words[0])
          except ValueError:
             # tried to do an #all when there aren't any connections
             player.Putline('there aren\'t any sessions!')
@@ -341,11 +338,11 @@ class client(dict_plus.c):
          # not a valid history command
          self.SendPlainInput(input)
       else:
-         num = HistNumber(input)
+         num = history_number(input)
          # we need to add one to num because the history list
          # has already increased in size thanks to PreHandleUserInput
          h = data.history[num+1]
-         input = cmdparse.DoHistorySubs(input, h)
+         input = cmdparse.do_history_subs(input, h)
          self.HandleUserInput(input)
 
    # save input in the history list
@@ -356,13 +353,13 @@ class client(dict_plus.c):
       if input == '\n':
          # don't record this crap
          return
-      if IsHistory(input):
+      if is_history(input):
          # we want to record the actual command, instead of 
          # something like !4, so we have to look it up
-         num = HistNumber(input)
+         num = history_number(input)
          old = data.history[num]
          # perform any requested substitutions
-         input = cmdparse.DoHistorySubs(input, old)
+         input = cmdparse.do_history_subs(input, old)
 
       # do what we came here for
       data.history = [input] + data.history
@@ -452,15 +449,15 @@ class BadUser:
 # Utility Functions
 ##################################################################
 
-def setPath(path):
+def set_path(path):
    global _ltd
    _ltd = path
 
-def getPath():
+def get_path():
    global _ltd
    return _ltd
 
-def Run():
+def run():
    """
    Initialize app and enter main loop.
 
@@ -478,7 +475,7 @@ def Run():
    user module is imported -- switch with last step?
    usercustom variables are loaded and any extra libs are added to path
    """
-   cl = client()
+   cl = Client()
    data.theapp = cl
 
    # The initial session started for the user
@@ -513,14 +510,14 @@ def Run():
       player.Putline('Unable to load user customizations')
     
    # warn player if no-echo not possible
-   if not mud.has_echo():
+   if not data.theapp.ui.has_echo():
       cl.ui.WarnNoEcho()
 
    cl.Initialize()
    player.Prompt()
    cl.ui.mainloop()
 
-def StripFinalEltIf(seq, remlist):
+def strip_final_elt_if(seq, remlist):
    """
    If the final element of the seq is in remlist, remove it.
    """
@@ -530,8 +527,8 @@ def StripFinalEltIf(seq, remlist):
             return seq[:-1]
    return seq
 
-def GetAppropriateFile(str, Access):
-   """GetApproproateFile(str, Access) -> file
+def get_appropriate_file(str, Access):
+   """get_approproate_file(str, Access) -> file
 
    return a file opened from the given string, with the given 
    access paramter.  if they give us a full path name, try to open it.
@@ -550,8 +547,8 @@ def GetAppropriateFile(str, Access):
       return open(str, Access)
 
     
-def SplitBraced(str):
-   """SplitBraced(str) -> tuple of innards
+def split_braced(str):
+   """split_braced(str) -> tuple of innards
 
    Takes a string like {blah} {blah} and returns a tuple of the innards
    """
@@ -598,11 +595,12 @@ def SplitBraced(str):
       raise 'LTSyntaxError', 'unmatched braces'
    return one, two
 
+"""
 def CountRegex(pat, str):
-   """CountRegex(pat, str) -> int
+   CountRegex(pat, str) -> int
 
    Returns the number of occurances of pattern in a string.
-   """
+   
    s = str[:]
    r = regex.compile(pat)
    count = 0
@@ -610,9 +608,10 @@ def CountRegex(pat, str):
       count = count + 1
       s = regsub.sub(pat, '', s)
    return count
+"""
 
-def StripVars(s):
-   """StripVars(s) -> list
+def strip_vars(s):
+   """strip_vars(s) -> list
 
    Returns a list of all variables in a string.  No element
    will occur twice in the list.
@@ -634,9 +633,8 @@ def StripVars(s):
       str = regsub.sub(data.var_regex.givenpat, '', str)
    return vars, ret
 
-# is input enclosed in braces?
-def IsBrace(input):
-   """IsBrace(input) -> bool
+def is_brace(input):
+   """is_brace(input) -> bool
 
    Returns whether the input is enclosed in braces.
    """
@@ -644,8 +642,8 @@ def IsBrace(input):
       return 0
    return input[0] == '{' and input[-1] == '}'
 
-def IsSequence(input):
-   """IsSequence(input) -> bool
+def is_sequence(input):
+   """is_sequence(input) -> bool
 
    check for sequencing, i.e. commands separated by ';'
    no choice but to do a grungy old parse
@@ -703,15 +701,15 @@ def IsSequence(input):
    return whether, parsed
 
 
-def IsHistory(input):
-   """IsHistory(input) -> bool
+def is_history(input):
+   """is_history(input) -> bool
 
    Returns whether this is a history command.
    """
    return regex.search('^![0-9]*', input) == 0
 
-def HistNumber(input):
-   """HistNumber(input) -> int
+def history_number(input):
+   """history_number(input) -> int
 
    Returns the number of a history command that input
    is referencing.
@@ -722,8 +720,8 @@ def HistNumber(input):
       return 0
    return string.atoi(rx.group(1))
 
-def GetUserCustom(var):
-   """GetUserCustom(var) -> depends
+def get_user_custom(var):
+   """get_user_custom(var) -> depends
 
    Gets a user-customized variable
    """
@@ -735,7 +733,6 @@ def GetUserCustom(var):
       return uc[var]
    raise BadUser, BadUser(var)
 
-# too many errors; quit lyntin
 def abort_due_to_errors(arg):
    """abort_due_to_errors(arg) -> None
 

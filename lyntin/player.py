@@ -478,7 +478,7 @@ def Report(words, input, seslist):
                 # define a new report
                 filename = words[1]
                 text = string.join(words[2:])
-                file = app.GetAppropriateFile(filename, 'a')
+                file = app.get_appropriate_file(filename, 'a')
                 eachses.reports.append((file, text))
                 PutUntouchedLine('OK, "%s" NOW REPORTED TO FILE %s'% \
                                  (text, file))
@@ -516,7 +516,7 @@ def Variable(words, input, seslist):
         else:
             # more than one argument: define
             # a new variable for the current session
-            name, expansion = app.SplitBraced(string.join(words[1:]))
+            name, expansion = app.split_braced(string.join(words[1:]))
             if name and (not expansion):
                 # display just the matching variables
                 Variable(['#var', name], [ses])
@@ -542,7 +542,7 @@ def WriteFile(words, input, seslist):
                 Putline("write: command requires at least one argument")
                 Putline("write <filename>")
                 return
-            thefile = app.GetAppropriateFile(words[1], 'w')
+            thefile = app.get_appropriate_file(words[1], 'w')
 
             # aliases
             for al in ses.aliases.keys():
@@ -622,7 +622,7 @@ def ParseFile(ofile, input, seslist):
                 return
             
             # open a file for reading
-            thefile = app.GetAppropriateFile(ofile[1], 'r')
+            thefile = app.get_appropriate_file(ofile[1], 'r')
             
             thelist = thefile.readlines()
             al_count = ac_count = sub_count = gag_count = var_count = 0
@@ -636,18 +636,18 @@ def ParseFile(ofile, input, seslist):
                     if words[0] == '#al':
                         al_count = al_count + 1
                         name, expansion = \
-                              app.SplitBraced(string.join(words[1:]))
+                              app.split_braced(string.join(words[1:]))
                         ses.aliases[name] = expansion
                     # action
                     elif words[0] == '#ac':
                         ac_count = ac_count + 1
-                        trigger, response = cmdparse.SplitAction(s)
+                        trigger, response = cmdparse.split_action(s)
                         
                         ses.add_action(trigger, response)
                     # substitute
                     elif string.find('#substitute', words[0]) == 0:
                         sub_count = sub_count + 1
-                        pat, repl = app.SplitBraced(string.join(words[1]))
+                        pat, repl = app.split_braced(string.join(words[1]))
                         ses.subs[pat] = repl
                     # gag
                     elif string.find('#gag', words[0]) == 0:
@@ -660,7 +660,7 @@ def ParseFile(ofile, input, seslist):
                         if len(words) > 2:
                             var_count = var_count + 1
                             name, val = \
-                                  app.SplitBraced(string.join(words[1:]))
+                                  app.split_braced(string.join(words[1:]))
                             ses.vars[name] = val
 
 
@@ -744,7 +744,7 @@ def Quit(words, input, seslist):
     # run the shutdown hook.
     hooks.shut_down_lyntin_hook.run()
     if data.numsessions:
-        data.ClearAll()
+        data.clear_all()
 
     # call CloseUI
     data.theapp.ui.CloseUI()
@@ -775,7 +775,7 @@ def Action(words, input, seslist):
     hooks.action_command_hook.run((input, seslist))
     for eachses in seslist:
         count = 0
-        trigger, response = cmdparse.SplitAction(input) 
+        trigger, response = cmdparse.split_action(input) 
     
         if trigger and response:
             eachses.add_action(trigger, response)
@@ -846,7 +846,7 @@ def Alias(words, input, seslist):
         count = 0
 
         if len(words) > 2:
-            name, expansion = app.SplitBraced(string.join(words[1:]))
+            name, expansion = app.split_braced(string.join(words[1:]))
             ses.aliases[name] = expansion
             PutUntouchedLine('#OK, {%s} ALIASES {%s}'%(name, expansion))
 
@@ -1041,7 +1041,7 @@ def Substitute(words, input, seslist):
         if len(words) < 3:
             Putline('substitute: command requires at least two arguments')
             continue
-        pattern, replacement = app.SplitBraced(string.join(words[1:]))
+        pattern, replacement = app.split_braced(string.join(words[1:]))
         ses.subs[pattern] = replacement
         Putline('ok, ' + pattern + ' is now replaced by ' + replacement)
 

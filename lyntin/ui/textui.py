@@ -52,38 +52,35 @@ def GetInputLine(host):
 class Textui(BaseGUI):
     closing = 0
 
-    def __init__(self):
-        if os.name != 'posix':
-            self.line_read = ''
-            thread.start_new_thread(GetInputLine, (self,))
-            
     def filter_crud(self, txt):
         txt = regsub.gsub('\015\\|\r', '', txt)
         # txt = regsub.gsub(chr(27) + '[[0-9;]+[mJ]', '', txt)
         return txt
 
+    """over-ridden from BaseGUI"""
+    def setup(self):
+        if os.name != 'posix':
+            self.line_read = ''
+            thread.start_new_thread(GetInputLine, (self,))
+            
+    """over-ridden from BaseGUI"""
     def close(self):
-        print "closing text ui"
+        sys.stdout.write("closing text ui\n")
         self.closing = 1
          
 
-    def CloseUI(self):
-        print "closing text ui"
-        self.closing = 1
-        pass
-
+    """over-ridden from BaseGUI"""
     def print_string(self,line,modifiers=None,ending='\n',target=None):
         if modifiers == 'client':
             line = string.replace(line, "\n", "\n## ")
             line = line + "\n"
 
         line = self.filter_crud(line)
-        print line,
+        sys.stdout.write(line)
         sys.stdout.flush()
 
 
-    # check for stuff from stdin
-    # def GetUserInput(self):
+    """over-ridden from BaseGUI"""
     def get_input(self):
         if os.name == 'posix':
             readers,w,e = select.select([sys.stdin], [], [], data.timeout)
@@ -99,21 +96,21 @@ class Textui(BaseGUI):
             self.line_read = ''
             return retval
 
+    """over-ridden from BaseGUI"""
     def prompt(self):
         self.print_string('\n> ','user','')
 
+    """over-ridden from BaseGUI"""
     def has_echo(self):
         return tio
 
+    """over-ridden from BaseGUI"""
     def echo(self,yesno):
         if yesno == 1:
             self.turnonecho()
         else:
             self.turnoffecho()
 
-
-    # turn on echo
-    # def OnEcho(self, checktio="yes"):
     def turnonecho(self, checktio="yes"):
         if not tio and checktio == "yes":
             return
@@ -130,8 +127,6 @@ class Textui(BaseGUI):
         except:
             raise 'lt_echo_error', 'unable to turn on echo'
 
-    # turn off echo
-    # def OffEcho(self, checktio="yes"):
     def turnoffecho(self, checktio="yes"):
         if not tio and checktio == "yes":
             return
@@ -150,19 +145,10 @@ class Textui(BaseGUI):
         except:
             raise 'lt_echo_error', 'unable to turn off echo'
 
-    def WarnNoEcho(self):
+    """over-ridden from BaseGUI"""
+    def warn_no_echo(self):
         self.Putline('Warning, noecho unavailable. '+
                        'Your password will be visible')
         if os.name == 'posix':
             self.Putline('Install the termios module or Tkinter to enable '+
                          'echo toggling')
-
-    """
-    def mainloop(self):
-        while 1:
-            try:
-                if not self.app.Loop():
-                    return
-            except SystemExit:
-                return
-    """

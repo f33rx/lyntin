@@ -2,6 +2,24 @@ For a more up-to-date TODO, please check the web-site:
 http://lyntin.sourceforge.net
 
 -------------------------------------------------------------
+finish cleaning up modules
+
+finish basegui translation
+
+fix extra space problem with textui
+
+fix spacing problems in tkgui
+
+finish up help files
+ - help files on modules
+
+fix all the files--
+ - consistent indentation 
+ - doc-strings
+ - consistent naming
+
+
+
 build some kind of sleep command.  so you can sleep some arbitrary amount
 between alias commands.
 

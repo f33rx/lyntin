@@ -18,7 +18,7 @@ fine.
 """
 
 import data, string, sys, mud, app, select, os, time, regsub
-sys.path.append(app.getPath() + 'ui/cui')
+sys.path.append(app.get_path() + 'ui/cui')
 
 from basegui import BaseGUI
 from cui_curses import CUI_Curses

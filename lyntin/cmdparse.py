@@ -18,12 +18,21 @@ import data, app
 
 var_char = '$'
 
-def Initialize():
-    var_char = app.GetUserCustom('lyntin_variable_char')
+def initialize():
+    """initialize() -> None
+
+    Initializes the variable character.
+    """
+    global var_char
+    var_char = app.get_user_custom('lyntin_variable_char')
     
-# fill in values for any variables found in the input
-# unless they're braced
-def SubVars(input):
+
+def substitute_vars(input):
+    """substitute_vars(input) -> #, str
+
+    Substitutes variables found in the input with
+    their values unless they're braced.
+    """
     if string.find(input, var_char) == -1:
         # no variables in this
         return 0, input
@@ -74,15 +83,19 @@ def SubVars(input):
     
 
 
-# regex for history substitutions
-# looks like '!4 joe=john' or '! I like=I hate'
+"""regex for history substitutions
+looks like '!4 joe=john' or '! I like=I hate'"""
 sub_regex = regex.compile('^![0-9]* \(.*\)=\(.*\)')
 
-# when requesting a redo from the history list, the user has
-# the option of substituting for some of the text in the command, 
-# along the lines of !3 jay=joe.
-# here's where we do that.
-def DoHistorySubs(hist, input):
+
+def do_history_subs(hist, input):
+    """do_history_subs(hist, input) -> str
+
+    when requesting a redo from the history list, the user 
+    has the option of substituting for some of the text in the 
+    command, along the lines of !3 jay=joe.
+    here's where we do that.
+    """
     if sub_regex.search(hist) != -1:
         # user wants to substitute something in this command
         pat = sub_regex.group(1)
@@ -91,10 +104,13 @@ def DoHistorySubs(hist, input):
     return input
 
 
-# search input for speedwalking/aliases
-# return a 2 elt tuple, of whether an alias was found,
-# and what it expanded to
-def WorkOver(input, ses):
+def work_over(input, ses):
+    """work_over(input, ses) -> 1|0, str
+
+    search input for speedwalking/aliases
+    return a 2 elt tuple, of whether an alias was found,
+    and what it expanded to
+    """
     ret = input
     splitup = string.split(input)
     whether = 0
@@ -108,7 +124,7 @@ def WorkOver(input, ses):
                 # make a copy
                 ret = ses.aliases[each][:]
                 # get the variables that we'll need to fill in
-                varlist, ret = app.StripVars(ret)
+                varlist, ret = app.strip_vars(ret)
                 varcount = len(varlist)
                 if varcount == 0:
                     # this alias has no variables. just concatenate
@@ -158,9 +174,12 @@ def WorkOver(input, ses):
 
 
 
-# return (trigger, response) from action string 
-# input looks like '#ac {you see a dog} {kill dog}'
-def SplitAction(ac): 
+def split_action(ac): 
+    """split_action(ac) -> (ac_trigger, ac_response)
+
+    return (trigger, response) from action string 
+    input looks like '#ac {you see a dog} {kill dog}'
+    """
     ac_trigger = ''
     ac_response = ''
     

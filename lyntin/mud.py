@@ -24,10 +24,6 @@ WONT = chr(252) # '\374'
 WILL = chr(251) # '\373'
 
 
-# whether the user has echoing
-def has_echo():
-    return data.theapp.ui.has_echo()
-
 # see if anything from the mud triggered an action/gag/sub
 # if so, handle it.  
 # then display stuff from the mud to the user
@@ -48,15 +44,15 @@ def HandleMudOutput(output, ses):
     charlist = [] 
     for c in output:
 	# First, we turn echo on by default
-	OnEcho()
+	on_echo()
         # see if we're negotiating an option
         if opt:
             if opt == WILL:
                 if c == '\001':
-                    OffEcho()
+                    off_echo()
             elif opt == WONT:
                 if c == '\001':
-                    OnEcho()
+                    on_echo()
             # we don't take orders
             # FIXME
             elif opt == DO:
@@ -143,8 +139,12 @@ def HandleMudOutput(output, ses):
         ses.CheckActions(cleandata)
         data.currsession = oldses
 
-# log some text
+
 def log(str):
+    """log(str) -> None
+
+    Logs data to the mudlog
+    """
     if(data.debug > 0 and data.logfile):
         # data.logfile.write("*** Logging ***\n")
         data.logfile.writelines( [str, "\n"] )
@@ -154,10 +154,17 @@ def log(str):
                 # data.logfile.write('%s(%d)'%(c, ord(c)))
         data.logfile.flush()
         
-# turn on echo
-def OnEcho():
+
+def on_echo():
+    """on_echo() -> None
+
+    Alerts the ui to turn on echo.
+    """
     data.theapp.ui.OnEcho()
     
-# turn off echo
-def OffEcho():
+def off_echo():
+    """off_echo() -> None
+
+    Alerts the ui to shut off echo.
+    """
     data.theapp.ui.OffEcho()
