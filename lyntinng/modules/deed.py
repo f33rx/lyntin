@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.5 2002/11/07 02:32:53 willhelm Exp $
+# $Id: deed.py,v 1.6 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
@@ -137,8 +137,18 @@ commands_dict = {}
 
 def deed_cmd(ses, args, input):
   """
-  This adds a deed or prints all the deeds stored till now.
+  Deeds serve as a kind of notebook - whatever you don't want
+  to forget, store it in a deed.
 
+  examples:
+    #deed                             -- prints all the deeds for 
+                                         that session
+    #deed {$TIMESTAMP Joe healed me}  -- adds a new deed to the list
+
+  Before a deed is stored, variables are expanded--this allows you
+  to use system, global, and session variables in your deeds like
+  $TIMESTAMP which will mark when the deed was created.
+  
   category: commands
   """
   # original deed_cmd code contributied by Sebastian John

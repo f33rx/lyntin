@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.62 2003/01/01 00:36:25 willhelm Exp $
+# $Id: tintincmds.py,v 1.63 2003/01/05 22:55:18 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -491,7 +491,9 @@ commands_dict["showme"] = (showme_cmd, "input=", "limitparsing=0")
 
 def snoop_cmd(ses, args, input):
   """
-  Sets the session specified into or out of snooping mode.
+  Sets the session specified into or out of snooping mode.  When
+  a session is in snoop mode, you will see mud data from that session
+  regardless of what session is the current session.
 
   examples:
     #snoop a          -- tells you whether a is in snoop mode
@@ -559,8 +561,12 @@ def tick_cmd(ses, args, input):
   Displays the number of seconds left before this session's
   ticker ticks.
 
-  When a tick happens, it will look for a TICK!!! alias.  Finding none,
-  it will print TICK!!! to the ui.
+  When a tick happens, it will look for a TICK!!! alias then a TICK
+  alias.  Finding none, it will print TICK!!! to the ui.
+
+  When a tickwarning happens, it will look for a TICKWARN!!! alias
+  and then a TICKWARN alias.  Finding none, it will print a tickwarning
+  message to the ui.
 
   This allows you to perform an event every x number of seconds.
 
