@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.21 2002/05/03 19:28:23 jmberne Exp $
+# $Id: utils.py,v 1.22 2002/05/15 00:16:55 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -17,6 +17,7 @@ import string, re
 SEMI_REGEXP = re.compile('(?<!\\\\);')
 VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
+ANSI_CODE_REGEXP = re.compile('\[[0-9;]*[mJ]')
 
 def chomp(text):
   """ Removes all '\\r' and '\\n' from the input string.
@@ -71,6 +72,53 @@ def http_get(url):
     raise ValueError, "HTTP error: %d %s" % (status, reason)
 
   return sock.getfile()
+
+
+def is_color_token(token):
+  """ Returns whether or not this is a color token.
+
+  arguments:
+
+    'token' -- (string) the token to test
+
+  returns:
+
+    1 if it's a color token, 0 if not
+  """
+  if len(token) == 0:
+    return 0
+
+  return token[0] == chr(27)
+
+
+def split_ansi_from_text(text):
+  """ Takes in a string and returns a list of text and ansi tokens.
+
+  arguments:
+
+    'text' -- (string)
+
+  returns:
+
+    list of text and ansi tokens (all strings)
+  """
+  matchob = ANSI_COLOR_REGEXP.search(text)
+  if matchob:
+    textlist = []
+    marker = 0
+    while matchob:
+      (b, e) = matchob.span()
+      if marker != b:
+        textlist.append(text[marker:b])
+      else:
+        textlist.append(text[b:e])
+
+      marker = e
+      matchob = ANSI_COLOR_REGEXP.search(text, marker)
+    textlist.append(text[marker:])
+    return textlist
+
+  return [text]
 
 
 def expand(str, list):
@@ -155,50 +203,6 @@ def split_commands(text):
 
   ret.append(text[marker:])
   return ret
-
-
-def split_braced(text):
-  """ Splits command line arguments into braced pieces.
-
-  Takes the given text and splits it into two pieces taking into
-  account possible bracing from the user.  If the text has
-  errors--such as unmatched braces, we raise a ValueError.
-
-  examples:
-  #alias blah blah2  -> ["blah", "blah2"]
-  #alias blah {blah2 blah3} -> ["blah", "blah2 blah3"]
-  #alias {blah1 blah2} blah3  => ["blah1 blah2", "blah3"]
-  #alias {blah1 blah2} {blah3 blah4} => ["blah1 blah2", "blah3 blah4"]
-  """    
-  text = text.strip()
-
-  # the text has no braces, so we split it on the first space
-  b = text.find('{')
-  if b == -1:
-    return text.split(' ', 1)
-
-  count = 0
-  breakpoint = -1
-
-  # we zip through the array matching braces loosely
-  for i in range(0, len(text)):
-    c = text[i]
-    if c == '{':
-      count = count + 1
-
-    if c == '}':
-      count = count - 1
-
-    # if we find a space that's not inside braces, this is a
-    # a breakpoint
-    if c == ' ' and count == 0 and breakpoint == -1:
-      breakpoint = i
-        
-  # if we don't have a breakpoint or the count > 0 at the end
-  if breakpoint == -1 or count > 0:
-    raise ValueError, "Unmatched braces."
-
-  return [strip_braces(text[:breakpoint]), strip_braces(text[breakpoint:])]
 
 
 def strip_braces(text):
@@ -424,22 +428,6 @@ if __name__ == '__main__':
 
   print 
 
-  print "split_braced tests"
-  _pass_fail(split_braced('blah blah2'),
-            ['blah', 'blah2'])
-  _pass_fail(split_braced('blah {blah2 blah3}'),
-            ['blah', 'blah2 blah3'])
-  _pass_fail(split_braced('{blah1 blah2} blah3'),
-            ['blah1 blah2', 'blah3'])
-  _pass_fail(split_braced('{blah1 blah2} {blah3 blah4}'),
-            ['blah1 blah2', 'blah3 blah4'])
-  try:
-    split_braced('{blah1 blah2} {blah3 blah')
-  except:
-    print "   pass: exception"
-
-  print 
-
   print "replace_vars tests"
   print replace_vars("#test 1 2 3", "#test")
   print replace_vars("#test 1 2 3", "#test %1 %2")
@@ -447,11 +435,3 @@ if __name__ == '__main__':
   print replace_vars("#test 1 2 3", "#test %-1")
   print replace_vars("#test 1 2 3", "#test %:-1")
   print replace_vars("#test 1 2 3", "#test %1:-1")
-
-
-
-
-
-
-
-
