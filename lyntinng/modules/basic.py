@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.37 2002/03/22 02:42:49 willhelm Exp $
+# $Id: basic.py,v 1.38 2002/03/24 21:00:18 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -486,7 +486,7 @@ def mudecho_cmd(session, words, input):
     exported.write_error("syntax: #echo <on|off>")
     return
 
-  option = utils.strip_braced(words[1])
+  option = utils.strip_braces(words[1])
 
   if option == "on":
     event.EchoEvent(1).enqueue() 
