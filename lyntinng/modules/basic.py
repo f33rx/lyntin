@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.5 2001/12/15 07:25:22 willhelm Exp $
+# $Id: basic.py,v 1.6 2001/12/24 02:59:44 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -625,7 +625,7 @@ def tickon_cmd(session, words, input):
    Turns on the ticker.
    """
    session.getTicker().enableTicker()
-   engine.myengine.writeMessage("tickon: " + session.getName() + 
+   engine.myengine.writeMessage("tickon: session " + session.getName() + 
                                 " ticker enabled.")
 
 
