@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.22 2002/05/15 00:16:55 willhelm Exp $
+# $Id: utils.py,v 1.23 2002/05/15 02:41:42 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -115,7 +115,16 @@ def split_ansi_from_text(text):
 
       marker = e
       matchob = ANSI_COLOR_REGEXP.search(text, marker)
-    textlist.append(text[marker:])
+
+    # we do this to handle ansi color sequences which are broken
+    # between two network chunks
+    b = text[marker:].find(chr(27))
+    if b == -1:
+      textlist.append(text[marker:])
+    else:
+      textlist.append(text[marker:b])
+      textlist.append(text[b:])
+
     return textlist
 
   return [text]
