@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.28 2003/03/28 21:26:07 willhelm Exp $
+# $Id: action.py,v 1.29 2003/05/01 14:41:58 jmberne Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -64,7 +64,8 @@ class ActionData:
     @rtype:  boolean
     """
     expansion = exported.expand_ses_vars(trigger, self._ses)
-
+    if not expansion:
+      expansion = trigger
     compiled = utils.compile_regexp(expansion, 1)
     self._actions[trigger] = (trigger, compiled, response, priority, onetime)
     return 1
@@ -79,6 +80,7 @@ class ActionData:
       expansion = exported.expand_ses_vars(trigger, self._ses)
       if not expansion:
         expansion = trigger
+
       compiled = utils.compile_regexp(expansion, 1)
 
       self._actions[trigger] = (trigger, compiled, response, priority, onetime)
