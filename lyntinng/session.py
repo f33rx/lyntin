@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.39 2002/04/25 17:13:17 willhelm Exp $
+# $Id: session.py,v 1.40 2002/04/26 02:29:02 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -238,8 +238,12 @@ class Session:
     if len(input) > 1 and input[0] == lyntin.commandchar:
       input = input[1:]
 
-      # splits on globbed whitespace characters
-      words = input.split()
+      # splits out the command name from the rest of the command line
+      words = input.split(" ",1)
+
+      # We want an empty argument list if there was one, don't want
+      # array out-of-bounds issues       
+      if len(words) < 2: words.append("")
 
       # this checks to see if it's a special #@ command.
       if input[0] == "@":
@@ -259,7 +263,9 @@ class Session:
               command(self, input.split(" "), input)
             else:
               try:
-                command(self, argumentparser.parse(input), input)
+                dict = argumentparser.parse(words[1])
+                dict["command"]=words[0]
+                command(self, dict, input)
               except ValueError, e:
                 exported.write_error("%s: %s" % (mem, e))
               except argparser.ParserException, e:
@@ -271,10 +277,12 @@ class Session:
             command = engine.myengine.getCommand(mem)
             argumentparser = engine.myengine.getArgParser(mem)
             if argumentparser == None:
-              command(self, words, input)
+              command(self, input.split(" "), input)
             else:
               try:
-                command(self, argumentparser.parse(input), input)
+                dict = argumentparser.parse(words[1])
+                dict["command"]=words[0]
+                command(self, dict, input)
               except ValueError, e:
                 exported.write_error("%s: %s" % (mem, e))
               except argparser.ParserException, e:

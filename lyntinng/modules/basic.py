@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.75 2002/04/26 20:22:41 jmberne Exp $
+# $Id: basic.py,v 1.76 2002/04/26 21:04:34 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -178,12 +178,13 @@ def datagrep_cmd(session, args, input):
     return
 
   pattern = args["pattern"]
+  size = args["size"]
 
-  ret = session.getDataBuffer().grepbuffer(pattern)
+  ret = session.getDataBuffer().grepbuffer(pattern,size)
   exported.write_message("datagrep %s results:\n%s"
                          % (pattern, string.join(ret, "\n")))
 
-commands_dict["datagrep"] = (datagrep_cmd, "pattern")
+commands_dict["datagrep"] = (datagrep_cmd, "pattern size:int=300")
 
 
 def datagreplines_cmd(session, args, input):
@@ -198,11 +199,12 @@ def datagreplines_cmd(session, args, input):
     return
 
   pattern = args["pattern"]
-  ret = session.getDataBuffer().greplines(pattern)
+  size = args["size"]
+  ret = session.getDataBuffer().greplines(pattern,size)
   exported.write_message("datagreplines %s results:\n%s"
                          % (pattern, string.join(ret, "")))
 
-commands_dict["datagreplines"] = (datagreplines_cmd, "pattern")
+commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
 
 
 def deed_cmd(session, args, input):
@@ -504,11 +506,12 @@ commands_dict["^killall"] = (killall_cmd, "")
 
 
 def log_cmd(session, args, input):
-  """#log <filename>
+  """#log <filename> <databuffer>
 
   Starts or stops logging to a logfile.
   """
   logfile = args["logfile"]
+  databuffer = args["databuffer"]
 
   if not logfile:
     if session.getLogfile() != None:
@@ -521,22 +524,33 @@ def log_cmd(session, args, input):
   if session.isConnected():
     if session.getLogfile() != None:
       try:
-        exported.write_message("log: stopping logging to '%s'." % (session.getLogFileName()))
+        exported.write_message("log: stopping logging to '%s'." % (session.getLogfileName()))
         session.closeLogfile()
-      except:
-        exported.write_error("log: logfile cannot be closed.")
+      except Exception, e:
+        exported.write_error("log: logfile cannot be closed (%s)." % (e))
     else:
       try:
+        if databuffer:
+          if session.getName() == "common":
+            exported.write_error("databuffer cannot be dumped to log from common session.")
+            return
+          dumped=0
+          f = open(logfile, "w")
+          for line in session.getDataBuffer().greplines(".*",0):
+            f.write(line)
+            dumped=dumped + 1
+          f.close()
+          exported.write_message("log: dumped %s lines of databuffer to logfile" % (dumped))
         session.openLogfile(logfile)
         exported.write_message("log: starting logging to '%s'." % 
                              session.getLogfileName())
-      except:
-        exported.write_error("log: logfile cannot be opened for appending.")
+      except Exception, e:
+        exported.write_error("log: logfile cannot be opened for appending. %s" % (e))
   else:
     exported.write_message("log: You must have a session to log")
 
 
-commands_dict["log"] = (log_cmd, "logfile=")
+commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false")
 
          
 def loop_cmd(session, args, input):

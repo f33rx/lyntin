@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.5 2002/04/18 02:56:48 willhelm Exp $
+# $Id: data.py,v 1.6 2002/04/21 03:49:31 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 
@@ -25,7 +25,7 @@ class DataBuffer:
     # buffer is organized oldest to newest.  so _buffer[0] is
     # the most stale and _buffer[-1] is the most new.
     self._buffer = []
-    self._size = 300
+    self._size = 10000
   
   def addData(self, text):
     """
@@ -60,7 +60,7 @@ class DataBuffer:
     """
     self._size = newsize
 
-  def greplines(self, pattern):
+  def greplines(self, pattern, numlines=300):
     """
     Returns a list of all the lines in the databuffer that
     match the given pattern.
@@ -69,6 +69,9 @@ class DataBuffer:
 
       'pattern' -- (string) the match pattern
  
+      'numlines' -- (int) number of lines to search back through.  0
+      will get all lines in buffer 
+
     returns:
 
       (list of strings) a list of the lines that matched the
@@ -77,12 +80,12 @@ class DataBuffer:
     ret = []
     cpattern = re.compile(pattern)
 
-    for mem in self._buffer:
+    for mem in self._buffer[-numlines:]:
       if cpattern.search(mem):
         ret.append(mem)
     return ret
 
-  def grepbuffer(self, pattern):
+  def grepbuffer(self, pattern, numlines=300):
     """
     Similar to greplines, except this greps the buffer
     as a whole allowing you to match across multiple lines.
@@ -91,11 +94,14 @@ class DataBuffer:
 
       'pattern' -- (string) the match pattern
 
+      'numlines' -- (int) number of lines to search back through.  0
+      will get all lines in buffer 
+
     returns:
 
       (list of strings) all the matches from the buffer
     """
-    buffer = string.join(self._buffer, "")
+    buffer = string.join(self._buffer[-numlines:], "")
 
     ret = []
     cpattern = re.compile(pattern)
@@ -105,3 +111,5 @@ class DataBuffer:
       ret.append(match)
 
     return ret
+
+
