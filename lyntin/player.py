@@ -828,7 +828,7 @@ def Help(words, seslist):
         new_line = '   '
         count = 1
         for mem in the_list:
-            new_line = new_line + string.ljust(mem, 12)
+            new_line = new_line + string.ljust(mem, 16)
             if (count % 3) == 0:
                 PutUntouchedLine(new_line)
                 new_line = '   '

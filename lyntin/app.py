@@ -410,6 +410,7 @@ def Run():
    prul('############################################\n')
    prul("#          Welcome to LynTin...            #\n")
    prul('#          The Hacker\'s mud client.        #\n')
+   prul('#          For help, type #help general.   #\n')     
    prul('############################################\n')
    prul('\n\n')
 
