@@ -55,13 +55,11 @@ def DispatchCommand(input, seslist):
         exec input in user.__dict__
         return
 
-    
     # for commands in data.theapp.commands listing
     clist = data.theapp.commands.keys()
     for mem in clist:
         # this means it has to be matched exactly
         if mem[0] == "^":
-            # FIXME - this might fix that bug that that dude talked about
             if regex.search(mem, words[0]) != -1:
                 return data.theapp.commands[mem](words, input, seslist)
         else:
