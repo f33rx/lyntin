@@ -235,17 +235,20 @@ class Gui:
                 
                 start = index + 1
 
-            while index < len(line):
+	    self.txt.configure(state='normal')
+	    while index < len(line):
                 if line[index] == chr(27):
                     cstart = index
                     end = index
 
-                    self.txt.configure(state='normal')
+#                    self.txt.configure(state='normal')
+# moved this to the beginning of the loop and removed the disable
+# until the very end :)
                     if self.currcolors == self.regcolors:
                         self.txt.insert('end', line[start:end])
                     else:
                         self.txt.insert('end', line[start:end], self.currcolors[1])
-                    self.txt.configure(state='disabled')
+#                    self.txt.configure(state='disabled')
 
                     while index < len(line) and line[index] != "m":
                         index = index + 1
@@ -259,11 +262,10 @@ class Gui:
 
                     start = index + 1
 
-                index = index + 1 
-
+		index = index + 1 
 
             end = index
-            self.txt.configure(state='normal')
+
             if self.currcolors == self.regcolors:
                 self.txt.insert('end', line[start:end])
             else:

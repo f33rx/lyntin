@@ -10,7 +10,7 @@
 ##################################################################
 from Tkinter import *
 
-import os, exported, regex
+import os, exported, regex, string
 
 class CommandEntry(Entry):
     def __init__(self, master, partk, **kw):
@@ -151,6 +151,7 @@ class CommandEntry(Entry):
 
     def store_input(self, event):
         val = self.get()
+	val=string.replace(val,'\n',';')
         if len(val) < 1:
             val = "#cr"
         val = val + '\n'
