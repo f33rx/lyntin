@@ -16,7 +16,7 @@ interpret and display the output
 import regsub, string, regex, sys
 import data, player
 
-# telnet protocol variables
+"""telnet protocol constants"""
 IAC  = chr(255) # Interpret '\377' as command
 DONT = chr(254) # '\376'
 DO   = chr(253) # '\375'
@@ -46,15 +46,15 @@ def handle_mud_output(output, ses):
     charlist = [] 
     for c in output:
 	# First, we turn echo on by default
-	on_echo()
+	echo_on()
         # see if we're negotiating an option
         if opt:
             if opt == WILL:
                 if c == '\001':
-                    off_echo()
+                    echo_off()
             elif opt == WONT:
                 if c == '\001':
-                    on_echo()
+                    echo_on()
             # we don't take orders
             # FIXME
             elif opt == DO:
@@ -81,6 +81,7 @@ def handle_mud_output(output, ses):
     cleandata = string.join(charlist, '')
     if cleandata:
         oldcleandata = cleandata
+
         # get rid of Ansi crap (so colored stuff will still trigger actions)
         oldcleandata = data.filter_cm(oldcleandata)
         cleandata = data.filter_crud(cleandata)
@@ -157,15 +158,15 @@ def log(str):
         data.logfile.flush()
         
 
-def on_echo():
-    """on_echo() -> None
+def echo_on():
+    """echo_on() -> None
 
     Alerts the ui to turn on echo.
     """
     data.theapp.ui.OnEcho()
     
-def off_echo():
-    """off_echo() -> None
+def echo_off():
+    """echo_off() -> None
 
     Alerts the ui to shut off echo.
     """
