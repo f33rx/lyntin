@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.3 2002/05/02 23:39:07 willhelm Exp $
+# $Id: manager.py,v 1.4 2002/05/12 04:40:38 willhelm Exp $
 #######################################################################
 """
 This module defines the basic manager which handles various things
@@ -15,8 +15,11 @@ To build a new manager on a session scoping, you need to
 
 1. extend the manager.Manager class below
 
-2. add a manager instantiation line to engine.initialize to instantiate
-that manager.
+2. implement the manager's __copy__ to return a new instance of the
+   manager with the copied data
+
+3. add a manager instantiation line to engine.initialize to instantiate
+   that manager
 
 """
 class Manager:

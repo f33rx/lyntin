@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.28 2002/05/18 03:45:59 willhelm Exp $
+# $Id: action.py,v 1.29 2002/05/27 23:12:59 jmberne Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -24,7 +24,7 @@ class ActionManager(manager.Manager):
   def __copy__(self):
     ac = ActionManager()
     for mem in self._actions.keys():
-      ac.addAction(mem, self._actions[mem][2])
+      ac.addAction(mem, self._actions[mem][2], self._actions[mem][3])
     return ac
 
   def _compileAction(self, trigger):

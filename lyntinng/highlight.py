@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.22 2002/05/18 14:44:19 willhelm Exp $
+# $Id: highlight.py,v 1.23 2002/05/18 23:32:00 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -49,6 +49,12 @@ class HighlightManager(manager.Manager):
     self._currcolor = [-1,-1,-1]
     self._colorleftover = ''
 
+  def __copy__(self):
+    hm = HighlightManager()
+    for mem in self._highlights.keys():
+      hm.addHighlight(self._highlights[mem][0], mem)
+    return hm
+
   def addHighlight(self, style, text):
     """ Adds a highlight to the dict.
 
@@ -58,6 +64,7 @@ class HighlightManager(manager.Manager):
 
       'text' -- (string) the text to highlight
     """
+    style = style.lower()
     self._highlights[text] = (style, self._getMarkup(style))
     return 1
 

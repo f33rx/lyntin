@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.15 2002/05/15 00:16:55 willhelm Exp $
+# $Id: variable.py,v 1.16 2002/05/16 13:59:20 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -24,6 +24,12 @@ class VariableManager(manager.Manager):
   def __init__(self):
     self._variables = {}
     self._setBuiltinVars()
+
+  def __copy__(self):
+    vm = VariableManager()
+    for mem in self._variables.keys():
+      vm.addVariable(mem, self._variables[mem])
+    return vm
 
   def addVariable(self, var, expansion):
     """ Adds a variable to the dict.
