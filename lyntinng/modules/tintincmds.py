@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.9 2002/05/09 03:53:06 jmberne Exp $
+# $Id: tintincmds.py,v 1.10 2002/05/09 04:15:16 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -903,7 +903,7 @@ commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
 
 
 class Unsomethinger:
-  def __init__(self, managername, removalfunction, singular=None, plural=None, doc=None, wildcarding=1):
+  def __init__(self, managername, removalfunction, singular=None, plural=None, command=None, doc=None, wildcarding=1):
     self.managername = managername
     self.removalfunction = removalfunction
     if singular:
@@ -914,15 +914,19 @@ class Unsomethinger:
       self.plural = plural
     else:
       self.plural = self.singular + "s"
+    if command:
+      self.command = command
+    else:
+      self.command = "un" + self.singular
 
     if doc:
       self.__doc__ = doc
     else:
       self.__doc__ = ("\nRemoves %s matching {pattern}.\n\n" % (self.plural)
-                      + "ex: #un%s {kill}    <-- remove %s 'kill'\n" % (self.singular,self.singular))
+                      + "ex: #%s {kill}    <-- remove %s 'kill'\n" % (self.command,self.singular))
       if wildcarding:
         self.__doc__ = (self.__doc__
-                        + "ex: #un%s {*kill*}   <-- remove all %s with 'kill' in them\n" % (self.singular, self.plural))
+                        + "ex: #%s {*kill*}   <-- remove all %s with 'kill' in them\n" % (self.command, self.plural))
 
   def __call__(self, session, args, input):
     """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
