@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: session.py,v 1.2 2001/12/04 01:07:19 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied deeply from the common
 session.
 """
 import re, copy
-import engine, utils, lyntin
+import engine, utils, lyntin, event
 
 # this is the regular expression that matches speedwalking stuff
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -72,6 +72,7 @@ class Session:
       if self.getName() != "common":
          engine.myengine.unregisterSession(self.getName())
          if self._socket: self._socket.shutdown()
+      event.OutputEvent("Session " + self._name + " shutdown.").enqueue()
 
    def getInfo(self):
       """ Returns information about the session."""

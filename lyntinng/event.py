@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: event.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -191,3 +191,17 @@ class InputEvent(Event):
       engine.myengine.writeUserData(self.input)
       engine.myengine.handleUserData(self.input)
 
+
+class OutputEvent(Event):
+   """
+   Sometimes it's necessary to put data that's going to the ui
+   into an event so that it is displayed in the correct order.
+   This event allows you to do that.
+   """
+   def __init__(self, message):
+      """ Initialize."""
+      self.message = message
+
+   def execute(self):
+      """ Execute."""
+      engine.myengine.writeUI(self.message)
