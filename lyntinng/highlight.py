@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.12 2002/03/22 01:27:24 willhelm Exp $
+# $Id: highlight.py,v 1.13 2002/03/24 21:00:17 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -108,21 +108,22 @@ class HighlightManager(manager.Manager):
       for mem in self._highlights.keys():
         if mem[0] == "*" and mem[-1] == "*":
           if text.find(mem[1:-1]) > -1:
-            text = self._highlights[mem][1] + text + chr(27) + "[0m"
+            text = (self._highlights[mem][1] + utils.filter_ansi(text) + 
+                                     chr(27) + "[0m")
 
         elif mem[0] == "*":
           end = text.find(mem[1:])
           while (end > -1):
-            end = end + len(mem) - 1
-            text = (self._highlights[mem][1] + text[:end] + 
+            end = end + len(mem[1:])
+            text = (self._highlights[mem][1] + utils.filter_ansi(text[:end]) + 
                                      chr(27) + "[0m" + text[end:])
             end = text.find(mem[1:], end + len(self._highlights[mem][1]) + 1)
 
         elif mem[-1] == "*":
           begin = text.find(mem[:-1])
           while (begin > -1):
-            text = (text[:begin] + self._highlights[mem][1] + text[begin:] + 
-                                     chr(27) + "[0m")
+            text = (text[:begin] + self._highlights[mem][1] + 
+                          utils.filter_ansi(text[begin:]) + chr(27) + "[0m")
             begin = text.find(mem[:-1], begin + len(self._highlights[mem][1]) + 1)
                                    
         else:
