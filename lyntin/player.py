@@ -12,7 +12,7 @@ defines lyntin's user-level commands
 """
 
 import string, regex, sys, regsub, socket, time
-import data, mud, app, hooks, cmdparse
+import data, mud, app, hooks, cmdparse, os
 
 # delay import of user module until we have more state
 user = None
