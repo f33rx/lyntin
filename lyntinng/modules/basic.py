@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.10 2002/01/23 01:22:11 willhelm Exp $
+# $Id: basic.py,v 1.11 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -356,22 +356,23 @@ def log_cmd(session, words, input):
     return
 
 
-  if session._logfile != None:
-    session._logfile.close()
-    session._logfile = None
-    engine.write_message("log: logging to '" + 
-                                 session._logfile.name + 
-                                 "' stopped.")
-    return
+  if session.getLogfile() != None:
+    try:
+      engine.write_message("log: stopping logging to '" + 
+                                   session.getLogfileName() + 
+                                   "'.")
+      session.closeLogfile()
+    except:
+      engine.write_error("log: logfile cannot be closed.")
 
-  try:
-    session._logfile = open(words[1], "a")
-    engine.write_message("log: logging to '" + 
-                                 session._logfile.name + 
-                                 "'.")
-  except:
-    session._logfile = None
-    engine.write_error("log: logfile cannot be opened for apending.")
+  else:
+    try:
+      engine.write_message("log: starting logging to '" + 
+                                   session.getLogfileName() + 
+                                   "'.")
+      session.openLogfile(words[1])
+    except:
+      engine.write_error("log: logfile cannot be opened for apending.")
 
          
 def mudecho_cmd(session, words, input):

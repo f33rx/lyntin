@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.2 2001/12/15 07:05:33 willhelm Exp $
+# $Id: utils.py,v 1.3 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -210,6 +210,10 @@ def replace_vars(input, expansion):
     # run through the replacements
     for mem in varlookup.keys():
       expansion = re.sub("%" + mem, varlookup[mem], expansion)
+
+  else:
+    if input.find(' ') > -1:
+      expansion = expansion + ' ' + input.split(' ', 1)[1]
 
   return expansion
 

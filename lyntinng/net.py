@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.4 2002/01/23 01:22:10 willhelm Exp $
+# $Id: net.py,v 1.5 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -48,7 +48,10 @@ class SocketCommunicator:
     if self._sock:
       event.OutputEvent("Lost connection to: " + self._host).enqueue()
       # engine.write_message("Lost connection to: " + self._host)
-      self._sock.shutdown(2)
+      try:
+        self._sock.shutdown(2)
+      except:
+        pass
       self._sock.close()
       self._sock = None
       self._session = None

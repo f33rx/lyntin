@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.7 2002/01/23 01:22:10 willhelm Exp $
+# $Id: session.py,v 1.8 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -92,7 +92,8 @@ class Session:
             repr(len(self.getSubstituteManager().getSubstitutes())) + "\n" +
             "   variables: " + 
             repr(len(self.getVariableManager().getVariables())) + "\n" +
-            "   ticker: " + self.getTicker().getTickerInfo())
+            "   ticker: " + self.getTicker().getTickerInfo() + "\n" +
+            "   logfile: " + self.getLogfileName())
     return data
 
   def setActionManager(self, am):
@@ -327,10 +328,34 @@ class Session:
     engine.write_mud_data(input)
 
   def log(self, input):
-    """ Logs text to a file instance in self._logfile."""
+    """ Logs text to a file instance in self._logfile.
+
+    arguments:
+
+      'input' -- (string) the string to log to the logfile for this session
+
+    """
     try:
       # FIXME - this assumes unix files
       self._logfile.write(utils.filter_ansi(utils.filter_cm(input)))
     except:
       engine.write_error("Logfile cannot be written to.")
       self._logfile = None
+
+  def getLogfile(self):
+    """ Returns the logfile file instance or None."""
+    return self._logfile
+
+  def closeLogfile(self):
+    if self._logfile:
+      self._logfile.close()
+      self._logfile = None
+
+  def openLogfile(self, filename):
+    self._logfile = open(filename, "a")
+
+  def getLogfileName(self):
+    if self._logfile:
+      return self._logfile.name
+    else:
+      return "<none>"
