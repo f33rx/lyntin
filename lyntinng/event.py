@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.7 2002/02/07 02:09:05 willhelm Exp $
+# $Id: event.py,v 1.8 2002/02/07 15:48:08 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -52,7 +52,7 @@ class StartupEvent(Event):
   """ Starts up and initializes Lyntin.
 
   When Lyntin is started, we try to do as much as we can
-  inside of the SstartupEvent and through the Startup frequency.
+  inside of the SstartupEvent and through the startup hook.
   """
   def __init__(self, args):
     """ Initialize.
@@ -93,8 +93,8 @@ class StartupEvent(Event):
       ShutdownEvent().enqueue()
       traceback.print_exc()
 
-    # spam the startup frequency
-    engine.myengine.spamfreq(engine.STARTUPFREQ, ())
+    # spam the startup hook 
+    engine.myengine.spamhook(engine.STARTUP_HOOK, ())
 
     # if we don't have a readfile set by --read flag, then we
     # try to use ~/.lyntinrc
@@ -128,7 +128,7 @@ class ShutdownEvent(Event):
   When the user shuts down lyntin, it triggers a shutdown
   event to close all network connections, close ui's, return the 
   user's session to a normal state, and shuts down whatever modules
-  have registered with the shutdown frequency.
+  have registered with the shutdown hook.
   """
   def __init__(self):
     """ Initialize."""
@@ -138,7 +138,7 @@ class ShutdownEvent(Event):
     """ Execute the shutdown."""
     import time
     engine.write_message("shutting down...  goodbye.")
-    engine.myengine.spamfreq(engine.SHUTDOWNFREQ)
+    engine.myengine.spamhook(engine.SHUTDOWN_HOOK)
     sys.exit(0)
 
 
@@ -160,7 +160,7 @@ class EchoEvent(Event):
 
   def execute(self):
     """ 1 means turn echo on, 0 means turn it off."""
-    engine.myengine.spamfreq(engine.ECHOFREQ, (self._state))
+    engine.myengine.spamhook(engine.ECHO_HOOK, (self._state))
 
 
 class ReloadEvent(Event):
@@ -197,7 +197,7 @@ class ReloadEvent(Event):
 class MudEvent(Event):
   """
   A mud event is when the connected mud sends data to us.  We
-  spam that data to the mud event frequency.
+  spam that data to the mud event hook.
   """
   def __init__(self, input):
     """ Initialize.
@@ -258,26 +258,26 @@ class OutputEvent(Event):
 
 class SpamEvent(Event):
   """
-  Certain things can kick off a call to spam a frequency.  Rather
+  Certain things can kick off a call to spam a hook.  Rather
   than doing it "inline" so to speak, it's sometimes nice to kick
   it off in its own event.  The timer uses this to handle kicking
-  anything that's listening to the TIMERFREQ.
+  anything that's listening to the TIMER_HOOK.
   """
-  def __init__(self, frequency, args):
+  def __init__(self, hook, args):
     """ Initialize.
 
     arguments:
 
-      'frequency' -- (string) the frequency to spam
+      'hook' -- (string) the hook to spam
 
       'args' -- (list of arguments) the arguments to send to
                 the functions--refer to the documentation on 
-                the frequencies
+                the hook 
 
     """
-    self._frequency = frequency
+    self._hook = hook
     self._args = args
 
   def execute(self):
     """ Execute."""
-    engine.myengine.spamfreq(self._frequency, self._args)
+    engine.myengine.spamhook(self._hook, self._args)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.10 2002/01/25 20:18:13 willhelm Exp $
+# $Id: engine.py,v 1.11 2002/02/04 01:10:16 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -14,10 +14,9 @@ queue and the handler for it.
 Most of your stuff should call functions in the engine to do things.
 To get the instance of engine, look at myengine.
 
-Engine also holds frequencies which are hooks to the various event
-types.  Events will spam the appropriate frequency when they
-execute--this allows you to add functionality via the modules
-interface without affecting the rest of lyntin at all.
+Engine also holds hooks to the various event types.  Events will call
+all appropriate hooks allowing you to add functionality via the modules
+interface without changing the Lyntin internals.
 
 The engine module holds a variable which is a singleton: 'myengine'.
 To access the engine, access it by 'engine.myengine'.
@@ -35,12 +34,12 @@ variable can be used to retrieve the engine singleton.
 """
 myengine = None
 
-INPUTFREQ = "inputfreq"
-MUDFREQ = "mudfreq"
-SHUTDOWNFREQ = "shutdownfreq"
-STARTUPFREQ = "startupfreq"
-ECHOFREQ = "echofreq"
-TIMERFREQ = "timerfreq"
+INPUT_HOOK = "inputhook"
+MUD_HOOK = "mudhook"
+SHUTDOWN_HOOK = "shutdownhook"
+STARTUP_HOOK = "startuphook"
+ECHO_HOOK = "echohook"
+TIMER_HOOK = "timerhook"
 
 FIRST = 0
 LAST = 99
@@ -134,8 +133,8 @@ class Engine:
     self._shutdownflag = 0
 
     # listeners exist at an engine level.  if you sign up for
-    # an input frequency, you get the input frequency for ALL
-    # sessions.
+    # an input hook, you get the input hook for ALL sessions.
+    # this might change at some point....  we'll see.
     self._listeners = {}
 
     # the thread manager manages all the threads in the engine.
@@ -160,8 +159,8 @@ class Engine:
     # holds all the commands
     self._command_list = {}
 
-    # we register ourselves with the shutdown freq
-    self.register(SHUTDOWNFREQ, self.shutdown)
+    # we register ourselves with the shutdown hook
+    self.register(SHUTDOWN_HOOK, self.shutdown)
 
 
   def initialize(self):
@@ -227,7 +226,7 @@ class Engine:
     while not self._shutdownflag:
       try:
         time.sleep(1)
-        event.SpamEvent(TIMERFREQ, (self._tick,)).enqueue()
+        event.SpamEvent(TIMER_HOOK, (self._tick,)).enqueue()
         self._tick += 1
       except KeyboardInterrupt:
         return
@@ -261,14 +260,14 @@ class Engine:
     handling.  The session can call this method again with
     expanded input--this this method is considered recursive.
 
-    internal tells whether to spam the input frequencies and
+    internal tells whether to spam the input hook and
     things of that nature.
 
     arguments:
 
       'input' -- (string) data from the user
 
-      'internal=0' -- (int) 1 if we should spam the input frequencies
+      'internal=0' -- (int) 1 if we should spam the input hook 
                       0 if we shouldn't
 
     """ 
@@ -278,9 +277,9 @@ class Engine:
       # chomp it, replace \; -> ;, and strip leading/trailing whitespace
       mem = utils.chomp(mem).replace("\;", ";").strip()
 
-      # spam the frequency with the raw input statement first...
+      # spam the hook with the raw input statement first...
       if internal:
-        myengine.spamfreq(INPUTFREQ, (mem,))
+        myengine.spamhook(INPUT_HOOK, (mem,))
 
       # FIXME - handle history stuff
 
@@ -570,9 +569,9 @@ class Engine:
       data += '   ' + string.join(mem.getInfo().split('\n'), '\n   ') + "\n"
 
 
-    # print info from all the frequencies
-    data = (data + "Frequencies:\n" + 
-            "   total frequencies: " + 
+    # print info from all the hooks
+    data = (data + "Hooks:\n" + 
+            "   total hooks: " + 
             repr(len(self._listeners.keys())) + "\n")
 
     for mem in self._listeners.keys():
@@ -584,19 +583,19 @@ class Engine:
 
 
   ### ------------------------------------------
-  ### frequency/channel stuff
+  ### hook stuff
   ### ------------------------------------------
 
-  def register(self, freq, func, place=LAST):
-    """ Registers a function with a frequency.
+  def register(self, hook, func, place=LAST):
+    """ Registers a function with a hook.
 
-    freq should be one of the frequency constants.  func 
+    hook should be one of the hook constants.  func 
     should be a callable function.  place is optional--it allows 
-    you to put yourself earlier in the frequency lineup.
+    you to put yourself earlier in the hook lineup.
 
     arguments:
 
-      'freq' -- (string) the name of the frequency
+      'hook' -- (string) the name of the hook 
 
       'func' -- (function) the function to call
 
@@ -608,36 +607,35 @@ class Engine:
       # print "func not callable"
       return
 
-    if self._listeners.has_key(freq):
-      if place == LAST or place > len(self._listeners[freq]):
-        self._listeners[freq].append(func)
+    if self._listeners.has_key(hook):
+      if place == LAST or place > len(self._listeners[hook]):
+        self._listeners[hook].append(func)
       else:
-        self._listeners[freq].insert(place, func)
+        self._listeners[hook].insert(place, func)
     else:
-      self._listeners[freq] = [func]
+      self._listeners[hook] = [func]
 
-  def unregister(self, freq, func):
+  def unregister(self, hook, func):
     """
-    Tries to remove a registrant from a frequency--does 
-    pretty well.
+    Tries to remove a registrant from a hook--does pretty well.
 
     arguments:
 
-      'freq' -- (string) the frequency to unregister this function
+      'hook' -- (string) the hook to unregister this function
 
       'func' -- (function) the function to unregister
 
     """
-    if self._listeners.has_key(freq):
-      if func in self._listeners[freq]:
-        self._listeners[freq].remove(func)
+    if self._listeners.has_key(hook):
+      if func in self._listeners[hook]:
+        self._listeners[hook].remove(func)
 
-  def getfreq(self, freq):
-    """ Returns the listeners for a specific frequency.
+  def gethook(self, hook):
+    """ Returns the listeners for a specific hook.
 
     arguments:
 
-      'freq' -- (string) the frequency in question
+      'hook' -- (string) the hook in question
 
     returns:
 
@@ -645,25 +643,25 @@ class Engine:
 
     """
     try:
-      return self._listeners[freq]
+      return self._listeners[hook]
     except:
       return []
 
-  def spamfreq(self, freq, arglist=()):
-    """ Sends out input to all the registrants of a frequency.
+  def spamhook(self, hook, arglist=()):
+    """ Sends out input to all the registrants of a hook.
 
     arguments:
 
-      'freq' -- (string) the frequency to spam
+      'hook' -- (string) the hook to spam
 
-      'arglist' -- (list of arguments--depends on frequency)
+      'arglist' -- (list of arguments--depends on hook)
                    the list of arguments that gets passed to
-                   each function in the frequency
+                   each function in the hook 
 
     """
     import traceback
-    if self._listeners.has_key(freq):
-      for mem in self._listeners[freq]:
+    if self._listeners.has_key(hook):
+      for mem in self._listeners[hook]:
         try:
           mem(arglist)
         except:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.3 2002/01/25 08:18:36 willhelm Exp $
+# $Id: cursesui.py,v 1.4 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -64,8 +64,8 @@ class Cursesui(ui.BaseUI):
     # self._output.nodelay(1)
     # self._input.nodelay(0) 
     self.refresh_all()
-    engine.myengine.register(engine.SHUTDOWNFREQ, self.shutdown)
-    engine.myengine.register(engine.STARTUPFREQ, self.startui)
+    engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
+    engine.myengine.register(engine.STARTUP_HOOK, self.startui)
 
 
   def startui(self, args):
@@ -76,7 +76,7 @@ class Cursesui(ui.BaseUI):
 
   def shutdown(self, args):
     """
-    Gets called (it's registered with the shutdown frequency).
+    Gets called (it's registered with the shutdown hook).
     This is important because it ends the curses session
     returning the client back to "normal" land.
     """

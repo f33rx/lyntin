@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.3 2002/01/25 08:18:36 willhelm Exp $
+# $Id: ui.py,v 1.4 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -56,7 +56,7 @@ class BaseUI:
        'BaseUI.__init__(self)'
     """
     self.shutdownflag = 0
-    engine.myengine.register(engine.SHUTDOWNFREQ, self.shutdown)
+    engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
 
   def startui(self):
     """ Initializes your user interface.

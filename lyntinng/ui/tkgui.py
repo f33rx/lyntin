@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.10 2002/02/05 03:39:22 willhelm Exp $
+# $Id: tkgui.py,v 1.11 2002/02/07 02:35:04 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -121,8 +121,8 @@ class TkGui(ui.BaseUI):
     self._txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
 
     self._initColorTags()
-    engine.myengine.register(engine.ECHOFREQ, self.echo)
-    engine.myengine.register(engine.STARTUPFREQ, self.startui)
+    engine.myengine.register(engine.ECHO_HOOK, self.echo)
+    engine.myengine.register(engine.STARTUP_HOOK, self.startui)
 
 
   def startui(self, args):

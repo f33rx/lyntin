@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.10 2002/02/03 04:27:50 willhelm Exp $
+# $Id: session.py,v 1.11 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -35,8 +35,8 @@ class Session:
     self._logfile = None
     self._ticker = ticker.Ticker()
 
-    # register with the shutdown frequency
-    engine.myengine.register(engine.SHUTDOWNFREQ, self.shutdown)
+    # register with the shutdown hook 
+    engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
 
   def __copy__(self):
     """ Copies the session and returns a new session with the same 
@@ -70,8 +70,8 @@ class Session:
 
   def shutdown(self, args):
     """ Shuts down the session."""
-    # unregister with the shutdown frequency
-    engine.myengine.unregister(engine.SHUTDOWNFREQ, self.shutdown)
+    # unregister with the shutdown hook
+    engine.myengine.unregister(engine.SHUTDOWN_HOOK, self.shutdown)
     if self.getName() != "common":
       engine.myengine.unregisterSession(self.getName())
       if self._socket: self._socket.shutdown()
@@ -227,7 +227,7 @@ class Session:
     """ Handles input in the context of this session specifically.
 
     internal says whether the command came from interally.
-    we won't spam frequencies and may at some point prevent
+    we won't spam hooks and may at some point prevent
     output for internal stuff too.  1 if internal, 0 if not.
     """
     # we deal with possible variables...
