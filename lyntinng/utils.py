@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.72 2003/03/22 03:14:23 jmberne Exp $
+# $Id: utils.py,v 1.73 2003/04/13 03:44:36 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -769,6 +769,8 @@ def _lyntin_expand_vars(text, varmap):
     return text
 
   varmapkeys = varmap.keys()
+  # we want to sort them in order of longest first
+  varmapkeys.sort(lambda x,y: cmp(len(y), len(x)))
   i = 0
 
   # we go through the text expanding things one at a time.
@@ -804,15 +806,6 @@ def _lyntin_expand_vars(text, varmap):
 
   return text
 
-def sort_by_length(item1, item2):
-  """
-  Takes two strings and compares them by length.
-
-  @return: same as the Python cmp function
-  @rtype: int
-  """
-  return cmp(len(item1), len(item2))
-
 def _tintin_expand_vars(text, varmap):
   """
   Do not call this directly.  Use 'expand_vars' instead.
@@ -833,7 +826,7 @@ def _tintin_expand_vars(text, varmap):
     return text
 
   varmapkeys = varmap.keys()
-  varmapkeys.sort(sort_by_length)
+  varmapkeys.sort(lambda x,y: cmp(len(y), len(x)))
   i = 0
   count = 1
 
