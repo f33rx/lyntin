@@ -3,10 +3,10 @@
 
    #ses sessname hostname port
 
-   replacing hostname with the ip address or host name, and
-   port with the port number of the mud you want to
-   connect to.
+   replacing hostname with the ip address or host name, and port with 
+   the port number of the mud you want to connect to.
+
    When you're done, quit out of the mud, then type #quit
-   to get out of lyntin.  That's all you _need_ to know.
+   to get out of Lyntin.
 
    See also: alias, action, gag, session, help

@@ -1,6 +1,6 @@
    syntax: #history
-   Shows you the last bunch of commands that you've typed.
-   You can do history substitution with these:
+   Shows you the last bunch of commands that you've typed.  You can do 
+   history substitution with these:
 
    !<# of line to repeat> <additional text>
 
