@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.22 2002/04/29 02:06:18 willhelm Exp $
+# $Id: lyntin.py,v 1.23 2002/05/12 04:40:38 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
       elif mem[0] == '--datadir' or mem[0] == '-d':
         if mem[1][-1] != os.sep:
-          lyntin.options['datadir'] = mem[1] + os.sep
+          lyntin.options['datadir'] = mem[1] + "/"
         else:
           lyntin.options['datadir'] = mem[1]
 
@@ -177,14 +177,15 @@ if __name__ == '__main__':
 
     # if they haven't set the datadir via the command line, then
     # we go see if they have a HOME in their environment variables....
-    if lyntin.options['datadir'] == '':
+    datadir = lyntin.options['datadir']
+    if datadir == '':
       if os.environ.has_key("HOME"):
         datadir = os.environ["HOME"]
         if len(datadir) > 0:
           if datadir[-1] != os.sep: 
             datadir = datadir + os.sep
-          lyntin.options['datadir'] = datadir
 
+    lyntin.options['datadir'] = datadir.replace("/", os.sep)
 
     import atexit
     atexit.register(lyntin.shutdown)
