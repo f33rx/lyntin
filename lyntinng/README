@@ -6,7 +6,7 @@
 VERSION
 =======
 
-$Id: README,v 1.9 2002/06/24 01:19:47 willhelm Exp $
+$Id: README,v 1.10 2002/07/14 15:14:00 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -103,6 +103,10 @@ emulates how Tintin works.  Lyntin mode is born from our own preferred
 user input evaluation.  There are probably good and bad points of 
 each which is beyond the scope of this document.
 
+Note: Lyntin defaults to lyntin mode--so if you're a Tintin user and 
+want to user your Tintin command files, you should make sure to start 
+Lyntin up in tintin mode.
+
 
 
 DOCUMENTATION 
@@ -117,11 +121,11 @@ There are *in-game* help files covering the commands and most
 other things we could think of which can be accessed with the ``#help`` 
 command.
 
-All the documentation that comes with Lyntin and is also available on
+All the documentation comes with Lyntin and is also available on
 the Lyntin website in HTML form.  Lyntin documentation is written in
 reStructuredText because it's an ASCII-based formatting markup that's 
 easy to read (making the source files useful) as well as convert into 
-formats like HTML, RTF, and other formats.
+formats like HTML and RTF.
 
 If you find problems with the documentation or have fixes for it, 
 let us know.
@@ -131,17 +135,16 @@ let us know.
 HOW TO CONTRIBUTE
 =================
 
-Development and maintenance is entirely done by the maintainer right now.
-If you're interested in sending in bug fixes, please feel welcome.  I'm
-extremely accomodating to most methods of sending in patches.
-
-A diff -u output file is great for this sort of thing.
+Development and maintenance is entirely managed by the maintainer right 
+now.  If you're interested in sending in bug fixes, please feel welcome.  
+I'm extremely accomodating to most methods of sending in patches, however
+a diff -u output file is great for this sort of thing.
 
 All patches and such things should be sent to the mailing list at:
 
    lyntin-devl@lists.sourceforge.net
 
-Patches will not be applied unless the author either yields the
+Note: Patches will not be applied unless the author either yields the
 copyright to the FSF or to us (and then we'll yield it to the FSF).
 
 Please read through the web-site areas on coding conventions and such
@@ -162,7 +165,7 @@ via the bug-tracker and task-tracker on our SourceForge project site.
 If you have problems and fix them, by all means send us patches and
 we'll happily work with them and credit you.
 
-That should be about it.  In-game help is accessed by typing #help.
+That should be about it.  In-game help is accessed by typing ``#help``.
 When you start Lyntin for the first time, type ``#help general``
 and that'll get you started.  Read through the various help files
 at your leisure.

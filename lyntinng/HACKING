@@ -5,7 +5,7 @@
 VERSION
 =======
 
-$Id: HACKING,v 1.12 2002/06/25 01:46:44 willhelm Exp $
+$Id: HACKING,v 1.13 2002/07/14 15:14:00 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -38,7 +38,7 @@ Building "macros" in this way is complex and solves a small set of
 problems, but the more complex problems really need a full language 
 and a library to solve.  The Tintin way of solving this is to keep
 adding commands that fill out the macro language to handle string
-functions and such.  Lyntin takes a different approach leaving
+manipulations and such.  Lyntin takes a different approach leaving
 those sorts of things to Python.  
 
 Lyntin is inextricably intertwined with Python so you can

@@ -4,7 +4,7 @@
 VERSION
 =======
 
-$Id: INSTALL,v 1.7 2002/07/14 20:53:57 jmberne Exp $
+$Id: INSTALL,v 1.8 2002/07/17 01:21:58 willhelm Exp $
 
 For more up-to-date documentation, check out the web-site at:
 http://lyntin.sourceforge.net/
@@ -22,9 +22,9 @@ revisited and re-written at some point.
 UNIX/LINUX
 ==========
 
-1. Make sure you have at least Python 2.0--you can do this by 
+1. Make sure you have at least Python 2.2--you can do this by 
    running "python" and seeing what version it says it is.  If 
-   you don't have Python 2.0 or later installed, Lyntin won't work.
+   you don't have Python 2.2 or later installed, Lyntin won't work.
 2. Download the version of Lyntin you're looking for (below) 
 3. Untar the client into ~/lyntin or something along those lines
 4. Run ``python lyntin.py``
@@ -32,17 +32,22 @@ UNIX/LINUX
 lyntin.py takes a series of options.  For a list of options 
 and explanations, run::
 
-   lyntin.py --help
+   python lyntin.py --help
 
 
 
 WINDOWS
 =======
 
-1. Make sure you have at least Python 2.0
+1. Make sure you have at least Python 2.2
 2. Unzip the client into c:\lyntin
-3. Double-click on lyntin.py to run Lyntin
-4. You probably want to build a shortcut for Lyntin to make it easier
-   to run from your desktop.  The shortcut should use pythonw.exe
-   instead of python.exe--this will start Lyntin without that silly
-   extra window.
+3. Right click on lyntin.py and select ``Create Shortcut``
+4. Then right click on the new shortcut and select ``Properties``
+5. There are many versions of Windows and I think shortcut properties
+   differ between them.  On Win2k, I have my shortcut set up like this:
+
+::
+
+   Target:    {path_to_python}\pythonw.exe c:\lyntin\lyntin.py --ui tk
+   Start in:  c:\lyntin
+   Run:       Normal window
