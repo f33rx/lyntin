@@ -4,49 +4,18 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.87 2002/05/04 17:39:58 jmberne Exp $
+# $Id$
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
-This module holds a series of basic commands.
+This module holds commands that are based on Tintin functionality.
 """
 commands_dict = {}
 
 def action_cmd(session, args, input):
-  """#action [<trigger> <response>]
-
-  This adds actions and tells you the current action stati of actions
-  already registered.
   """
-  trigger = args["trigger"]
-  action = args["action"]
-  quiet = args["quiet"]
-
-  # they typed '#action'--print out all the current actions
-  if not trigger and not action:
-    data = session.getManager("action").getInfo()
-    if data == '':
-      data = "action: no actions defined."
-
-    exported.write_message(data)
-    return
-
-  # they typed '#action dd*' and are looking for matching actions
-  if not action:
-    data = session.getManager("action").getInfo(trigger)
-    if data == '':
-      data = "action: no actions defined."
-
-    exported.write_message(data)
-    return
-
-  session.getManager("action").addAction(trigger, action)
-  if not quiet:
-    exported.write_message("action: {%s} {%s} added." % (trigger, action))
-
-actionhelp = """
 With no arguments, prints all actions.
 With one argument, prints all actions which match the arg.
 With multiple arguments, creates an action.
@@ -75,15 +44,57 @@ ex:
    #action {EVISCERATES joey} {rescue joey}
    #action {%0 gives you %5} {say thanks for the %5, %0!}
    #action {^%1 tells you %2$} {say %1 just told me %2}
-"""
-commands_dict["action"] = (action_cmd, "trigger= action= quiet:boolean=false", None, actionhelp)
+  """
+  trigger = args["trigger"]
+  action = args["action"]
+  quiet = args["quiet"]
+
+  # they typed '#action'--print out all the current actions
+  if not trigger and not action:
+    data = session.getManager("action").getInfo()
+    if data == '':
+      data = "action: no actions defined."
+
+    exported.write_message(data)
+    return
+
+  # they typed '#action dd*' and are looking for matching actions
+  if not action:
+    data = session.getManager("action").getInfo(trigger)
+    if data == '':
+      data = "action: no actions defined."
+
+    exported.write_message(data)
+    return
+
+  session.getManager("action").addAction(trigger, action)
+  if not quiet:
+    exported.write_message("action: {%s} {%s} added." % (trigger, action))
+
+commands_dict["action"] = (action_cmd, "trigger= action= quiet:boolean=false")
 
 
 def alias_cmd(session, args, input):
-  """#alias [<alias> <expansion>]
+  """
+With no arguments, prints all aliases.
+With one argument, prints all aliases which match the arg.
+With multiple arguments, creates an alias.
 
-  This adds aliases and tells you the current alias stati of aliases
-  already registered.
+You can use pattern variables which look like % and a number.
+(ex: %4).   %0 is the alias name, %n (where n is a number)
+is the nth item after the alias name.  
+
+Ranges can be used by using python colon-syntax, specifying a
+half-open slice of the input items, so %0:3 is the first, second and
+third elements of the input
+
+Negative numbers count back from the end of the list.  So %-1 is the
+last item in the list, %:-1 is everything but the last item in the
+list. 
+
+Note: It should be noted that actions are matched via 
+regular expressions and that %1 will get translated to (.*?)
+for the regular expression match.
   """
   name = args["alias"]
   command = args["expansion"]
@@ -111,60 +122,14 @@ def alias_cmd(session, args, input):
   if not quiet:
     exported.write_message("alias: {%s} {%s} added." % (name, command))
 
-aliashelp = """
-With no arguments, prints all aliases.
-With one argument, prints all aliases which match the arg.
-With multiple arguments, creates an alias.
-
-You can use pattern variables which look like % and a number.
-(ex: %4).   %0 is the alias name, %n (where n is a number)
-is the nth item after the alias name.  
-
-Ranges can be used by using python colon-syntax, specifying a
-half-open slice of the input items, so %0:3 is the first, second and
-third elements of the input
-
-Negative numbers count back from the end of the list.  So %-1 is the
-last item in the list, %:-1 is everything but the last item in the
-list. 
-
-Note: It should be noted that actions are matched via 
-regular expressions and that %1 will get translated to (.*?)
-for the regular expression match.
-"""
-commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false", None, aliashelp)
-
-
-def ansi_cmd(session, args, input):
-  """#ansi [on|off]
-
-  With no arguments, tells you whether ansicolor is enabled.
-  With arguments, sets the ansicolor global variable.
-  """
-  option = args["option"]
-
-  if option == 1:
-    lyntin.ansicolor = 1
-    exported.write_message("ansi: ansi is now enabled.")
-
-  elif option == 0:
-    lyntin.ansicolor = 0
-    exported.write_message("ansi: ansi is now disabled.")
-
-  else:
-    if lyntin.ansicolor:
-      exported.write_message("ansi: ansi color is enabled.")
-    else:
-      exported.write_message("ansi: ansi color is disabled.")
-
-commands_dict["ansi"] = (ansi_cmd, "option:booleanornone=")
+commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false")
 
 
 def boss_cmd(session, words, input):
-  """#boss
-
-  This command prints stuff to the screen that looks important.
-  Oddly enough, it's actually linked list code.
+  """
+This probably isn't as helpful as it could be.  Right now it
+will print to your display code from Lyntin 2.x to make it seem
+like you're doing work.
   """
   # FIXME - somehow make this more universal by having a bossfile?
   exported.write_mud_data(lyntin.BOSSTEXT)
@@ -173,11 +138,13 @@ commands_dict["boss"] = (boss_cmd, "")
 
 
 def char_cmd(session, args, input):
-  """#char <new-command-denoting-character>
+  """
+The default command char is #.  Prepending a # to any command pokes 
+Lyntin into executing it as a Lyntin command.  #action and #alias 
+for instance.  You can change the # to any other character you 
+like--though be careful.
 
-  With no arguments, tells you what the current command character
-  is.  With arguments allows you to set the global command
-  character.
+ex: #char {*}  <-- changes the command char to *
   """
   char = args["char"]
 
@@ -193,10 +160,9 @@ commands_dict["^char"] = (char_cmd, "char=")
 
 
 def clear_cmd(session, words, input):
-  """#clear
-
-  This command clears a session of all session data (except
-  the actual connection).
+  """
+This command clears a session of all session data (except the actual 
+connection).  This covers gags, subs, actions, aliases...
   """
   try:
     session.clear()
@@ -208,154 +174,18 @@ commands_dict["clear"] = (clear_cmd, "")
   
 
 def cr_cmd(session, args, input):
-  """#cr
-
-  This sends a carriage return to the mud.  Sometimes this is useful
-  in aliases and the like.
+  """
+This sends a carriage return to the mud.  Sometimes this is useful
+in aliases that require a carriage return.
   """
   session.writeSocket("\n")
 
 commands_dict["^cr"] = (cr_cmd, "")
 
 
-def datagrep_cmd(session, args, input):
-  """#datagrep {regularexpression}
-
-  Searches this session's databuffer with a regular expression
-  printing all matches in their entirety.
-  """
-  if (session.getName() == "common"):
-    exported.write_error("datagrep cannot be applied to common session.")
-    return
-
-  pattern = args["pattern"]
-  size = args["size"]
-
-  ret = session.getDataBuffer().grepbuffer(pattern,size)
-  exported.write_message("datagrep %s results:\n%s"
-                         % (pattern, string.join(ret, "\n")))
-
-commands_dict["datagrep"] = (datagrep_cmd, "pattern size:int=300")
-
-
-def datagreplines_cmd(session, args, input):
-  """#datagreplines {regularexpression}
-
-  Searches the lines in this session's databuffer with 
-  a regular expression printing all matching lines in their 
-  entirety.
-  """
-  if (session.getName() == "common"):
-    exported.write_error("datagrep cannot be applied to common session.")
-    return
-
-  pattern = args["pattern"]
-  size = args["size"]
-  ret = session.getDataBuffer().greplines(pattern,size)
-  exported.write_message("datagreplines %s results:\n%s"
-                         % (pattern, string.join(ret, "")))
-
-commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
-
-
-def deed_cmd(session, args, input):
-  """#deed [deed|count] quiet=[true|false]
-  
-  This adds a deed or prints all the deeds stored till now.
-  """
-  # original deed_cmd code contributied by Sebastian John
-
-  if (session.getName() == "common"):
-    exported.write_error("deed cannot be applied to common session.")
-    return
-
-  deedtext = args["text"]
-  quiet = args["quiet"]
-
-  varexpansion = session.getManager("variable").expand(deedtext)
-  if varexpansion:
-    deedtext = varexpansion
-
-  if not deedtext:
-    data = session.getManager("deed").getInfo()
-    if data == "":
-      data = "deed: no deeds defined."
-    
-    exported.write_message(data)
-    return
-  
-  
-  if deedtext.isdigit():
-    data = session.getManager("deed").getInfo(deedtext)
-    if data == "":
-      data = "deed: no deeds defined."
-    
-    exported.write_message(data)
-    return
-  
-  session.getManager("deed").addDeed(deedtext)
-  if not quiet:
-    exported.write_message("deed: {%s} added." % deedtext)
-
-commands_dict["deed"] = (deed_cmd, "text= quiet:boolean=false")
-
-
-def diagnostics_cmd(session, args, input):
-  """#diagnostics [logfile]
-
-  This tells you the current status of Lyntin.  Starting with 
-  events and moving into the threadmanager and such.  Also pulls
-  from the os and sys modules.
-  """
-  import os, sys
-  message = "Diagnostics:\n"
-  message = message + exported.get_engine().getDiagnostics()
-
-  message = message + "Thread statii:\n"
-
-  data = exported.get_engine().checkthreads()
-  for mem in data:
-    message += mem + "\n"
-      
-  message = message + "OS/Python information:\n"
-  try: 
-    message = message + "   sys.version: " + sys.version + "\n"
-  except:
-    message = message + "   sys.version not available.\n"
-
-  try: 
-    message = message + "   os.name: " + os.name + "\n"
-  except:
-    message = message + "   os.name not available.\n"
- 
-  message = message + "Lyntin Options:\n"
-  for mem in lyntin.options.keys():
-    message = message + "   " + mem + ": " + repr(lyntin.options[mem]) + "\n"
-
-  exported.write_message(message)
-  exported.write_message("This information can be dumped to a "
-        "file by doing:\n   #diagnostics dumpfile.txt")
-
-  logfile = args["logfile"]
-  if logfile:
-    import time
-    try:
-      f = open(logfile, "w")
-      f.write("This file was created on: " + time.ctime(time.time()) + 
-              "\n\n")
-      f.write(message)
-      f.close()
-    except Exception, e:
-      exported.write_error("diagnostics: Error writing to file %s. %s" 
-                            % (logfile, e))
-
-commands_dict["diagnostics"] = (diagnostics_cmd, "logfile=")
-
-
 def end_cmd(session, args, input):
-  """#end
-
-  This is the end command--it shuts down Lyntin.
+  """
+Closes all sessions and quits out of Lyntin.
   """
   import event
   exported.write_message("end: you'll be back...")
@@ -365,10 +195,18 @@ commands_dict["^end"] = (end_cmd, "")
 
 
 def gag_cmd(session, args, input):
-  """#gag [<text>]
+  """
+With no arguments, prints out all gags.
+With arguments, creates a gag.
 
-  With no arguments, it tells you all the gags currently existing.
-  With arguments, it sets up a new gag.
+Incoming lines from the mud which contain gagged text will
+be removed and not shown on the ui.
+
+Gags get converted to regular expressions.  Feel free to use
+regular expression matching syntax as you see fit.
+
+ex: #gag {has missed you.}    <-- will prevent any incoming line
+                                  with "has missed you" to be shown.
   """
   if not args.has_key("text"):
     data = session.getManager("gag").getInfo()
@@ -385,22 +223,32 @@ def gag_cmd(session, args, input):
 commands_dict["gag"] = (gag_cmd, "text*")
 
 
-def help_cmd(session, words, input):
-  """#help [topic|command]
-
-  This is the main help command for Lyntin.
+def help_cmd(session, args, input):
+  """
+With no arguments, shows all the help files available.
+With an argument, shows that specific help file.
   """
   import dircache
 
   helpdir = lyntin.lyntindir + "help"
   data = "::lyntin help::\n"
 
-  if len(words) == 1:
+  item = args["item"]
+
+  if not item:
     file_list = dircache.listdir(helpdir)
     file_list.sort()
 
     topic_list = []
     command_list = []
+
+    data += "\nCommands Available:\n"
+    command_list = exported.get_commands()
+    for i in range(len(command_list)):
+      if len(command_list[i]) > 0 and command_list[i][0] == "^":
+        command_list[i] = command_list[i][1:]
+    command_list.sort()
+    data += utils.columnize(textlist=command_list, indent=3)
 
     for mem in file_list:
       if len(mem) < 5:
@@ -409,17 +257,9 @@ def help_cmd(session, words, input):
       if mem[-4:] == ".tpc":
         topic_list.append(mem[:-4])
 
-    data += "\nTopics Available:\n"
+    data += "\n\nOther topics Available:\n"
     topic_list.sort()
     data += utils.columnize(textlist=topic_list, indent=3)
-
-    data += "\n\nCommands Available:\n"
-    command_list = exported.get_commands()
-    for i in range(len(command_list)):
-      if len(command_list[i]) > 0 and command_list[i][0] == "^":
-        command_list[i] = command_list[i][1:]
-    command_list.sort()
-    data += utils.columnize(textlist=command_list, indent=3)
 
     exported.write_message(data)
     return
@@ -427,45 +267,68 @@ def help_cmd(session, words, input):
   command_list = exported.get_commands()
   helpfiles = dircache.listdir(helpdir + "/")
 
-  for mem in words[1:]:
-    mem = utils.strip_braces(mem)
 
-    if mem[0] == lyntin.commandchar:
-      mem = mem[1:]
+  if item[0] == lyntin.commandchar:
+    item = item[1:]
 
-    if mem in command_list:
-      ap = exported.get_engine().getArgParser(mem)
-      if ap:
-        syntaxline = "syntax: %s %s" % (mem, ap.syntaxline)
+  if item in command_list:
+    ap = exported.get_engine().getArgParser(item)
+    if ap:
+      data += "syntax: %s %s\n" % (item, ap.syntaxline)
+
+    command = exported.get_engine().getCommand(item)
+    if command:
+      data += command.__doc__
+    if not command:
+      helptext = exported.get_engine().getHelp(item)
+      if helptext:
+        data += helptext
       else:
-        syntaxline = ""
+        data += "\nThat command has no help text."
 
-      body = exported.get_engine().getHelp(mem)
-
-      if body:
-        exported.write_message(data + syntaxline + "\n" + body)
-      else:
-        exported.write_message("\n%s%s\nThat command has no help." % (data, syntaxline))
-      continue
+    exported.write_message(data)
+    return
       
-    if mem + ".tpc" in helpfiles:
-      f = open(helpdir + "/" + mem + ".tpc", "r")
-      lines = f.readlines()
-      f.close()
-      data += (string.join(lines, "") + "\n")
-      exported.write_message(data)
+  if item + ".tpc" in helpfiles:
+    f = open(helpdir + "/" + item + ".tpc", "r")
+    lines = f.readlines()
+    f.close()
+    data += (string.join(lines, "") + "\n")
+    exported.write_message(data)
  
-    else:
-      data += "Sorry, but %s is not a valid help topic.\n" % mem
+  exported.write_message("%s\nSorry, but %s is not a valid help topic.\n" % 
+                         (data, item))
 
-commands_dict["help"] = (help_cmd)
+commands_dict["help"] = (help_cmd, "item=")
 
 
 def highlight_cmd(session, args, input):
-  """#highlight [<style>] [<text>]
+  """
+With no arguments, prints all highlights.
+With one argument, prints all highlights which match the arg.
+With multiple arguments, creates a highlight.
 
-  With no arguments, lists all the highlights currently set.
-  With arguments, sets a new highlight.
+Highlights enable you to colorfully "tag" text that's of interest
+to you with the given style.  This may not work or fully work in
+all ui's.
+
+Styles available are:
+   bold     black    grey           b black
+   blink    red      light red      b red
+   reverse  green    light green    b green
+            yellow   light yellow   b yellow
+            blue     light blue     b blue
+            magenta  light magenta  b magenta
+            cyan     light cyan     b cyan
+            white    light white    b white
+
+Highlights also handle *.  So '*word*' will highlight an entire line
+with "word" in it.  '*word' will highlight the line up to "word".  
+'word*' will highlight the line from "word" to the end.
+
+ex:
+   #highlight {green} {Sven arrives.}
+   #highlight {reverse,green} {Sven arrives.}
   """
   style = args["style"]
   text = args["text"]
@@ -486,9 +349,22 @@ commands_dict["highlight"] = (highlight_cmd, "style= text=")
 
 
 def history_cmd(session, args, input):
-  """#history
+  """
+#history prints the current history buffer.
 
-  Prints the history list.
+! will call an item in the history indexed by the number after
+the !.  You can also do replacements via the sub=repl syntax.
+
+ex:
+   #history
+       prints the history buffer
+   !
+       executes the last thing you did
+   !4
+       executes the fourth to last thing you did
+   !4 3k=gk
+       executes the fourth to last thing you did after replacing
+       3k with gk in it
   """
   historylist = exported.get_history()
   for i in range(0, len(historylist)):
@@ -500,9 +376,17 @@ commands_dict["history"] = (history_cmd, "")
 
 
 def if_cmd(session, args, input):
-  """#if <expr> <action> [else]
+  """
+Allows you to do some boolean logic based on Lyntin variables
+or any Python expression.  If this expression returns a non-false
+value, then the action will be performed.
 
-  Implements the Tintin++ #if command.
+Strings should be in single quotes:
+
+ex:
+  #if {$myhpvar < 100} {#showme PANIC!}
+  #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
+  #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
   """
   # original if_cmd code contributed by Sebastian John
 
@@ -532,9 +416,8 @@ commands_dict["if"] = (if_cmd, "expr action elseaction=")
 
 
 def ignore_cmd(session, args, input):
-  """#ignore
-
-  Turns on and shuts off ignoring of actions for this session.
+  """
+Toggles whether actions for that session are ignored or not.
   """
   if (session.getName() == "common"):
     exported.write_error("ignore cannot be applied to common session.")
@@ -553,9 +436,10 @@ commands_dict["ignore"] = (ignore_cmd, "")
 
 
 def info_cmd(session, args, input):
-  """#info
-
-  This asks the session about its info.  Commands and such.
+  """
+Prints all the information about the active session: 
+actions, aliases, gags, highlights, variables, ticker, verbose, 
+speedwalking, and other various things.
   """
   exported.write_message(session.getInfo())
 
@@ -563,9 +447,9 @@ commands_dict["info"] = (info_cmd, "")
 
 
 def killall_cmd(session, args, input):
-  """#killall
-
-  Wipes all the sessions of all information.
+  """
+Clears all sessions of session oriented stuff: aliases,
+substitutions, gags, variables, so on so forth.
   """
   for mem in exported.get_active_sessions():
     mem.clear()
@@ -575,9 +459,9 @@ commands_dict["^killall"] = (killall_cmd, "")
 
 
 def log_cmd(session, args, input):
-  """#log <filename> <databuffer>
-
-  Starts or stops logging to a logfile.
+  """
+Will start or stop logging to a given filename for that session.
+Each session can have its own logfile.
   """
   logfile = args["logfile"]
   databuffer = args["databuffer"]
@@ -626,9 +510,21 @@ commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false")
 
          
 def loop_cmd(session, args, input):
-  """#loop {<from>,<to>} {command}
+  """
+Executes a given command replacing %0 in the command with
+the range of numbers specified in <from> and <to>.
 
-  Implements the loop command (which is more like a range).
+ex:
+
+  #loop {1,5} {reclaim %0.corpse}
+
+will execute:
+
+  reclaim 1.corpse
+  reclaim 2.corpse
+  reclaim 3.corpse
+  reclaim 4.corpse
+  reclaim 5.corpse
   """
   loop = args["fromto"]
   command = args["comm"]
@@ -665,10 +561,9 @@ commands_dict["loop"] = (loop_cmd, "fromto comm")
 
 
 def math_cmd(session, args, input):
-  """#math <variable> <math ops>
-
-  Implements the #math command which allows you to manipulate
-  variables above and beyond setting them.
+  """
+Implements the #math command which allows you to manipulate
+variables above and beyond setting them.
   """
   var = args["var"]
   ops = args["operation"]
@@ -688,51 +583,37 @@ def math_cmd(session, args, input):
 commands_dict["math"] = (math_cmd, "var operation")
 
 
-def mudecho_cmd(session, args, input):
-  """#mudecho [on|off]
-
-  Sometimes muds screw up the detail and don't properly turn echo
-  on and off.  Sometimes you just want to be able to turn it on
-  and off on your own.  So this allows you to do that.
-  """
-  import event
-  option = args["option"]
-
-  if option == 1:
-    event.EchoEvent(1).enqueue() 
-    exported.write_message("mudecho: turned on manually.")
-  elif option == 0:
-    event.EchoEvent(0).enqueue() 
-    exported.write_message("mudecho: turned off manually.")
-
-commands_dict["mudecho"] = (mudecho_cmd, "option:boolean")
- 
-
 def nop_cmd(session, args, input):
-  """#nop <whatever you want to write here....>
+  """
+nop stands for "no operation".  So anything after a #nop
+and before a ; (unless it's braced) will be ignored.
 
-  nop stands for "no operation".  So anything after a #nop
-  and before a ; (unless it's braced) will be ignored.
-
-  This was quite possibly the easiest command to program.
+This was quite possibly the easiest command to program ever.
   """
   return
 
 commands_dict["nop"] = (nop_cmd, "comment*", "noparsing")
 
-def raw_cmd(session, args, input):
-  """#raw text_to_mud
-
-  Takes its arguments and sends them straight to the mud.
-  """
-  session.writeSocket(args["input"] + "\n")
-  
-commands_dict["raw"] = (raw_cmd, "input=", "noparsing")
 
 def read_cmd(session, args, input):
-  """#read <filename>
+  """
+Reads in a file running each line as a Lyntin command.  This is the
+opposite of #write which allows you to save session settings and
+restore them using #read.
 
-  Reads in a commands file and executes all the lines.
+You can also read in via the commandline when you start Lyntin:
+
+  lyntin --read 3k
+
+And read can handle HTTP urls:
+
+  lyntin --read http://lyntin.sourceforge.net/lyntinrc
+
+  #read http://lyntin.sourceforge.net/lyntinrc
+
+Note: the first non-whitespace char is used to set the Lyntin
+command character.  If you use non Lyntin commands in your file,
+make sure the first one is a command char.  If not, use #nop .
   """
   filename = args["filename"]
 
@@ -771,11 +652,23 @@ commands_dict["read"] = (read_cmd, "filename")
 
 
 def session_cmd(session, args, input):
-  """#session <sessionname> <host> <port>
+  """
+This is the command you use to connect to the muds. The session that 
+you startup will become the active session. That is, all commands you 
+type, will be sent to this session.
 
-  The first argument is the session name.
-  The second argument is the hostname/ip address to connect to.
-  The third argument is the port number.
+Here's a small example to get you started:
+It shows how you can log into GrimneMUD with 2 chars and play a bit 
+with them.
+
+ex: #session valgar 129.241.36.229 4000 <= define a session named
+                                          'valgar'.
+ex: #session eto gytje.pvv.unit.no 4000 <= define session named
+                                           'eto'.
+You can change the active session, by typing #sessionname 
+#eto      <=make the char in the 'eto' session the active one.
+...       <= all commands now go to session 'eto'.
+#valgar   <=switching now to session 'valgar'.
   """
   name = args["sessionname"]
   host = args["host"]
@@ -844,9 +737,12 @@ commands_dict["session"] = (session_cmd, "sessionname= host= port:int=-1")
 
 
 def showme_cmd(session, args, input):
-  """#showme <message>
+  """
+Will display {text} on your screen.  Doesn't get sent to the mud--
+just your screen.
 
-  Prints stuff to the user display.
+ex:
+   #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
   """
   input = args["input"]
   if not input:
@@ -858,10 +754,8 @@ commands_dict["showme"] = (showme_cmd, "text*", "noparsing")
 
 
 def speedwalk_cmd(session, args, input):
-  """#speedwalk [on|off]
-
-  With no arguments, tells you whether speedwalk is enabled.
-  With arguments, sets the speedwalk global variable.
+  """
+Toggles speedwalking on and off for the entire client.
   """
   option = args["option"]
 
@@ -880,77 +774,13 @@ def speedwalk_cmd(session, args, input):
 commands_dict["speedwalk"] = (speedwalk_cmd, "option:booleanornone=")
 
 
-def swdir_cmd(session, args, input):
-  """#swdir [<alias> <dir>]
-
-  This adds speedwalking aliases and tells you the current speedwalking dirs
-  already registered.
-  """
-  alias = args["alias"]
-  dir = args["dir"]
-  quiet = args["quiet"]
-
-  # they typed '#swdir'--print out all the current speedwalking dirs
-  if not alias and not dir:
-    data = session.getManager("speedwalk").getDirsInfo()
-    if data == '':
-      data = "swdir: no speedwalking dirs defined."
-
-    exported.write_message(data)
-    return
-
-  # they typed '#swdir dd*' and are looking for matching speedwalking dirs
-  if not dir:
-    data = session.getManager("speedwalk").getDirsInfo(alias)
-    if data == '':
-      data = "swdir: no speedwalking dirs defined."
-
-    exported.write_message(data)
-    return
-
-  try:
-    session.getManager("speedwalk").addDir(alias, dir)
-    if not quiet:
-      exported.write_message("swdir: {%s} {%s} added." % (alias, dir))
-  except ValueError, e:
-    exported.write_error("swdir: cannot add alias: %s." % e)
-
-commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
-
-
-def swexclude_cmd(session, args, input):
-  """#swexclude [<exclude>]
-
-  This adds speedwalking excludes and tells you the current excludes
-  already registered. Excludes are a bit like antisubstitutes, but for
-  speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
-  get speedwalk-parsing.
-  """
-  excludes = args["exclude"]
-  quiet = args["quiet"]
-
-  # they typed '#swexclude'--print out all current speedwalking excludes
-  if len(excludes) == 0:
-    data = session.getManager("speedwalk").getExcludesInfo()
-    if data == '':
-      data = "swexcl: no speedwalking excludes defined."
-
-    exported.write_message(data)
-    return
-
-  for exclude in excludes:
-    session.getManager("speedwalk").addExclude(exclude)
-    if not quiet:
-      exported.write_message("swexclude: {%s} added." % exclude)
-
-commands_dict["swexclude"] = (swexclude_cmd, "exclude* quiet:boolean=false")
-
-
 def substitute_cmd(session, args, input):
-  """#substitue [<item> <substitution>]
+  """
+With no arguments, prints all substitutes.
+With one argument, prints all substitutes which match the argument.
+Otherwise creates a substitution.
 
-  With no arguments, lists all the substitutions currently set.
-  With arguments, sets a new substitution.
+Braces are advised around both 'name' and 'substitution'.
   """
   item = args["item"]
   substitution = args["substitution"]
@@ -978,10 +808,9 @@ commands_dict["substitute"] = (substitute_cmd, "item= substitution=")
 
 
 def textin_cmd(session, args, input):
-  """#textin <filename>
-
-  Takes the contents of the file and outputs it directly to the mud
-  without processing it (like #read does).
+  """
+Takes the contents of the file and outputs it directly to the mud
+without processing it (like #read does).
   """
   if (session.getName() == "common"):
     exported.write_error("textin cannot be applied to common session.")
@@ -1010,10 +839,14 @@ commands_dict["textin"] = (textin_cmd, "file")
 
 
 def tick_cmd(session, args, input):
-  """#tick
+  """
+Displays the number of seconds left before this session's
+ticker ticks.
 
-  Displays the # of seconds left before the ticker for this
-  session ticks.
+When a tick happens, it will look for a TICK!!! alias.  Finding none,
+it will print TICK!!! to the ui.
+
+This allows you to perform an event every x number of seconds.
   """
   if (session.getName() == "common"):
     exported.write_error("tick cannot be applied to common session.")
@@ -1032,9 +865,10 @@ commands_dict["tick"] = (tick_cmd, "")
 
 
 def tickon_cmd(session, args, input):
-  """#tickon
+  """
+Turns on the ticker for this session.
 
-  Turns on the ticker.
+see also: tick, tickoff, ticksize
   """
   if (session.getName() == "common"):
     exported.write_error("tickon cannot be applied to common session.")
@@ -1048,9 +882,10 @@ commands_dict["tickon"] = (tickon_cmd, "")
 
 
 def tickoff_cmd(session, args, input):
-  """#tickoff
+  """
+Turns off the ticker for this session.
 
-  Turns off the ticker.
+see also: tick, tickon, ticksize
   """
   if (session.getName() == "common"):
     exported.write_error("tickoff cannot be applied to common session.")
@@ -1064,9 +899,11 @@ commands_dict["tickoff"] = (tickoff_cmd, "")
 
 
 def ticksize_cmd(session, args, input):
-  """#ticksize [{number}]
+  """
+Sets and displays the number of seconds between ticks for this
+session.
 
-  Sets and displays the tick length.
+see also: tick, tickon, tickoff
   """
   if (session.getName() == "common"):
     exported.write_error("ticksize cannot be applied to common session.")
@@ -1090,9 +927,8 @@ commands_dict["ticksize"] = (ticksize_cmd, "size:int=0")
 
 
 def togglesubs_cmd(session, args, input):
-  """#togglesubs
-
-  Turns on and shuts off ignoring of substitutions for this session.
+  """
+Toggles whether substitutions for that session are ignored or not.
   """
   if (session.getName() == "common"):
     exported.write_error("togglesubs cannot be applied to common session.")
@@ -1176,10 +1012,18 @@ commands_dict["unvariable"] = (
 
 
 def variable_cmd(session, args, input):
-  """#variable [<var> <expansion>]
+  """
+Creates a variable for that session of said name with said value.
+Variables can then be used in #if commands and any predicates
+of #alias or #action.
 
-  With no arguments, lists all the variables currently set.
-  With arguments, sets a new variable.
+ex:
+   #variable {hps} {100}
+   #action {HP: %0/%1 } {#variable {hps} {%0}}
+
+Variables can later be accessed via the variable character
+(which defaults to $) and the variable name.  In the case of the
+above, the variable name would be $hps.
   """
   var = args["var"]
   expansion = args["expansion"]
@@ -1212,9 +1056,9 @@ commands_dict["variable"] = (variable_cmd, "var= expansion= quiet:boolean=false"
 
 
 def verbatim_cmd(session, args, input):
-  """#verbatim
-
-  Turns on and shuts off verbatim mode.
+  """
+Toggles whether user data is parsed for speedwalking,
+aliases, and variables.
   """
   if (session.getName() == "common"):
     exported.write_error("verbatim cannot be applied to common session.")
@@ -1241,10 +1085,9 @@ commands_dict["verbatim"] = (verbatim_cmd, "option:booleanornone=")
 
 
 def version_cmd(session, args, input):
-  """#version
-
-  Prints out the version number, date, copyright info, and
-  some other garbage to the user.
+  """
+Displays the version number, contact information, and web-site for
+Lyntin.
   """
   exported.write_message(lyntin.VERSION)
 
@@ -1252,9 +1095,9 @@ commands_dict["version"] = (version_cmd, "")
 
 
 def wizlist_cmd(session, args, input):
-  """#wizlist
-
-  List of people without whom Lyntin wouldn't exist.
+  """
+Tells you about all the people who have participated in Lyntin's
+development--these are the Lyntin wizards.
   """
   exported.write_message(lyntin.WIZLIST)
 
@@ -1262,10 +1105,10 @@ commands_dict["wizlist"] = (wizlist_cmd, "")
 
 
 def write_cmd(session, args, input):
-  """#write <filename>
-
-  Queries the sessions and the lyntin globals for stuff
-  and writes it out to a file for persistence.
+  """
+Writes all aliases, actions, gags, etc to a file called
+{filename}.  You can then #read this filename in thus restoring
+your session settings.
   """
   filename = args["file"]
   try:
@@ -1280,10 +1123,8 @@ commands_dict["write"] = (write_cmd, "file")
 
 
 def zap_cmd(session, args, input):
-  """#zap
-
-  This closes a session and should close the socket and cause
-  the SocketCommunicator to garbage collect.
+  """
+This disconnects from the mud and closes the session.
   """
   if exported.get_engine().closeSession(session):
     exported.write_message("zap: session %s zapped!" % session.getName())

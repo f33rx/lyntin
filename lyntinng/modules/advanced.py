@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.12 2002/04/14 17:36:12 willhelm Exp $
+# $Id: advanced.py,v 1.13 2002/04/22 02:58:32 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -18,11 +18,15 @@ module exists, it executes it in this module.
 usermodule = None
 
 def python_cmd(session, words, input):
-  """#@ arbitrary python code
+  """
+#@ is different from all the rest because this one does some 
+incredibly magic stuff because it requires an environment to 
+execute the arbitrary python code in.  It allows you to execute
+arbitrary python code inside Lyntin.
 
-  This function is different from all the rest because this one does
-  some incredibly magic stuff because it requires an environment
-  to execute the arbitrary python code in.
+ex:
+  #@ print "hello"
+  #@ print string.join(exported.get_commands(), "\\n")
   """
   try:
     if usermodule == None:
