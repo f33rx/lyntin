@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.59 2002/04/13 05:10:33 willhelm Exp $
+# $Id: basic.py,v 1.60 2002/04/14 03:58:18 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -266,7 +266,7 @@ def diagnostics_cmd(session, words, input):
  
   message = message + "Lyntin Options:\n"
   for mem in lyntin.options.keys():
-    message = message + "   " + mem + ": " + lyntin.options[mem] + "\n"
+    message = message + "   " + mem + ": " + repr(lyntin.options[mem]) + "\n"
 
   exported.write_message(message)
   exported.write_message("This information can be dumped to a "
@@ -696,7 +696,8 @@ def read_cmd(session, words, input):
 
     for mem in contents:
       mem = mem.strip()
-      session.handleUserData(mem)
+      if len(mem) > 0:
+        session.handleUserData(mem)
     exported.write_message("read: file " + filename + " read.")
 
   except IOError:
