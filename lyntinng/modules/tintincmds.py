@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.10 2002/05/09 04:15:16 jmberne Exp $
+# $Id: tintincmds.py,v 1.11 2002/05/09 04:20:12 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -205,10 +205,19 @@ be removed and not shown on the ui.
 Gags get converted to regular expressions.  Feel free to use
 regular expression matching syntax as you see fit.
 
+As with all commands, braces get stripped off and each complete
+argument creates a gag.  gag accepts multiple gags at once, and
+accepts a quiet argument to supress reporting of what has been
+gagged.  
+
 ex: #gag {has missed you.}    <-- will prevent any incoming line
                                   with "has missed you" to be shown.
+
+ex: #gag has missed you       <-- will gag any text with "has",
+                                  "missed", or "you"
   """
   gaggedtext = args["text"]
+  quiet = args["quiet"]
 
   if not gaggedtext:
     data = session.getManager("gag").getInfo()
@@ -218,11 +227,12 @@ ex: #gag {has missed you.}    <-- will prevent any incoming line
     exported.write_message(data)
     return
 
-  gaggedtext = input[input.find(' ')+1:]
-  session.getManager("gag").addGag(gaggedtext)
-  exported.write_message("gag: {%s} added." % gaggedtext)
+  for togag in gaggedtext:
+    session.getManager("gag").addGag(togag)
+    if not quiet:
+      exported.write_message("gag: {%s} added." % togag)
 
-commands_dict["gag"] = (gag_cmd, "text*")
+commands_dict["gag"] = (gag_cmd, "text* quiet:boolean=false")
 
 
 def help_cmd(session, args, input):
