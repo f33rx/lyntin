@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.4 2002/04/13 05:10:33 willhelm Exp $
+# $Id: hooks.py,v 1.5 2002/04/14 03:58:18 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -14,21 +14,45 @@ Also contains the Hook class which encapsulates hook functionality.
 
 import traceback
 
+"""
+These are priority constants.  They should rarely be used.
+"""
 FIRST = 0
 LAST = 99
 
 class Hook:
   """
   Represents a (possibly empty) sequence of user-defined
-  functions.  provides user with the opportunity of reacting
-  to events internal to lyntin.  All functions take a single
+  functions.  Provides users with the opportunity of reacting
+  to events internal to Lyntin.  All functions take a single
   argument which is a tuple.  see the specific hooks below for
   more info.
   """
   def __init__(self):
-    self.functionlist = []
+    # this is the master priority list
+    self.functionlist = {}
+
+    # this gets recomputered everytime someone registers or
+    # unregisters a hook
+    self.orderedlist = []
+
     self.defaultMapper = lambda x,y:x
 
+  def createOrderedList(self):
+    """
+    Goes through the functionlist and generates the
+    orderedlist.  This helps save some cycles every time
+    we spam the hook.
+    """
+    priorities = self.functionlist.keys();
+    priorities.sort()
+
+    self.orderedlist = []
+
+    for priority in priorities:
+      for mem in self.functionlist[priority]:
+        self.orderedlist.append(mem)
+    
   def spamhook(self, arglist=(), mappingFunction=None):
     """ Sends out input to all the registrants of a hook.
 
@@ -44,7 +68,8 @@ class Hook:
                            previous function
     """
     mappingFunction = mappingFunction or self.defaultMapper
-    for mem in self.functionlist:
+
+    for mem in self.orderedlist:
       output = mem(arglist)
       arglist = mappingFunction(arglist,output)
     return arglist
@@ -58,9 +83,14 @@ class Hook:
       'func' -- (function) the function to unregister
 
     """
-    if func in self.functionlist:
-      self.functionlist.remove(func)
+    for priority in self.functionlist.keys():
+      if func in self.functionlist[priority]:
+        self.functionlist[priority].remove(func)
+        if len(self.functionlist[priority]) == 0:
+          del self.functionlist[priority]
 
+    self.createOrderedList()
+        
 
   def register(self, func, place=LAST):
     """ Registers a function with a hook.
@@ -74,21 +104,26 @@ class Hook:
       'func' -- (function) the function to call
 
       'place=LAST' -- (int) the function will get this place in 
-                      the call order
+                      the call order  functions with the same place
+                      specified will get arbitray ordering
 
     """
     if not callable(func):
       exported.write_error("Function %s not callable." % repr(func))
       return
 
-    if place == LAST or place > len(self.functionlist):
-      self.functionlist.append(func)
+
+    if self.functionlist.has_key(place):
+      self.functionlist[place].append(func)
     else:
-      self.functionlist.insert(place, func)
+      self.functionlist[place] = [func]
+
+    self.createOrderedList()
 
   def clear(self):
     """ Clears the functionlist."""
-    self.functionlist = []
+    self.functionlist = {}
+    self.orderedlist = []
 
 
 
