@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.6 2002/04/18 23:31:15 willhelm Exp $
+# $Id: hooks.py,v 1.7 2002/04/21 03:49:31 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -183,7 +183,8 @@ from_mud_hook = Hook()
 """
 This differs slightly from the from_user_hook in that this is everything
 we send on the socket to the mud where the from_user_hook is everything
-the user types--much of it goes to the mud.
+the user types--much of it goes to the mud.  The arg tuple is the session
+instance, then the string being sent to the mud.
 """
 to_mud_hook = Hook()
 

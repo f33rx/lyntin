@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.30 2002/04/11 03:58:22 willhelm Exp $
+# $Id: engine.py,v 1.31 2002/04/21 03:49:31 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -26,7 +26,7 @@ calls easier to deal with.
 """
 import Queue, traceback, copy, string, re, thread
 
-import threadmanager, session, ui.ui, alias, lyntin, utils, event
+import threadmanager, session, ui.ui, alias, lyntin, utils, event, argparser
 import action, alias, gag, highlight, history, substitute, variable
 import exported, hooks
 
@@ -86,6 +86,9 @@ class Engine:
 
     # holds all the commands
     self._command_list = {}
+
+    # holds argparsers for commands that get arguments pre-parsed
+    self._command_arguments = {}
 
     # we register ourselves with the shutdown hook
     hooks.shutdown_hook.register(self.shutdown)
@@ -613,7 +616,7 @@ class Engine:
     """
     return self._command_list.keys()
 
-  def addCommand(self, name, func):
+  def addCommand(self, name, func, arguments=None):
     """
     Registers a command.
 
@@ -623,9 +626,14 @@ class Engine:
 
       'func' -- (function) the function that handles it
 
+      'arguments=None' -- (string) argument specification to create 
+                          the argparser
+
     """
     if callable(func):
       self._command_list[name] = func
+      if arguments != None:
+        self._command_arguments[name] = argparser.ArgumentParser("command:string " + arguments)
       return 1
 
     self.writeError(name + ' is uncallable.')
@@ -641,6 +649,7 @@ class Engine:
     """
     try:
       del self._command_list[name]
+      del self._command_arguments[name]
     except:
       pass
 
@@ -667,6 +676,27 @@ class Engine:
 
     return None
 
+  def getArgParser(self, name):
+    """
+    Returns the arguments parser for a given command name.
+
+    arguments:
+
+      'name' -- (string) the name of the command whose arguments should 
+                be retrieved
+
+    returns:
+
+      (ArgParser) -- argument parsing object with parse(string) command 
+                      to convert incoming arguments into a dictionary
+      
+    """
+    if self._command_arguments.has_key(name):
+      return self._command_arguments[name]
+
+    return None
+    
+      
   def getHistoryManager(self):
     """ Retrieves the history manager.
 

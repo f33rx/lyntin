@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.35 2002/04/21 03:49:31 willhelm Exp $
+# $Id: session.py,v 1.36 2002/04/21 18:45:36 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -198,7 +198,7 @@ class Session:
 
   def writeSocket(self, message):
     """ Writes data to the socket."""
-    hooks.to_mud_hook.spamhook(message)
+    hooks.to_mud_hook.spamhook(self, message)
     if self._socket:
       self._socket.write(message)
 
@@ -242,7 +242,7 @@ class Session:
 
       # this checks to see if it's a special #@ command.
       if input[0] == "@":
-        engine.myengine.getCommand("@")(self, words, input)
+        engine.myengine.getCommand("@")(self, input.split(" "), input)
         if internal==0: self._prompt()
         return
 
@@ -252,12 +252,22 @@ class Session:
       for mem in commands:
         if mem[0] == "^":
           if re.compile(mem).search(words[0]):
-            engine.myengine.getCommand(mem)(self, words, input)
+            command = engine.myengine.getCommand(mem)
+            argparser = engine.myengine.getArgParser(mem)
+            if argparser == None:
+              command(self, input.split(" "), input)
+            else:
+              command(self, argparser.parse(input), input)
             if internal==0: self._prompt()
             break
         else:
           if mem.find(words[0]) == 0:
-            engine.myengine.getCommand(mem)(self, words, input) 
+            command = engine.myengine.getCommand(mem)
+            argparser = engine.myengine.getArgParser(mem)
+            if argparser == None:
+              command(self, words, input)
+            else:
+              command(self, argparser.parse(input), input)
             if internal==0: self._prompt()
             break
 

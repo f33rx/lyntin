@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.60 2002/04/14 03:58:18 willhelm Exp $
+# $Id: basic.py,v 1.61 2002/04/14 17:36:12 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -424,24 +424,16 @@ def history_cmd(session, words, input):
   exported.write_message("History:\n" + string.join(historylist, "\n"))
 
 
-def if_cmd(session, words, input):
-  """#if <expr> <action>
+def if_cmd(session, dict, input):
+  """#if <expr> <action> [else]
 
   Implements the Tintin++ #if command.
   """
-
   # original if_cmd code contributed by Sebastian John
 
-  if len(words) < 3:
-    exported.write_error("syntax: #if <expr> <action>")
-    return
-
-  try:
-    inputadjusted = input.split(" ", 1)[1]
-    expr, action = utils.split_braced(inputadjusted)
-  except Exception, e:
-    exported.write_error("if: problems splitting arguments. %s" % e)
-    return
+  expr = utils.strip_braces(dict["expr"])
+  action = utils.strip_braces(dict["action"])
+  elseaction = utils.strip_braces(dict["elseaction"])
 
   # we have to do manual variable expansion here.
   varexpansion = session.getManager("variable").expand(expr)
@@ -454,6 +446,8 @@ def if_cmd(session, words, input):
   try:
     if eval(expr):
       exported.lyntin_command(action)
+    elif elseaction:
+      exported.lyntin_command(elseaction)
   except SyntaxError:
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
@@ -1156,7 +1150,7 @@ def load():
   exported.add_command("help", help_cmd)
   exported.add_command("highlight", highlight_cmd)
   exported.add_command("history", history_cmd)
-  exported.add_command("if", if_cmd)
+  exported.add_command("if", if_cmd,"expr action elseaction=")
   exported.add_command("ignore", ignore_cmd)
   # exported.add_command("import", import_cmd)
   exported.add_command("info", info_cmd)
