@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.1 2002/05/14 22:49:04 willhelm Exp $
+# $Id: tkui.py,v 1.2 2002/06/07 23:43:31 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
 Lyntin, but largely re-coded in various areas.
 """
 
-import string, os, Tkinter, tkFont
+import string, os, Tkinter, tkFont, ScrolledText
 import ui, hooks, event, engine, exported, lyntin
 
 """
@@ -408,6 +408,8 @@ class CommandEntry(Tkinter.Entry):
     """ Initializes and sets the key-bindings."""
     self._partk = partk
     self._inputstack = []
+    self._autotyper = None
+    self._autotyper_ses = None
 
     apply(Tkinter.Entry.__init__, (self, master), kw)
 
@@ -420,6 +422,7 @@ class CommandEntry(Tkinter.Entry):
     self.bind("<KeyPress-Prior>", self.callPrior)
     self.bind("<KeyPress-Next>", self.callNext)
 
+    self.bind("<Control-KeyPress-t>", self.startAutotyper)
     self.bind("<Control-KeyPress-u>", self.callKillLine)
     self.bind("<Control-KeyPress-Up>", self.callPushInputStack)
     self.bind("<Control-KeyPress-Down>", self.callPopInputStack)
@@ -555,6 +558,48 @@ class CommandEntry(Tkinter.Entry):
         return "break"
 
 
+  def startAutotyper(self, tkevent):
+    """
+    This will start the autotyper. It will be called if you type <Ctrl>+<t>.
+    There can be only one autotyper at a time. The autotyper cannot be started
+    for the common session.
+    """
+    
+    if self._autotyper != None:
+      exported.write_error("cannot start autotyper: already started.")
+      return
+    
+    session = exported.get_current_session()
+    
+    if session.getName() == "common":
+      exported.write_error("autotyper cannot be applied to common session.")
+      return
+    
+    self._autotyper = Autotyper(self._partk._tk, self.autotyperDone)
+    self._autotyper_ses = session
+    
+    exported.write_message("autotyper: started.")
+
+  def autotyperDone(self, data):
+    """
+    This is a callback for the autotyper. It will be called when the autotyper
+    is finished.
+    
+    arguments:
+    
+      'data' -- (string or None) the autotyper data. None if the user clicked
+                on the "Cancel" button or closed the autotyper window.
+    
+    """
+    
+    if data != None:
+      self._autotyper_ses.writeSocket(data)
+    
+    self._autotyper = None
+    self._autotyper_ses = None
+    
+    exported.write_message("autotyper: done.")
+
   def clearInput(self):
     """ Clears the text widget."""
     self.delete(0, 'end')
@@ -617,3 +662,43 @@ class CommandEntry(Tkinter.Entry):
     else:
       self.delete(0, 'end')
       self.insert(0, hist[self.hist_index])
+
+class Autotyper:
+  def __init__(self, master, sendfunc):
+    self._sendfunc = sendfunc
+    
+    self._tk = Tkinter.Toplevel(master)
+    
+    self._tk.geometry("400x300")
+    self._tk.title("Lyntin -- Autotyper")
+    
+    self._tk.protocol("WM_DELETE_WINDOW", self.cancel)
+    
+    if os.name == "posix":
+      fontname = "Courier"
+    else:
+      fontname = "Fixedsys"
+    fnt = tkFont.Font(family=fontname, size=12)
+    
+    self._txt = ScrolledText.ScrolledText(self._tk, fg="black", bg="white",
+      font=fnt, height=20)
+    self._txt.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+    
+    self._send_btn = Tkinter.Button(self._tk, text="Send", command=self.send)
+    self._send_btn.pack(side=Tkinter.LEFT, fill=Tkinter.X, expand=1)
+    
+    self._cancel_btn = Tkinter.Button(self._tk, text="Cancel",
+      command=self.cancel)
+    self._cancel_btn.pack(side=Tkinter.RIGHT, fill=Tkinter.X, expand=1)
+    
+    engine.myengine.startthread("autotyper", self._tk.mainloop)
+  
+  def send(self):
+    text = self._txt.get(1.0, Tkinter.END)
+    
+    self._sendfunc(text)
+    self._tk.destroy()
+  
+  def cancel(self):
+    self._sendfunc(None)
+    self._tk.destroy()
