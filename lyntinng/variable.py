@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.10 2002/04/11 03:58:22 willhelm Exp $
+# $Id: variable.py,v 1.11 2002/04/11 23:30:47 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
 It also defines some builtin variables like $TIMESTAMP.
 """
 import re
-import manager, utils, lyntin
+import manager, utils, lyntin, engine
 
 localvarchar = lyntin.variablechar
 VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
@@ -147,7 +147,7 @@ class VariableManager(manager.Manager):
     else:
       return text
 
-  def unescapeVariables(self, text):
+  def unescapeVariables(self, input):
     """ Changes \$ into $.
 
     Accounts for the fact that the user can change the variable
@@ -155,13 +155,14 @@ class VariableManager(manager.Manager):
 
     aguments:
 
-      'text' -- (string) string to unescape variable characters
+      'input' == (tuple) mud_filter_hook hook tuple.
 
     returns:
 
       the unescaped string
 
     """
+    text = input[-1]
     return text.replace("\\" + lyntin.variablechar, 
                         lyntin.variablechar)
 
@@ -201,3 +202,28 @@ class VariableManager(manager.Manager):
   def getCount(self):
     """ Returns a count of all the variables."""
     return len(self._variables.keys()) - 1
+
+  def filter(self, tuple):
+    """ Handle the filtering of input through the current variables.
+        If input gets changed then we pass it back to
+        engine.myengine.HandleUserData and return None to stop this
+        chain of filtering.
+
+    arguments:
+
+      tuple: user_filter_hook arg tuple (session, internal, input,
+      filtered)
+
+    returns:
+
+      filtered text or None if any changes took place.
+    """
+    session = tuple[0]
+    internal = tuple[1]
+    text = tuple[-1]
+    varexpansion = self.expand(text)
+    if varexpansion:
+      engine.myengine.handleUserData(varexpansion, internal, session)
+      return None
+    else:
+      return text

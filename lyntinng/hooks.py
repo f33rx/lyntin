@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.10 2002/04/25 00:28:29 jmberne Exp $
+# $Id: hooks.py,v 1.11 2002/04/27 20:58:19 jmberne Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -13,11 +13,16 @@ Also contains the Hook class which encapsulates hook functionality.
 
 import traceback
 
+import session, variable
+
 """
 These are priority constants.  They should rarely be used.
 """
 FIRST = 0
 LAST = 99
+
+class StopSpammingException:
+  pass
 
 class Hook:
   """
@@ -52,6 +57,7 @@ class Hook:
       for mem in self.functionlist[priority]:
         self.orderedlist.append(mem)
     
+    
   def spamhook(self, arglist=(), mappingFunction=None):
     """ Sends out input to all the registrants of a hook.
 
@@ -68,9 +74,13 @@ class Hook:
     """
     mappingFunction = mappingFunction or self.mapper
 
-    for mem in self.orderedlist:
-      output = mem(arglist)
-      arglist = mappingFunction(arglist,output)
+    try:
+      for mem in self.orderedlist:
+        output = mem(arglist)
+        arglist = mappingFunction(arglist,output)
+    except StopSpammingException, e:
+      return None
+
     return arglist
 
   def unregister(self, func):
@@ -219,14 +229,17 @@ too_many_errors_hook = Hook()
 This is the mapping function to use for filter-style hooks.  
 Spamhook should be called as 
 
-  spamtuple = hook.spamhook( (session,original,original) )
-  output = spamtuple[2]
+  spamtuple = hook.spamhook( (session,flags,original,original) )
+  output = spamtuple[-1]
 
-Each filter function will get (session,original,filteredoriginal) 
+Each filter function will get (session,flags,original,filteredoriginal) 
 when it is called.
 """
 def filter_mapper(x,y):
-  return x[0],x[1],y
+  if y != None:
+    return x[:-1] + (y,)
+  else:
+    raise StopSpammingException
 
 """
 Whenever data comes back from the mud it will first be passed through
@@ -235,10 +248,10 @@ all filter functions.
 These should return the text that should be processed as if it came from 
 the mud.
 
-arg tuple will contain the session, the original text and the currently 
-filtered text.
+arg tuple will contain the session, the internal flag, the original text
+and the currently filtered text.
 """
-mud_filter_hook = Hook(lambda x,y:(x[0],x[1],y))
+mud_filter_hook = Hook(filter_mapper)
 
 """
 Whenever data comes from the user it will first be passed through
@@ -249,4 +262,7 @@ These should return the text that should be sent to the mud.
 arg tuple will contain the session, the original text and the currently 
 filtered text.
 """
-user_filter_hook = Hook(lambda x,y:(x[0],x[1],y))
+user_filter_hook = Hook(filter_mapper)
+
+
+

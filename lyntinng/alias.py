@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.8 2002/04/02 03:22:45 willhelm Exp $
+# $Id: alias.py,v 1.9 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
 compiling, and checking and such.
 """
-import manager, utils, lyntin
+import manager, utils, lyntin, engine
 
 class AliasManager(manager.Manager):
   """ Manages aliases."""
@@ -150,3 +150,31 @@ class AliasManager(manager.Manager):
       (int) the number of aliases managed
     """
     return len(self._aliases.keys())
+
+  def filter(self, tuple):
+    """ Handle the filtering of input through the current aliases.
+        If input gets changed then we pass it back to
+        engine.myengine.HandleUserData and return None to stop this
+        chain of filtering.
+
+    arguments:
+
+      tuple: user_filter_hook arg tuple (session, internal, input,
+      filtered)
+
+    returns:
+
+      filtered text or None if any changes took place.
+    """
+    # we check for aliases here--and if we find some, we
+    # do the variable expansion and then recurse over the result
+    session = tuple[0]
+    internal = tuple[1]
+    text = tuple[-1]
+    aliasexpansion = self.expand(text)
+    if aliasexpansion:
+      aliasexpansion = utils.replace_vars(text,aliasexpansion)
+      engine.myengine.handleUserData(aliasexpansion, internal, session)
+      return None
+    else:
+      return text

@@ -4,17 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.41 2002/04/26 23:34:17 jmberne Exp $
+# $Id: session.py,v 1.42 2002/04/27 20:58:19 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy, string
-import deed, data, exported, engine, hooks, utils, lyntin, event, ticker
+import deed, variable, data, exported, engine, hooks, utils, lyntin, event, ticker
 import argparser
 
 # this is the regular expression that matches speedwalking stuff
-SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
 
 class Session:
   """ A session is a nice container of all the stuff that
@@ -214,26 +213,21 @@ class Session:
     if self.getName() == "common":
       engine.myengine.writePrompt()
 
-  def handleUserData(self, input, internal=0, tag=None):
+  def handleUserData(self, input, internal=0 ):
     """ Handles input in the context of this session specifically.
 
     internal says whether the command came from interally.
     we won't spam hooks and may at some point prevent
     output for internal stuff too.  1 if internal, 0 if not.
     """
-    spamtuple = self,input,input
-    spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
-    input = spamtuple[2]
-
-    # we deal with possible variables...
     if self._verbatim == 0 or (len(input) > 0 and input[0] == lyntin.commandchar):
-      varexpansion = self.getManager("variable").expand(input)
-      if varexpansion:
-        engine.myengine.handleUserData(varexpansion, internal, tag)
-        return
 
-      # replace \$ -> $
-      input = self.getManager("variable").unescapeVariables(input)
+      spamtuple = self,internal,input,input
+      spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
+      if spamtuple == None:
+        return
+      else:
+        input = spamtuple[-1]
 
     # handle lyntin commands
     if len(input) > 1 and input[0] == lyntin.commandchar:
@@ -296,17 +290,6 @@ class Session:
         if internal==0: self._prompt()
       return
 
-    if not self._verbatim:
-      # we check for aliases here--and if we find some, we
-      # do the variable expansion and then recurse over the result
-      aliasexpansion = self.getManager("alias").expand(input)
-      if aliasexpansion:
-        # replace placement variables in the expansion
-        aliasexpansion = utils.replace_vars(input, aliasexpansion)
-
-        engine.myengine.handleUserData(aliasexpansion, internal, tag)
-        return
-
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
     if self._socket == None:
@@ -314,17 +297,8 @@ class Session:
       if internal==0: self._prompt()
       return
 
-    if not self._verbatim:
-      # are we speedwalking?... ("news" explicitly doesn't count)
-      if lyntin.speedwalk == 1:
-
-        # FIXME - handle news and sense differently
-        if SPEEDWALK_REGEXP.search(input) and input != 'news':
-          self.writeSocket(utils.expand_speedwalk(input), tag)
-          return
-
     # just regular data to the mud
-    self.writeSocket(input + "\n", tag)
+    self.writeSocket(input + "\n")
 
 
   ### ------------------------------------------------
@@ -402,3 +376,26 @@ class Session:
       return self._logfile.name
     else:
       return "<none>"
+
+
+class ManagerFilterAdapter:
+  def __init__(self, managername, function=None):
+    self.managername=managername
+    self.function = function
+
+  def __call__(self, tuple):
+    session, internal, input, filtered = tuple
+    if self.function:
+      return self.function(session.getManager(self.managername),tuple)
+    else:
+      return session.getManager(self.managername).filter(tuple)
+
+
+hooks.user_filter_hook.register(ManagerFilterAdapter("variable"),0)
+
+hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
+
+hooks.user_filter_hook.register(ManagerFilterAdapter("speedwalk"),80)
+
+hooks.user_filter_hook.register(ManagerFilterAdapter("variable",variable.VariableManager.unescapeVariables),90)
+

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.34 2002/04/25 17:13:17 willhelm Exp $
+# $Id: engine.py,v 1.35 2002/04/26 23:34:17 jmberne Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -27,7 +27,7 @@ calls easier to deal with.
 import Queue, traceback, copy, string, re, thread
 
 import threadmanager, session, ui.ui, alias, lyntin, utils, event, argparser
-import action, alias, gag, highlight, history, substitute, variable
+import action, alias, gag, highlight, history, substitute, variable, speedwalk
 import exported, hooks
 
 """
@@ -106,6 +106,7 @@ class Engine:
     commonsession.setManager("highlight", highlight.HighlightManager())
     commonsession.setManager("substitute", substitute.SubstituteManager())
     commonsession.setManager("variable", variable.VariableManager())
+    commonsession.setManager("speedwalk", speedwalk.SpeedwalkManager())
 
     self._sessions["common"] = commonsession
     self._current_session = commonsession
@@ -186,7 +187,7 @@ class Engine:
   ### input/output stuff
   ### ------------------------------------------
 
-  def handleUserData(self, input, internal=0, session=None):
+  def handleUserData(self, input, internal=0, session=None ):
     """ This handles input lines from the user in a session-less context.
 
     The engine.handleUserData deals with global stuff and then
@@ -241,7 +242,7 @@ class Engine:
           num = int(ses)
           if mem.find(" ") != -1:
             for i in range(num):
-              self.handleUserData(mem.split(" ", 1)[1], internal)
+              self.handleUserData(mem.split(" ", 1)[1], internal )
           continue
 
         # is it a session?
@@ -252,17 +253,17 @@ class Engine:
             exported.write_message(ses + " now current session.")
           else:
             self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
-                                                     internal)
+                                                     internal )
           continue
 
         # is it all sessions?
         if ses == "all":
           for mem in self._sessions.value():
-            mem.handleUserData(mem.split(" ", 1)[1], internal)
+            mem.handleUserData(mem.split(" ", 1)[1], internal )
           continue
 
       # no command char, so we pass it on to the mud
-      session.handleUserData(mem, internal)
+      session.handleUserData(mem, internal )
 
 
   def handleMudData(self, session, text):
