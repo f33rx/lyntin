@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.37 2003/04/10 22:09:06 willhelm Exp $
+# $Id: net.py,v 1.38 2003/04/12 22:23:23 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -308,7 +308,7 @@ class SocketCommunicator:
     # we split on prompts so that we serialize MudEvents with prompt_hook
     # calls.  this allows inline prompt detection in the stream.
     for d in splitdata:
-      if self._prompt_regex.match(d):
+      if lyntin.promptdetection and self._prompt_regex.match(d):
         event.SpamEvent(exported.get_hook("prompt_hook"), (self._session, d)).enqueue()
       else:
         
@@ -347,6 +347,9 @@ class SocketCommunicator:
       if data[i+1] == NOP:
         data = data[:i] + data[i+2:]
         self.logControl("receive: IAC NOP")
+
+      elif data[i+1] == GA or data[i+1] == TELOPT_EOR:
+        data = data[:i] + data[i+2:]
 
       elif data[i+1] == IAC:
         data = data[:i] + data[i+1:]
