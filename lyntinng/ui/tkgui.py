@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.7 2002/01/25 08:18:36 willhelm Exp $
+# $Id: tkgui.py,v 1.8 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -120,7 +120,7 @@ class TkGui(ui.BaseUI):
 
     self._txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
 
-    self.initColorTags()
+    self._initColorTags()
     engine.myengine.register(engine.ECHOFREQ, self.echo)
     engine.myengine.register(engine.STARTUPFREQ, self.startui)
 
@@ -220,6 +220,17 @@ class TkGui(ui.BaseUI):
     if os.name != 'posix':
       self._txt.yview('scroll', '20', 'units')
 
+  def _clipText(self):
+    """
+    Scrolls the text buffer up so that the new text written at
+    the bottom of the text buffer can be seen.
+    """
+    temp = self._txt.index("end")
+    ind = string.find(temp, ".")
+    temp = temp[:ind]
+    if (int(temp) > 800):
+      self._txt.delete ("1.0", "100.end")
+
   def write(self, message):
     """ This writes text to the text buffer for viewing by the user.
 
@@ -262,7 +273,7 @@ class TkGui(ui.BaseUI):
                                    line[:index])
 
         else:
-          self.colorchange(self._unfinishedcolor[1] + line[:index]) 
+          self._colorChange(self._unfinishedcolor[1] + line[:index]) 
           self._unfinishedcolor = (0, "")
 
         start = index + 1
@@ -282,7 +293,7 @@ class TkGui(ui.BaseUI):
           self._unfinishedcolor = (1, line[cstart:])
           line = line[:cstart]
         else:   
-          self.colorchange(line[cstart:temp])
+          self._colorChange(line[cstart:temp])
           start = temp + 1
 
         index = line.find(chr(27), index+1)
@@ -297,11 +308,11 @@ class TkGui(ui.BaseUI):
                          line[start:], 
                          (self._currcolors[1], self._currcolors[2]))
 
-    self.ClipText()
+    self._clipText()
     self._yadjust()
 
 
-  def colorchange(self, text):
+  def _colorChange(self, text):
     """
     Takes in a string and parses it into a series of numbers,
     then sets the current colors accordingly.
@@ -334,7 +345,7 @@ class TkGui(ui.BaseUI):
             self._currcolors[2] = num
 
 
-  def initColorTags(self):
+  def _initColorTags(self):
     """ Sets up Tk tags for the text widget (fg/bg)."""
 
     for ck in fg_color_codes.keys():
@@ -346,19 +357,6 @@ class TkGui(ui.BaseUI):
       self._txtbuffer.tag_config(ck, background=bg_color_codes[ck])
 
 
-  def ClipText(self):
-    """
-    Scrolls the text buffer up so that the new text written at
-    the bottom of the text buffer can be seen.
-    """
-    temp = self._txt.index("end")
-    ind = string.find(temp, ".")
-    temp = temp[:ind]
-    try:
-      if (int(temp) > 800):
-        self._txt.delete ("1.0", "100.end")
-    except:
-      pass
 
 
 class CommandEntry(Tkinter.Entry):
