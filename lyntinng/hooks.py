@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.1 2002/04/03 03:14:15 willhelm Exp $
+# $Id: hooks.py,v 1.2 2002/04/11 03:58:22 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -112,9 +112,15 @@ the new echo state (1 if on, 0 if off).
 echo_hook = Hook()
 
 """
-When a session dies or ends.  arg tuple contains the  session instance.
+When a session dies or ends.  arg tuple contains the session instance.
 """
 death_hook = Hook()
+
+"""
+When a session connects to a mud.  arg tuple contains the session instance,
+the hostname of the mud it connected to, and the port.
+"""
+connect_hook = Hook()
 
 """
 When a user types a command, this will trigger the user_data_hook.

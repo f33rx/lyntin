@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.27 2002/04/10 02:32:39 willhelm Exp $
+# $Id: tkgui.py,v 1.28 2002/04/11 03:58:23 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -81,7 +81,11 @@ class TkGui(ui.BaseUI):
     self._tk.geometry("800x600")
     self.settitle()
 
-    fnt = tkFont.Font(family="Fixedsys", size=12)
+    if os.name == 'posix':
+      fnt = tkFont.Font(family="Courier", size=12)
+    else:
+      fnt = tkFont.Font(family="Fixedsys", size=12)
+
     self._entry = CommandEntry(self._tk, 
                                self,
                                fg='white', 
@@ -102,6 +106,7 @@ class TkGui(ui.BaseUI):
                                               'bg': 'black', 
                                               'font': fnt, 
                                               'height': 20})
+
 
     # these deal with catching improper keypresses
     self._txtbuffer.bind("<KeyPress-Escape>", self.escape)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.21 2002/04/11 00:21:12 willhelm Exp $
+# $Id: event.py,v 1.22 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -62,24 +62,29 @@ class StartupEvent(Event):
   def execute(self):
     """ Execute."""
 
-    # instantiate a ui
-    # FIXME - do we want to handle arbitrary ui's?
-    if lyntin.options['ui'] == 'tk':
-      from ui.tkgui import TkGui
-      engine.myengine.setUI(TkGui())
+    try:
+      # instantiate a ui
+      # FIXME - do we want to handle arbitrary ui's?
+      if lyntin.options['ui'] == 'tk':
+        from ui.tkgui import TkGui
+        engine.myengine.setUI(TkGui())
 
-    elif lyntin.options['ui'] == 'curses':
-      from ui.cursesui import Cursesui
-      engine.myengine.setUI(Cursesui())
+      elif lyntin.options['ui'] == 'curses':
+        from ui.cursesui import Cursesui
+        engine.myengine.setUI(Cursesui())
 
-    else:
-      from ui.textui import Textui
-      engine.myengine.setUI(Textui())
+      else:
+        from ui.textui import Textui
+        engine.myengine.setUI(Textui())
 
-    exported.write_message("UI started.")
+      exported.write_message("UI started.")
+    except:
+      print "Cannot start ui."
+      sys.exit(0)
 
-    # import modules listed in modulesinit
-    exported.write_message("Importing modules in modules directory.")
+      # import modules listed in modulesinit
+      exported.write_message("Importing modules in modules directory.")
+
     try:
       import modules.__init__
       modules.__init__.load_modules()

@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.56 2002/04/11 03:58:22 willhelm Exp $
+# $Id: basic.py,v 1.57 2002/04/11 23:30:47 willhelm Exp $
 #######################################################################
 import string, traceback
-import net, utils, engine, lyntin, exported
+import net, utils, engine, lyntin, exported, hooks
 
 """
 This module holds a series of basic commands.
@@ -751,6 +751,8 @@ def session_cmd(session, words, input):
       pass
     exported.write_error("session: unable to connect. %s" % e)
     exported.write_error("session: had problems creating the session.")
+
+  hooks.connect_hook.spamhook((ses, host, port))
 
 
 def showme_cmd(session, words, input):
