@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.57 2002/12/04 03:46:28 willhelm Exp $
+# $Id: tintincmds.py,v 1.58 2002/12/04 15:18:01 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -18,7 +18,7 @@ modules along with their manager and any helper functions involved.
 commands_dict = {}
 
 
-def boss_cmd(session, words, input):
+def boss_cmd(ses, words, input):
   """
   This probably isn't as helpful as it could be.  Right now it
   will print to your display code from Lyntin 2.x to make it seem
@@ -32,7 +32,7 @@ def boss_cmd(session, words, input):
 commands_dict["boss"] = (boss_cmd, "")
 
 
-def clear_cmd(session, words, input):
+def clear_cmd(ses, words, input):
   """
   This command clears a session of all session data (except the actual 
   connection).  This covers gags, subs, actions, aliases...
@@ -40,27 +40,27 @@ def clear_cmd(session, words, input):
   category: commands
   """
   try:
-    session.clear()
-    exported.write_message("clear: session %s cleared." % session.getName())
+    ses.clear()
+    exported.write_message("clear: session %s cleared." % ses.getName(), ses)
   except Exception, e:
-    exported.write_error("clear: error in clearing session.  %s" % e)
+    exported.write_error("clear: error in clearing session.  %s" % e, ses)
 
 commands_dict["clear"] = (clear_cmd, "")
   
 
-def cr_cmd(session, args, input):
+def cr_cmd(ses, args, input):
   """
   This sends a carriage return to the mud.  This is useful in aliases 
   and actions that require a carriage return.
 
   category: commands
   """
-  session.writeSocket("\n")
+  ses.writeSocket("\n")
 
 commands_dict["^cr"] = (cr_cmd, "")
 
 
-def end_cmd(session, args, input):
+def end_cmd(ses, args, input):
   """
   Closes all sessions and quits out of Lyntin.
 
@@ -78,7 +78,7 @@ def end_cmd(session, args, input):
 commands_dict["^end"] = (end_cmd, "")
 
 
-def help_cmd(session, args, input):
+def help_cmd(ses, args, input):
   """
   With no arguments, shows all the help files available.
   With an argument, shows that specific help file.
@@ -109,7 +109,7 @@ def help_cmd(session, args, input):
 commands_dict["help"] = (help_cmd, "item=")
 
 
-def history_cmd(session, args, input):
+def history_cmd(ses, args, input):
   """
   #history prints the current history buffer.
 
@@ -175,9 +175,9 @@ def if_cmd(ses, args, input):
     elif elseaction:
       exported.lyntin_command(elseaction, 1, ses)
   except SyntaxError:
-    exported.write_error("if: invalid syntax / syntax error.")
+    exported.write_error("if: invalid syntax / syntax error.", ses)
   except Exception, e:
-    exported.write_error("if: exception: %s" % e)
+    exported.write_error("if: exception: %s" % e, ses)
 
 commands_dict["if"] = (if_cmd, "expr action elseaction=")
 
@@ -192,12 +192,12 @@ def info_cmd(ses, args, input):
   """
   data = exported.get_engine().getStatus(ses)
   data = string.join(data, "\n")
-  exported.write_message(data)
+  exported.write_message(data, ses)
 
 commands_dict["info"] = (info_cmd, "")
 
 
-def killall_cmd(session, args, input):
+def killall_cmd(ses, args, input):
   """
   Clears all sessions of session oriented stuff: aliases,
   substitutions, gags, variables, so on so forth.
@@ -211,7 +211,7 @@ def killall_cmd(session, args, input):
 commands_dict["^killall"] = (killall_cmd, "")
 
 
-def loop_cmd(session, args, input):
+def loop_cmd(ses, args, input):
   """
   Executes a given command replacing %0 in the command with
   the range of numbers specified in <from> and <to>.
@@ -244,7 +244,7 @@ def loop_cmd(session, args, input):
   looprange = loop.split(',')
 
   if len(looprange) != 2:    
-    exported.write_error("syntax: #loop <from,to> <command>")
+    exported.write_error("syntax: #loop <from,to> <command>", ses)
     return
 
   # remove trailing and leading whitespace and convert to ints
@@ -266,7 +266,7 @@ def loop_cmd(session, args, input):
 
   for i in range(ifrom, ito, step):
     loopcommand = command.replace("%0", repr(i))
-    exported.lyntin_command(loopcommand, internal=1, session=session)
+    exported.lyntin_command(loopcommand, internal=1, session=ses)
 
 commands_dict["loop"] = (loop_cmd, "fromto comm")
 
@@ -295,14 +295,14 @@ def math_cmd(ses, args, input):
     if varman:
       varman.addVariable(ses,var, str(rvalue))
     if not quiet:
-      exported.write_message("math: %s = %s = %s." % (var, ops, str(rvalue)))
+      exported.write_message("math: %s = %s = %s." % (var, ops, str(rvalue)), ses)
   except Exception, e:
-    exported.write_error("math: exception: %s\n%s" % (ops, e))
+    exported.write_error("math: exception: %s\n%s" % (ops, e), ses)
 
 commands_dict["math"] = (math_cmd, "var operation quiet:boolean=false")
 
 
-def nop_cmd(session, args, input):
+def nop_cmd(ses, args, input):
   """
   nop stands for "no operation".  So anything after a #nop
   and before a ; (unless it's braced) will be ignored.
@@ -353,7 +353,7 @@ def read_cmd(ses, args, input):
     else:
       file = open(filename, "r")
   except Exception, e:
-    exported.write_error("read: file %s cannot be opened.\n%s" % (filename, e))
+    exported.write_error("read: file %s cannot be opened.\n%s" % (filename, e), ses)
     return
     
   contents = file.readlines()
@@ -364,7 +364,7 @@ def read_cmd(ses, args, input):
     contents = contents[1:]
 
   if len(contents) == 0:
-    exported.write_message("read: %s had no data." % filename)
+    exported.write_message("read: %s had no data." % filename, ses)
     return
 
   if contents[0][0] != lyntin.commandchar:
@@ -375,7 +375,7 @@ def read_cmd(ses, args, input):
     if len(mem) > 0:
       exported.lyntin_command(mem, internal=1, session=ses)
 
-  exported.write_message("read: file " + filename + " read.")
+  exported.write_message("read: file " + filename + " read.", ses)
 
 commands_dict["read"] = (read_cmd, "filename")
 
@@ -479,7 +479,7 @@ def showme_cmd(ses, args, input):
   """
   input = args["input"]
   if not input:
-    exported.write_error("syntax: requires a message.")
+    exported.write_error("syntax: requires a message.", ses)
     return
 
   # we have to do manual variable expansion here.
@@ -491,7 +491,7 @@ def showme_cmd(ses, args, input):
   input = input.replace("\\$", "$")
   input = input.replace("\\%", "%")
 
-  exported.write_message(input)
+  exported.write_message(input, ses)
      
 commands_dict["showme"] = (showme_cmd, "input=", "limitparsing=0")
 
@@ -525,7 +525,7 @@ def snoop_cmd(ses, args, input):
 
 commands_dict["snoop"] = (snoop_cmd, "session mode:booleanornone=")
 
-def textin_cmd(session, args, input):
+def textin_cmd(ses, args, input):
   """
   Takes the contents of the file and outputs it directly to the mud
   without processing it (like #read does).
@@ -535,8 +535,8 @@ def textin_cmd(session, args, input):
 
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("textin cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("textin cannot be applied to common session.", ses)
     return
 
   filename = args["file"]
@@ -550,18 +550,18 @@ def textin_cmd(session, args, input):
     f.close()
     for mem in contents:
       mem = utils.chomp(mem)
-      session.getSocketCommunicator().write(mem + "\n")
-    exported.write_message("textin: file %s read and sent to mud." % filename)
+      ses.getSocketCommunicator().write(mem + "\n")
+    exported.write_message("textin: file %s read and sent to mud." % filename, ses)
 
   except IOError:
-    exported.write_error("textin: file %s is not readable." % filename)
+    exported.write_error("textin: file %s is not readable." % filename, ses)
   except:
-    exported.write_error("textin: exception thrown.")
+    exported.write_error("textin: exception thrown.", ses)
 
 commands_dict["textin"] = (textin_cmd, "file")
 
 
-def tick_cmd(session, args, input):
+def tick_cmd(ses, args, input):
   """
   Displays the number of seconds left before this session's
   ticker ticks.
@@ -573,23 +573,23 @@ def tick_cmd(session, args, input):
   This allows you to perform an event every x number of seconds.
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("tick cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("tick cannot be applied to common session.", ses)
     return
 
-  if session.getTicker().isEnabled():
+  if ses.getTicker().isEnabled():
     currenttick = exported.get_engine().getCurrentTick()
-    ticklen = session.getTicker().getTickLen()
-    tickstart = session.getTicker().getTickStart()
+    ticklen = ses.getTicker().getTickLen()
+    tickstart = ses.getTicker().getTickStart()
     nexttick = ticklen - ((currenttick - tickstart) % ticklen)
-    exported.write_message("tick: next tick in %d seconds." % nexttick)
+    exported.write_message("tick: next tick in %d seconds." % nexttick, ses)
   else:
-    exported.write_message("tick: ticker is not enabled.")
+    exported.write_message("tick: ticker is not enabled.", ses)
 
 commands_dict["tick"] = (tick_cmd, "")
 
 
-def tickon_cmd(session, args, input):
+def tickon_cmd(ses, args, input):
   """
   Turns on the ticker for this session.
 
@@ -597,18 +597,18 @@ def tickon_cmd(session, args, input):
 
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("tickon cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("tickon cannot be applied to common session.", ses)
     return
 
-  session.getTicker().enableTicker()
+  ses.getTicker().enableTicker()
   exported.write_message("tickon: session %s ticker enabled." 
-                         % session.getName())
+                         % ses.getName(), ses)
 
 commands_dict["tickon"] = (tickon_cmd, "")
 
 
-def tickoff_cmd(session, args, input):
+def tickoff_cmd(ses, args, input):
   """
   Turns off the ticker for this session.
 
@@ -616,18 +616,18 @@ def tickoff_cmd(session, args, input):
 
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("tickoff cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("tickoff cannot be applied to common session.", ses)
     return
 
-  session.getTicker().disableTicker()
+  ses.getTicker().disableTicker()
   exported.write_message("tickoff: session %s ticker disabled." 
-                         % session.getName())
+                         % ses.getName(), ses)
 
 commands_dict["tickoff"] = (tickoff_cmd, "")
 
 
-def ticksize_cmd(session, args, input):
+def ticksize_cmd(ses, args, input):
   """
   Sets and displays the number of seconds between ticks for this
   session.
@@ -641,28 +641,28 @@ def ticksize_cmd(session, args, input):
 
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("ticksize cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("ticksize cannot be applied to common session.", ses)
     return
 
   size = args["size"]
 
   if size == 0:
     exported.write_message("ticksize: ticksize is %d seconds." % 
-                           session.getTicker().getTickLen())
+                           ses.getTicker().getTickLen(), ses)
     return
 
   if size <= 0:
-    exported.write_error("ticksize must be a positive number.")
+    exported.write_error("ticksize must be a positive number.", ses)
     return
 
-  session.getTicker().setTickLen(size)
-  exported.write_message("ticksize: tick length set to %s." % str(size))
+  ses.getTicker().setTickLen(size)
+  exported.write_message("ticksize: tick length set to %s." % str(size), ses)
 
 commands_dict["ticksize"] = (ticksize_cmd, "size:timespan=0")
 
 
-def version_cmd(session, args, input):
+def version_cmd(ses, args, input):
   """
   Displays the version number, contact information, and web-site for
   Lyntin.
@@ -674,7 +674,7 @@ def version_cmd(session, args, input):
 commands_dict["version"] = (version_cmd, "")
 
 
-def wizlist_cmd(session, args, input):
+def wizlist_cmd(ses, args, input):
   """
   Tells you about all the people who have participated in Lyntin's
   development--these are the Lyntin wizards.
@@ -716,27 +716,27 @@ def write_cmd(ses, args, input):
     hooks.write_hook.spamhook((ses, f, quiet))
     f.close()
     exported.write_message("write: file %s has been written for session %s." % 
-                           (filename, ses.getName()))
+                           (filename, ses.getName()), ses)
   except Exception, e:
     try:
       f.close()
     except:
       pass
-    exported.write_error("write: error writing to file %s. %s" % (filename, e))
+    exported.write_error("write: error writing to file %s. %s" % (filename, e), ses)
 
 commands_dict["write"] = (write_cmd, "file quiet:boolean=false")
 
 
-def zap_cmd(session, args, input):
+def zap_cmd(ses, args, input):
   """
   This disconnects from the mud and closes the session.
 
   category: commands
   """
-  if exported.get_engine().closeSession(session):
-    exported.write_message("zap: session %s zapped!" % session.getName())
+  if exported.get_engine().closeSession(ses):
+    exported.write_message("zap: session %s zapped!" % ses.getName(), ses)
   else:
-    exported.write_message("zap: session cannot be zapped!")
+    exported.write_message("zap: session cannot be zapped!", ses)
 
 commands_dict["zap"] = (zap_cmd, "")
 

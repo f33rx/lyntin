@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.4 2002/08/31 16:36:17 jmberne Exp $
+# $Id: deed.py,v 1.5 2002/11/07 02:32:53 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
@@ -144,7 +144,7 @@ def deed_cmd(ses, args, input):
   # original deed_cmd code contributied by Sebastian John
 
   if (ses.getName() == "common"):
-    exported.write_error("deed cannot be applied to common session.")
+    exported.write_error("deed cannot be applied to common session.", ses)
     return
 
   deedtext = args["text"]
@@ -159,7 +159,7 @@ def deed_cmd(ses, args, input):
     if data == "":
       data = "deed: no deeds defined."
     
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
   
   if deedtext.isdigit():
@@ -167,12 +167,12 @@ def deed_cmd(ses, args, input):
     if data == "":
       data = "deed: no deeds defined."
     
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
 
   exported.get_manager("deed").addDeed(ses, deedtext)
   if not quiet:
-    exported.write_message("deed: {%s} added." % deedtext)
+    exported.write_message("deed: {%s} added." % deedtext, ses)
 
 commands_dict["deed"] = (deed_cmd, "text= quiet:boolean=false")
 

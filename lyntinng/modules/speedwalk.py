@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.14 2002/11/07 02:32:53 willhelm Exp $
+# $Id: speedwalk.py,v 1.15 2002/11/08 02:35:12 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.  Speedwalking is highly
@@ -420,7 +420,7 @@ def swdir_cmd(ses, args, input):
     if data == '':
       data = "swdir: no speedwalking dirs defined."
 
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
 
   # they typed '#swdir dd*' and are looking for matching speedwalking dirs
@@ -429,15 +429,15 @@ def swdir_cmd(ses, args, input):
     if data == '':
       data = "swdir: no speedwalking dirs defined."
 
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
 
   try:
     exported.get_manager("speedwalk").addDir(ses, alias, dir)
     if not quiet:
-      exported.write_message("swdir: {%s} {%s} added." % (alias, dir))
+      exported.write_message("swdir: {%s} {%s} added." % (alias, dir), ses)
   except ValueError, e:
-    exported.write_error("swdir: cannot add alias '%s': %s." % (alias, e))
+    exported.write_error("swdir: cannot add alias '%s': %s." % (alias, e), ses)
 
 commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
 
@@ -465,13 +465,13 @@ def swexclude_cmd(ses, args, input):
     if data == '':
       data = "swexcl: no speedwalking excludes defined."
 
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
 
   for exclude in excludes:
     exported.get_manager("speedwalk").addExclude(ses, exclude)
     if not quiet:
-      exported.write_message("swexclude: {%s} added." % exclude)
+      exported.write_message("swexclude: {%s} added." % exclude, ses)
 
 commands_dict["swexclude"] = (swexclude_cmd, "exclude* quiet:boolean=false")
 

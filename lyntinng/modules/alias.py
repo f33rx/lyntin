@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.14 2002/11/06 01:56:51 willhelm Exp $
+# $Id: alias.py,v 1.15 2002/11/09 04:21:59 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which manages aliases, creating new
@@ -314,7 +314,7 @@ def alias_cmd(ses, args, input):
     if data == '':
       data = "alias: no aliases defined."
 
-    exported.write_message("aliases:\n" + data)
+    exported.write_message("aliases:\n" + data, ses)
     return
 
   # they typed '#alias dd*' and are looking for matching aliases
@@ -323,7 +323,7 @@ def alias_cmd(ses, args, input):
     if data == '':
       data = "alias: no aliases defined."
 
-    exported.write_message("aliases:\n" + data)
+    exported.write_message("aliases:\n" + data, ses)
     return
 
   # we have to do manual variable expansion here.
@@ -334,10 +334,10 @@ def alias_cmd(ses, args, input):
   try:
     am.addAlias(ses, name, command)
   except ValueError, e:
-    exported.write_error("alias: %s" % e)
+    exported.write_error("alias: %s" % e, ses)
 
   if not quiet:
-    exported.write_message("alias: {%s} {%s} added." % (name, command))
+    exported.write_message("alias: {%s} {%s} added." % (name, command), ses)
 
 commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false")
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.21 2002/11/06 02:09:08 willhelm Exp $
+# $Id: lyntincmds.py,v 1.22 2002/11/21 02:04:19 willhelm Exp $
 #######################################################################
 import string
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -48,7 +48,7 @@ def config_cmd(ses, args, input):
               "   ignoreactions " + bv(ses._ignoreactions) + "  (boolean)\n" + \
               "   ignoresubs    " + bv(ses._ignoresubs) + "  (boolean)\n" + \
               "   verbatim      " + bv(ses._verbatim) + "  (boolean)\n"
-    exported.write_message(output)
+    exported.write_message(output, ses)
     return
 
   # set the variable to this value
@@ -57,18 +57,18 @@ def config_cmd(ses, args, input):
     if value == 1 or value == 0:
       exec("ses._%s = value" % name)
       if not quiet:
-        exported.write_message("config: %s set to %s." % (name, bv(value)))
+        exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     else:
-      exported.write_error("config: '%s' is not a valid boolean value." % (value))
+      exported.write_error("config: '%s' is not a valid boolean value." % (value), ses)
     return
 
   if name in ["variablechar", "commandchar"]:
     if len(value) == 1:
       exec("lyntin.%s = value" % name)
       if not quiet:
-        exported.write_message("config: %s set to '%s'." % (name, value))
+        exported.write_message("config: %s set to '%s'." % (name, value), ses)
     else:
-      exported.write_error("config: '%s' is not a valid %s value." % (value, name))
+      exported.write_error("config: '%s' is not a valid %s value." % (value, name), ses)
     return
 
   if name in ["ansicolor", "speedwalk"]:
@@ -76,9 +76,9 @@ def config_cmd(ses, args, input):
     if value == 1 or value == 0:
       exec("lyntin.%s = value" % name)
       if not quiet:
-        exported.write_message("config: %s set to %s." % (name, bv(value)))
+        exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     else:
-      exported.write_error("config: '%s' is not a valid boolean value." % (value))
+      exported.write_error("config: '%s' is not a valid boolean value." % (value), ses)
     return
 
   if name == "mudecho":
@@ -92,7 +92,7 @@ def config_cmd(ses, args, input):
       event.EchoEvent(0).enqueue() 
 
     if not quiet:
-      exported.write_message("config: %s set to %s." % (name, bv(value)))
+      exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     return
 
   if name == "evalmode":
@@ -101,62 +101,62 @@ def config_cmd(ses, args, input):
       lyntin.evalmode = lyntin.EVALMODE_TINTIN
       hooks.evalmode_change_hook.spamhook((old, lyntin.EVALMODE_TINTIN))
       if not quiet:
-        exported.write_message("config: %s set to %s." % (name, value))
+        exported.write_message("config: %s set to %s." % (name, value), ses)
     elif value == "lyntin":
       lyntin.evalmode = lyntin.EVALMODE_LYNTIN
       hooks.evalmode_change_hook.spamhook((old, lyntin.EVALMODE_LYNTIN))
       if not quiet:
-        exported.write_message("config: %s set to %s." % (name, value))
+        exported.write_message("config: %s set to %s." % (name, value), ses)
     else:
-      exported.write_error("config: '%s' is not a valid value." % (value))
+      exported.write_error("config: '%s' is not a valid value." % (value), ses)
     return
 
-  exported.write_error("config: did not recognize '%s' as an attribute." % name)
+  exported.write_error("config: did not recognize '%s' as an attribute." % name, ses)
       
 commands_dict["config"] = (config_cmd, "name= value= quiet:boolean=false")
   
-def datagrep_cmd(session, args, input):
+def datagrep_cmd(ses, args, input):
   """
   Searches this session's databuffer with a regular expression printing 
   all matches in their entirety.
 
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("datagrep cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("datagrep cannot be applied to common session.", ses)
     return
 
   pattern = args["pattern"]
   size = args["size"]
 
-  ret = session.getDataBuffer().grepbuffer(pattern,size)
+  ret = ses.getDataBuffer().grepbuffer(pattern,size)
   exported.write_message("datagrep %s results:\n%s"
-                         % (pattern, string.join(ret, "\n")))
+                         % (pattern, string.join(ret, "\n")), ses)
 
 commands_dict["datagrep"] = (datagrep_cmd, "pattern size:int=300")
 
 
-def datagreplines_cmd(session, args, input):
+def datagreplines_cmd(ses, args, input):
   """
   Searches the lines in this session's databuffer with a regular 
   expression printing all matching lines in their entirety.
 
   category: commands
   """
-  if (session.getName() == "common"):
-    exported.write_error("datagrep cannot be applied to common session.")
+  if (ses.getName() == "common"):
+    exported.write_error("datagrep cannot be applied to common session.", ses)
     return
 
   pattern = args["pattern"]
   size = args["size"]
-  ret = session.getDataBuffer().greplines(pattern,size)
+  ret = ses.getDataBuffer().greplines(pattern,size)
   exported.write_message("datagreplines %s results:\n%s"
-                         % (pattern, string.join(ret, "")))
+                         % (pattern, string.join(ret, "")), ses)
 
 commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
 
 
-def diagnostics_cmd(session, args, input):
+def diagnostics_cmd(ses, args, input):
   """
   This is very useful for finding out all the information about Lyntin
   while it's running.  This will print out operating system information,
@@ -230,13 +230,17 @@ def diagnostics_cmd(session, args, input):
 commands_dict["diagnostics"] = (diagnostics_cmd, "logfile=")
 
 
-def raw_cmd(session, args, input):
+def raw_cmd(ses, args, input):
   """
   Sends input straight to the mud.
 
   category: commands
   """
-  session.writeSocket(args["input"] + "\n")
+  if (ses.getName() == "common"):
+    exported.write_error("raw: cannot send raw data to the common session.", ses)
+    return
+
+  ses.writeSocket(args["input"] + "\n")
   
 commands_dict["raw"] = (raw_cmd, "input=", "limitparsing=0")
 

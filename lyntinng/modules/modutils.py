@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.7 2002/10/13 03:04:34 willhelm Exp $
+# $Id: modutils.py,v 1.8 2002/11/06 03:03:20 willhelm Exp $
 #######################################################################
 """
 This module holds helper functions for building other Lyntin modules.
@@ -93,7 +93,7 @@ def unsomething_helper(args, func, ses, sing, plur):
         else:
           data.append("un%s: {%s} removed." % (sing, mem))
       data = string.join(data, "\n")
-    exported.write_message(data)
+    exported.write_message(data, ses)
 
 
 # Local variables:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.35 2002/11/18 02:43:53 willhelm Exp $
+# $Id: exported.py,v 1.36 2002/12/04 03:46:28 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -273,17 +273,20 @@ def write_ui(text):
   else:
     print text
 
-def write_message(text):
+def write_message(text, ses=None):
   """
   Calls engine.myengine.writeMessage which writes LTDATA message.
   If there is no engine instance available, it prints it to sysout.
 
   @param text: the message to send
   @type  text: string
+
+  @param ses: the session instance the error data is associated with
+  @type  ses: session.Session
   """
   text = str(text)
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.LTDATA))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.LTDATA, ses))
   else:
     print "message:", text
 
@@ -338,7 +341,7 @@ def write_mud_data(text, ses=None):
   else:
     print "muddata:", text
 
-def write_traceback(message=""):
+def write_traceback(message="", ses=None):
   """
   Convenience method for grabbing the traceback, formatting it, 
   piping it through write_error, with a message for the user.
@@ -346,6 +349,9 @@ def write_traceback(message=""):
   @param message: any message you want to pass to the user--this
       gets printed first
   @type  message: string
+
+  @param ses: the session instance the mud data is associated with
+  @type  ses: session.Session
   """
   exc = "".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 
@@ -353,7 +359,7 @@ def write_traceback(message=""):
     message = message + "\n" + exc
   else:
     message = exc
-  write_error(message)
+  write_error(message, ses)
 
 
 def get_history(count=30):

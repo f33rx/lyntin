@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: logger.py,v 1.11 2002/11/09 04:21:59 willhelm Exp $
+# $Id: logger.py,v 1.1 2002/11/15 02:36:24 willhelm Exp $
 #######################################################################
 """
 This module defines the LoggerManager which handles logging.
@@ -21,7 +21,7 @@ class LoggerData:
     # whether or not to strip ansi--0 is off, 1 is on
     self._strip_ansi = 0
 
-  def log(self, input):
+  def log(self, ses, input):
     """
     Logs text to a file instance self._logfile and optionally
     filters ansi according to self._strip_ansi.
@@ -41,9 +41,8 @@ class LoggerData:
       self._logfile.write(text)
       self._logfile.flush()
     except:
-      exported.write_error("Logfile cannot be written to.")
       self._logfile = None
-      exported.write_traceback()
+      exported.write_traceback("Logfile cannot be written to.", ses)
 
   def isLogging(self):
     """
@@ -145,7 +144,7 @@ class LoggerManager(manager.Manager):
     text = args[-1]
 
     if self._loggers.has_key(ses):
-      self._loggers[ses].log(text)
+      self._loggers[ses].log(ses, text)
 
     return text
 
@@ -164,14 +163,14 @@ def log_cmd(ses, args, input):
   stripansi = args["stripansi"]
 
   if not ses.isConnected():
-    exported.write_error("log: You must have a session to log")
+    exported.write_error("log: You must have a session to log.", ses)
     return
 
   lm = exported.get_manager("logger")
   loggerdata = lm.getLogData(ses)
 
   if not logfile:
-    exported.write_message(loggerdata.getStatus())
+    exported.write_message(loggerdata.getStatus(), ses)
     return
 
   # handle stopping logging
@@ -179,9 +178,9 @@ def log_cmd(ses, args, input):
     try:
       logname = loggerdata._logfile.name
       loggerdata.closeLogFile()
-      exported.write_message("log: stopped logging to '%s'." % logname)
+      exported.write_message("log: stopped logging to '%s'." % logname, ses)
     except Exception, e:
-      exported.write_error("log: logfile cannot be closed (%s)." % (e))
+      exported.write_error("log: logfile cannot be closed (%s)." % (e), ses)
     return
 
   # handle starting logging
@@ -193,7 +192,7 @@ def log_cmd(ses, args, input):
       f = open(logfile, "w")
       buffer = ses.getDataBuffer().fetchbuffer()
       f.write(buffer)
-      exported.write_message("log: dumped %d lines of databuffer to logfile" % buffer.count("\n"))
+      exported.write_message("log: dumped %d lines of databuffer to logfile" % buffer.count("\n"), ses)
       loggerdata.setLogFile(f, stripansi)
 
     else:
@@ -204,9 +203,9 @@ def log_cmd(ses, args, input):
     else:
       stripansimessage = ""
 
-    exported.write_message("log: starting logging to '%s'%s." % (logfile, stripansimessage))
+    exported.write_message("log: starting logging to '%s'%s." % (logfile, stripansimessage), ses)
   except Exception, e:
-    exported.write_error("log: logfile cannot be opened for appending. %s" % (e))
+    exported.write_error("log: logfile cannot be opened for appending. %s" % (e), ses)
 
 commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false stripansi:boolean=true")
 

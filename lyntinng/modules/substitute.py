@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.16 2002/11/09 04:21:59 willhelm Exp $
+# $Id: substitute.py,v 1.17 2002/11/18 02:43:54 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -251,7 +251,7 @@ def substitute_cmd(ses, args, input):
     if data == '':
       data = "substitute: no substitutes defined."
 
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
 
   if not substitution:
@@ -259,12 +259,12 @@ def substitute_cmd(ses, args, input):
     if data == '':
       data = "substitute: no substitutes defined."
 
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return 
 
   sm.addSubstitute(ses, item, substitution)
   if not quiet:
-    exported.write_message("substitute: {%s} {%s} added." % (item, substitution))
+    exported.write_message("substitute: {%s} {%s} added." % (item, substitution), ses)
 
 commands_dict["substitute"] = (substitute_cmd, "item= substitution= quiet:boolean=false")
 
@@ -315,13 +315,13 @@ def gag_cmd(ses, args, input):
     if data == '':
       data = "gag: no gags defined."
 
-    exported.write_message(data)
+    exported.write_message(data, ses)
     return
 
   for togag in gaggedtext:
     sm.addSubstitute(ses, togag, ".")
     if not quiet:
-      exported.write_message("gag: {%s} added." % togag)
+      exported.write_message("gag: {%s} added." % togag, ses)
 
 commands_dict["gag"] = (gag_cmd, "text* quiet:boolean=false")
 

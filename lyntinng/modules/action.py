@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.19 2002/11/18 02:43:54 willhelm Exp $
+# $Id: action.py,v 1.20 2002/12/05 02:08:46 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -405,7 +405,7 @@ def action_cmd(ses, args, input):
     if data == '':
       data = "action: no actions defined."
 
-    exported.write_message("actions:\n" + data)
+    exported.write_message("actions:\n" + data, ses)
     return
 
   # they typed '#action dd*' and are looking for matching actions
@@ -414,15 +414,15 @@ def action_cmd(ses, args, input):
     if data == '':
       data = "action: no actions defined."
 
-    exported.write_message("actions:\n" + data)
+    exported.write_message("actions:\n" + data, ses)
     return
 
   try:
     am.addAction(ses, trigger, action, onetime)
     if not quiet:
-      exported.write_message("action: {%s} {%s} added." % (trigger, action))
+      exported.write_message("action: {%s} {%s} added." % (trigger, action), ses)
   except:
-    exported.write_traceback("action: exception thrown.")
+    exported.write_traceback("action: exception thrown.", ses)
 
 commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false quiet:boolean=false")
 

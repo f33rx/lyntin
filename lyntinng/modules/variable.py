@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.15 2002/10/26 15:17:24 willhelm Exp $
+# $Id: variable.py,v 1.16 2002/11/08 02:35:13 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -360,7 +360,7 @@ def variable_cmd(ses, args, input):
     if data == '':
       data = "variable: no variables defined."
 
-    exported.write_message("variables:\n" + data)
+    exported.write_message("variables:\n" + data, ses)
     return
 
   if not expansion:
@@ -368,7 +368,7 @@ def variable_cmd(ses, args, input):
     if data == '':
       data = "variable: no variables defined."
 
-    exported.write_message("variables:\n" + data)
+    exported.write_message("variables:\n" + data, ses)
     return 
 
   # need to expand the var
@@ -379,10 +379,10 @@ def variable_cmd(ses, args, input):
   try:
     vm.addVariable(ses, var, expansion)
     if not quiet:
-      exported.write_message("variable: {%s}={%s} added." % (var, expansion))
+      exported.write_message("variable: {%s}={%s} added." % (var, expansion), ses)
 
   except Exception, e:
-    exported.write_error("variable: cannot be set. %s", e)
+    exported.write_error("variable: cannot be set. %s", e, ses)
 
 commands_dict["variable"] = (variable_cmd, "var= expansion= quiet:boolean=false")
 
