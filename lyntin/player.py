@@ -243,9 +243,14 @@ def LynImport(words, input, seslist):
 
     import sys
     Putline("trying to import " + words[1])
+
     try:
-        exec ("import " + words[1])
-        Putline("import successful.")
+        if sys.modules.has_key(words[1]):
+            reload(sys.modules[words[1]])
+            Putline("import (actually--we reloaded) successful.")
+        else:
+            exec ("import " + words[1])
+            Putline("import successful.")
     except ImportError:
         Putline(words[1] + " module does not exist.")
     except:
@@ -254,10 +259,10 @@ def LynImport(words, input, seslist):
 
         info = exc_info()
         exc_class = info[0]
-        info = format_exception(info[0], info[1], info[2])
+        Putline(string.join(format_exception(info[0], info[1], info[2]), ""))
 
-        message = 'Error: ' + info[-4] + info[-3] + info[-2] + info[-1]
-        Putline("import failed because of:\n" + message)
+        # message = 'Error: ' + info[-4] + info[-3] + info[-2] + info[-1]
+        # Putline("import failed because of:\n" + message)
     return
 
 def Showme(words, input, seslist):
