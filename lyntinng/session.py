@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.40 2002/04/26 02:29:02 jmberne Exp $
+# $Id: session.py,v 1.41 2002/04/26 23:34:17 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -87,7 +87,7 @@ class Session:
     if self.getName() != "common":
       engine.myengine.unregisterSession(self.getName())
       if self._socket: self._socket.shutdown()
-    event.OutputEvent("Session " + self._name + " shutdown.").enqueue()
+    event.OutputEvent("Session " + self._name + " shutdown.\n").enqueue()
     self._ticker.clear()
 
   def getInfo(self):
@@ -197,11 +197,12 @@ class Session:
     """ Tells you whether or not a session has a connection."""
     return self._socket != None
 
-  def writeSocket(self, message):
+  def writeSocket(self, message, tag = None):
     """ Writes data to the socket."""
-    hooks.to_mud_hook.spamhook((self, message))
+    for line in message.strip().split("\n"):
+      hooks.to_mud_hook.spamhook((self, line, tag))
     if self._socket:
-      self._socket.write(message)
+      self._socket.write(str(message))
 
 
   ### ------------------------------------------------
@@ -213,7 +214,7 @@ class Session:
     if self.getName() == "common":
       engine.myengine.writePrompt()
 
-  def handleUserData(self, input, internal=0):
+  def handleUserData(self, input, internal=0, tag=None):
     """ Handles input in the context of this session specifically.
 
     internal says whether the command came from interally.
@@ -228,7 +229,7 @@ class Session:
     if self._verbatim == 0 or (len(input) > 0 and input[0] == lyntin.commandchar):
       varexpansion = self.getManager("variable").expand(input)
       if varexpansion:
-        engine.myengine.handleUserData(varexpansion, internal)
+        engine.myengine.handleUserData(varexpansion, internal, tag)
         return
 
       # replace \$ -> $
@@ -264,7 +265,7 @@ class Session:
             else:
               try:
                 dict = argumentparser.parse(words[1])
-                dict["command"]=words[0]
+                dict["command"]=mem
                 command(self, dict, input)
               except ValueError, e:
                 exported.write_error("%s: %s" % (mem, e))
@@ -281,7 +282,7 @@ class Session:
             else:
               try:
                 dict = argumentparser.parse(words[1])
-                dict["command"]=words[0]
+                dict["command"]=mem
                 command(self, dict, input)
               except ValueError, e:
                 exported.write_error("%s: %s" % (mem, e))
@@ -303,7 +304,7 @@ class Session:
         # replace placement variables in the expansion
         aliasexpansion = utils.replace_vars(input, aliasexpansion)
 
-        engine.myengine.handleUserData(aliasexpansion, internal)
+        engine.myengine.handleUserData(aliasexpansion, internal, tag)
         return
 
     # if we don't have a socket then we can't do any non-lyntin-command
@@ -319,11 +320,11 @@ class Session:
 
         # FIXME - handle news and sense differently
         if SPEEDWALK_REGEXP.search(input) and input != 'news':
-          self.writeSocket(utils.expand_speedwalk(input))
+          self.writeSocket(utils.expand_speedwalk(input), tag)
           return
 
     # just regular data to the mud
-    self.writeSocket(input + "\n")
+    self.writeSocket(input + "\n", tag)
 
 
   ### ------------------------------------------------

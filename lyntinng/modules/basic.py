@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.76 2002/04/26 21:04:34 jmberne Exp $
+# $Id: basic.py,v 1.77 2002/04/26 23:34:17 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -121,7 +121,7 @@ def boss_cmd(session, words, input):
 commands_dict["boss"] = (boss_cmd, "")
 
 
-def char_cmd(session, words, input):
+def char_cmd(session, args, input):
   """#char <new-command-denoting-character>
 
   With no arguments, tells you what the current command character
