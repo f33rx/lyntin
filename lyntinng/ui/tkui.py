@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.5 2002/07/07 04:53:45 willhelm Exp $
+# $Id: tkui.py,v 1.6 2002/07/11 04:11:20 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -149,7 +149,7 @@ class Tkui(ui.BaseUI):
     self._txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
 
     self._initColorTags()
-    hooks.echo_hook.register(self.echo)
+    hooks.mudecho_hook.register(self.echo)
     hooks.startup_hook.register(self.startui)
 
 
@@ -286,7 +286,7 @@ class Tkui(ui.BaseUI):
         self._txt.insert('end', message.data, "44")
 
     elif message.type == ui.USERDATA:
-      if lyntin.echo == 1:
+      if lyntin.mudecho == 1:
         if message.data[-1] == "\n":
           self._txt.insert('end', message.data[:-1], "44")
           self._txt.insert('end', "\n")

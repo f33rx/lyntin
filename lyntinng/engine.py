@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.61 2002/07/07 17:44:41 willhelm Exp $
+# $Id: engine.py,v 1.62 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -276,7 +276,7 @@ class Engine:
 
     # we don't record internal stuff or input that isn't supposed
     # to be echo'd
-    if internal == 0 and lyntin.echo == 1:
+    if internal == 0 and lyntin.mudecho == 1:
       self.getManager("history").recordHistory(";".join(historyitems))
 
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.18 2002/07/07 17:44:42 willhelm Exp $
+# $Id: hooks.py,v 1.19 2002/07/11 04:11:19 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -159,7 +159,7 @@ shutdown_hook = Hook()
 When the mud sends an echo on or an echo off.  arg tuple is
 the new echo state (1 if on, 0 if off).
 """
-echo_hook = Hook()
+mudecho_hook = Hook()
 
 """
 Whenever we switch evalmodes, we call everything on this hook.

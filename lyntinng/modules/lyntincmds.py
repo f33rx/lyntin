@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.11 2002/07/11 04:11:19 willhelm Exp $
+# $Id: lyntincmds.py,v 1.12 2002/07/11 23:38:28 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -13,35 +13,6 @@ import net, utils, engine, lyntin, exported, hooks, modutils
 This module holds commands that are new and unique to Lyntin.
 """
 commands_dict = {}
-
-def ansi_cmd(session, args, input):
-  """
-  Toggles whether Lyntin takes out all the ansi coloring for you
-  or not.  Mind you, the mud has to send ansi colors your way--otherwise
-  this toggle won't do anything for you at all.
-
-  This is to help folks whose mud servers aren't so friendly.
-
-  category: commands
-  """
-  option = args["option"]
-
-  if option == 1:
-    lyntin.ansicolor = 1
-    exported.write_message("ansi: ansi is now enabled.")
-
-  elif option == 0:
-    lyntin.ansicolor = 0
-    exported.write_message("ansi: ansi is now disabled.")
-
-  else:
-    if lyntin.ansicolor:
-      exported.write_message("ansi: ansi color is enabled.")
-    else:
-      exported.write_message("ansi: ansi color is disabled.")
-
-commands_dict["ansi"] = (ansi_cmd, "option:booleanornone=")
-
 
 def bv(bool):
   if bool:
@@ -63,7 +34,8 @@ def config_cmd(ses, args, input):
     output = "Global:\n" + \
              "   ansicolor     " + bv(lyntin.ansicolor) + "  (boolean)\n" + \
              "   commandchar   " + lyntin.commandchar + "  (char)\n" + \
-             "   echo          " + bv(lyntin.echo) + "  (boolean)\n"
+             "   mudecho       " + bv(lyntin.mudecho) + "  (boolean)\n" + \
+             "   speedwalk     " + bv(lyntin.speedwalk) + "  (boolean)\n"
     if lyntin.evalmode == lyntin.LYNTIN:
       output += "   evalmode      lyntin  (\"lyntin\" or \"tintin\")\n"
     else:
@@ -81,7 +53,7 @@ def config_cmd(ses, args, input):
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
       exec("ses._%s = value" % name)
-      exported.write_message("config: %s set to %s." % (name, value))
+      exported.write_message("config: %s set to %s." % (name, bv(value)))
     else:
       exported.write_error("config: '%s' is not a valid boolean value." % (value))
     return
@@ -94,13 +66,26 @@ def config_cmd(ses, args, input):
       exported.write_error("config: '%s' is not a valid %s value." % (value, name))
     return
 
-  if name in ["ansicolor", "echo"]:
+  if name in ["ansicolor", "speedwalk"]:
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
       exec("lyntin.%s = value" % name)
-      exported.write_message("config: %s set to %s." % (name, value))
+      exported.write_message("config: %s set to %s." % (name, bv(value)))
     else:
       exported.write_error("config: '%s' is not a valid boolean value." % (value))
+    return
+
+  if name == "mudecho":
+    import event
+    old = lyntin.mudecho
+    value = utils.convert_boolean(value)
+
+    if value == 1:
+      event.EchoEvent(1).enqueue() 
+    else:
+      event.EchoEvent(0).enqueue() 
+
+    exported.write_message("config: %s set to %s." % (name, bv(value)))
     return
 
   if name == "evalmode":
@@ -219,30 +204,6 @@ def diagnostics_cmd(session, args, input):
                             % (logfile, e))
 
 commands_dict["diagnostics"] = (diagnostics_cmd, "logfile=")
-
-
-def mudecho_cmd(session, args, input):
-  """
-  Toggles echoing user commands.  When echo is on, all user commands
-  will be printed to the screen.  When off, user commands are hidden.
-
-  Muds use echo for switching in and out of password handling.  This
-  command was created so that if your mud screws up echo settings,
-  you can set it locally.
-
-  category: commands
-  """
-  import event
-  option = args["option"]
-
-  if option == 1:
-    event.EchoEvent(1).enqueue() 
-    exported.write_message("mudecho: turned on manually.")
-  elif option == 0:
-    event.EchoEvent(0).enqueue() 
-    exported.write_message("mudecho: turned off manually.")
-
-commands_dict["mudecho"] = (mudecho_cmd, "option:boolean")
 
 
 def raw_cmd(session, args, input):

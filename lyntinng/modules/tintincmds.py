@@ -29,31 +29,6 @@ def boss_cmd(session, words, input):
 commands_dict["boss"] = (boss_cmd, "")
 
 
-def char_cmd(session, args, input):
-  """
-  The default command char is #.  Prepending a # to any command pokes 
-  Lyntin into executing it as a Lyntin command.  #action and #alias 
-  for instance.  You can change the # to any other character you 
-  like--though be careful.
-
-  ex:
-     #char {*}  <-- changes the command char to *
-
-  category: commands
-  """
-  char = args["char"]
-
-  if not char:
-    exported.write_message("char: current command character is " + 
-                                 lyntin.commandchar + ".")
-    return
-
-  lyntin.commandchar = char
-  exported.write_message("char: new command character is %s."  % char)
-
-commands_dict["^char"] = (char_cmd, "char=")
-
-
 def clear_cmd(session, words, input):
   """
   This command clears a session of all session data (except the actual 
@@ -180,46 +155,15 @@ def if_cmd(ses, args, input):
 
   try:
     if eval(expr):
-      exported.lyntin_command(action, 1, ses)
+      exported.lyntin_command(action, 1, session)
     elif elseaction:
-      exported.lyntin_command(elseaction, 1, ses)
+      exported.lyntin_command(elseaction, 1, session)
   except SyntaxError:
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
     exported.write_error("if: exception: %s" % e)
 
 commands_dict["if"] = (if_cmd, "expr action elseaction=")
-
-
-def ignore_cmd(session, args, input):
-  """
-  Toggles whether to ignore actions for a particular session.
-
-  category: commands
-  """
-  if (session.getName() == "common"):
-    exported.write_error("ignore cannot be applied to common session.")
-    return
-
-  option = args["option"]
-
-  if option == 1:
-    session._ignoreactions = 1
-    exported.write_message("ignore: now enabled for session %s."
-                           % session.getName())
-  elif option == 0:
-    session._ignoreactions = 0
-    exported.write_message("ignore: now disabled for session %s." 
-                           % session.getName())
-  else:
-    if session._ignoreactions:
-      exported.write_message("ignore: currently enabled for %s." 
-                             % session.getName())
-    else:
-      exported.write_message("ignore: currently disabled for %s."
-                             % session.getName())
-
-commands_dict["ignore"] = (ignore_cmd, "option:booleanornone=")
 
 
 def info_cmd(ses, args, input):
@@ -375,7 +319,7 @@ def math_cmd(ses, args, input):
     rvalue = eval(ops)
     varman = exported.get_manager("variable")
     if varman:
-      varman.addVariable(ses,var, str(rvalue))
+      varman.addVariable(session,var, str(rvalue))
     if not quiet:
       exported.write_message("math: %s = %s = %s." % (var, ops, str(rvalue)))
   except Exception, e:
@@ -574,29 +518,6 @@ def showme_cmd(ses, args, input):
 commands_dict["showme"] = (showme_cmd, "input=", "limitparsing=0")
 
 
-def speedwalk_cmd(session, args, input):
-  """
-  Toggles speedwalking on and off for the entire client.
-
-  category: commands
-  """
-  option = args["option"]
-
-  if option == 1:
-    lyntin.speedwalk = 1
-    exported.write_message("speedwalk: now enabled.")
-  elif option == 0:
-    lyntin.speedwalk = 0
-    exported.write_message("speedwalk: now disabled.")
-  else:
-    if lyntin.speedwalk:
-      exported.write_message("speedwalk: enabled.")
-    else:
-      exported.write_message("speedwalk: disabled.")
-
-commands_dict["speedwalk"] = (speedwalk_cmd, "option:booleanornone=")
-
-
 def textin_cmd(session, args, input):
   """
   Takes the contents of the file and outputs it directly to the mud
@@ -729,68 +650,6 @@ def ticksize_cmd(session, args, input):
   exported.write_message("ticksize: tick length set to %s." % str(size))
 
 commands_dict["ticksize"] = (ticksize_cmd, "size:timespan=0")
-
-
-def togglesubs_cmd(session, args, input):
-  """
-  Toggles whether to ignore substitutions for a particular session
-  or not.
-
-  category: commands
-  """
-  if (session.getName() == "common"):
-    exported.write_error("togglesubs cannot be applied to common session.")
-    return
-
-  option = args["option"]
-  if option == 1:
-    session._ignoresubs = 1
-    exported.write_message("togglesubs: substitutions are active for " +
-                           "session %s." % session.getName())
-  elif option == 0:
-    session._ignoresubs = 1
-    exported.write_message("togglesubs: now ignoring substitions for " +
-                           "session %s." % session.getName())
-  else:
-    if session._ignoresubs:
-      exported.write_message("togglesubs: substitutions are not active for " +
-                             "session %s." % session.getName())
-    else:
-      exported.write_message("togglesubs: substitutions are active for " +
-                             "session %s." % session.getName())
-    
-commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
-
-
-def verbatim_cmd(session, args, input):
-  """
-  Toggles whether user data is parsed for speedwalking,
-  aliases, and variables.
-
-  category: commands
-  """
-  if (session.getName() == "common"):
-    exported.write_error("verbatim cannot be applied to common session.")
-    return
-
-  option = args["option"]
-  if option == 1:
-    session._verbatim = 1
-    exported.write_message("verbatim: verbatim enabled for session %s." 
-                           % session.getName())
-  elif option == 0: 
-    session._verbatim = 0
-    exported.write_message("verbatim: verbatim disabled for session %s." 
-                           % session.getName())
-  else:
-    if session._verbatim:
-      exported.write_message("verbatim: verbatim is enabled for session %s."
-                           % session.getName())
-    else:
-      exported.write_message("verbatim: verbatim is disabled for session %s."
-                           % session.getName())
-
-commands_dict["verbatim"] = (verbatim_cmd, "option:booleanornone=")
 
 
 def version_cmd(session, args, input):

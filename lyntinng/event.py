@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.35 2002/06/09 17:09:36 jmberne Exp $
+# $Id: event.py,v 1.36 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -166,8 +166,8 @@ class EchoEvent(Event):
 
   def execute(self):
     """ Runs the echo event through anything listening."""
-    hooks.echo_hook.spamhook((self._state,))
-    lyntin.echo = self._state
+    hooks.mudecho_hook.spamhook((self._state,))
+    lyntin.mudecho = self._state
 
 
 class ReloadEvent(Event):
