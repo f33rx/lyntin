@@ -6,7 +6,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-Thu, 06 Mar 2003 02:11:54 +0000
+Tue, 29 Apr 2003 02:05:04 +0000
 
 For more up-to-date information and documentation, please check the 
 web-site: http://Lyntin.sourceforge.net/
@@ -16,31 +16,36 @@ web-site: http://Lyntin.sourceforge.net/
 COMMANDS IN LYNTIN
 ==================
 
-Lyntin uses Lyntin commands to allow you to manipulate the Lyntin client
-and setup your session with aliases, variables, actions, and such.
-Commands start with the command character--by default this is "#".  It
-can be changed with the "#config" command.  The command character can
-also do some other special things:
+Lyntin uses Lyntin commands to allow you to manipulate the Lyntin 
+client and setup your session with aliases, variables, actions, 
+and such.  Commands start with the command character--by default 
+this is "#".  It can be changed with the "#config" command.  The 
+command character can also do some other special things:
 
-1. You can execute commands in another session by typing the command
-   character and then the sesion name: "#3k say hello" will say hello
-   in the 3k session.
+1. You can execute commands in another session by typing the 
+   command character and then the sesion name: "#3k say hello" 
+   will say hello in the 3k session.
 
-2. You can switch to another session by typing the command character
-   and then the session name: "#3k" will switch to the 3k session.
+2. You can switch to another session by typing the command 
+   character and then the session name: "#3k" will switch to the 
+   3k session.
 
-3. You can execute a command in all sessions by typing the command
-   character then all: "#all say hello" will say hello in all sessions.
+3. You can execute a command in all sessions by typing the 
+   command character then all: "#all say hello" will say hello in 
+   all sessions.
 
-4. You can execute a command a number of times by typing the command
-   character then a number, then the command: "#5 say hello" will
-   send "say hello" to the current session 5 times.
+4. You can execute a command a number of times by typing the 
+   command character then a number, then the command: 
+   "#5 say hello" will send "say hello" to the current session 
+   5 times.
 
-Commands are separated by the semicolon.  Semicolons can be escaped
-with the \ character.
+Commands are separated by the semicolon.  Semicolons can be 
+escaped with the \ character.
 
-Command arguments can be enclosed with { }.  This enables you to specify
-arguments that have multiple words in them.
+Command arguments can be enclosed with { }.  This enables you to 
+specify arguments that have multiple words in them.
+
+{, } and \ can all be escaped with the \ character: \{, \}, and \\.
 
 
 
@@ -53,17 +58,19 @@ COMMANDS.@
    It will first look for a module named "lyntinuser" and execute
    the code inside that module's __dict__ environment.  If no
    such module exists, it will execute the code inside 
-   modules.advanced .
+   modules.advanced .  At present it can only handle one-line
+   Python statements.
    
    examples:
      #@ print "hello"
-     #@ print string.join(exported.get_commands(), "\n")
+     #@ print "\n".join(exported.get_commands())
 
 
 
 COMMANDS.ACTION
 
-   syntax: #action [<TRIGGER>] [<ACTION>] [<ONETIME:BOOLEAN=false>] [<QUIET:BOOLEAN=false>] 
+   syntax: #action [<TRIGGER>] [<ACTION>] [<PRIORITY:INT=5>] 
+         [<ONETIME:BOOLEAN=false>] [<QUIET:BOOLEAN=false>] 
    
    With no trigger and no action, prints all actions.
    With a trigger and no action, prints actions that match the
@@ -125,18 +132,21 @@ COMMANDS.ALIAS
 
 
 
+COMMANDS.ANTISUBSTITUTE
+
+   syntax: #antisubstitute [<ITEM>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to create antisubstitutes.
+   
+   For any line that contains an antisubstitute, we won't do substitutions
+   or gags on it.
+
+
+
 COMMANDS.BELL
 
    Kicks off the bell for a given session.  Anything registered
    with the bell_hook will get tickled.
-
-
-
-COMMANDS.BOSS
-
-   This probably isn't as helpful as it could be.  Right now it
-   will print to your display code from Lyntin 2.x to make it seem
-   like you're doing work.
 
 
 
@@ -262,12 +272,27 @@ COMMANDS.HELP
    syntax: #help [<ITEM>] 
    
    With no arguments, shows all the help files available.
-   With an argument, shows that specific help file.
+   With an argument, shows that specific help file or lists the contents
+   of that category of help files.
    
    examples:
-     #help
-     #help help
-     #help commands.substitute
+     #help                      - lists all help files in the root
+     #help help                 - shows help for the help command
+     #help commands.substitute  - shows help for the substitute command
+     #help commands             - shows help for the commands category
+   
+   Items that have a number in parentheses after them are a category.
+   The number is how many help topics are below that category.
+   
+   example:
+     > #help
+     lyntin: ::Lyntin Help::
+     lyntin:
+     lyntin: category: root
+     lyntin:
+     lyntin:    commands(55)  readme(13)
+     lyntin:    textui
+     >
 
 
 
@@ -366,7 +391,7 @@ COMMANDS.KILLALL
 
 COMMANDS.LOAD
 
-   syntax: #load [MODULENAME] 
+   syntax: #load [MODULENAME] [<RELOAD:BOOLEAN=true>] 
    
    Loads/reloads a module.
    
@@ -395,7 +420,8 @@ COMMANDS.LOAD
 
 COMMANDS.LOG
 
-   syntax: #log [<LOGFILE>] [<DATABUFFER:BOOLEAN=false>] [<STRIPANSI:BOOLEAN=true>] 
+   syntax: #log [<LOGFILE>] [<DATABUFFER:BOOLEAN=false>] 
+         [<STRIPANSI:BOOLEAN=true>] 
    
    Will start or stop logging to a given filename for that session.
    Each session can have its own logfile.
@@ -410,19 +436,18 @@ COMMANDS.LOOP
    the range of numbers specified in <from> and <to>.
    
    example:
-     #loop {1,5} {reclaim %0.corpse}
+     #loop {1,4} {reclaim %0.corpse}
    
    will execute:
      reclaim 1.corpse
      reclaim 2.corpse
      reclaim 3.corpse
      reclaim 4.corpse
-     reclaim 5.corpse
    
    A better way to execute a command a number of times without regard
    to an index, would be:
    
-     #5 {reclaim corpse}
+     #4 {reclaim corpse}
    
    which will send "reclaim corpse" to the mud 5 times.
 
@@ -445,7 +470,7 @@ COMMANDS.NOP
    syntax: #nop [<INPUT>] 
    
    nop stands for "no operation".  So anything after a #nop
-   and before a ; (unless it's braced) will be ignored.
+   and before a ; (unless it's escaped) will be ignored.
    
    This was quite possibly the easiest command to program ever.
 
@@ -488,7 +513,8 @@ COMMANDS.READ
 
 COMMANDS.SCHEDULE
 
-   syntax: #schedule [<TICK>] [<EVENT>] [<REPEAT:BOOLEAN=false>] [<QUIET:BOOLEAN=false>] 
+   syntax: #schedule [<TICK>] [<EVENT>] [<REPEAT:BOOLEAN=false>] 
+         [<QUIET:BOOLEAN=false>] 
    
    With no arguments lets you view the scheduled events.
    
@@ -598,6 +624,14 @@ COMMANDS.SWDIR
      #swdir {NE} {northeast}
      #swdir {l} {look}
      ...
+   
+   This allows you to string characters together to speedwalk:
+   
+     4e2sNE
+   
+   which using the above swdirs gets expanded to 
+   "east;east;east;east;south;south;northeast" and who wants to type all 
+   that?
    
    see also: swexclude
 
@@ -720,6 +754,14 @@ COMMANDS.UNALIAS
 
 
 
+COMMANDS.UNANTISUBSTITUTE
+
+   syntax: #unantisubstitute [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove antisubstitutes.
+
+
+
 COMMANDS.UNGAG
 
    syntax: #ungag [<STR>] [<QUIET:BOOLEAN=false>] 
@@ -833,8 +875,8 @@ COMMANDS.VERSION
 
 COMMANDS.WIZLIST
 
-   Tells you about all the people who have participated in Lyntin's
-   development--these are the Lyntin wizards.
+   Displays the web-page where you can find an up-to-date list
+   of people who have contributed to Lyntin's development.
 
 
 
@@ -866,8 +908,9 @@ COMMANDS.ZAP
 EVALMODES
 =========
 
-There are two user input evaluation modes in Lyntin: Lyntin mode and
-Tintin mode.  You can switch modes using the command-line argument:
+There are two user input evaluation modes in Lyntin: Lyntin mode 
+and Tintin mode.  You can switch modes using the command-line 
+argument:
 
    --evalmode [mode]
 
@@ -879,13 +922,16 @@ it ingame using the #config command:
 with valid modes being "tintin" and "lyntin".
 
 The evalmodes differ in how variables, placement variables, and
-command arguments are expanded as well as the time at which they're 
-expanded.  Tintin mode emulates how Tintin works.  Lyntin mode is 
-born from our own preferred user input evaluation.
+command arguments are expanded as well as the time at which 
+they're expanded.  Tintin mode emulates how Tintin works.  Lyntin 
+mode is born from our own preferred user input evaluation.
 
 Lyntin defaults to lyntin mode--so if you're a Tintin user and 
-want to user your Tintin command files, you should make sure to start 
-Lyntin up in tintin mode.
+want to user your Tintin command files, you should make sure to 
+start Lyntin up in tintin mode.
+
+Note: Lyntin 4.0 will no longer have the tintin evalmode and the 
+idea of evalmodes will go away.
 
 
 
@@ -896,44 +942,45 @@ dependancy on tintinmode.  Though not neccessarily better, it does
 provide some abilities that tintinmode does not.
 
   * Variables and placement variables with a single $ or % are
-    evaluated/expanded.  One layer of $s or %s is then stripped off
-    when this evaluation occurs.
+    evaluated/expanded.  One layer of $s or %s is then stripped 
+    off when this evaluation occurs.
 
-  * Variable expansion is always done on user input before commands 
-    are evaluted.  This means variables can be used as arguments to
-    any commands, etc.
+  * Variable expansion is always done on user input before 
+    commands are evaluted.  This means variables can be used as 
+    arguments to any commands, etc.
 
   * Variable expansion happens again when certain expressions are
     evaluated, such as action triggers, alias expansion, etc.
     Essentially, when any stored value gets expanded its variables
-    will get expanded (typically whenever tintinmode would do its sole
-    expansion.) 
+    will get expanded (typically whenever tintinmode would do its 
+    sole expansion.) 
 
-  * Placement vars in actions and aliases support an expanded syntax
-    based on python array slices.  %0:1 will evaluate to the first and
-    second arguments, while %0: will be all arguments, and %:-1 will be
-    all but the last argumen, etc.
+  * Placement vars in actions and aliases support an expanded 
+    syntax based on python array slices.  %0:1 will evaluate to 
+    the first and second arguments, while %0: will be all 
+    arguments, and %:-1 will be all but the last argumen, etc.
 
   * Examples:
      #action {$Myvar} {woo} 
- 	 --- will trigger whenever the value Myvar holds when this is
-	     entered (the original value of Myvar - it will not change
-             if Myvar's value changes)
+         --- will trigger whenever the value Myvar holds when this 
+             is entered (the original value of Myvar - it will not 
+             change if Myvar's value changes)
      #action {$$Myvar} {woo}
-         --- Will trigger whenever the current value of Myvar passes
-             by.
+         --- Will trigger whenever the current value of Myvar 
+             passes by.
      #action {$$$Myvar} {woo}
-         --- Will trigger whenever the literal string $Myvar is seen.
-             (and thus, place more $s in if you wish to trigger on
-             more of them, the first 2 will be stripped by the
-             variable expansion processes. 
+         --- Will trigger whenever the literal string $Myvar is 
+             seen.  (and thus, place more $s in if you wish to 
+             trigger on more of them, the first 2 will be stripped 
+             by the variable expansion processes. 
      #alias {hello} {$moo}
          --- will bind hello to $moo's current value.
      #alias {hello} {$$moo}
-         --- will bind hello to always expand to moo's current value,
-             even when it changes.
+         --- will bind hello to always expand to moo's current 
+             value, even when it changes.
      #alias {hello} {$$$moo}
-         --- will bind hello to expand to the literal string "$moo"
+         --- will bind hello to expand to the literal string 
+             "$moo"
 
 
 
@@ -944,15 +991,17 @@ probably some minor descrepancies--these should be logged as bugs.
 Basically, tintin eval mode has the following properties:
 
  * the number of % signs indicates the nesting depth at which the
-   placement variable will be expanded.  If the nesting depth equals
-   the number of %, then the variable will be expanded.  Otherwise
-   it's left as it is.
+   placement variable will be expanded.  If the nesting depth 
+   equals the number of %, then the variable will be expanded.  
+   Otherwise it's left as it is.
 
  * placement variables can start with a % or a $ and the name can
    start with a _, but must otherwise be entirely of digits.
 
  * variables are not denested after they've been evaluated by the
    CommandManager like Lyntin mode does.
+
+Note: Tintin evalmode will be removed in Lyntin 4.0.
 
 
 
