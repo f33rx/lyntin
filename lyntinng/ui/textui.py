@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.20 2002/06/07 23:43:31 willhelm Exp $
+# $Id: textui.py,v 1.21 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -12,6 +12,13 @@ Holds the text ui class.
 import string, re, sys, traceback
 import engine, hooks, event, utils, ui, exported
 
+HELP_TEXT = """
+The textui is the most basic ui you can get.  It works great over
+telnet/ssh, but terrible in the Win32 command window.  At the same 
+time, because it's so basic, it tends to be a good testing ui.
+
+The textui has no special features.
+"""
 myui = None
 
 def get_ui_instance():
@@ -33,7 +40,9 @@ class Textui(ui.BaseUI):
 
   def startui(self, args):
     """ Sets up the UI."""
+    global HELP_TEXT
     hooks.to_user_hook.register(self.write)
+    exported.add_help("textui", HELP_TEXT)
     engine.myengine.startthread("ui", self.run)
 
   def run(self):

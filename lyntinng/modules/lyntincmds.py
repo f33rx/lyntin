@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.9 2002/06/20 01:20:11 willhelm Exp $
+# $Id: lyntincmds.py,v 1.10 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -43,6 +43,66 @@ def ansi_cmd(session, args, input):
 commands_dict["ansi"] = (ansi_cmd, "option:booleanornone=")
 
 
+def config_cmd(session, args, input):
+  """
+  Allows you to set a wide variety of options, some of which are
+  session oriented and some of which are global.  Typing "#config"
+  by itself will print out all the options it knows about.
+  """
+  name = args["name"]
+  value = args["value"]
+
+  if not name:
+    # print out the current configuration: globals then this session.
+    return
+
+  if not value:
+    # print out the value for this variable
+    pass
+
+  # set the variable to this value
+  if name in ["ignoreactions", "ignoresubs", "verbatim"]:
+    value = utils.convert_boolean(value)
+    if value == 1 or value == 0:
+      eval("ses._%s = value" % name)
+      exported.write_message("config: %s set to %s." % (name, value))
+    else:
+      exported.write_error("config: %s is not a valid boolean value." % (value))
+    return
+
+  if name in ["variablechar", "commandchar"]:
+    if len(value) == 1:
+      eval("lyntin.%s = value" % name)
+      exported.write_message("config: %s set to '%s'." % (name, value))
+    else:
+      exported.write_error("config: '%s' is not a valid %s value." % (value, name))
+    return
+
+  if name in ["ansicolor", "echo"]:
+    value = utils.convert_boolean(value)
+    if value == 1 or value == 0:
+      eval("lyntin.%s = value" % name)
+      exported.write_message("config: %s set to %s." % (name, value))
+    else:
+      exported.write_error("config: %s is not a valid boolean value." % (value))
+    return
+
+  if name == "evalmode":
+    old = lyntin.evalmode
+    if value == "tintin":
+      lyntin.evalmode = lyntin.TINTIN
+      hooks.evalmode_change_hook.spamhook((old, lyntin.TINTIN))
+      exported.write_message("config: %s set to %s." % (name, value))
+    elif value == "lyntin":
+      lyntin.evalmode = lyntin.LYNTIN
+      hooks.evalmode_change_hook.spamhook((old, lyntin.LYNTIN))
+      exported.write_message("config: %s set to %s." % (name, value))
+    else:
+      exported.write_error("config: %s is not a valid value." % (value))
+    return
+      
+commands_dict["config"] = (config_cmd, "name= value=")
+  
 def datagrep_cmd(session, args, input):
   """
   Searches this session's databuffer with a regular expression printing 

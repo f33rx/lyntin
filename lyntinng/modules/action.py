@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.2 2002/06/21 02:27:17 willhelm Exp $
+# $Id: action.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -12,13 +12,6 @@ This module defines the ActionManager which handles managing actions
 """
 import re, string, copy
 import manager, utils, event, lyntin, hooks, exported, modutils
-
-var_module = None
-try:
-  import modules.variable
-  var_module = modules.variable
-except:
-  pass
 
 # the placement variable regular expression
 VARREGEXP = re.compile('%_?(\d+)')
@@ -47,14 +40,12 @@ class ActionData:
       (int) always returns a 1
 
     """
-    # first we expand variables in the action trigger then compile
-    # it into a regular expression
-    vm = exported.get_manager("variable")
-    expansion = trigger
-    if vm:
-      expansion = vm.expand(self._ses, trigger)
-      if not expansion:
-        expansion = trigger
+    if lyntin.evalmode == lyntin.TINTIN:
+      # first we expand variables in the action trigger then compile
+      # it into a regular expression
+      expansion = exported.expand_ses_vars(trigger, self._ses)
+    else:
+      expansion = trigger
 
     compiled = compile_action(expansion)
     self._actions[trigger] = (trigger, compiled, response, onetime)
@@ -65,16 +56,14 @@ class ActionData:
     When a variable changes, we go through and recompile all the
     regular expressions for the actions in this session.
     """
-    vm = exported.get_manager("variable")
-    if vm:
-      for mem in self._actions.keys():
-        (trigger, compiled, response, onetime) = self._actions[mem]
-        expansion = vm.expand(self._ses, trigger)
-        if not expansion:
-          expansion = trigger
-        compiled = compile_action(expansion)
+    for mem in self._actions.keys():
+      (trigger, compiled, response, onetime) = self._actions[mem]
+      expansion = exported.expand_ses_vars(trigger, self._ses)
+      if not expansion:
+        expansion = trigger
+      compiled = compile_action(expansion)
 
-        self._actions[trigger] = (trigger, compiled, response, onetime)
+      self._actions[trigger] = (trigger, compiled, response, onetime)
 
   def clear(self):
     """
@@ -289,6 +278,8 @@ class ActionManager(manager.Manager):
     """
     When a variable changes, we need to recompile the regular
     expressions involved.  This facilitates that.
+
+    This is registered with the variable_change hook.
     """
     ses = args[0]
     if self._actions.has_key(ses):
@@ -348,6 +339,29 @@ def get_ordered_vars(text):
     keylist.append(match)
 
   return keylist
+
+
+def evalmodechange(args):
+  """
+  Registered with the evalmode_change hook, this handles adjusting
+  behavior when the evalmode changes.
+  """
+  old = args[0]
+  new = args[1]
+
+  if (old == lyntin.LYNTIN or old == -1) and new == lyntin.TINTIN:
+    # lyntin's just starting up into TINTIN mode or we just switched
+    # into TINTIN
+    hooks.variable_change_hook.register(am.variableChange)
+
+  elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
+    # lyntin's just starting up into LYNTIN mode or we just switched
+    # into LYNTIN
+    hooks.variable_change_hook.unregister(am.variableChange)
+
+  elif old == lyntin.TINTIN and new == -1:
+    # this module is being unloaded
+    hooks.variable_change_hook.unregister(am.variableChange)
 
 
 commands_dict = {}
@@ -435,6 +449,7 @@ def unaction_cmd(ses, args, input):
 commands_dict["unaction"] = (unaction_cmd, "str= quiet:boolean=false")
 
 
+
 am = None
 
 def load():
@@ -447,8 +462,8 @@ def load():
   hooks.mud_filter_hook.register(am.filter, 75)
   hooks.write_hook.register(am.persist)
 
-  if var_module:
-    var_module.variable_change_hook.register(am.variableChange)
+  hooks.evalmode_change_hook.register(evalmodechange)
+  evalmodechange((-1, lyntin.evalmode))
 
 def unload():
   """ Unloads the module by calling any unload/unbind functions."""
@@ -458,5 +473,5 @@ def unload():
   hooks.mud_filter_hook.unregister(am.filter)
   hooks.write_hook.unregister(am.persist)
 
-  if var_module:
-    var_module.variable_change_hook.unregister(am.variableChange)
+  hooks.evalmode_change_hook.unregister(evalmodechange)
+  evalmodechange((lyntin.evalmode, -1))

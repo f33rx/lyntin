@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.34 2002/06/07 23:43:30 willhelm Exp $
+# $Id: event.py,v 1.35 2002/06/09 17:09:36 jmberne Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -93,6 +93,7 @@ class StartupEvent(Event):
       ShutdownEvent().enqueue()
       traceback.print_exc()
 
+    # import help stuff
     try:
       import help.__init__
       help.__init__.load_help()

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.32 2002/06/20 03:56:30 jmberne Exp $
+# $Id: tintincmds.py,v 1.33 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -151,7 +151,7 @@ def history_cmd(session, args, input):
 commands_dict["history"] = (history_cmd, "count:int=30")
 
 
-def if_cmd(session, args, input):
+def if_cmd(ses, args, input):
   """
   Allows you to do some boolean logic based on Lyntin variables
   or any Python expression.  If this expression returns a non-false
@@ -173,11 +173,7 @@ def if_cmd(session, args, input):
   elseaction = args["elseaction"]
 
   # we have to do manual variable expansion here.
-  varman = exported.get_manager("variable")
-  if varman:
-    varexpansion = varman.expand(session, expr)
-    if varexpansion:
-      expr = varexpansion
+  expr = exported.expand_ses_vars(expr, ses)
 
   expr = expr.replace("&&", " and ")
   expr = expr.replace("||", " or ")
@@ -361,7 +357,7 @@ def loop_cmd(session, args, input):
 commands_dict["loop"] = (loop_cmd, "fromto comm")
 
 
-def math_cmd(session, args, input):
+def math_cmd(ses, args, input):
   """
   Implements the #math command which allows you to manipulate
   variables above and beyond setting them.
@@ -373,14 +369,11 @@ def math_cmd(session, args, input):
   quiet = args["quiet"]
 
   # we have to do manual variable expansion here.
-  varman = exported.get_manager("variable")
-  if varman:
-    varexpansion = varman.expand(session, ops)
-    if varexpansion:
-      ops = varexpansion
+  ops = exported.expand_ses_vars(ops, ses)
 
   try:
     rvalue = eval(ops)
+    varman = exported.get_manager("variable")
     if varman:
       varman.addVariable(session,var, str(rvalue))
     if not quiet:
@@ -478,9 +471,9 @@ def session_cmd(session, args, input):
   ex: #session eto gytje.pvv.unit.no 4000 <= define session named
                                              'eto'.
   You can change the active session, by typing #sessionname 
-  #eto      <=make the char in the 'eto' session the active one.
+  #eto      <= make the char in the 'eto' session the active one.
   ...       <= all commands now go to session 'eto'.
-  #valgar   <=switching now to session 'valgar'.
+  #valgar   <= switching now to session 'valgar'.
 
   category: commands
   """

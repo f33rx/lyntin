@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.4 2002/07/07 04:53:45 willhelm Exp $
+# $Id: variable.py,v 1.5 2002/07/07 17:44:42 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -13,19 +13,12 @@ It also defines global variables like $TIMESTAMP.
 import re, string, time
 import manager, utils, lyntin, engine, hooks, exported, modutils
 
-"""
-This hook will get called every time a variable is changed.  arg tuple
-is (session, varname, varoldvalue, varnewvalue).
-"""
-variable_change_hook = hooks.Hook()
-
 class TimeStampBuiltin:
   """
   Allows us to do dynamic TIMESTAMPs as a global variable.
   """
   def __init__(self): pass
   def __str__(self): return time.asctime()
-
 
 class VariableData:
   def __init__(self):
@@ -83,8 +76,7 @@ class VariableData:
 
       the text with variables expanded
     """
-    text = utils.expand_vars(text, self._variables)
-    return text
+    return utils.expand_vars(text, self._variables)
 
   def getVariables(self):
     """ Returns the keys of the variables dict.
@@ -174,7 +166,6 @@ class VariableManager(manager.Manager):
     if os.environ.has_key("HOME"):
       self._global.addVariable("HOME", os.environ["HOME"])
 
-
   def addVariable(self, ses, var, expansion):
     if not self._variables.has_key(ses):
       self._variables[ses] = VariableData()
@@ -192,7 +183,7 @@ class VariableManager(manager.Manager):
     vdata.addVariable(var, expansion)
 
     # spam the hook
-    variable_change_hook.spamhook((ses, var, oldvalue, expansion))
+    hooks.variable_change_hook.spamhook((ses, var, oldvalue, expansion))
 
   def clear(self, ses):
     if self._variables.has_key(ses):
@@ -203,7 +194,7 @@ class VariableManager(manager.Manager):
     if self._variables.has_key(ses):
       vars = self._variables[ses].removeVariables(text)
       for mem in vars:
-        variable_change_hook.spamhook((ses, mem[0], mem[1], None))
+        hooks.variable_change_hook.spamhook((ses, mem[0], mem[1], None))
     return vars
 
   def getVariables(self, ses):
@@ -254,6 +245,18 @@ class VariableManager(manager.Manager):
     data = self.getInfo(ses)
     if data:
       file.write(data + "\n")
+
+  def denestVars(self, args):
+    """ Handles denesting variables for Lyntin evaluation mode."""
+    ses = args[0]
+    internal = args[1]
+    verbatim = args[2]
+    text = args[-1]
+
+    if verbatim == 1:
+      return text
+
+    return utils.lyntin_denest_vars(text)
 
   def filter(self, args):
     """ Handle the filtering of input through the current variables.
@@ -363,19 +366,37 @@ commands_dict["unvariable"] = (unvariable_cmd, "str= quiet:boolean=false")
 
 vm = None
 
+def evalmodechange(args):
+  global vm
+  old = args[0]
+  new = args[1]
+
+  if (old == lyntin.LYNTIN or old == -1) and new == lyntin.TINTIN:
+    # lyntin's just starting up into TINTIN mode or we just switched
+    # into TINTIN
+    hooks.user_filter_hook.unregister(vm.denestVars)
+
+  elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
+    # lyntin's just starting up into LYNTIN mode or we just switched
+    # into LYNTIN
+    hooks.user_filter_hook.register(vm.denestVars, 110)
+
+  elif old == lyntin.LYNTIN and new == -1:
+    # this module is being unloaded
+    hooks.user_filter_hook.unregister(vm.denestVars)
+
+
 def load():
   """ Initializes the module by binding all the commands."""
   global vm
   modutils.load_commands(commands_dict)
   vm = VariableManager()
   exported.add_manager("variable", vm)
-
-  # FIXME - the number controls the order this gets called in the grand
-  # scheme of things.  we should probably do something to make this
-  # more obvious.
-  hooks.user_filter_hook.register(vm.filter, 0)
-  # hooks.user_filter_hook.register(unescape_variables, 90)
+  hooks.user_filter_hook.register(vm.filter, 10)
   hooks.write_hook.register(vm.persist)
+
+  hooks.evalmode_change_hook.register(evalmodechange)
+  evalmodechange((-1, lyntin.evalmode))
 
 def unload():
   """ Unloads the module by calling any unload/unbind functions."""
@@ -383,6 +404,7 @@ def unload():
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("variable")
   hooks.user_filter_hook.unregister(vm.filter)
-  # hooks.user_filter_hook.unregister(unescape_variables)
   hooks.write_hook.unregister(vm.persist)
 
+  hooks.evalmode_change_hook.unregister(evalmodechange)
+  evalmodechange((lyntin.evalmode, -1))

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.4 2002/06/23 14:35:12 willhelm Exp $
+# $Id: tkui.py,v 1.5 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -16,7 +16,20 @@ import ui, hooks, event, engine, exported, lyntin
 
 UNICODE_ENCODING = "latin-1"
 
+HELP_TEXT = """
+The tkui uses the Tk widget set and provides a graphical interface 
+to Lyntin.  There are a series of vastly useful things that it does
+above and beyond the textui:
+
+ - numpad bindings (VK_NUMPAD0 through VK_NUMPAD9)
+ - function key bindings (VK_F2 through VK_F12)
+ - pgup and pgdown scroll back
+ - up and down command line history
+ - ctrl-u removal of text
+ - copy and paste from the screen
+ - ctrl-t autotyper
 """
+
 0 -- all off
 1 -- bold
 5 -- blinking (which we don't support)
@@ -142,7 +155,9 @@ class Tkui(ui.BaseUI):
 
   def startui(self, args):
     """ Starts up the main thread."""
+    global HELP_TEXT
     hooks.to_user_hook.register(self.write)
+    exported.add_help("tkui", HELP_TEXT)
     engine.myengine.startthread("ui", self._tk.mainloop)
 
 

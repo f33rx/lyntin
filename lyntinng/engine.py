@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.59 2002/06/27 18:02:00 jmberne Exp $
+# $Id: engine.py,v 1.61 2002/07/07 17:44:41 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -74,9 +74,7 @@ class Engine:
     self._managers["history"] = history.HistoryManager()
 
     # our command manager
-    cm = commandmanager.CommandManager()
-    self._managers["command"] = cm
-    hooks.user_filter_hook.register(cm.filter, 100)
+    self._managers["command"] = commandmanager.CommandManager()
 
     # there is only one ui in the system.
     self._ui = None
@@ -96,6 +94,9 @@ class Engine:
     # we register ourselves with the shutdown hook
     hooks.shutdown_hook.register(self.shutdown)
 
+    # we register ourselves with the evalmode_change hook
+    hooks.evalmode_change_hook.register(evalmodechange)
+
 
   def initialize(self):
     """ Handles initialization that requires an engine object."""
@@ -109,6 +110,8 @@ class Engine:
 
     self._sessions["common"] = commonsession
     self._current_session = commonsession
+
+    evalmodechange((-1, lyntin.evalmode))
 
 
   ### ------------------------------------------
@@ -693,3 +696,33 @@ class Engine:
 
     # return the list of elements
     return data
+
+
+def evalmodechange(args):
+  """
+  Handles when we change from one evalmode to another.
+  """
+  old = args[0]
+  new = args[1]
+
+  cm = exported.get_manager("command")
+  if not cm:
+    print "no command manager"
+    return
+
+  if (old == -1):
+    # just started up
+    if new == lyntin.TINTIN:
+      hooks.user_filter_hook.register(cm.filter, 1)
+    else:
+      hooks.user_filter_hook.register(cm.filter, 100)
+
+  elif old == lyntin.LYNTIN and new == lyntin.TINTIN:
+    # just switched into TINTIN mode
+    hooks.user_filter_hook.unregister(cm.filter)
+    hooks.user_filter_hook.register(cm.filter, 1)
+
+  elif old == lyntin.TINTIN and new == lyntin.LYNTIN:
+    # just switched into LYNTIN mode
+    hooks.user_filter_hook.unregister(cm.filter)
+    hooks.user_filter_hook.register(cm.filter, 100)

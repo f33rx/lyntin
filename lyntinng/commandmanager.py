@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: commandmanager.py,v 1.2 2002/07/07 17:44:41 willhelm Exp $
 #######################################################################
 """
 Handles managing commands and also holds the filter for handling commands.
@@ -37,12 +37,12 @@ class CommandData:
   def getFQN(self): return self._fqn
 
 class CommandManager(manager.Manager):
+  """ 
+  The CommandManager holds a series of CommandData objects
+  and methods to manipulate and use them.
+  """
   def __init__(self):
     self._commands = {}
-
-  ### ------------------------------------------------
-  ### Command functions
-  ### ------------------------------------------------
 
   def getCommands(self):
     """
@@ -122,7 +122,6 @@ class CommandManager(manager.Manager):
     arguments:
 
       'name' -- (string) the name of the command to remove
-
     """
     if self._commands.has_key(name):
       cd = self._commands[name]
@@ -238,3 +237,4 @@ class CommandManager(manager.Manager):
         exported.write_error("Not a valid command: %s" % (words[0]))
       return
     return args[-1]
+

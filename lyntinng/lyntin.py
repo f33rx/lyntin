@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.24 2002/06/01 15:08:56 willhelm Exp $
+# $Id: lyntin.py,v 1.25 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -31,6 +31,10 @@ HELPTEXT = """syntax: lyntin.py [--help] [--read <file>] [--datadir <dir>] [--ui
          If you don't set your datadir, Lyntin will set the datadir to
          the HOME environment variable.  Using this option allows you to
          set it manually.
+
+  --evalmode or -e
+         Lyntin has two user input evaluation modes: lyntin and tintin.
+         This allows you to set the mode at the command line.
 
   --read or --readfile or -r
          reads a file in at startup populating the common
@@ -86,9 +90,12 @@ BOSSTEXT = """
 
 
 
+TINTIN = 0
+LYNTIN = 1
+
 # holds the application options--these are adjusted
 # by command-line arguments only
-options = {'ui': 'textui', 'readfile': [], 'datadir': ''}
+options = {'ui': 'textui', 'readfile': [], 'datadir': '', 'evalmode': LYNTIN}
 
 # the character used to denote variables.
 variablechar = '$'
@@ -120,6 +127,12 @@ lyntindir = "."
 # This enables us to shut ourselves down if we encounter too
 # many indicating a "bigger problem".
 errorcount = 0
+
+# Lyntin has two modes for user input evaluation.  TINTIN mode
+# will evaluate user input just like TINTIN does.  LYNTIN mode
+# evaluates user input using different semantics.  We default
+# to LYNTIN mode.
+evalmode = LYNTIN
 
 def shutdown():
   import hooks, exported
@@ -156,6 +169,12 @@ if __name__ == '__main__':
         else:
           lyntin.options['datadir'] = mem[1]
 
+      elif mem[0] == '--evalmode' or mem[0] == '-e':
+        if mem[1] == 'tintin':
+          lyntin.options['evalmode'] = TINTIN
+        else:
+          lyntin.options['evalmode'] = LYNTIN
+
       elif mem[0] == '--help':
         print HELPTEXT
         sys.exit(0)
@@ -186,6 +205,9 @@ if __name__ == '__main__':
             datadir = datadir + os.sep
 
     lyntin.options['datadir'] = datadir.replace("/", os.sep)
+
+    # set the lyntin evalmode
+    lyntin.evalmode = lyntin.options['evalmode']
 
     import atexit
     atexit.register(lyntin.shutdown)
