@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.28 2002/04/11 03:58:23 willhelm Exp $
+# $Id: tkgui.py,v 1.29 2002/04/12 03:13:37 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -133,6 +133,7 @@ class TkGui(ui.BaseUI):
 
   def startui(self, args):
     """ Starts up the main thread."""
+    hooks.to_user_hook.register(self.write)
     engine.myengine.startthread("ui", self._tk.mainloop)
 
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.12 2002/04/08 21:53:05 willhelm Exp $
+# $Id: textui.py,v 1.13 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -25,6 +25,7 @@ class Textui(ui.BaseUI):
 
   def startui(self, args):
     """ Sets up the UI."""
+    hooks.to_user_hook.register(self.write)
     engine.myengine.startthread("ui", self.run)
 
   def run(self):
@@ -49,12 +50,21 @@ class Textui(ui.BaseUI):
         while not self.shutdownflag:
           self.handleinput(sys.stdin.readline())
 
+    except select.error, e:
+      (errno,name) = e
+      if errno == 4:
+        exported.write_message("system exit: you'll be back...")
+        event.ShutdownEvent().enqueue()
+        return
+
     except SystemExit:
+      exported.write_message("system exit: you'll be back...")
       event.ShutdownEvent().enqueue()
 
     except:
       traceback.print_exc()
       event.ShutdownEvent().enqueue()
+
 
   def write(self, message):
     """ Handles writing information from the mud and/or SB

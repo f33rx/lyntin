@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.29 2002/04/11 01:50:07 willhelm Exp $
+# $Id: engine.py,v 1.30 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -583,12 +583,10 @@ class Engine:
       'text' -- (string or ui.Message) the message to write 
                 to the ui
     """
-    if self._ui:
-      self._ui_lock.acquire(1)
-      self._ui.write(text)
-      self._ui_lock.release()
-    else:
-      print "error: no ui\n" + repr(text)
+    self._ui_lock.acquire(1)
+    hooks.to_user_hook.spamhook((text))
+    self._ui_lock.release()
+
 
   def writePrompt(self):
     """ Tells the ui to print a prompt."""

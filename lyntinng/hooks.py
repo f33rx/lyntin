@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.5 2002/04/14 03:58:18 willhelm Exp $
+# $Id: hooks.py,v 1.6 2002/04/18 23:31:15 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -166,19 +166,32 @@ the hostname of the mud it connected to, and the port.
 connect_hook = Hook()
 
 """
-When a user types a command, this will trigger the user_data_hook.
+Everything the user types gets sent on the from_user_hook.
 The arg tuple contains the data they entered.
 """
-user_data_hook = Hook()
+from_user_hook = Hook()
 
 """
-When the mud sends data, this will trigger the mud_data_hook.
+When the mud sends data, this will trigger the from_mud_hook.
 The arg tuple contains the session and the raw mud data.
 
 If you're looking for a line by line idea of things, use the
 databuffer hook.
 """
-mud_data_hook = Hook()
+from_mud_hook = Hook()
+
+"""
+This differs slightly from the from_user_hook in that this is everything
+we send on the socket to the mud where the from_user_hook is everything
+the user types--much of it goes to the mud.
+"""
+to_mud_hook = Hook()
+
+"""
+The ui's listen on this hook to display stuff.  The arg tuple is
+either a string or a ui.ui.Message instance.
+"""
+to_user_hook = Hook()
 
 """
 The timer hook runs every second.  The tickers for the various sessions
@@ -204,8 +217,10 @@ too_many_errors_hook = Hook()
 """
 This is the mapping function to use for filter-style hooks.  
 Spamhook should be called as 
-spamtuple = hook.spamhook( (session,original,original) );
-output = spamtuple[2]
+
+  spamtuple = hook.spamhook( (session,original,original) )
+  output = spamtuple[2]
+
 Each filter function will get (session,original,filteredoriginal) 
 when it is called.
 """
@@ -215,24 +230,24 @@ def filter_mapper(x,y):
 """
 Whenever data comes back from the mud it will first be passed through
 all filter functions.
-These should return the text that should be processed as if it came from the mud.
-arg tuple will contain the session, the original text and the currently filtered text
+
+These should return the text that should be processed as if it came from 
+the mud.
+
+arg tuple will contain the session, the original text and the currently 
+filtered text.
 """
 mud_filter_hook = Hook()
 mud_filter_hook.defaultMapper=filter_mapper
 
 """
-Whenever data comes fro the user it will first be passed through
+Whenever data comes from the user it will first be passed through
 all filter functions.
+
 These should return the text that should be sent to the mud.
-arg tuple will contain the session, the original text and the currently filtered text
+
+arg tuple will contain the session, the original text and the currently 
+filtered text.
 """
 user_filter_hook = Hook()
 user_filter_hook.defaultMapper=filter_mapper
-
-
-
-
-
-
-

@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.19 2002/04/16 03:44:37 willhelm Exp $
+# $Id: lyntin.py,v 1.20 2002/04/18 02:10:04 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -82,7 +82,6 @@ BOSSTEXT = """
       \"""
       if not input:
 """
-
 
 
 

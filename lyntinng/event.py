@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.23 2002/04/12 03:13:37 willhelm Exp $
+# $Id: event.py,v 1.24 2002/04/14 23:57:35 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -214,7 +214,7 @@ class MudEvent(Event):
 
   def execute(self):
     """ Execute."""
-    hooks.mud_data_hook.spamhook((self._session, self._input))
+    hooks.from_mud_hook.spamhook((self._session, self._input))
     engine.myengine.handleMudData(self._session, self._input)
 
 

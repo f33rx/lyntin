@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.16 2002/04/16 03:56:07 willhelm Exp $
+# $Id: net.py,v 1.17 2002/04/18 02:56:48 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -119,11 +119,11 @@ class SocketCommunicator:
       'convert=1' -- (int) 1 if we should convert eol stuff, 0 if not
 
     """
+    if convert:
+      data = data.replace("\n", "\r\n")
+
     try:
-      if convert:
-        self._sock.send(data.replace("\n", "\r\n"))
-      else:
-        self._sock.send(data)
+      self._sock.send(data)
     except:
       if self._shutdownflag == 0 and self._session:
         # FIXME - this might not be prudent--might want to create
