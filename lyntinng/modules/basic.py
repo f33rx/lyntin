@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.73 2002/04/26 17:22:08 willhelm Exp $
+# $Id: basic.py,v 1.74 2002/04/26 20:11:02 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -518,24 +518,23 @@ def log_cmd(session, args, input):
       exported.write_message("Logging is disabled.")
     return
 
-      if session.isConnected():
-  if session.getLogfile() != None:
-    try:
-      exported.write_message("log: stopping logging to '%s'." % 
-      else:
-        exported.write_message("log: You must have a session to log")
+  if session.isConnected():
+    if session.getLogfile() != None:
+      try:
+        exported.write_message("log: stopping logging to '%s'." % (session.getLogFileName()))
+        session.closeLogfile()
+      except:
+        exported.write_error("log: logfile cannot be closed.")
+    else:
+      try:
+        session.openLogfile(logfile)
+        exported.write_message("log: starting logging to '%s'." % 
                              session.getLogfileName())
-      session.closeLogfile()
-    except:
-      exported.write_error("log: logfile cannot be closed.")
-
+      except:
+        exported.write_error("log: logfile cannot be opened for appending.")
   else:
-    try:
-      session.openLogfile(logfile)
-      exported.write_message("log: starting logging to '%s'." % 
-                             session.getLogfileName())
-    except:
-      exported.write_error("log: logfile cannot be opened for appending.")
+    exported.write_message("log: You must have a session to log")
+
 
 commands_dict["log"] = (log_cmd, "logfile=")
 
