@@ -32,6 +32,7 @@ class CommandEntry(Entry):
         self.bind("<KeyPress-5>", self.callKP5)
         self.bind("<KeyPress-3>", self.callKP3)
         self.bind("<KeyPress-1>", self.callKP1)
+	self.bind("<Control-KeyPress-u>", self.callKillLine)
         try: 
            self.bind("<KeyPress-/>", self.callKPSlash)
            self.bind("<KeyPress-*>", self.callKPStar)
@@ -43,6 +44,8 @@ class CommandEntry(Entry):
         self.input = []
         self.hist_index = -1
         self.partk = partk
+	self.saveinputhighlight = 0 #JA Change this to store the last input in 
+	                            #the line but highlight it like zMUD does.
         
     def callKPSlash(self, event):
         if event.keycode == 111:
@@ -129,7 +132,10 @@ class CommandEntry(Entry):
             val = "#cr"
         val = val + '\n'
         self.input.append(val)
-        self.delete(0, 'end')
+	if self.saveinputhighlight == 1:
+	    self.selection_range(0,'end')
+	else:
+	    self.delete(0, 'end')
         self.hist_index = -1
 
     def clear_input(self):
@@ -149,6 +155,9 @@ class CommandEntry(Entry):
     def callEsc(self, event):
         self.partk.escape()
         # self.insert(INSERT, 'keypress esc')
+    
+    def callKillLine(self, event): #JA Kill line with ^U like normal terminals
+	self.delete(0,'end')
         
     # go backward in the history list
     def InsertPrevCommand(self, event):
