@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.14 2002/04/12 03:13:37 willhelm Exp $
+# $Id: net.py,v 1.15 2002/04/16 03:44:37 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -122,7 +122,6 @@ class SocketCommunicator:
     """
     try:
       if convert:
-        f.write(data.replace("\n", "\r\n"))
         self._sock.send(data.replace("\n", "\r\n"))
       else:
         self._sock.send(data)
@@ -131,6 +130,7 @@ class SocketCommunicator:
         # FIXME - this might not be prudent--might want to create
         # an event for shutting down sessions.
         self._session.shutdown(())
+
 
   def _handlenego(self, data):
     """
@@ -147,10 +147,11 @@ class SocketCommunicator:
       (string) the data without the telnet control codes
 
     """
+    # FIXME - this needs to be re-written without the try block
     i = data.find(IAC)
 
-    try:
-      while (i != -1):
+    while (i != -1):
+      try:
         if data[i+1] in DDWW:
           if data[i+2] == ECHO:
             if data[i+1] == WILL:
@@ -164,16 +165,22 @@ class SocketCommunicator:
 
         elif data[i+1] == SB:
           end = data.find(SE, i)
-          data = data[:i] + data[end+1:]
+          if end == -1:
+            self._nego_buffer = data[i:]
+            data = data[:i]
+            break
+          else:
+            data = data[:i] + data[end+1:]
 
         else:
           data = data[:i] + data[i+3:]
 
-        i = data.find(IAC, i)
+      except IndexError:
+        self._nego_buffer = data[i:]
+        data = data[:i]
+        break
 
-    except IndexError:
-      self._nego_buffer = data[i:]
-      data = data[:i]
+      i = data.find(IAC, i)
 
     return data
 
