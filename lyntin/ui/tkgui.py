@@ -5,7 +5,10 @@ Tkgui is a gui interface based on tk.
 from Tkinter import *
 
 import tkhistentry, string, mud, sys, os, font, data
+from tkgui import *
 from basegui import BaseGUI
+from exported import lyntin_add_command
+from exported import lyntin_command
 
 txtAttribs = { } ## 0 -- all off. 1 -- bold  5 -- blinking
    ## 7 -- reverse 8 hidden
@@ -41,6 +44,17 @@ bgColorCodes = { "40": "black", "41": "red", "42": "#004411",
                  "43": "yellow", "44": "blue", "45": "magenta",
                  "46": "cyan", "47": "white", "50": "purple" }
 
+def addaliases(words, input, seslist):
+    """adds a bunch of aliases to the current session"""
+    lyntin_command("#alias tk_kb_num_1 sw")
+    lyntin_command("#alias tk_kb_num_2 s")
+    lyntin_command("#alias tk_kb_num_3 se")
+    lyntin_command("#alias tk_kb_num_4 w")
+    lyntin_command("#alias tk_kb_num_6 e")
+    lyntin_command("#alias tk_kb_num_7 nw")
+    lyntin_command("#alias tk_kb_num_8 n")
+    lyntin_command("#alias tk_kb_num_9 ne")
+
 class TkGui(BaseGUI):
 
    """override function"""
@@ -54,6 +68,11 @@ class TkGui(BaseGUI):
       self.currcolors = (0, 37, 40)
       self.regcolors = (0, 37, 40)
       self.unfinishedcolor = (0, "")
+
+
+      # i wrote this because i was sick and tired of re-binding
+      # all those aliases
+      lyntin_add_command("tkaddaliases", addaliases)
 
       if os.name != 'posix':
          # require tcl/tk 8.0 on windows
