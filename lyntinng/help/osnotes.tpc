@@ -1,0 +1,31 @@
+Lyntin works in most environments we can think of, but it has some
+caveats with the various operating systems due to differences between
+them.
+
+WINDOWS
+-------
+
+Windows users should use either \\ or / to denote directory separaters.
+
+ex::
+
+   #write c:\\commandfile
+   #write c:/commandfile
+
+
+REDHAT LINUX
+------------
+
+Depending on which version of RedHat Linux you have, you will have to
+install the Python RPM as well as the Python Tkinter RPM.  If you don't
+install the Tkinter RPM, then you won't be able to use the Tk ui and
+it'll complain that it's missing a library when you try.
+
+
+OTHER NOTES
+-----------
+
+If you encounter other operating system issues, let us know both the
+problem and the solution so we can add them here.
+
+category: readme

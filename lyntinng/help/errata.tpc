@@ -1,0 +1,21 @@
+The latest release of Lyntin is always available from:
+
+   http://lyntin.sourceforge.net/
+
+In general, work on Lyntin progresses as time allows.  I respond to
+emails on the mailing list within a day or so.  Most issues are tracked
+via the bug-tracker and task-tracker on our SourceForge project site.
+If you have problems and fix them, by all means send us patches and
+we'll happily work with them and credit you.
+
+That should be about it.  In-game help is accessed by typing ``#help``.
+When you start Lyntin for the first time, type ``#help general``
+and that'll get you started.  Read through the various help files
+at your leisure.
+
+Enjoy!
+
+the Lyntin development folks
+http://lyntin.sourceforge.net/
+
+category: readme

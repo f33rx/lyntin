@@ -1,0 +1,19 @@
+Lyntin incorporates the *look and feel* of Tintin, so if you've used
+Tintin or a variant it should be pretty easy to make the transition.  
+It offers all the major features of Tintin, including multiple 
+sessions, but leaves a few minor things out.
+
+There are *in-game* help files covering the commands and most 
+other things we could think of which can be accessed with the ``#help`` 
+command.
+
+All the documentation comes with Lyntin and is also available on
+the Lyntin website in HTML form.  Lyntin documentation is written in
+reStructuredText because it's an ASCII-based formatting markup that's 
+easy to read (making the source files useful) as well as convert into 
+formats like HTML and RTF.
+
+If you find problems with the documentation or have fixes for it, 
+let us know.
+
+category: readme
