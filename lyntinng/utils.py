@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: utils.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -42,7 +42,15 @@ def expand(str, list):
 
    # if they had wildcards....
    else:
+      # replace * with .*
       str = re.sub('\*', '.*', str)
+
+      # replace ^ with \^
+      str = re.sub('\^', '\\\^', str)
+
+      # replace $ with \$
+      str = re.sub('\$', '\\\$', str)
+
       str = '^' + str + '$'
       regex = re.compile(str)
 

@@ -8,9 +8,16 @@
    to you with the given style.  This may not work or fully work in
    all ui's.
 
-   Styles available are: reverse, bold, blink, or black, red, green
-   yellow, blue, magenta, and cyan.
+   Styles available are:
+      bold     black    grey           b black
+      blink    red      light red      b red
+      reverse  green    light green    b green
+               yellow   light yellow   b yellow
+               blue     light blue     b blue
+               magenta  light magenta  b magenta
+               cyan     light cyan     b cyan
+               white    light white    b white
 
    ex:
       #highlight {green} {Sven arrives.}
-      #highlight {reverse} {Sven arrives.}
+      #highlight {reverse,green} {Sven arrives.}
