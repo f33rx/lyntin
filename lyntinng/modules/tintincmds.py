@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.63 2003/01/05 22:55:18 willhelm Exp $
+# $Id: tintincmds.py,v 1.64 2003/01/18 16:46:16 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -416,19 +416,23 @@ def session_cmd(ses, args, input):
     exported.write_error("session: session name cannot be all numbers.")
     return
 
-  if not exported.get_engine().isUniqueSessionName(name):
+  ses = exported.get_engine().getSession(name)
+
+  if ses != None and ses.isConnected():
     exported.write_error("session: session of that name already exists.")
     return
 
   sock = None
-  ses = None
+  ses = ses or None
 
   try:
     # create a SocketCommunicator
     sock = net.SocketCommunicator()
 
     # create and register a session for this connection....
-    ses = exported.get_engine().createSession(name)
+    if ses == None:
+      ses = exported.get_engine().createSession(name)
+
     ses.setSocketCommunicator(sock)
     ses._host = host
     ses._port = port
