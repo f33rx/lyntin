@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.18 2002/03/24 21:00:18 willhelm Exp $
+# $Id: session.py,v 1.19 2002/03/29 06:23:29 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -30,9 +30,13 @@ class Session:
     self._logfile = None
     self._ticker = ticker.Ticker()
 
-    # allows users to toggle whether to allow actions to kick off
-    # or not.
-    self._ignore = 0
+    # allows users to toggle whether we're handling actions.
+    # 0 for handling actions, 1 if we're ignoring actions.
+    self._ignoreactions = 0
+
+    # allows users to toggle whether we're doing substitutions.
+    # 0 for substitutions, 1 if we're ignoring substitutions
+    self._ignoresubs = 0
 
     # register with the shutdown hook 
     engine.myengine.register(engine.SHUTDOWN_HOOK, self.shutdown)
@@ -91,10 +95,15 @@ class Session:
     else: 
       data += "   speedwalk: off\n"
 
-    if self._ignore == 0:
-      data += "   ignore: actions are active"
+    if self._ignoreactions == 0:
+      data += "   ignore: actions are active.\n"
     else:
-      data += "   ignore: actions are ignored"
+      data += "   ignore: actions are ignored.\n"
+
+    if self._ignoresubs == 0:
+      data += "   ignore: substitutions are active."
+    else:
+      data += "   ignore: substitutions are ignored."
 
     return data
 
@@ -278,10 +287,11 @@ class Session:
       mem = self.getManager("gag").removeGaggedText(mem)
 
       # handle substitutions
-      mem = self.getManager("substitute").expand(mem)
+      if self._ignoresubs == 0:
+        mem = self.getManager("substitute").expand(mem)
 
       # handle actions
-      if self._ignore == 0:
+      if self._ignoreactions == 0:
         self.getManager("action").checkActions(mem)
 
       if lyntin.ansicolor == 0:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.42 2002/03/29 06:23:29 willhelm Exp $
+# $Id: basic.py,v 1.43 2002/03/29 06:57:02 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -414,12 +414,12 @@ def ignore_cmd(session, words, input):
 
   Turns on and shuts off ignoring of actions for this session.
   """
-  if session._ignore == 1:
-    session._ignore = 0
+  if session._ignoreactions == 1:
+    session._ignoreactions = 0
     exported.write_message("ignore: actions are active for session %s." 
                            % session.getName())
   else:
-    session._ignore = 1
+    session._ignoreactions = 1
     exported.write_message("ignore: now ignoring actions for session %s." 
                            % session.getName())
 
@@ -828,12 +828,13 @@ def tickoff_cmd(session, words, input):
 
 
 def ticksize_cmd(session, words, input):
-  """#ticksize {number}
+  """#ticksize [{number}]
 
-  Sets the tick length.
+  Sets and displays the tick length.
   """
   if len(words) < 2:
-    exported.write_error("syntax: #ticksize {number}")
+    exported.write_message("ticksize: ticksize is %d seconds." % 
+                           session.getTicker().getTickLen())
     return
 
   ticklength = utils.strip_braces(words[1])
@@ -844,6 +845,21 @@ def ticksize_cmd(session, words, input):
   session.getTicker().setTickLen(int(ticklength))
   exported.write_message("ticksize: tick length set to " + 
                                words[1] + ".")
+
+
+def togglesubs_cmd(session, words, input):
+  """#togglesubs
+
+  Turns on and shuts off ignoring of substitutions for this session.
+  """
+  if session._ignoresubs == 1:
+    session._ignoresubs = 0
+    exported.write_message("ignore: substitutions are active for session %s." 
+                           % session.getName())
+  else:
+    session._ignoresubs = 1
+    exported.write_message("ignore: now ignoring substitions for session %s." 
+                           % session.getName())
 
 
 def unsomething_cmd(session, words, input):

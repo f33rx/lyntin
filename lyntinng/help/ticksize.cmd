@@ -1,5 +1,6 @@
-syntax: #ticksize {number}
+syntax: #ticksize [{number}]
 
-Sets the number of seconds between ticks for this session.
+Sets and displays the number of seconds between ticks for this
+session.
 
 see also: tick, tickon, tickoff
