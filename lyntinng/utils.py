@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.5 2002/02/03 04:27:50 willhelm Exp $
+# $Id: utils.py,v 1.6 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -282,6 +282,7 @@ def columnize(textlist, screenwidth=72, indent=0):
 
 
 def _pass_fail(testoutput, realoutput):
+  """ Used for testing purposes."""
   if testoutput == realoutput:
     print "   pass:", testoutput
   else:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.13 2002/02/23 21:10:32 willhelm Exp $
+# $Id: session.py,v 1.14 2002/02/24 00:32:26 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -26,12 +26,7 @@ class Session:
     """ Initialize."""
     self._socket = None
     self._name = ""
-    self._actionmanager = None
-    self._aliasmanager = None
-    self._gagmanager = None
-    self._hlmanager = None
-    self._submanager = None
-    self._varmanager = None
+    self._managers = {}
     self._logfile = None
     self._ticker = ticker.Ticker()
 
@@ -46,12 +41,7 @@ class Session:
     to implement our own version of copy.
     """
     ses = Session()
-    ses._actionmanager = copy.copy(self._actionmanager)
-    ses._aliasmanager = copy.copy(self._aliasmanager)
-    ses._gagmanager = copy.copy(self._gagmanager)
-    ses._hlmanager = copy.copy(self._hlmanager)
-    ses._submanager = copy.copy(self._submanager)
-    ses._varmanager = copy.copy(self._varmanager)
+    ses._managers = copy.copy(self._managers)
     return ses
       
   def __repr__(self):
@@ -80,69 +70,28 @@ class Session:
   def getInfo(self):
     """ Returns information about the session."""
     data = ("Session name: " + self._name + "\n" +
-            "   socket: " + repr(self._socket) + "\n" +
-            "   actions: " + 
-            repr(len(self.getActionManager().getActions())) + "\n" +
-            "   aliases: " + 
-            repr(len(self.getAliasManager().getAliases())) + "\n" +
-            "   gags: " + repr(len(self.getGagManager().getGags())) + "\n" +
-            "   highlights: " + 
-            repr(len(self.getHighlightManager().getHighlights())) + "\n" +
-            "   substitutes: " + 
-            repr(len(self.getSubstituteManager().getSubstitutes())) + "\n" +
-            "   variables: " + 
-            repr(len(self.getVariableManager().getVariables())) + "\n" +
-            "   ticker: " + self.getTicker().getInfo() + "\n" +
+            "   socket: " + repr(self._socket) + "\n")
+
+    managerkeys = self._managers.keys()
+    managerkeys.sort()
+
+    for mem in managerkeys:
+      data += "   " + mem + ": " +  repr(self.getManager(mem).getCount()) + "\n"
+
+    data += ("   ticker: " + self.getTicker().getInfo() + "\n" +
             "   logfile: " + self.getLogfileName())
     return data
 
-  def setActionManager(self, am):
-    """ Sets the action manager."""
-    self._actionmanager = am
+  def setManager(self, manager, object):
+    """ Sets a manager in the manager hash."""
+    self._managers[manager] = object
 
-  def getActionManager(self):
-    """ Returns the action manager."""
-    return self._actionmanager
-
-  def setAliasManager(self, am):
-    """ Sets the alias manager."""
-    self._aliasmanager = am
-
-  def getAliasManager(self):
-    """ Returns the alias manager."""
-    return self._aliasmanager
-
-  def setGagManager(self, gm):
-    """ Sets the gag manager."""
-    self._gagmanager = gm
-
-  def getGagManager(self):
-    """ Returns the gag manager."""
-    return self._gagmanager
-
-  def setHighlightManager(self, hm):
-    """ Sets the highlight manager."""
-    self._hlmanager = hm
-
-  def getHighlightManager(self):
-    """ Returns the highlight manager."""
-    return self._hlmanager
-
-  def setSubstituteManager(self, sm):
-    """ Sets the substitution manager."""
-    self._submanager = sm
-
-  def getSubstituteManager(self):
-    """ Returns the substitution manager."""
-    return self._submanager
-
-  def setVariableManager(self, vm):
-    """ Sets the variable manager."""
-    self._varmanager = vm
-
-  def getVariableManager(self):
-    """ Returns the variable manager."""
-    return self._varmanager
+  def getManager(self, manager):
+    """ Retrieves a manager from the hash."""
+    if self._managers.has_key(manager):
+      return self._managers[manager]
+    else:
+      return None
 
   def setTicker(self, ticker):
     """ Sets the ticker."""
@@ -173,22 +122,18 @@ class Session:
         return item + "\n"
       return ""
 
-    data += fixinfo(self._aliasmanager.getInfo())
-    data += fixinfo(self._actionmanager.getInfo())
-    data += fixinfo(self._gagmanager.getInfo())
-    data += fixinfo(self._hlmanager.getInfo())
-    data += fixinfo(self._submanager.getInfo())
-    data += fixinfo(self._varmanager.getInfo())
+    managerkeys = self._managers.keys()
+    managerkeys.sort()
+
+    for mem in managerkeys:
+      data += fixinfo(self._managers[mem].getInfo())
+
     return data
 
   def clear(self):
     """ Clears the session (except for connections)."""
-    self._aliasmanager.clear()
-    self._actionmanager.clear()
-    self._gagmanager.clear()
-    self._hlmanager.clear()
-    self._submanager.clear()
-    self._varmanager.clear()
+    for mem in self._managers.values():
+      mem.clear()
     self._ticker.clear()
 
 
@@ -231,14 +176,14 @@ class Session:
     output for internal stuff too.  1 if internal, 0 if not.
     """
     # we deal with possible variables...
-    varexpansion = self.getVariableManager().expand(input)
+    varexpansion = self.getManager("variable").expand(input)
     if varexpansion:
-      varexpansion = self.getVariableManager().unescapeVariables(varexpansion)
+      varexpansion = self.getManager("variable").unescapeVariables(varexpansion)
       engine.myengine.handleUserData(varexpansion, internal)
       return
 
     # replace \$ -> $
-    input = self.getVariableManager().unescapeVariables(input)
+    input = self.getManager("variable").unescapeVariables(input)
 
     # handle lyntin commands
     if len(input) > 1 and input[0] == lyntin.commandchar:
@@ -274,7 +219,7 @@ class Session:
 
     # we check for aliases here--and if we find some, we
     # do the variable expansion and then recurse over the result
-    aliasexpansion = self.getAliasManager().expand(input)
+    aliasexpansion = self.getManager("alias").expand(input)
     if aliasexpansion:
       # replace placement variables in the expansion
       aliasexpansion = utils.replace_vars(input, aliasexpansion)
@@ -310,19 +255,19 @@ class Session:
       self.log(input)
 
     # handle gags
-    input = self.getGagManager().removeGaggedText(input)
+    input = self.getManager("gag").removeGaggedText(input)
 
     # handle substitutions
-    input = self.getSubstituteManager().expand(input)
+    input = self.getManager("substitute").expand(input)
 
     # handle actions
-    self.getActionManager().checkActions(input)
+    self.getManager("action").checkActions(input)
 
     if lyntin.ansicolor == 0:
       input = utils.filter_ansi(input)
     else:
       # handle highlights 
-      input = self.getHighlightManager().expand(input)
+      input = self.getManager("highlight").expand(input)
 
     exported.write_mud_data(input)
 

@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.4 2002/02/03 04:27:50 willhelm Exp $
+# $Id: variable.py,v 1.5 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
 """
 import re
-import utils, lyntin
+import manager, utils, lyntin
 
 localvarchar = lyntin.variablechar
 VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
@@ -18,9 +18,8 @@ VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
 def _fixvariableregexp():
   VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
 
-class VariableManager:
+class VariableManager(manager.Manager):
   """ Manages variables."""
-
   def __init__(self):
     self._variables = {}
 
@@ -171,3 +170,7 @@ class VariableManager:
               "variable {" + mem + "} {" + self._variables[mem] + "}\n")
 
     return data[:-1]
+
+  def getCount(self):
+    """ Returns a count of all the variables."""
+    return len(self._variables.keys())

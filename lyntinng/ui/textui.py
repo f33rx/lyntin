@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.6 2002/02/18 05:19:42 willhelm Exp $
+# $Id: textui.py,v 1.7 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -53,7 +53,7 @@ class Textui(ui.BaseUI):
           self.handleinput(sys.stdin.readline())
 
     except SystemExit:
-      pass
+      event.ShutdownEvent().enqueue()
 
     except:
       traceback.print_exc()

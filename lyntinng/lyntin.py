@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.6 2002/02/07 15:48:08 willhelm Exp $
+# $Id: lyntin.py,v 1.7 2002/02/26 15:16:13 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -174,7 +174,9 @@ if __name__ == '__main__':
     engine.myengine.runengine()
 
   except SystemExit:
-    pass
+    event.ShutdownEvent().enqueue()
+    engine.myengine.runengine()
+    
   except:
     import traceback
     traceback.print_exc()

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.18 2002/02/07 15:48:08 willhelm Exp $
+# $Id: basic.py,v 1.19 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin, exported
@@ -22,7 +22,7 @@ def action_cmd(session, words, input):
   """
   # they typed '#action'--print out all the current actions
   if len(words) == 1:
-    data = session.getActionManager().getInfo()
+    data = session.getManager("action").getInfo()
     if data == '':
       data = "action: no actions defined."
 
@@ -31,7 +31,7 @@ def action_cmd(session, words, input):
 
   # they typed '#action dd*' and are looking for matching actions
   if len(words) == 2:
-    data = session.getActionManager().getInfo(words[1])
+    data = session.getManager("action").getInfo(words[1])
     if data == '':
       data = "action: no actions defined."
 
@@ -45,7 +45,7 @@ def action_cmd(session, words, input):
     # split it into parts
     (a, b) = utils.split_braced(inputadjusted)
 
-    session.getActionManager().addAction(a, b)
+    session.getManager("action").addAction(a, b)
     exported.write_message("action: {" + a + "} -> {" + b + "} added.")
   except:
     exported.write_error("action: cannot be added.")
@@ -60,7 +60,7 @@ def alias_cmd(session, words, input):
   """
   # they typed '#alias'--print out all current aliases
   if len(words) == 1:
-    data = session.getAliasManager().getInfo()
+    data = session.getManager("alias").getInfo()
     if data == '':
       data = "alias: no aliases defined."
 
@@ -69,7 +69,7 @@ def alias_cmd(session, words, input):
 
   # they typed '#alias dd*' and are looking for matching aliases
   if len(words) == 2:
-    data = session.getAliasManager().getInfo(words[1])
+    data = session.getManager("alias").getInfo(words[1])
     if data == '':
       data = "alias: no aliases defined."
 
@@ -83,7 +83,7 @@ def alias_cmd(session, words, input):
     # split it into parts
     (a, b) = utils.split_braced(inputadjusted)
 
-    session.getAliasManager().addAlias(a, b)
+    session.getManager("alias").addAlias(a, b)
     exported.write_message("alias: {" + a + "} -> {" + b + "} added.")
   except:
     exported.write_error("alias: cannot be added.")
@@ -229,7 +229,7 @@ def gag_cmd(session, words, input):
   With arguments, it sets up a new gag.
   """
   if len(words) == 1:
-    data = session.getGagManager().getInfo()
+    data = session.getManager("gag").getInfo()
     if data == '':
       data = "gag: no gags defined."
 
@@ -237,7 +237,7 @@ def gag_cmd(session, words, input):
     return
 
   gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
-  session.getGagManager().addGag(gaggedtext)
+  session.getManager("gag").addGag(gaggedtext)
   exported.write_message("gag: '" + gaggedtext + "' added.")
 
 
@@ -301,7 +301,7 @@ def highlight_cmd(session, words, input):
   With arguments, sets a new highlight.
   """
   if len(words) == 1:
-    data = session.getHighlightManager().getInfo()
+    data = session.getManager("highlight").getInfo()
     if data == '':
       data = "highlight: no highlights defined."
 
@@ -309,7 +309,7 @@ def highlight_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getHighlightManager().getInfo(words[1])
+    data = session.getManager("highlight").getInfo(words[1])
     if data == '':
       data = "highlight: no highlights defined."
 
@@ -323,7 +323,7 @@ def highlight_cmd(session, words, input):
     # split it into parts
     (a, b) = utils.split_braced(inputadjusted)
 
-    session.getHighlightManager().addHighlight(a, b)
+    session.getManager("highlight").addHighlight(a, b)
     exported.write_message("highlight: '" + b + 
                                  "' with style " + a + ".")
   except:
@@ -564,7 +564,7 @@ def substitute_cmd(session, words, input):
   With arguments, sets a new substitution.
   """
   if len(words) == 1:
-    data = session.getSubstituteManager().getInfo()
+    data = session.getManager("substitute").getInfo()
     if data == '':
       data = "substitute: no substitutes defined."
 
@@ -572,7 +572,7 @@ def substitute_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getSubstituteManager().getInfo(words[1])
+    data = session.getManager("substitute").getInfo(words[1])
     if data == '':
       data = "substitute: no substitutes defined."
 
@@ -586,7 +586,7 @@ def substitute_cmd(session, words, input):
     # split it into parts
     (a, b) = utils.split_braced(inputadjusted)
 
-    session.getSubstituteManager().addSubstitute(a, b)
+    session.getManager("substitute").addSubstitute(a, b)
     exported.write_message("substitute: " + a + " -> '" + b + "'")
   except:
     exported.write_error("substitute: cannot be set.")
@@ -688,27 +688,27 @@ def unsomething_cmd(session, words, input):
 
   text = input.split(' ', 1)[1]   
   if "unaction".find(words[0]) == 0:
-    removedthings = session.getActionManager().removeActions(text)
+    removedthings = session.getManager("action").removeActions(text)
     singular = "action"
     plural = "actions"
   elif "unalias".find(words[0]) == 0:
-    removedthings = session.getAliasManager().removeAliases(text)
+    removedthings = session.getManager("alias").removeAliases(text)
     singular = "alias"
     plural = "aliases"
   elif "ungag".find(words[0]) == 0:
-    removedthings = session.getGagManager().removeGags(text)
+    removedthings = session.getManager("gag").removeGags(text)
     singular = "gag"
     plural = "gags"
   elif "unhighlight".find(words[0]) == 0:
-    removedthings = session.getHighlightManager().removeHighlights(text)
+    removedthings = session.getManager("highlight").removeHighlights(text)
     singular = "highlight"
     plural = "highlights"
   elif "unsubstitute".find(words[0]) == 0:
-    removedthings = session.getSubstituteManager().removeSubstitutes(text)
+    removedthings = session.getManager("substitute").removeSubstitutes(text)
     singular = "substitute"
     plural = "substitutes"
   elif "unvariable".find(words[0]) == 0:
-    removedthings = session.getVariableManager().removeVariables(text)
+    removedthings = session.getManager("variable").removeVariables(text)
     singular = "variable"
     plural = "variables"
       
@@ -735,7 +735,7 @@ def variable_cmd(session, words, input):
   With arguments, sets a new variable.
   """
   if len(words) == 1:
-    data = session.getVariableManager().getInfo()
+    data = session.getManager("variable").getInfo()
     if data == '':
       data = "variable: no variables defined."
 
@@ -743,7 +743,7 @@ def variable_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getVariableManager().getInfo(words[1])
+    data = session.getManager("variable").getInfo(words[1])
     if data == '':
       data = "variable: no variables defined."
 
@@ -757,7 +757,7 @@ def variable_cmd(session, words, input):
     # split it into parts
     (a, b) = utils.split_braced(inputadjusted)
 
-    session.getVariableManager().addVariable(a, b)
+    session.getManager("variable").addVariable(a, b)
     exported.write_message("variable: " + a + " -> '" + b + "'")
   except:
     exported.write_error("variable: cannot be set.")

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.13 2002/02/23 21:10:32 willhelm Exp $
+# $Id: engine.py,v 1.14 2002/02/24 00:32:26 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -100,12 +100,13 @@ class Engine:
     """ Handles initialization that requires an engine object."""
     commonsession = session.Session()
     commonsession.setName("common")
-    commonsession.setActionManager(action.ActionManager())
-    commonsession.setAliasManager(alias.AliasManager())
-    commonsession.setGagManager(gag.GagManager())
-    commonsession.setHighlightManager(highlight.HighlightManager())
-    commonsession.setSubstituteManager(substitute.SubstituteManager())
-    commonsession.setVariableManager(variable.VariableManager())
+
+    commonsession.setManager("action", action.ActionManager())
+    commonsession.setManager("alias", alias.AliasManager())
+    commonsession.setManager("gag", gag.GagManager())
+    commonsession.setManager("highlight", highlight.HighlightManager())
+    commonsession.setManager("substitute", substitute.SubstituteManager())
+    commonsession.setManager("variable", variable.VariableManager())
 
     self._sessions["common"] = commonsession
     self._current_session = commonsession

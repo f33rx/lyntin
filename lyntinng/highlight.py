@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.7 2002/02/03 04:27:50 willhelm Exp $
+# $Id: highlight.py,v 1.8 2002/02/04 01:10:16 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
 """
-import utils, lyntin
+import manager, utils, lyntin
 
 STYLEMAP = {
              "bold": "1",
@@ -41,7 +41,7 @@ STYLEMAP = {
              "b white": "47"
            }
 
-class HighlightManager:
+class HighlightManager(manager.Manager):
   """ Manages highlights."""
   def __init__(self):
     self._highlights = {}
@@ -124,3 +124,7 @@ class HighlightManager:
               self._highlights[mem] + "}\n")
 
     return data[:-1]
+
+  def getCount(self):
+    """ Returns the total number of highlights we're managing."""
+    return len(self._highlights.keys())
