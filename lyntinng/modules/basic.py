@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.6 2001/12/24 02:59:44 willhelm Exp $
+# $Id: basic.py,v 1.7 2001/12/24 03:11:59 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -635,7 +635,7 @@ def tickoff_cmd(session, words, input):
    Turns off the ticker.
    """
    session.getTicker().disableTicker()
-   engine.myengine.writeMessage("tickoff: " + session.getName() + 
+   engine.myengine.writeMessage("tickoff: session " + session.getName() + 
                                 " ticker disabled.")
 
 
