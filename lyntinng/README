@@ -1,12 +1,15 @@
 *Title: README
 *Author: Will
 
+
+
 * VERSION
 
-$Id: README,v 1.2 2002/02/03 18:53:12 willhelm Exp $
+$Id: README,v 1.3 2002/02/05 03:39:22 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
+
 
 
 * WHY SHOULD YOU USE LYNTIN?
@@ -27,23 +30,22 @@ to forking a web spider.  Anything Python allows (which is a lot),
 Lyntin allows.  In addition, your code can interface with Lyntin's
 code.  
 
-Lyn once tried to write a mud agent in plain Tintin, and while it
-was kinda cool, a 'program' it was not.  Thus he created Lyntin.
-Will rewrote Lyntin for version 3.0 focusing on Tintin++ command
-compatibility and using a fundamentally nicer architecture.
+Lyntin is great if:
 
-If you're looking for a mudclient that's more of a framework for
-extending and building, then give Lyntin a try.
+	1. you're at work and you want to telnet/ssh to a server and
+	   then mud from there without anyone knowing
+	2. you want a mud client that you can see the source code to
+	   and adjust it to suit your needs
+	3. you want a mud client that has a sophisticated API for 
+	   enhancing and building bots/agents/triggers more advanced than
+	   "if you see this then do this"
+	4. you want a mud client that works on all your machines 
+	   and has a text ui and a gui
 
-If you're looking for a client that has a gui interface and a text 
-interface you can use over telnet, Lyntin is your client.
+Lyntin is not great if:
 
-If you're looking for a client that coddles you with fancy configuration
-windows and an auto cartographer and cute little bells and whistles,
-Lyntin probably isn't what you're looking for.
-
-Amongst which are multiple ui's so you can use the same client over
-telnet that you can use on your desktop.
+	1. you prefer wizards to the command line
+	2. you hate Python
 
 
 
@@ -55,24 +57,41 @@ willhelm@users.sourceforge.net .  (as of 1.3.2)
 
 We appreciate ALL types of feedback.
 
-Hell, if you even USE this, drop us a line on the 
-lyntin-devl@lists.sourceforge.net .
+Hell, if you even USE this, drop us a line on the mailing list:
+
+	lyntin-devl@lists.sourceforge.net
 
 All bugs, feature-requests, and other things should be reported
-at http://sourceforge.net/projects/lyntin/ .
+at: 
+
+	http://sourceforge.net/projects/lyntin/
 
 If possible, when noting bugs, please do a "#diagnostics" and include
 the OS/Python information at the bottom as well as any stack traces
-and pertinent information.  The more information you inclue, the
-more we have to go by to use to understand what you're finding
-buggy.
+and pertinent information.  The more information you include, the
+more we have to go by to understand what the problem is.
+
+
+
+* HOW TO CONTRIBUTE
+
+Development and maintenance is currently entirely done by the maintainer.
+If you're interested in sending in bug fixes, please feel welcome.  I'm
+extremely accomodating to most methods of sending in patches.
+
+A diff -u output file is great for this sort of thing.
+
+All patches and such things should be sent to the mailing list at:
+
+	lyntin-devl@lists.sourceforge.net
 
 
 
 * OTHER CONCERNS
 
-The latest release of Lyntin is always available from
-http://lyntin.sourceforge.net/
+The latest release of Lyntin is always available from:
+
+	http://lyntin.sourceforge.net/
 
 Lyntin is still under development, and there aren't many testers, so
 we apologize profusely for any bugs you may encounter and such.
@@ -113,6 +132,7 @@ command.
 If you find any bugs in the documentation or want to contribute
 documentation, please feel free to send such things to the mailing
 list.
+
 
 
 * ERRATA

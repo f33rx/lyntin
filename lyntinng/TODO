@@ -4,12 +4,14 @@ TODO
 
 This file is a todo list that I'll maintain until the full Lyntin 3.0
 version is out.  At that time, this TODO file will be removed from
-the distribution.
+the distribution.  It's more of a brain dump than an actual list of
+things that need to be done.
 
 
 TODO:
  - fix ticker
  - fix substitutes (they're not implemented right)
+
  - overhaul help files and write documentation
  - stack traces, messages and error messages (all errors should be logged)
 
