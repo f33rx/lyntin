@@ -7,12 +7,16 @@ FOR 2.0 release:
 finish up help files
  - help files on modules
 
-add ability to turn on command-checking and turn off command-checking
-(this would make it easier to write about lyntin using lyntin)
+fix up AddCommand in app.py
+
+check through the bugs
 
 
 ------------------------------------------------------------
 FOR 3.0 release?:
+
+add ability to turn on command-checking and turn off command-checking
+(this would make it easier to write about lyntin using lyntin)
 
 re-organize modules?
 

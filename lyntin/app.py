@@ -45,6 +45,12 @@ class Client(dict_plus.c):
        if callable(func):
            self.commands[name] = func
        else:
+           # FIXME - we should check to see if it exists in
+           # /path/module.function or something like that
+           # probably need to check to see if the file exists,
+           # import it, and then check to see if the command
+           # exists in the dict, and if it's callable, then
+           # add it.
            player.PutError(name + ' is uncallable.  Sorry kiddo.')
 
    def RemoveCommand(self, name):

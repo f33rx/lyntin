@@ -219,9 +219,7 @@ def AddCommand(words, input, seslist):
         # or something similar.
         data.theapp.AddCommand(words[1], words[2])
     else:
-        # raise error? or something because there aren't enough
-        # arguments.
-        return PrintCommands(words, input, seslist)
+        return PrintCommand(words, input, seslist)
 
 def UnCommand(words, input, seslist):
     """UnCommand(words, input, seslist) -> None
@@ -826,7 +824,7 @@ def UnAction(words, input, seslist):
                 del ses.actions[ac]
             # remove from action_list
             # FIXME - this causes an error--out of index range.
-            for i in xrange(len(ses.action_list) - 1):
+            for i in xrange(len(ses.action_list) - 2):
                 if ses.action_list[i][0] in acs:
                     del ses.action_list[i]
 
