@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.34 2002/11/06 02:09:07 willhelm Exp $
+# $Id: lyntin.py,v 1.35 2002/11/08 02:35:12 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -145,7 +145,7 @@ options = {'datadir': '',
            'ui': 'text'}
 
 # Lyntin has two modes for user input evaluation.  EVALMODE_TINTIN mode
-# will evaluate user input just like EVALMODE_TINTIN does.  
+# will evaluate user input just like Tintin does.  
 # EVALMODE_LYNTIN mode evaluates user input using different semantics.  
 # We default to EVALMODE_LYNTIN mode.
 evalmode = EVALMODE_LYNTIN

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.25 2002/10/13 03:16:22 willhelm Exp $
+# $Id: net.py,v 1.26 2002/10/21 04:02:33 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -60,7 +60,7 @@ DDWW     = DD + WW
 ECHO     = chr(1)
 SGA      = chr(3)
 TERMTYPE = chr(24)
-EOR      = chr(24)
+EOR      = chr(25)
 NAWS     = chr(31)
 ENV      = chr(39)
 

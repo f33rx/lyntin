@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.6 2002/10/27 20:41:32 willhelm Exp $
+# $Id: ansi.py,v 1.7 2002/11/06 03:03:19 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -105,21 +105,22 @@ def split_ansi_from_text(text):
     # we do this to handle ansi color sequences which are broken
     # between two network chunks
     if marker < len(text):
-      esc = text.rfind('\33', marker)
-      if esc != -1:
-        for i in range(esc, len(text)):
+      escindex = text.rfind('\33', marker)
+      if escindex != -1:
+        for i in range(escindex+1, len(text)):
           c = text[i]
 
           if c.isdigit() or c == ";" or c == "[":
             continue
           else:
-            esc = -1
+            escindex = -1
+            break
 
-      if esc == -1:
+      if escindex == -1:
         textlist.append(text[marker:])
       else:
-        textlist.append(text[marker:esc])
-        textlist.append(text[esc:])
+        textlist.append(text[marker:escindex])
+        textlist.append(text[escindex:])
 
     return textlist
   return [text]
