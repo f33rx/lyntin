@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.3 2002/04/29 12:57:31 jmberne Exp $
+# $Id: speedwalk.py,v 1.4 2002/04/29 23:14:13 willhelm Exp $
 #######################################################################
 """
 This module defines the SpeedwalkManager which handles speedwalking
 substitution.
 """
-import re
+import re, string
 import manager, utils, lyntin, engine
 
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -61,14 +61,17 @@ class SpeedwalkManager(manager.Manager):
 
     # FIXME - this might be better written
 
-    output = ''
+    output = []
     c = ''
     for mem in input:
       if mem in '0123456789':
         c += mem
       elif len(c) > 0:
-        output = output + ((mem + '\n') * int(c))
+        for i in range(int(c)):
+          output.append(mem)
+        # output = output + ((mem + '\n') * int(c))
         c = '' 
       else:
-        output = output + mem + '\n'
-    return output
+        output.append(mem)
+        # output = output + mem + '\n'
+    return string.join(output, "\n")

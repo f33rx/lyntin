@@ -5,16 +5,18 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.6 2002/04/29 23:14:13 willhelm Exp $
+# $Id: testserver.py,v 1.7 2002/04/30 02:53:46 willhelm Exp $
 #######################################################################
-# originally written by Brian Bell<bmbell@yahoo.com> 
+# originally written by Brian Bell <bmbell@yahoo.com> 
 """
 This runs a multithreaded server on port 3000.
 It used to test mud clients.  It currently take no arguments.
 """
-import SocketServer, random, time, thread, string
+import SocketServer, random, time, string, thread
 
+# terrible global shutdown variable
 shutdown = 0
+server = None
 
 class ConnectionHandler(SocketServer.StreamRequestHandler):
 
@@ -26,11 +28,9 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
            'says', 'tell', 'goblin', 'pink', 'crunch', 'smashed',
            'hungry', 'thirsty', 'huh?', 'glows', 'drop', 'blind',
            'to', 'the', 'of', 'broken', 'red', 'smoke']
-    self._spamTime = 0.0
     self._spamFreq = 0
-    self._lock = thread.allocate_lock()
     self._message = ''
-    self.myline = 'Default testserver line.'
+    self._myline = 'Default testserver line.'
 
     self._commands = {}
     self._commands["quit"] = self.handle_quit
@@ -44,9 +44,15 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     self._commands["text"] = self.handle_text
     self._commands["spam"] = self.handle_spam
 
+    self._rlist = [self.request]
+
+    self._spamThread = None
 
   def write(self, data):
+    # put data in string for writing when socket ready
     data = data.replace("\n", "\r\n")
+
+    # add data for sending
     self.request.send(data)
 
   def handle(self):
@@ -54,18 +60,26 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     This is the function that gets called by the StreamRequestHandler object.
     """
     self.write(self.color("You're logged in.") + "\n")
-
+    import select
     try:
+      self.request.setblocking(0)
+      data = ''
       while shutdown == 0:
-        # fixme - this needs to be non-blocking
-        data = self.request.recv(1024)
-        if not data:
-          break
-        data = data[:-2]
-        print "incoming: '%s'" % data
-        self.messageHandler(data)
+        #check to see what is ready on the socket
+        conns = select.select([self.request], [], [], 0)[0]
+
+        for mem in conns:
+          #lets get the message
+          data += self.request.recv(1024)
+
+          if data.find("\n") != -1:
+            message = data[:data.find("\n")-1]
+            print "incoming: '%s'" % message
+            self.messageHandler(message)
+            data = data[data.find("\n") + 1:]
     except Exception, e:
       print "Exception for %s\n%s" % (self.request, e)
+
     return
 
   def messageHandler(self, text):
@@ -75,14 +89,12 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     a command match.
     """
     comm = text.split(" ", 1)[0]
-
-    self.write(self.color(time.ctime() + " <" + str(time.clock()) + ">",32,40) + "\n")
     if self._commands.has_key(comm):
       self._commands[comm](text)
     else:
       # CATCH ALL for bad commands
       self.write(self.color("huh?", 33) + "\n")
-
+    self.write(self.color(time.ctime() + " <" + str(time.clock()) + ">",32,40) + "\n")
 
   def handle_quit(self, text):
     # QUIT command -> ends session 
@@ -91,13 +103,13 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     
   def handle_remember(self, text):
     # REMEMBER command
-    self.myline = text[text.find(" ")+1:]
+    self._myline = text[text.find(" ")+1:]
 
   def handle_repeat(self, text):
-    self.write(self.myline + "\n")
+    self.write(self._myline + "\n")
 
   def handle_command(self, text):
-    # COMMAND command -> please mention new commands in here
+    # COMMAND command -> see startup for adding new commands
     self.write(string.join(self._commands, "\n") + "\n")
 
   def handle_colors(self, text):
@@ -133,17 +145,18 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
   def handle_spam(self, text):
     # SPAM command -> starts timed spam
     # 1 = 1 line per sec, 2 = 5 lines per sec, 3 = 10 lines per sec
+    text = text.split()
+    
     try:
-      if text[5] == '1':
-        self._spamFreq = 1
-      elif text[5] == '2':
-        self._spamFreq = 5
-      elif text[5] == '3':
-        self._spamFreq = 10
-      elif text:
-        self._spamFreq = 0
-    except:
+      newval = int(text[1])
+
+      if self._spamFreq == 0 and newval > 0:
+        self._spamThread = thread.start_new_thread(self.spam, ())
+
+      self._spamFreq = newval
+    except Exception, e:
       self._spamFreq = 0
+      self.write("That's not an appropriate spam setting. %s\n" % e)
 
   def color(self, data, pcolor=37, backcolor=40, bold=0):
     """
@@ -174,16 +187,14 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
     spam()
     generates random 10 word lines per second
     """
-    if self._spamFreq == 0:
-      return
-    if self._spamTime > time.clock():
-      return
-    else:
+    global shutdown
+    while not shutdown and self._spamFreq > 0:
+      time.sleep(self._spamFreq)
+
       # print spam
       self.write(self.getWords(10) + "\n")
-      # set spam clock
-      self._spamTime = time.clock() + (1.0 / self._spamFreq)
-      return
+
+    return
     
 def handler(signum, frame):
   import sys
@@ -195,7 +206,7 @@ def handler(signum, frame):
 
 if __name__=='__main__':
   import signal
-  server=SocketServer.ThreadingTCPServer(('', 3000), ConnectionHandler)
+  server = SocketServer.ThreadingTCPServer(('', 3000), ConnectionHandler)
   print "Server is up on port 3000"
   signal.signal(signal.SIGINT, handler)
   server.serve_forever()
