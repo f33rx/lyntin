@@ -389,7 +389,7 @@ def Char(words, input, seslist):
     hooks.char_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
-            PutMessage("CURRENT LYNTIN CHARACTER: '%s'\n"%data.ltchar)
+            PutMessage("current lyntin character: '%s'\n"%data.ltchar)
             if not data.currsession.connected:
                 prompt()
         elif len(words) == 2:
@@ -398,7 +398,7 @@ def Char(words, input, seslist):
                 PutError('char: %s is not a single character!'%c)
             else:
                 data.ltchar = c
-                PutMessage("OK, LYNTIN CHARACTER SET TO '%s'\n"%c)
+                PutMessage("ok, lyntin character set to '%s'\n"%c)
                 if not data.currsession.connected:
                     prompt()
         else:
@@ -488,7 +488,7 @@ def Report(words, input, seslist):
                 text = string.join(words[2:])
                 file = app.get_appropriate_file(filename, 'a')
                 eachses.reports.append((file, text))
-                PutMessage('OK, "%s" NOW REPORTED TO FILE %s'% (text, file))
+                PutMessage('ok, "%s" now reported to file %s'% (text, file))
             except IOError:
                 PutError('report: unable to open file %s'%filename)
                     
@@ -850,7 +850,7 @@ def Alias(words, input, seslist):
         if len(words) > 2:
             name, expansion = app.split_braced(string.join(words[1:]))
             ses.aliases[name] = expansion
-            PutMessage('OK, {%s} ALIASES {%s}'%(name, expansion))
+            PutMessage('ok, {%s} aliases {%s}'%(name, expansion))
 
         elif len(words) == 2:
             # print alias definition
@@ -1008,7 +1008,7 @@ def Gag(words, input, seslist):
         if len(words) < 2:
             # print all gags
             if len(ses.gags) == 0:
-                PutMessage('no gags are defined')
+                PutMessage('gag: no gags are defined')
             else:
                 for gag in ses.gags:
                     PutMessage('gag: gag ' + gag)
@@ -1037,9 +1037,9 @@ def UnGag(words, input, seslist):
         for g in ungagwhatlist:
             if ses.gags.count(g) > 0:
                 ses.gags.remove(g)
-                PutMessage('gag: ok, "' + g + '" is no longer gagged')
+                PutMessage('ungag: ok, "' + g + '" is no longer gagged')
         if not ungagwhatlist:
-            PutError('gag: that gag is not defined')
+            PutError('ungag: that gag is not defined')
 
 def Substitute(words, input, seslist):
     """Substitute(words, seslist) -> None
@@ -1066,12 +1066,12 @@ def UnSubstitute(words, input, seslist):
     hooks.unsubstitute_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) < 2:
-            PutError('command requires at least one argument')
+            PutError('unsubstitue: command requires at least one argument')
             return
         unlist = ses.Expand(string.join(words[1:]), ses.subs.keys())
         for sub in unlist:
             del ses.subs[sub]
-        PutMessage(str(len(unlist)) + ' substitutes removed')
+        PutMessage("unsubstitute: " + str(len(unlist)) + ' substitutes removed')
 
 def Clear(words, input, seslist):
     """Clear(seslist) -> None
@@ -1087,7 +1087,7 @@ def Clear(words, input, seslist):
         ses.subs = {}
         ses.vars = {}
         ses.gags = []
-        PutMessage('session ' + ses.name + ' cleared')
+        PutMessage('clear: session ' + ses.name + ' cleared')
 
 
 def Tickset(words, input, seslist):
@@ -1102,9 +1102,9 @@ def Tickset(words, input, seslist):
         # synchronize
         for ses in seslist:
             if not ses.ticker:
-                PutMessage('Ticker is off')
+                PutMessage('tickset: ticker is off')
                 return
-            PutMessage('resetting ticker...')
+            PutMessage('tickset: resetting ticker...')
             ses.lasttickclock = 0
             ses.lastclock = time.time()
             ses.warnedtick = 0
@@ -1118,21 +1118,21 @@ def Tickset(words, input, seslist):
                     ses.lasttickclock = 0
                     ses.lastclock = time.time()
                     ses.warnedtick = 0
-                    PutMessage('Ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                    PutMessage('tickset: ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
                 else:
-                    PutMessage('Ticker is already on!')
+                    PutMessage('tickset: ticker is already on!')
 
         elif words[1] == 'off':
             # turn off ticker
             for ses in seslist:
                 ses.ticker = 0
-                PutMessage('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                PutMessage('tickset: ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
             
         elif words[1] == 'clear':
             for ses in seslist:
                 ses.ticker = 0
                 ses.tickaction = ''
-                PutMessage('ticklen and tickaction cleared.')
+                PutMessage('tickset: ticklen and tickaction cleared.')
 
         elif words[1] == 'toggle':
             # toggle ticker status
@@ -1142,13 +1142,13 @@ def Tickset(words, input, seslist):
                     ses.lasttickclock = 0
                     ses.lastclock = time.time()
                     ses.warnedtick = 0
-                    PutMessage('Ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                    PutMessage('tickset: ticker is now on (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
                 else:
-                    PutMessage('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
+                    PutMessage('tickset: ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
 
         elif words[1] == 'status':
             for ses in seslist:
-                PutMessage('Ticker status:')
+                PutMessage('tickset: ticker status:')
                 if ses.ticker:
                     PutMessage('Ticker is on')
                     PutMessage('Ticklength = %d'%ses.ticklen)
@@ -1165,10 +1165,10 @@ def Tickset(words, input, seslist):
             for ses in seslist:
                 try:
                     ses.ticklen = string.atoi(words[1])
-                    PutMessage('tick length set to %d'%ses.ticklen)
+                    PutMessage('tickset: tick length set to %d'%ses.ticklen)
                 except ValueError:
                     ses.tickaction = string.join(words[1:], " ")
-                    PutMessage('tickaction set to %s'%ses.tickaction)
+                    PutMessage('tickset: tickaction set to %s'%ses.tickaction)
 
 
 def Tick(words, input, seslist):
@@ -1180,9 +1180,9 @@ def Tick(words, input, seslist):
     hooks.tick_command_hook.run((input, seslist))
     for ses in seslist:
         if not ses.ticker:
-            PutMessage('Ticker is off')
+            PutMessage('tick: ticker is off')
             return
-        PutMessage('there are %d seconds to the next tick!!'% \
+        PutMessage('tick: there are %d seconds to the next tick!!'% \
                 (ses.ticklen - ses.lasttickclock))
 
 def Version(words, input, seslist):
@@ -1203,7 +1203,10 @@ def Verbose(words, input, seslist):
     for ses in seslist:
         ses.verbose = not ses.verbose
         if ses.verbose:
-	    PutMessage('Verbose mode now on.')
+	    PutMessage('verbose: verbose mode now on.')
+        else:
+	    PutMessage('verbose: verbose mode now off.')
+
 
 def TickerUpdate(seslist):
     """TickerUpdate(seslist) -> None
@@ -1216,11 +1219,11 @@ def TickerUpdate(seslist):
         if ses.lasttickclock > (ses.ticklen - ses.tickwarn):
             if not ses.warnedtick:
                 ses.warnedtick=1
-                warntext='%d seconds to tick!!!'%ses.tickwarn
+                warntext='tickerupdate: %d seconds to tick!!!'%ses.tickwarn
                 PutMessage(warntext)
                 hooks.ticker_warn_hook.run((ses,))
         if ses.lasttickclock > ses.ticklen:
-            PutMessage('tick!!!')
+            PutMessage('tickerupdate: tick!!!')
             hooks.ticker_pass_hook.run((ses,))
             if ses.tickaction:
                 data.theapp.HandleUserInput(ses.tickaction)
