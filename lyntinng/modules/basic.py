@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.4 2001/12/14 05:30:01 willhelm Exp $
+# $Id: basic.py,v 1.5 2001/12/15 07:25:22 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -24,7 +24,7 @@ def action_cmd(session, words, input):
    if len(words) == 1:
       data = session.getActionManager().getActionInfo()
       if data == '':
-         data = "No actions defined."
+         data = "action: no actions defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -33,7 +33,7 @@ def action_cmd(session, words, input):
    if len(words) == 2:
       data = session.getActionManager().getActionInfo(words[1])
       if data == '':
-         data = "No actions defined."
+         data = "action: no actions defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -46,9 +46,9 @@ def action_cmd(session, words, input):
       (a, b) = utils.split_braced(inputadjusted)
 
       session.getActionManager().addAction(a, b)
-      engine.myengine.writeMessage("action {" + a + "} -> {" + b + "} added.")
+      engine.myengine.writeMessage("action: {" + a + "} -> {" + b + "} added.")
    except:
-      engine.myengine.writeError("action cannot be added.")
+      engine.myengine.writeError("action: cannot be added.")
       traceback.print_exc()
 
 
@@ -62,7 +62,7 @@ def alias_cmd(session, words, input):
    if len(words) == 1:
       data = session.getAliasManager().getAliasInfo()
       if data == '':
-         data = "No aliases defined."
+         data = "alias: no aliases defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -71,7 +71,7 @@ def alias_cmd(session, words, input):
    if len(words) == 2:
       data = session.getAliasManager().getAliasInfo(words[1])
       if data == '':
-         data = "No aliases defined."
+         data = "alias: no aliases defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -84,9 +84,9 @@ def alias_cmd(session, words, input):
       (a, b) = utils.split_braced(inputadjusted)
 
       session.getAliasManager().addAlias(a, b)
-      engine.myengine.writeMessage("alias {" + a + "} -> {" + b + "} added.")
+      engine.myengine.writeMessage("alias: {" + a + "} -> {" + b + "} added.")
    except:
-      engine.myengine.writeError("alias cannot be added.")
+      engine.myengine.writeError("alias: cannot be added.")
       traceback.print_exc()
 
 
@@ -98,17 +98,17 @@ def ansi_cmd(session, words, input):
    """
    if len(words) == 1:
       if lyntin.ansicolor:
-         engine.myengine.writeMessage("Ansi color is enabled.")
+         engine.myengine.writeMessage("ansi: ansi color is enabled.")
       else:
-         engine.myengine.writeMessage("Ansi color is disabled.")
+         engine.myengine.writeMessage("ansi: ansi color is disabled.")
       return
 
    if words[1] == '1' or words[1] == 'on':
       lyntin.ansicolor = 1
-      engine.myengine.writeMessage("Ansi is now enabled.")
+      engine.myengine.writeMessage("ansi: ansi is now enabled.")
    elif words[1] == '0' or words[1] == 'off':
       lyntin.ansicolor = 0
-      engine.myengine.writeMessage("Ansi is now disabled.")
+      engine.myengine.writeMessage("ansi: ansi is now disabled.")
    else:
       engine.myengine.writeError("syntax: #ansi [on|off]")
 
@@ -131,12 +131,12 @@ def char_cmd(session, words, input):
    character.
    """
    if len(words) == 1:
-      engine.myengine.writeMessage("Current command character is " + 
+      engine.myengine.writeMessage("char: current command character is " + 
                                     lyntin.commandchar + ".")
       return
 
    lyntin.commandchar = words[1]
-   engine.myengine.writeMessage("New command character is " + 
+   engine.myengine.writeMessage("char: new command character is " + 
                                  lyntin.commandchar + ".")
 
 
@@ -148,10 +148,10 @@ def clear_cmd(session, words, input):
    """
    try:
       session.clearSession()
-      engine.myengine.writeMessage("Session " + 
+      engine.myengine.writeMessage("clear: session " + 
                                    session.getName() + " cleared.")
    except:
-      engine.myengine.writeError("Error in clearing session.")
+      engine.myengine.writeError("clear: error in clearing session.")
 
   
 def cr_cmd(session, words, input):
@@ -227,14 +227,14 @@ def gag_cmd(session, words, input):
    if len(words) == 1:
       data = session.getGagManager().getGagInfo()
       if data == '':
-         data = "No gags defined."
+         data = "gag: no gags defined."
 
       engine.myengine.writeMessage(data)
       return
 
    gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
    session.getGagManager().addGag(gaggedtext)
-   engine.myengine.writeMessage("gag '" + gaggedtext + "' added.")
+   engine.myengine.writeMessage("gag: '" + gaggedtext + "' added.")
 
 
 def help_cmd(session, words, input):
@@ -299,7 +299,7 @@ def highlight_cmd(session, words, input):
    if len(words) == 1:
       data = session.getHighlightManager().getHighlightInfo()
       if data == '':
-         data = "No highlights defined."
+         data = "highlight: no highlights defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -307,7 +307,7 @@ def highlight_cmd(session, words, input):
    if len(words) == 2:
       data = session.getHighlightManager().getHighlightInfo(words[1])
       if data == '':
-         data = "No highlights defined."
+         data = "highlight: no highlights defined."
 
       engine.myengine.writeMessage(data)
       return 
@@ -320,9 +320,10 @@ def highlight_cmd(session, words, input):
       (a, b) = utils.split_braced(inputadjusted)
 
       session.getHighlightManager().addHighlight(a, b)
-      engine.myengine.writeMessage("highlight '" + b + "' with style " + a + ".")
+      engine.myengine.writeMessage("highlight: '" + b + 
+                                   "' with style " + a + ".")
    except:
-      engine.myengine.writeError("highlight cannot be set.")
+      engine.myengine.writeError("highlight: cannot be set.")
       traceback.print_exc()
 
 
@@ -341,7 +342,8 @@ def killall_cmd(session, words, input):
    """
    for mem in engine.myengine._sessions.values():
       mem.clearSession()
-      engine.myengine.writeMessage("Session " + mem.getName() + " cleared.")
+      engine.myengine.writeMessage("killall: session " + 
+                                   mem.getName() + " cleared.")
 
 
 def log_cmd(session, words, input):
@@ -357,19 +359,19 @@ def log_cmd(session, words, input):
    if session._logfile != None:
       session._logfile.close()
       session._logfile = None
-      engine.myengine.writeMessage("Logging to '" + 
+      engine.myengine.writeMessage("log: logging to '" + 
                                    session._logfile.name + 
                                    "' stopped.")
       return
 
    try:
       session._logfile = open(words[1], "a")
-      engine.myengine.writeMessage("Logging to '" + 
+      engine.myengine.writeMessage("log: logging to '" + 
                                    session._logfile.name + 
                                    "'.")
    except:
       session._logfile = None
-      engine.myengine.writeError("Logfile cannot be opened for apending.")
+      engine.myengine.writeError("log: logfile cannot be opened for apending.")
 
          
 def mudecho_cmd(session, words, input):
@@ -386,10 +388,10 @@ def mudecho_cmd(session, words, input):
 
    if words[1] == "on":
       event.EchoEvent(1).enqueue() 
-      engine.myengine.writeMessage("Echo turned on manually.")
+      engine.myengine.writeMessage("echo: turned on manually.")
    elif words[1] == "off":
       event.EchoEvent(0).enqueue() 
-      engine.myengine.writeMessage("Echo turned off manually.")
+      engine.myengine.writeMessage("echo: turned off manually.")
    else:
       engine.myengine.writeError("syntax: #echo <on|off>")
 
@@ -420,10 +422,10 @@ def read_cmd(session, words, input):
       for mem in contents:
          mem = mem.strip()
          session.handleUserData(mem)
-      engine.myengine.writeMessage("File " + words[1] + " read.")
+      engine.myengine.writeMessage("read: file " + words[1] + " read.")
 
    except IOError:
-      engine.myengine.writeError("File " + words[1] + " is not readable.")
+      engine.myengine.writeError("read: file " + words[1] + " is not readable.")
       return
 
 
@@ -449,14 +451,14 @@ def session_cmd(session, words, input):
    sessionname = words[1]
 
    if INT_REGEXP.match(sessionname):
-      engine.myengine.writeError("Session names cannot be all numbers.")
+      engine.myengine.writeError("session: session names cannot be all numbers.")
       return
 
    host = words[2]
    try:
       port = int(words[3])
    except:
-      engine.myengine.writeError("Port must be a number: " + words[3])
+      engine.myengine.writeError("session: port must be a number: " + words[3])
       return
 
    # we do this to deal with non-unique session names
@@ -483,7 +485,7 @@ def session_cmd(session, words, input):
       except:
          pass
 
-      engine.myengine.writeError("Unable to connect.")
+      engine.myengine.writeError("session: unable to connect.")
       return
 
    try:
@@ -495,7 +497,7 @@ def session_cmd(session, words, input):
       engine.myengine.registerSession(ses, sessionname)
       engine.myengine.changeSession(sessionname)
 
-      # start the network thread!
+      # start the network thread
       engine.myengine.startthread("network", sock.run)
 
    except:
@@ -506,7 +508,7 @@ def session_cmd(session, words, input):
       except:
          pass
 
-      engine.myengine.writeError("Had problems creating the session.")
+      engine.myengine.writeError("session: had problems creating the session.")
 
 
 def showme_cmd(session, words, input):
@@ -528,17 +530,17 @@ def speedwalk_cmd(session, words, input):
    """
    if len(words) == 1:
       if lyntin.speedwalk:
-         engine.myengine.writeMessage("Speedwalk is enabled.")
+         engine.myengine.writeMessage("speedwalk: enabled.")
       else:
-         engine.myengine.writeMessage("Speedwalk is disabled.")
+         engine.myengine.writeMessage("speedwalk: disabled.")
       return
 
    if words[1] == '1' or words[1] == 'on':
       lyntin.speedwalk = 1
-      engine.myengine.writeMessage("Speedwalk is now enabled.")
+      engine.myengine.writeMessage("speedwalk: now enabled.")
    elif words[1] == '0' or words[1] == 'off':
       lyntin.speedwalk = 0
-      engine.myengine.writeMessage("Speedwalk is now disabled.")
+      engine.myengine.writeMessage("speedwalk: now disabled.")
    else:
       engine.myengine.writeError("syntax: #speedwalk [on|off]")
 
@@ -552,7 +554,7 @@ def substitute_cmd(session, words, input):
    if len(words) == 1:
       data = session.getSubstituteManager().getSubstituteInfo()
       if data == '':
-         data = "No substitutes defined."
+         data = "substitute: no substitutes defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -560,7 +562,7 @@ def substitute_cmd(session, words, input):
    if len(words) == 2:
       data = session.getSubstituteManager().getSubstituteInfo(words[1])
       if data == '':
-         data = "No substitutes defined."
+         data = "substitute: no substitutes defined."
 
       engine.myengine.writeMessage(data)
       return 
@@ -573,9 +575,9 @@ def substitute_cmd(session, words, input):
       (a, b) = utils.split_braced(inputadjusted)
 
       session.getSubstituteManager().addSubstitute(a, b)
-      engine.myengine.writeMessage("substitute " + a + " -> '" + b + "'")
+      engine.myengine.writeMessage("substitute: " + a + " -> '" + b + "'")
    except:
-      engine.myengine.writeError("substitute cannot be set.")
+      engine.myengine.writeError("substitute: cannot be set.")
       traceback.print_exc()
 
 
@@ -595,12 +597,83 @@ def textin_cmd(session, words, input):
       for mem in contents:
          mem = mem.strip()
          session.getSocketCommunicator().write(mem + "\n")
-      engine.myengine.writeMessage("File " + words[1] + " read and sent to client.")
+      engine.myengine.writeMessage("textin: file " + words[1] + 
+                                   " read and sent to client.")
 
    except IOError:
-      engine.myengine.writeError("File " + words[1] + " is not readable.")
+      engine.myengine.writeError("textin: file " + words[1] + 
+                                 " is not readable.")
    except:
-      engine.myengine.writeError("Exception thrown.")
+      engine.myengine.writeError("textin: exception thrown.")
+
+
+def tick_cmd(session, words, input):
+   """#tick
+
+   Displays the # of seconds left before the ticker for this
+   session ticks.
+   """
+   currenttick = engine.myengine.getCurrentTick()
+   tick = session.getTicker().getTickLen()
+   engine.myengine.writeMessage("tick: next tick in " + 
+                   repr(currenttick % tick) + " seconds.")
+
+
+def tickon_cmd(session, words, input):
+   """#tickon
+
+   Turns on the ticker.
+   """
+   session.getTicker().enableTicker()
+   engine.myengine.writeMessage("tickon: " + session.getName() + 
+                                " ticker enabled.")
+
+
+def tickoff_cmd(session, words, input):
+   """#tickoff
+
+   Turns off the ticker.
+   """
+   session.getTicker().disableTicker()
+   engine.myengine.writeMessage("tickoff: " + session.getName() + 
+                                " ticker disabled.")
+
+
+def tickset_cmd(session, words, input):
+   """#tickset {some action}
+
+   Sets the tick action.
+   """
+   action = input.split(" ", 1)
+   if len(action) < 2:
+      engine.myengine.writeError("syntax: #tickset {action}")
+      return
+
+   action = utils.strip_braces(action[1])
+
+   session.getTicker().setTickAction(action)
+   engine.myengine.writeMessage("tickset: tick action set to '" + 
+                                action + "'.")
+
+
+def ticksize_cmd(session, words, input):
+   """#ticksize {number}
+
+   Sets the tick length.
+   """
+   if len(words) < 2:
+      engine.myengine.writeError("syntax: #ticksize {number}")
+      return
+
+   try:
+      ticklength = int(words[1])
+   except:
+      engine.myengine.writeError("syntax: #ticksize {number}")
+      return
+
+   session.getTicker().setTickLen(ticklength)
+   engine.myengine.writeMessage("ticksize: tick length set to " + 
+                                words[1] + ".")
 
 
 def unsomething_cmd(session, words, input):
@@ -646,7 +719,8 @@ def unsomething_cmd(session, words, input):
       
 
    if len(removedthings) == 0:
-      engine.myengine.writeMessage("No " + plural + " removed.")
+      engine.myengine.writeMessage("un" + singular + 
+                                   ": No " + plural + " removed.")
       return
 
    data = ''
@@ -668,7 +742,7 @@ def variable_cmd(session, words, input):
    if len(words) == 1:
       data = session.getVariableManager().getVariableInfo()
       if data == '':
-         data = "No variables defined."
+         data = "variable: no variables defined."
 
       engine.myengine.writeMessage(data)
       return
@@ -676,7 +750,7 @@ def variable_cmd(session, words, input):
    if len(words) == 2:
       data = session.getVariableManager().getVariableInfo(words[1])
       if data == '':
-         data = "No variables defined."
+         data = "variable: no variables defined."
 
       engine.myengine.writeMessage(data)
       return 
@@ -689,9 +763,9 @@ def variable_cmd(session, words, input):
       (a, b) = utils.split_braced(inputadjusted)
 
       session.getVariableManager().addVariable(a, b)
-      engine.myengine.writeMessage("variable " + a + " -> '" + b + "'")
+      engine.myengine.writeMessage("variable: " + a + " -> '" + b + "'")
    except:
-      engine.myengine.writeError("variable cannot be set.")
+      engine.myengine.writeError("variable: cannot be set.")
       traceback.print_exc()
 
 
@@ -726,9 +800,11 @@ def write_cmd(session, words, input):
       f = open(words[1], "w")
       f.write(session.getWriteFileInfo())
       f.close()
-      engine.myengine.writeMessage("File " + words[1] + " has been written.")
+      engine.myengine.writeMessage("write: file " + 
+                                   words[1] + " has been written.")
    except:
-      engine.myengine.writeError("Error writing to file " + words[1] + ".")
+      engine.myengine.writeError("write: error writing to file " + 
+                                 words[1] + ".")
       traceback.print_exc()
 
 
@@ -739,11 +815,11 @@ def zap_cmd(session, words, input):
    the SocketCommunicator to garbage collect.
    """
    if engine.myengine.closeSession(session):
-      engine.myengine.writeMessage("Session " + 
+      engine.myengine.writeMessage("zap: session " + 
                                    session.getName() + 
                                    " zapped!")
    else:
-      engine.myengine.writeMessage("Session cannot be zapped!")
+      engine.myengine.writeMessage("zap: session cannot be zapped!")
 
 
 engine.myengine.addCommand("^clear", clear_cmd)
@@ -792,11 +868,11 @@ engine.myengine.addCommand("substitute", substitute_cmd)
 # engine.myengine.addCommand("tabdelete", tabdelete_cmd)
 # engine.myengine.addCommand("tablist", tablist_cmd)
 engine.myengine.addCommand("textin", textin_cmd)
-# engine.myengine.addCommand("tick", tick_cmd)
-# engine.myengine.addCommand("tickon", tickon_cmd)
-# engine.myengine.addCommand("tickoff", tickoff_cmd)
-# engine.myengine.addCommand("tickset", tickset_cmd)
-# engine.myengine.addCommand("ticksize", ticksize_cmd)
+engine.myengine.addCommand("tick", tick_cmd)
+engine.myengine.addCommand("tickon", tickon_cmd)
+engine.myengine.addCommand("tickoff", tickoff_cmd)
+engine.myengine.addCommand("tickset", tickset_cmd)
+engine.myengine.addCommand("ticksize", ticksize_cmd)
 # engine.myengine.addCommand("togglesub", togglesub_cmd)
 engine.myengine.addCommand("unaction", unsomething_cmd)
 engine.myengine.addCommand("unalias", unsomething_cmd)

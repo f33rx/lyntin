@@ -19,6 +19,7 @@ engine.Engine
    |      |-- 1 gag.GagManager               (inherited from common)
    |      |-- 1 substitute.SubstituteManager (inherited from common)
    |      |-- 1 variable.VariableManager     (inherited from common)
+   |      |-- 1 ticker.Ticker                (not inherited from common)
    |
    |-- 1 threadmanager.ThreadManager
    |-- 1 ui.Baseui subclass

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: event.py,v 1.2 2001/12/09 06:31:15 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -95,6 +95,9 @@ class StartupEvent(Event):
          engine.myengine.writeMessage("Reading in file " + f)
          engine.myengine.getSession('common').handleUserData('#read ' + f)
 
+      # start the timer thread
+      engine.myengine.startthread("timer", engine.myengine.runtimer)
+
       # we're done initialization!
       message = ("Initialization complete.\n" +
                  "------------------------------------\n" + 
@@ -133,11 +136,11 @@ class EchoEvent(Event):
    """
    def __init__(self, onoff):
       """ Initialize."""
-      self.state = onoff
+      self._state = onoff
 
    def execute(self):
       """ 1 means turn echo on, 0 means turn it off."""
-      engine.myengine.spamfreq(engine.ECHOFREQ, (self.state))
+      engine.myengine.spamfreq(engine.ECHOFREQ, (self._state))
 
 
 class ReloadEvent(Event):
@@ -149,16 +152,16 @@ class ReloadEvent(Event):
    """
    def __init__(self, name, mod):
       """ Initialize."""
-      self.name = name
-      self.mod = mod
+      self._name = name
+      self._mod = mod
 
    def execute(self):
       """ Execute."""
       try:
-         reload(self.mod)
-         message = "reload successful: " + self.name
+         reload(self._mod)
+         message = "reload successful: " + self._name
       except:
-         message = "reload unsuccessful: " + self.name
+         message = "reload unsuccessful: " + self._name
 
       engine.myengine.writeMessage(message)
  
@@ -170,11 +173,11 @@ class MudEvent(Event):
    """
    def __init__(self, input):
       """ Initialize."""
-      self.input = input
+      self._input = input
 
    def execute(self):
       """ Execute."""
-      engine.myengine.handleMudData(self.input)
+      engine.myengine.handleMudData(self._input)
 
 
 class InputEvent(Event):
@@ -184,12 +187,12 @@ class InputEvent(Event):
    """
    def __init__(self, input):
       """ Initialize."""
-      self.input = input
+      self._input = input
 
    def execute(self):
       """ Execute."""
-      engine.myengine.writeUserData(self.input)
-      engine.myengine.handleUserData(self.input)
+      engine.myengine.writeUserData(self._input)
+      engine.myengine.handleUserData(self._input)
 
 
 class OutputEvent(Event):
@@ -200,8 +203,25 @@ class OutputEvent(Event):
    """
    def __init__(self, message):
       """ Initialize."""
-      self.message = message
+      self._message = message
 
    def execute(self):
       """ Execute."""
-      engine.myengine.writeUI(self.message)
+      engine.myengine.writeUI(self._message)
+
+
+class SpamEvent(Event):
+   """
+   Certain things can kick off a call to spam a frequency.  Rather
+   than doing it "inline" so to speak, it's sometimes nice to kick
+   it off in its own event.  The timer uses this to handle kicking
+   anything that's listening to the TIMERFREQ.
+   """
+   def __init__(self, frequency, args):
+      """ Initialize."""
+      self._frequency = frequency
+      self._args = args
+
+   def execute(self):
+      """ Execute."""
+      engine.myengine.spamfreq(self._frequency, self._args)

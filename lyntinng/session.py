@@ -4,14 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.3 2001/12/09 06:31:15 willhelm Exp $
+# $Id: session.py,v 1.4 2001/12/11 02:34:33 willhelm Exp $
 #######################################################################
 """
-Holds the session class.  Sessions are copied deeply from the common
-session.
+Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy
-import engine, utils, lyntin, event
+import engine, utils, lyntin, event, ticker
 
 # this is the regular expression that matches speedwalking stuff
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -34,6 +33,7 @@ class Session:
       self._submanager = None
       self._varmanager = None
       self._logfile = None
+      self._ticker = ticker.Ticker()
 
       # register with the shutdown frequency
       engine.myengine.register(engine.SHUTDOWNFREQ, self.shutdown)
@@ -66,6 +66,7 @@ class Session:
    def setName(self, name):
       """ Sets the name of the session."""
       self._name = name
+      self.getTicker().setSessionName(name)
 
    def shutdown(self, args):
       """ Shuts down the session."""
@@ -90,7 +91,8 @@ class Session:
               "   substitutes: " + 
               repr(len(self.getSubstituteManager().getSubstitutes())) + "\n" +
               "   variables: " + 
-              repr(len(self.getVariableManager().getVariables())))
+              repr(len(self.getVariableManager().getVariables())) + "\n" +
+              "   ticker: " + self.getTicker().getTickerInfo())
       return data
 
    def setActionManager(self, am):
@@ -141,6 +143,14 @@ class Session:
       """ Returns the variable manager."""
       return self._varmanager
 
+   def setTicker(self, ticker):
+      """ Sets the ticker."""
+      self._ticker = ticker
+
+   def getTicker(self):
+      """ Returns the ticker."""
+      return self._ticker
+
    def getWriteFileInfo(self):
       """ Pulls all the session information for #write command."""
       data = ''
@@ -182,6 +192,7 @@ class Session:
       self._hlmanager.clearHighlights()
       self._submanager.clearSubstitutes()
       self._varmanager.clearVariables()
+      self._ticker.clearTicker()
 
 
    ### ------------------------------------------------
@@ -233,14 +244,16 @@ class Session:
       input = self.getVariableManager().unescapeVariables(input)
 
       # handle lyntin commands
-      if len(input) > 0 and input[0] == lyntin.commandchar:
+      if len(input) > 1 and input[0] == lyntin.commandchar:
          input = input[1:]
 
          words = input.split(" ")
          handled_command = 0
 
          # this finds the first matching command and ends there.
-         for mem in engine.myengine.getCommands():
+         commands = engine.myengine.getCommands()
+         commands.sort()
+         for mem in commands:
             if mem[0] == "^":
                if re.compile(mem).search(words[0]):
                   engine.myengine.getCommand(mem)(self, words, input)
@@ -258,7 +271,6 @@ class Session:
             engine.myengine.writeError("Not a valid command.")
             if internal==0: self._prompt()
          return
-
 
       # we check for aliases here--and if we find some, we
       # do the variable expansion and then recurse over the result
@@ -286,7 +298,6 @@ class Session:
 
       # just regular data to the mud
       self._socket.write(input + "\n")
-
 
    def expandSpeedwalk(self, input):
       """
@@ -341,4 +352,3 @@ class Session:
       except:
          engine.myengine.writeError("Logfile cannot be written to.")
          self._logfile = None
-

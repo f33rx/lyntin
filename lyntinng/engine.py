@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.4 2001/12/14 05:30:00 willhelm Exp $
+# $Id: engine.py,v 1.5 2001/12/15 05:59:10 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -32,6 +32,7 @@ MUDFREQ = "mudfreq"
 SHUTDOWNFREQ = "shutdownfreq"
 STARTUPFREQ = "startupfreq"
 ECHOFREQ = "echofreq"
+TIMERFREQ = "timerfreq"
 
 FIRST = 0
 LAST = 99
@@ -62,6 +63,9 @@ class Engine:
 
       # there is only one ui in the system.
       self._ui = None
+
+      # current tick count
+      self._tick = 0
 
       # counts the total number of events processed--for diagnostics
       self._num_events_processed = 0
@@ -110,9 +114,45 @@ class Engine:
       """
       return self._threadman.checkThreadsStatus()
 
+
+   ### ------------------------------------------
+   ### timer thread
+   ### ------------------------------------------
+
+   def runtimer(self):
+      """
+      This timer thread sleeps for a second, then calls everything
+      in the queue with the current tick.
+      """
+      # FIXME - this will always be slightly behind and will get
+      #         worse as there are more tick things.
+      import time, event
+
+      self._tick = 0
+      while not self._shutdownflag:
+         try:
+            time.sleep(1)
+            event.SpamEvent(TIMERFREQ, (self._tick,)).enqueue()
+            self._tick += 1
+         except KeyboardInterrupt:
+            return
+         except SystemExit:
+            return
+         except:
+            traceback.print_exc()
+
+   def getCurrentTick(self):
+      """
+      Returns the current tick.  It also happens to be the total
+      number of seconds since this instance of Lyntin was started.
+      """
+      return self._tick
+
+ 
    ### ------------------------------------------
    ### input/output stuff
    ### ------------------------------------------
+
    def handleUserData(self, input, internal=0):
       """ This handles input lines from the user in a session-less context.
 
@@ -150,8 +190,13 @@ class Engine:
 
             # is it a session?
             if self._sessions.has_key(ses):
-               self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
-                                                  internal)
+               input = mem.split(" ", 1)
+               if len(input) < 2:
+                  self._current_session = self._sessions[ses]
+                  self.writeMessage(ses + " now current session.")
+               else:
+                  self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
+                                                     internal)
                return
 
             # is it all sessions?
@@ -170,9 +215,11 @@ class Engine:
       """
       self._current_session.handleMudData(text)
 
+
    ### ------------------------------------------
    ### session stuff
    ### ------------------------------------------
+
    def createSession(self):
       """ Copies the common session and returns it.
 
@@ -251,6 +298,7 @@ class Engine:
       session.shutdown(())
       return 1
 
+
    ### ------------------------------------------
    ### event-handling/engine stuff
    ### ------------------------------------------
@@ -264,8 +312,10 @@ class Engine:
       self._event_queue.put(event)
 
    def runengine(self):
-      """ This gets kicked off in a thread and just keep going through
-      events until it detects a shutdown."""
+      """
+      This gets kicked off in a thread and just keep going through
+      events until it detects a shutdown.
+      """
       while not self._shutdownflag:
          try:
             e = self.dequeue()
@@ -350,8 +400,10 @@ class Engine:
          self._listeners[freq] = [func]
 
    def unregister(self, freq, func):
-      """ Tries to remove a registrant from a frequency--does 
-      pretty well."""
+      """
+      Tries to remove a registrant from a frequency--does 
+      pretty well.
+      """
       if self._listeners.has_key(freq):
          if func in self._listeners[freq]:
             self._listeners[freq].remove(func)
