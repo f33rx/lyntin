@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.3 2002/02/27 03:39:34 willhelm Exp $
+$Id: HACKING,v 1.4 2002/03/01 04:32:47 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -47,14 +47,130 @@ respective sections:
 	2. building modules
 	3. command line
 
-Before you continue in this document, you should read through the
-ARCHITECTURE guide which walks you through how Lyntin is architected
-from a bird's eye view.  Understanding that will make this document
-much more interesting and more clear.
+Before we continue, we should cover Lyntin's architecture first.
 
 
 
-* EDITING THE SOURCE CODE
+* DIRECTORIES
+
+^<<
+   lyntinng/
+      |-- ui/            -- user interfaces
+      |-- modules/       -- Lyntin modules (dynamically loaded at runtime)
+      |-- help/          -- Lyntin help files
+      |-- errata/        -- random stuff for testing and other stuff
+^>>
+
+
+
+* ARCHITECTURE
+
+^<<
+engine.Engine
+   |-- 1 help.HelpManager
+   |-- * session.Session
+   |      |-- 1 net.SocketCommunicator
+   |      |-- 1 alias.AliasManager           (inherited from common)
+   |      |-- 1 action.ActionManager         (inherited from common)
+   |      |-- 1 gag.GagManager               (inherited from common)
+   |      |-- 1 highlight.HighlightManager   (inherited from common)
+   |      |-- 1 substitute.SubstituteManager (inherited from common)
+   |      |-- 1 variable.VariableManager     (inherited from common)
+   |      |-- 1 ticker.Ticker                (not inherited from common)
+   |
+   |-- 1 history.HistoryManager
+   |-- 1 threadmanager.ThreadManager
+   |-- 1 ui.Baseui subclass
+^>>
+
+The engine holds the event queue and drives Lyntin.  Most Lyntin
+things occur via an event.  Lyntin starts with the StartupEvent and ends
+with the ShutdownEvent.  The event queue is a synchronized queue and
+thus gives us a centralized way of synchronizing all the threads
+accessing Lyntin internals without causing them to block.
+
+The engine holds:
+
+	* the HistoryManager
+	* the ThreadManager
+	* the HelpManager
+	* the list of Sessions
+	* the user interface
+
+All these things exist on the 'engine scoping'.
+
+Each session has:
+
+	* its own SocketCommunicator which abstracts socket
+	  connections and network issues
+	* a series of managers which manage aliases, actions,
+	  gags, highlights, substitutes, variables and other such 
+	  things
+	* a Ticker which allows you to do things at intervals
+
+These things exist on a 'session scoping' in the sense that there
+exists one of each of these for every session.
+
+
+
+* MANAGERS
+
+Managers manage things.  All the session-scoped managers subclass
+the 'manager.Manager' class.  It doesn't really provide a lot of
+functionality, but it allows us to group them all and treat them 
+all the same.  Adding new managers is much easier because of this.
+
+
+
+* DATA HANDLING
+
+Data comes from one of a couple of sources: the user or the mud.
+User data (sometimes called Input) is received from the ui.BaseUI
+subclasses and tossed into an 'event.InputEvent'.
+
+Data can also come from the mud.  Mud data comes from the 
+SocketCommunicator and is encapsulated in an 'event.MudEvent'.
+
+
+
+* UI
+
+All user interfaces extend the ui.BaseUI class in the ui module.
+It has a series of methods which need to be overridden to give
+the ui functionality.  In addition, ui's can specify additional
+Lyntin commands, they can bind to Lyntin hooks (most ui's bind
+to the STARTUPHOOK allowing them to perform certain functionality
+on Lyntin startup rather than module loading time), and anything
+else that modules can do.
+
+Lyntin comes with a text ui which can be used over telnet/ssh
+or in a command shell.  It also comes with a tk gui.  The tk gui
+has functionality like split history screen (pgup and pgdown),
+its own command history buffer (up and down) and numpad bindings
+(VK_NUMPAD0 through VK_NUMPAD9).  There's also a very rudimentary
+and unstable curses ui.
+
+Feel free to extend the ui code and send in patches.  Or even
+write your own ui based on another widget set or whatever you
+want to do.
+
+
+
+* HOOKS
+
+The engine is augmented by a series of hooks which allow modules to
+execute functions without having to change Lyntin's internals.  An
+example of this would be the startup and shutdown hooks.  Any functions
+that hook into these hooks will be executed upon startup or shutdown
+of Lyntin.  Lyntin also uses these hooks to implement some of its
+functionality.
+
+For example, the TkGui uses the STARTUPHOOK to instantiate its gui 
+interface and set itself up.
+
+
+
+* SOURCE CODE HACKING
 
 Lyntin is entirely written in Python.  The source code is well organized
 (as of 3.0) and documentation exists on the web-site as well as in the 
@@ -71,25 +187,34 @@ get incorporated into the Lyntin base code.
 
 
 
-* BUILDING MODULES
+* LYNTIN MODULE HACKING
 
-FIXME - This is likely to change in the near future prior to the final
-3.0 release.
+Lyntin is written in Python.  Each file that ends in a .py is a
+Python module.  Lyntin has modules as well.  A Lyntin module is
+a Python module found in the modules/ subdirectory which has a 
+'load' method.
 
-Lyntin has a modules package and all the commands are implemented in
-the basic and advanced modules.  You can add modules at your whim.
-The purpose of Lyntin modules is to centralize your efforts into one
-file that you have control over.  This enables you to have one file
-you can drop into a Lyntin installation and it works without editing
-configuration files or installation files.
+Lyntin modules are cool.  All of Lyntin's commands are implemented 
+in the 'basic', 'advanced', and 'unittest' Lyntin modules.  Because
+Lyntin modules are written in Python, they have full access to
+the full Python API--they're not run in any kind of rexec bastion
+or anything.
 
-This is cool because then your module is easy to install should you
-upgrade your version of Lyntin.  And it's easy to distribute too because
-it's one file.
+Lyntin modules use the 'exported' module to access Lyntin internals.
+This API is guaranteed not to change (much) over versions of Lyntin.
+
+All modules are loaded dynamically when Lyntin starts.  The code
+for this is in modules/__init__.py.  You don't have to register your
+module, but you do have to implement a 'load' function which gets
+called at startup.  This is where your module would bind to hooks,
+add Lyntin commands, and do whatever other startup things you need.
+
+Since Lyntin's commands are implemented in Lyntin modules, you can
+use them as an example for writing your own.
 
 
 
-* COMMAND LINE
+* COMMAND LINE HACKING
 
 Lyntin allows you to execute arbitrary Python at the command line.
 The code will be executed in some module--(to be determined).
@@ -147,3 +272,15 @@ hello
 > #@myfunc()
 lyntin: hello
 ^>>
+
+
+
+* END
+
+That about covers it.  If you have questions, sign onto the Lyntin
+developers list and ask them.  The list is low volume high signal.
+
+	http://sourceforge.net/mail/?group_id=6730
+
+Happy hacking!
+

@@ -5,7 +5,7 @@
 
 * VERSION
 
-$Id: README,v 1.6 2002/03/02 22:28:47 willhelm Exp $
+$Id: README,v 1.7 2002/03/20 22:39:13 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -15,21 +15,13 @@ This document is somewhat in flux.
 
 * WHY SHOULD YOU USE LYNTIN?
 
-Lyntin is: 
-
-	1. a featureful and highly extensible mud client
-	2. a bot/agent development environment
-	3. based on Tintin++ functionality--tried and true
-
 Lyntin is written entirely in Python--a nicely written and very portable
-programming language.  Thusly Lyntin is very platform independent (minus
-a few issues here and there I'm sure).  This also means that your 
-actions (or triggers, or autos, or whatever you call them) are no longer
-restricted to simple 'if you see this then send this' kinds of things.
-They can be Python functions which do anything from setting a variable
-to forking a web spider.  Anything Python allows (which is a lot),
-Lyntin allows.  In addition, your code can interface with Lyntin's
-code.  
+programming language.  Thusly Lyntin is very platform independent 
+This also means that your actions/triggers are no longer restricted to 
+simple 'if you see this then send this' kinds of things.  They can be 
+Python functions which do anything from setting a variable to forking 
+a web spider.  Anything Python allows (which is a lot), Lyntin allows.  
+In addition, your code can interface with Lyntin's code.  
 
 Lyntin is great if:
 
@@ -135,19 +127,18 @@ AFT because it's an ASCII-based formatting markup that's easy to read
 (making the source files useful) and convert into formats like HTML,
 RTF, and other formats.
 
-Documentation is always a problem with projects.  Along those lines, 
-the documentation for Lyntin is severly lacking.  If you find any bugs 
-in the documentation or want to contribute documentation, please feel 
-free to send such things to the mailing list.  Also, if you have any
-questions, send those to the mailing list.  That helps in fixing/updating
-the documentation as well.
+If you find problems with the documentation or have fixes for it, 
+let us know.
 
 
 
 * ERRATA
 
 That should be about it.  In-game help is accessed by typing #help.
-When you start Lyntin for the first time, type '#help general'
+When you start Lyntin for the first time, type:
+
+	'#help general'
+
 and that'll get you started.  Read through the various help files
 at your leisure.
 
