@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.5 2002/03/25 02:11:10 willhelm Exp $
+$Id: HACKING,v 1.6 2002/03/25 23:08:58 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -69,14 +69,16 @@ Before we continue, we should cover Lyntin's architecture first.
 engine.Engine
    |-- 1 help.HelpManager
    |-- * session.Session
-   |      |-- 1 net.SocketCommunicator
    |      |-- 1 alias.AliasManager           (inherited from common)
    |      |-- 1 action.ActionManager         (inherited from common)
    |      |-- 1 gag.GagManager               (inherited from common)
    |      |-- 1 highlight.HighlightManager   (inherited from common)
    |      |-- 1 substitute.SubstituteManager (inherited from common)
    |      |-- 1 variable.VariableManager     (inherited from common)
-   |      |-- 1 ticker.Ticker                (not inherited from common)
+   |      |-- 1 net.SocketCommunicator
+   |      |-- 1 ticker.Ticker
+   |      |-- 1 deed.DeedManager
+   |      |-- 1 data.DataBuffer
    |
    |-- 1 history.HistoryManager
    |-- 1 threadmanager.ThreadManager

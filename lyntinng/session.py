@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.21 2002/03/29 21:17:02 willhelm Exp $
+# $Id: session.py,v 1.22 2002/03/29 23:47:05 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy, string
-import data, exported, engine, utils, lyntin, event, ticker
+import deed, data, exported, engine, utils, lyntin, event, ticker
 
 # this is the regular expression that matches speedwalking stuff
 SPEEDWALK_REGEXP = re.compile('^\d*[udnsew][udnsew\d]*$')
@@ -29,6 +29,8 @@ class Session:
     self._managers = {}
     self._logfile = None
     self._ticker = ticker.Ticker()
+
+    self.setManager("deed", deed.DeedManager()
 
     self._databuffer = data.DataBuffer()
 
