@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.13 2002/10/23 23:59:09 willhelm Exp $
+# $Id: speedwalk.py,v 1.14 2002/11/07 02:32:53 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.  Speedwalking is highly
@@ -12,7 +12,23 @@ configurable and it's actually less like speedwalking in other mudclients
 and more like alias shorthand that allows you to quickly do things
 a number of times.
 
-The key ideas are creating the maps
+First you want to create maps from a character or characters to
+an expansion using #swdir.  Then every instance of this character/characters
+gets expanded to the expansion.
+
+For example:
+
+  #swdir {n} {north}
+  #swdir {s} {south}
+
+"nnsss" will expand to "north;north;south;south;south".
+
+Similarly, "2n3s" will expand to "north;north;south;sout;south".
+
+To handle instances where certain combinations will get expanded, but we
+really don't want them to be, we use #swexclude.
+
+  #swexclude {news}
 """
 
 # Originally written 2002 by Sebastian John
@@ -46,12 +62,15 @@ class SpeedwalkHash:
     """
     Adds a speedwalking direction alias to the manager.
     
-    arguments:
-    
-      'alias' -- (string) the speedwalking alias
-      
-      'dir' -- (string) the actual direction
-    
+    @param alias: the speedwalking alias
+    @type  alias: string
+
+    @param dir: the expansion for the speedwalking alias
+    @type  dir: string
+
+    @raises ValueError: if there exists another alias where the dir is a
+        substring.  for example if dir was "n" and there was an alias "ln",
+        that would raise a ValueError.
     """
     for mem in self._dirs.keys():
       if mem.find(dir) != -1:
@@ -64,14 +83,11 @@ class SpeedwalkHash:
     Removes the speedwalking alias and only this one (no wildcard patterns
     are possible).
     
-    arguments:
-    
-      'alias' -- (string) the speedwalking alias to be removed
-    
-    returns:
-    
-      list with the (alias, dir) tuple of the removed speedwalking alias
-    
+    @param alias: speedwalking aliases that match the alias will be removed
+    @type  alias: string
+
+    @returns: a list of (alias, dir) tuples of removed speedwalking aliases.
+    @rtype: list of (string, string)
     """
     try:
       dir = self._dirs[alias]
@@ -86,11 +102,9 @@ class SpeedwalkHash:
     """
     Returns a list of all the speedwalking aliases currently defined.
     
-    returns:
-    
-      sorted list of (alias, dir) tuples of the speedwalking aliases we are
-      managing
-    
+    @returns: the list of (alias, dir) tuples consisting of all the
+        speedwalking aliases we're managing
+    @rtype: list of (string, string)
     """
     dirs = self._dirs.items()
     dirs.sort()
@@ -103,15 +117,12 @@ class SpeedwalkHash:
     This is used by #swdir to tell all the speedwalking aliases involved as
     well as #write which takes this information and dumps it to the file.
     
-    arguments:
+    @param text: the text to expand on to find aliases that the user is
+        interested in
+    @type  text: string
     
-      'text=""' -- (string) the text to expand on to find aliases that the
-                   user is interested in
-    
-    returns:
-    
-      a string of all the speedwalking alias information
-    
+    @returns: a string of all the speedwalking alias information
+    @rtype: string
     """
     if len(self._dirs) == 0:
       return ""
@@ -130,11 +141,11 @@ class SpeedwalkHash:
     return string.join(data, "\n")
   
   def getDirStatus(self):
-    """ Returns a one liner about dirs.
+    """
+    Returns a one liner about dirs.
 
-    returns:
-
-      (string) one-liner about dirs managed.
+    @returns: a one-line about the dirs managed.
+    @rtype: string
     """
     return "%d dir(s)." % len(self._dirs)
   
@@ -165,10 +176,8 @@ class SpeedwalkHash:
     """
     Adds a speedwalking exclude to the manager.
     
-    arguments:
-    
-      'exclude' -- (string) the exclude to add
-    
+    @param exclude: the exclude to add
+    @type  exclude: string
     """
     if exclude not in self._excludes:
       self._excludes.append(exclude)
@@ -178,13 +187,11 @@ class SpeedwalkHash:
     Removes a speedwalking exclude (and only one, no wildcards or the like)
     from the manager.
     
-    arguments:
-    
-      'exclude' -- (string) the exclude to remove
-    
-    returns:
-    
-      list with the exclude removed
+    @param exclude: the exclude to remove (we don't accept wildcards here)
+    @type  exclude: string
+
+    @returns: list of the excludes removed
+    @rtype: list of strings
     """
     badexcludes = utils.expand_text(exclude, self._excludes)
 
@@ -197,10 +204,8 @@ class SpeedwalkHash:
     """
     Returns the exclude list we are managing.
     
-    returns:
-    
-      the sorted list of excludes being managed
-    
+    @return: the sorted list of excludes being managed
+    @rtype: list of strings
     """
     self._excludes.sort()
     return self._excludes
@@ -212,15 +217,12 @@ class SpeedwalkHash:
     This is used by #swexcl to tell all the excludes involved as well as
     #write which takes this information and dumps it to the file.
     
-    arguments:
-    
-      'text=""' -- (string) the text to expand on to find excludes that the
-                   user is interested in
-    
-    returns:
-    
-      a string of all the speedwalking exclude list information
-    
+    @param text: the text to expand on to find excludes that the user
+        is interested in
+    @type  text: string
+
+    @returns: a string of all the speedwalking excludes
+    @rtype: string
     """
     if len(self._excludes) == 0:
       return ""
@@ -239,11 +241,11 @@ class SpeedwalkHash:
     return string.join(data, "\n")
   
   def getExcludeStatus(self):
-    """ Returns a one-line string describing how many excludes we have.
+    """
+    Returns a one-line string describing how many excludes we have.
 
-    returns:
-
-      (string) one liner describing how many excludes we have
+    @returns: a one liner describing how many excludes we have
+    @rtype: string
     """
     return "%d exclude(s)." % len(self._excludes)
 
@@ -315,7 +317,6 @@ class SpeedwalkManager(manager.Manager):
       self._hashes[ses].clear()
   
   def addSession(self, newsession, basesession=None):
-    """ over-ridden from manager.Manager."""
     if basesession:
       if self._hashes.has_key(basesession):
         sdata = self._hashes[basesession]
@@ -326,7 +327,6 @@ class SpeedwalkManager(manager.Manager):
           self.addExclude(newsession, mem)
 
   def removeSession(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._hashes.has_key(ses):
       del self._hashes[ses]
 
@@ -509,9 +509,6 @@ def load():
   sm = SpeedwalkManager()
   exported.add_manager("speedwalk", sm)
 
-  # FIXME - the number controls the order this gets called in the grand
-  # scheme of things.  we should probably do something to make this
-  # more obvious.
   hooks.user_filter_hook.register(sm.userfilter, 80)
   hooks.write_hook.register(sm.persist)
 

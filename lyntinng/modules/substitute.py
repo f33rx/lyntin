@@ -4,10 +4,11 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.13 2002/10/20 16:09:57 willhelm Exp $
+# $Id: substitute.py,v 1.14 2002/10/23 23:59:09 willhelm Exp $
 #######################################################################
 """
-This module defines the SubstituteManager which handles substitutes.
+This module defines the SubstituteManager which handles substitutes and
+gags.
 """
 import string
 import ansi, manager, utils, lyntin, hooks, exported, modutils
@@ -17,18 +18,35 @@ class SubstituteData:
     self._substitutes = {}
 
   def addSubstitute(self, item, substitute):
-    """ Adds a substitute to the dict."""
+    """
+    Adds a substitute to the dict.
+
+    @param item: the item to substitute
+    @type  item: string
+
+    @param substitute: the thing to substitute in place of "item"
+    @type  substitute: string
+    """
     self._substitutes[item] = substitute 
 
   def clear(self):
-    """ Removes all the substitutes."""
+    """
+    Removes all the substitutes.
+    """
     self._substitutes.clear()
 
   def removeSubstitutes(self, text):
-    """ Removes substitutes from the list.
+    """
+    Removes substitutes from the list.
 
     Returns a list of tuples of substitute item/substitute that
     were removed.
+
+    @param text: substitutes matching text will be removed
+    @type  text: string
+
+    @returns: list of (item, substitute) tuples of removed substitutes
+    @rtype: list of (string, string)
     """
     badsubstitutes = utils.expand_text(text, self._substitutes.keys())
 
@@ -40,17 +58,29 @@ class SubstituteData:
     return ret
 
   def getSubstitutes(self):
-    """ Returns the keys of the substitute dict."""
+    """
+    Returns the keys of the substitute dict.
+
+    @returns: list of all the substitute items
+    @rtype: list of strings
+    """
     list = self._substitutes.keys()
     list.sort()
     return list
 
   def expand(self, text):
-    """ Looks at mud data and performs any substitutes.
+    """
+    Looks at mud data and performs any substitutes.
 
     It returns the final text--even if there were no substitutes.
-    # FIXME -- this isn't done correctly.
+
+    @param text: the text to expand substitutes in
+    @type  text: string
+
+    @return: the (un)adjusted text
+    @rtype: string
     """
+    # FIXME -- this isn't done correctly.
     if len(text) > 0:
       for mem in self._substitutes.keys():
         if self._substitutes[mem] == ".":
@@ -72,11 +102,19 @@ class SubstituteData:
     return text 
 
   def getInfo(self, text=''):
-    """ Returns information about the substitutes in here.
+    """
+    Returns information about the substitutes in here.
 
     This is used by #substitute to tell all the substitutes involved
     as well as #write which takes this information and dumps
     it to the file.
+
+    @param text: the text used to figure out which substitutes to provide
+        information on
+    @type  text: string
+
+    @return: the string of the substitute information
+    @rtype: string
     """
     if len(self._substitutes.keys()) == 0:
       return ''
@@ -94,7 +132,12 @@ class SubstituteData:
     return string.join(data, "\n")
 
   def getStatus(self):
-    """ Returns the number of substitutes we're managing."""
+    """
+    Returns a one liner of number of substitutes we're managing.
+
+    @returns: string describing how many substitutes and gags we're managing
+    @rtype: string
+    """
     gags = 0
     subs = 0
 
@@ -140,7 +183,6 @@ class SubstituteManager(manager.Manager):
     return "0 substitute(s). 0 gag(s)."
 
   def addSession(self, newsession, basesession=None):
-    """ over-ridden from manager.Manager."""
     if basesession:
       if self._subs.has_key(basesession):
         sdata = self._subs[basesession]
@@ -148,7 +190,6 @@ class SubstituteManager(manager.Manager):
           self.addSubstitute(newsession, mem, sdata._substitutes[mem])
 
   def removeSession(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._subs.has_key(ses):
       del self._subs[ses]
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.14 2002/10/26 04:36:37 jmberne Exp $
+# $Id: variable.py,v 1.15 2002/10/26 15:17:24 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -25,36 +25,38 @@ class VariableData:
     self._variables = {}
 
   def addVariable(self, var, expansion):
-    """ Adds a variable to the dict.
+    """
+    Adds a variable to the dict.
 
-    arguments:
+    @param var: the variable name
+    @type  var: string
 
-      'var' -- the variable name
-
-      'expansion' -- the variable value
+    @param expansion: the variable value which can be anything that
+        has __str__ implemented
+    @type  expansion: string
     """
     self._variables[var] = expansion
 
   def clear(self):
-    """ Removes all the variables."""
+    """
+    Removes all the variables.
+    """
     list = self._variables.keys()
     for mem in list:
       del self._variables[mem]
 
   def removeVariables(self, text):
-    """ Removes variables from the list.
+    """
+    Removes variables from the list.
 
     Returns a list of tuples of variable var/expansion that
     were removed.
 
-    arguments:
+    @param text: variables will be removed that match the text
+    @type  text: string
 
-      'text' -- variables will be removed that match the text
-
-    returns:
-
-      list of (name, value) tuples of removed variables
-
+    @returns: list of (name, value) tuples of removed variables
+    @rtype: list of (string, string)
     """
     badvariables = utils.expand_text(text, self._variables.keys())
 
@@ -66,72 +68,69 @@ class VariableData:
     return ret
 
   def expand(self, text):
-    """ Expands variables in the text.
+    """
+    Expands variables in the text.
 
-    arguments:
+    @param text: the text to expand variables in
+    @type  text:
 
-      'text' -- (string) the text to expand variables in
-
-    returns:
-
-      the text with variables expanded
+    @returns: the text with variables expanded
+    @rtype: string
     """
     return utils.denest_vars(utils.expand_vars(text, self._variables), self._variables)
 
   def expand_command(self, text):
-    """ Expands variables in the text, does not denest yet since the command
+    """
+    Expands variables in the text, does not denest yet since the command
     could get recursed on and over-expand variables in some modes.
 
-    arguments:
+    @param text: the text to expand variables in
+    @type  text: string
 
-      'text' -- (string) the text to expand variables in
-
-    returns:
-
-      the text with variables expanded
+    @returns: the text with variables expanded
+    @rtype: string
     """
     return utils.expand_vars(text, self._variables)
 
   def expand_arguments(self, text):
-    """ Expands the arguments of a command.
-        Presumable in lyntin mode these have alread been expanded and nothing needs doing.
+    """
+    Expands the arguments of a command.  Presumable in lyntin mode these 
+    have alread been expanded and nothing needs doing.
 
-    arguments:
+    @param text: the text to expand variables in
+    @type  text: string
 
-      'text' -- (string) the text to expand variables in
-
-    return:
-
-      the text with variables expanded
+    @returns: the text with variables expanded
+    @rtype: string
     """
     return utils.expand_arguments(text, self._variables)
     
 
   def getVariables(self):
-    """ Returns the keys of the variables dict.
+    """
+    Returns the keys of the variables dict.
 
-    returns:
-
-      list of strings of variable names
-
+    @returns: a list of all the variable names being managed
+    @rtype: list of strings
     """
     list = self._variables.keys()
     list.sort()
     return list
 
   def getVariable(self, name, default=None):
-    """ Returns the value for a given variable.
+    """
+    Returns the value for a given variable.
 
-    arguments:
+    @param name: the name of the variable to retrieve
+    @type  name: string
 
-      'name' -- (string) the name of the variable.
+    @param default: the default value to return if the variable doesn't
+        exist
+    @type  default: any
 
-      'default=None' -- the default value to return if
-                        the variable doesn't exist
-
-    returns:
-
-      the variable value or the default
+    @returns: the variable value or the default if the variable doesn't
+        exist
+    @rtype: string (or default)
     """
     if self._variables.has_key(name):
       return self._variables[name]
@@ -139,30 +138,27 @@ class VariableData:
       return default
 
   def getStatus(self):
-    """ Returns a one-liner as to the status of this data class.
+    """
+    Returns a one-liner as to the status of this data class.
 
-    returns:
-
-      (string) the one-line status
+    @returns: the one-liner status as to what this manager is managing
+    @rtype: string
     """
     return "%d variable(s)." % len(self._variables)
 
   def getInfo(self, text=""):
-    """ Returns information about the variables in here.
+    """
+    Returns information about the variables in here.
 
     This is used by #variable to tell all the variables involved
     as well as #write which takes this information and dumps
     it to the file.
 
-    arguments:
+    @param text: variables matching this string will be returned
+    @type  text: string
 
-      'text=""' -- (string) variables matching this string will be 
-                   returned
-
-    returns:
-
-      (string) one big string with all the information in it
-
+    @returns: one big string with all the information in it
+    @rtype: string
     """
     if len(self._variables.keys()) == 0:
       return ''
@@ -265,7 +261,6 @@ class VariableManager(manager.Manager):
     return "0 variable(s)."
 
   def addSession(self, newsession, basesession=None):
-    """ over-ridden from manager.Manager."""
     if basesession:
       if self._variables.has_key(basesession):
         varhash = self._variables[basesession]._variables
@@ -273,7 +268,6 @@ class VariableManager(manager.Manager):
           self.addVariable(newsession, mem, varhash[mem])
 
   def removeSession(self, ses):
-    """ over-ridden from manager.Manager."""
     if self._variables.has_key(ses):
       del self._variables[ses]
 
@@ -295,7 +289,9 @@ class VariableManager(manager.Manager):
       file.flush()
 
   def denestVars(self, args):
-    """ Handles denesting variables for Lyntin evaluation mode."""
+    """
+    Handles denesting variables for Lyntin evaluation mode.
+    """
     ses = args[0]
     internal = args[1]
     verbatim = args[2]
@@ -308,19 +304,7 @@ class VariableManager(manager.Manager):
 
   def userfilter(self, args):
     """
-    Handle the filtering of input through the current variables.
-    If input gets changed then we pass it back to
-    engine.myengine.HandleUserData and return None to stop this
-    chain of filtering.
-
-    arguments:
-
-      'args' -- user_filter_hook arg tuple (session, internal, input,
-                filtered)
-
-    returns:
-
-      filtered text or None if any changes took place.
+    user_filter_hook for handling incoming user data.
     """
     ses = args[0]
     internal = args[1]
@@ -416,12 +400,6 @@ commands_dict["unvariable"] = (unvariable_cmd, "str= quiet:boolean=false")
 
 vm = None
 
-def evalmodechange(args):
-  global vm
-  old = args[0]
-  new = args[1]
-
-  #This doesn't really need to do anything any more... hmm...
 
 def load():
   """ Initializes the module by binding all the commands."""
@@ -433,9 +411,6 @@ def load():
   hooks.user_filter_hook.register(vm.denestVars, 95)
   hooks.write_hook.register(vm.persist)
 
-  hooks.evalmode_change_hook.register(evalmodechange)
-  evalmodechange((-1, lyntin.evalmode))
-
 def unload():
   """ Unloads the module by calling any unload/unbind functions."""
   global vm
@@ -444,9 +419,6 @@ def unload():
   hooks.user_filter_hook.unregister(vm.userfilter)
   hooks.user_filter_hook.unregister(vm.denestVars)
   hooks.write_hook.unregister(vm.persist)
-
-  hooks.evalmode_change_hook.unregister(evalmodechange)
-  evalmodechange((lyntin.evalmode, -1))
 
 # Local variables:
 # mode:python

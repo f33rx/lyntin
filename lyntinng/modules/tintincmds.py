@@ -4,13 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.52 2002/10/26 15:17:24 willhelm Exp $
+# $Id: tintincmds.py,v 1.53 2002/10/30 03:12:13 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
-This module holds commands that are based on Tintin functionality.
+This module holds commands that are derived from Tintin, but don't involve
+a manager.  Tintin commands that involve a manager (alias and unalias,
+action and unaction, variable and unvariable...) are in their respective
+modules along with their manager and any helper functions involved.
 """
 commands_dict = {}
 
