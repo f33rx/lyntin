@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.26 2002/05/16 02:13:47 willhelm Exp $
+# $Id: action.py,v 1.27 2002/05/16 14:27:45 jmberne Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
 (triggers) and expansion of actions.
 """
-import re, string
+import re, string, copy
 import manager, utils, event, lyntin
 
 # the placement variable regular expression
@@ -20,6 +20,12 @@ class ActionManager(manager.Manager):
   """ Extends the base manager class to manages actions."""
   def __init__(self):
     self._actions = {}
+
+  def __copy__(self):
+    ac = ActionManager()
+    for mem in self._actions.keys():
+      ac.addAction(mem, self._actions[mem][2])
+    return ac
 
   def _compileAction(self, trigger):
     """

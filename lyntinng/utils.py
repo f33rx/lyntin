@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.27 2002/05/17 01:46:56 willhelm Exp $
+# $Id: utils.py,v 1.28 2002/05/18 03:40:44 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -220,6 +220,7 @@ def split_commands(text):
     # if the entire segment we're looking at doesn't have
     # a full set of matched braces, we ignore this semi-colon
     # as a split point.
+    # FIXME - we need to take into account \{ and \}
     count = (text[marker:b].count('{') - 
              text[marker:b].count('}'))
 

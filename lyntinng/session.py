@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.49 2002/05/09 23:20:12 willhelm Exp $
+# $Id: session.py,v 1.50 2002/05/17 03:43:27 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -58,7 +58,8 @@ class Session:
     to implement our own version of copy.
     """
     ses = Session()
-    ses._managers = copy.copy(self._managers)
+    for mem in self._managers.keys():
+      ses._managers[mem] = copy.copy(self._managers[mem])
     return ses
       
   def __repr__(self):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.19 2002/05/15 00:16:55 willhelm Exp $
+# $Id: highlight.py,v 1.20 2002/05/18 03:40:44 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -193,11 +193,11 @@ class HighlightManager(manager.Manager):
       if not utils.is_color_token(textlist[j]):
         if memlength > len(textlist[j]):
           memlength -= len(textlist[j])
-          newlist.append(mem)
+          newlist.append(textlist[j])
         else:
           break
       else:
-        newcolor = self.figureColor([mem], newcolor, '')[0]
+        newcolor = self.figureColor([textlist[j]], newcolor, '')[0]
 
     newlist.append(textlist[j][:memlength])
     newlist.append(chr(27) + "[0m")
