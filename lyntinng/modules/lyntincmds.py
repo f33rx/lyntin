@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.4 2002/06/01 15:49:05 willhelm Exp $
+# $Id: lyntincmds.py,v 1.5 2002/06/01 18:02:34 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -220,7 +220,7 @@ def raw_cmd(session, args, input):
   """
   session.writeSocket(args["input"] + "\n")
   
-commands_dict["raw"] = (raw_cmd, "input=", "noparsing")
+commands_dict["raw"] = (raw_cmd, "input=", "limitparsing=0")
 
 
 def swdir_cmd(session, args, input):

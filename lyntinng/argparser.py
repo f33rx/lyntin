@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.16 2002/06/01 01:34:16 willhelm Exp $
+# $Id: argparser.py,v 1.17 2002/06/02 15:10:55 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -15,7 +15,9 @@ import string, re
 import utils
 
 defaultOptions={ "stripBraces": 1,
-                 "noparsing": 0 }
+                 "noparsing": 0,
+                 "limitparsing": -1
+               }
 optionParser = None
 
 class ParserException(Exception):
@@ -31,7 +33,11 @@ class ArgumentParser:
   Supported options:
   stripBraces (default=on) - whether all arguments should have braces
       stripped before being parsed.
-  noparsing (default=off) - puts input into dict["input"] and does no parsing.
+  noparsing (default=off) - doesn't insure that all arguments are
+      parsed.  works well when matched with  limitparsing=0 to provide
+      a syntax line for commands that parse their own input
+  limitparsing:int (default=-1) - only parse this number of tokens into dict,
+      the rest of the input line goes into dict["input"]
   """
   
   def __init__(self, argspec, argoptions=None):
@@ -87,10 +93,12 @@ class ArgumentParser:
             self.options[otherOption[2:]] = 0
       elif key=="otherValuedOptions":
         for otherKey in dict[key].keys():
-          self.options[otherkey] = dict[key][otherkey]
+          self.options[otherKey] = dict[key][otherKey]
       else:
         self.options[key] = dict[key]
-    
+
+    # set types for certain options
+    self.options["limitparsing"] = int(self.options["limitparsing"])
 
   def buildParsers(self, argspec):
     """
@@ -190,13 +198,10 @@ class ArgumentParser:
     """    
     dict = {}
 
-    if self.getOption("noparsing"):
-      dict["input"]=input
-    else:
-      arguments = self.split(input)
+    arguments = self.split(input,self.getOption("limitparsing"))
 
-      foundNamedArg = 0
-      for i in range(0,len(arguments)):
+    foundNamedArg = 0
+    for i in range(0,len(arguments)):
         key,val = arguments[i]
 
         if val == None:
@@ -219,19 +224,20 @@ class ArgumentParser:
             raise ParserException, "Invalid named argument: %s=%s" % (key,val)
           parser.parseInto(key,val,dict)
 
-      # now check that everything has been specified, putting in defaults 
-      # where available
-      for key in self.parsers.keys():
-        if not dict.has_key(key):
-          parser = self.parsers[key]
-          if not parser.defaultset:
-            raise ParserException, "Must specify a value for argument %s" % (key)
-          else:
-            dict[key] = parser.default
+
+    # now check that everything has been specified, putting in defaults 
+    # where available
+    for key in self.parsers.keys():
+      if not dict.has_key(key):
+        parser = self.parsers[key]
+        if not parser.defaultset and not self.getOption("noparsing"):
+          raise ParserException, "Must specify a value for argument %s" % (key)
+        else:
+          dict[key] = parser.default
           
     return dict
 
-  def split(self, input, buildsyntaxline=0):
+  def split(self, input, maxsplit=-1, buildsyntaxline=0):
     """
     Take an input string and tokenizes it into a list of pairs.
     Tokens with equal signs come back as (key,value) pairs, those
@@ -246,14 +252,16 @@ class ArgumentParser:
     \ escapes anything, including = and { and } (and, incidentally, \,
     and any character, so \a becomes a in the argument, and
     \n\o\t\a\d\r\a\g\o\n is the same as notadragon.
-    
+
+    after maxplit arguments are parsed (or never is maxsplit<0) stops
+    and returns the rest of input as the final item    
     """
     bracketdepth = 0
     arg = ""
     val = None
     equalsign = 0
     arguments = []
-    while input:
+    while input and (maxsplit < 0 or len(arguments) < maxsplit):
       nextchar = input[0:1]
       input = input[1:]
 
@@ -336,7 +344,10 @@ class ArgumentParser:
 
       arg = ""
       val = ""
-      
+
+    if input:
+      arguments.append( ("input",input) )
+    
     return arguments
 
 class Parser:

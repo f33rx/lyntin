@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.21 2002/06/01 15:51:45 willhelm Exp $
+# $Id: tintincmds.py,v 1.22 2002/06/02 15:10:56 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -602,7 +602,7 @@ def nop_cmd(session, args, input):
   """
   return
 
-commands_dict["nop"] = (nop_cmd, "comment*", "noparsing")
+commands_dict["nop"] = (nop_cmd, "input=", "limitparsing=0")
 
 
 def read_cmd(session, args, input):
@@ -766,7 +766,7 @@ def showme_cmd(session, args, input):
   else:
     exported.write_message(input)
      
-commands_dict["showme"] = (showme_cmd, "text*", "noparsing")
+commands_dict["showme"] = (showme_cmd, "input=", "limitparsing=0")
 
 
 def speedwalk_cmd(session, args, input):
