@@ -26,7 +26,28 @@ class client:
    def __init__(self):
       self.too_many_errors = 20
       self.numerrors = 0
+      self.commands = {}  # holds command mappings above and beyond core
 
+   def AddCommand(self, name, func):
+      """AddCommand(self) -> None
+
+      Adds a command binding to self.commands .
+      """
+      if callable(func):
+         self.commands[name] = func
+      else:
+         # FIXME (wbg) - do something to indicate that the function
+         # is non-callable like raise an error!
+         pass
+
+   def RemoveCommand(self, name):
+      """RemoveCommand(self) -> None
+
+      Removes a command binding from self.commands .
+      """
+      try:    del self.commands[name]
+      except: pass
+ 
    def Loop(self):
       """
       The main loop.
@@ -60,6 +81,7 @@ class client:
       # if anything else goes wrong, we get ugly and print a traceback.
       # this is helpful for the user's programs; otherwise lyntin
       # would crash completely.
+      # FIXME - this fucking sucks.  put a real traceback in.
       except:
          player.Putline('######################'+
                         'ack! error!'+
@@ -91,6 +113,9 @@ class client:
       The first pass over the command line to determine the user
       interface.
       """
+      # FIXME - this needs to be changed to adjust for multiple
+      # interfaces.
+
       self.ui = None
       if len(sys.argv) > 1:
          if sys.argv[1] == '-curses' and not self.ui:
@@ -115,6 +140,7 @@ class client:
       The second pass over the command line to determine files
       to parse.
       """
+      # FIXME - this needs to be changed to allow for multiple ui's.
       if len(sys.argv) > 1:
          # handle file args
          for opt in sys.argv[1:]:

@@ -110,7 +110,7 @@ class session:
         self.ticker = 0
         self.tickaction = ''
         self.warnedtick = 0
-	self.verbose = 1      # verbose mode
+        self.verbose = 1      # verbose mode
 
         if name:
             self.name = name
@@ -147,9 +147,12 @@ class session:
         except socket.error, x:
             self.Die(x)
 
-    # initialize a new local session.
-    # inherits all its aliases etc from the common session
     def InitLocalSession(self):
+        """InitLocalSession(self) -> None
+
+        initialize a new local session.  inherits all its aliases
+        etc from the common session.
+        """
         self.aliases = copy.copy(common.aliases)
         self.actions = copy.copy(common.actions)
         self.action_list = copy.copy(common.action_list)
@@ -273,7 +276,7 @@ class session:
     def Clear(self):
         self.aliases = {}
         self.actions = {}
-	self.action_list = [] # -- JA Was not cleared before... oops :)
+        self.action_list = [] # -- JA Was not cleared before... oops :)
         self.subs = {}
         self.gags = []
         self.vars = {}

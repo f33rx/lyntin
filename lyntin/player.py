@@ -38,6 +38,8 @@ def DispatchCommand(input, seslist):
 ## 2.0-JA  Because input is needed to run the hook anyway, we're sending
 ##         both input and words to the functions.
 
+    import data
+
     if not input: return
     # strip any data.ltchar from the front
     if input[0] == data.ltchar:
@@ -53,6 +55,44 @@ def DispatchCommand(input, seslist):
         exec input in user.__dict__
         return
 
+    
+
+    # import module?
+    if string.find("import", words[0]) == 0:
+        LynImport(words, input, seslist)
+        return
+
+    # clear session?
+    if regex.search("^clear", input) != -1:
+        Clear(words, input, seslist)
+        return
+
+    # send a carriage return?
+    if string.find("cr", words[0]) == 0:
+        CR(words, input, seslist)
+        return
+
+    # set/query the lyntin character?
+    if string.find("char", words[0]) == 0:
+        Char(words, input, seslist)
+        return
+
+    # help?
+    if string.find("help", words[0]) == 0:
+        Help(words, input, seslist)
+        return
+
+    # quit? (this can't be abbreviated)
+    if regex.search("^quit", input) != -1:
+        Quit(words, input, seslist)
+
+    # WBG - all commands below this line should be added via ses.AddCommand
+
+    
+    if string.find("command", words[0]) == 0:
+        AddCommand(words, input, seslist)
+        return
+
     # define/query an action?
     if string.find("action", words[0]) == 0:
         Action(words, input, seslist)
@@ -61,21 +101,6 @@ def DispatchCommand(input, seslist):
     # define/query an alias?
     if string.find("alias", words[0]) == 0:
         Alias(words, input, seslist)
-        return
-
-    # clear session?
-    if regex.search("^clear", input) != -1:
-        Clear(words, input, seslist)
-        return
-
-    # set/query the lyntin character?
-    if string.find("char", words[0]) == 0:
-        Char(words, input, seslist)
-        return
-
-    # send a carriage return?
-    if string.find("cr", words[0]) == 0:
-        CR(words, input, seslist)
         return
 
     # resize the databuffer?
@@ -98,11 +123,6 @@ def DispatchCommand(input, seslist):
         Gag(words, input, seslist)
         return
     
-    # help?
-    if string.find("help", words[0]) == 0:
-        Help(words, input, seslist)
-        return
-
     # do the history thing?
     if string.find("history", words[0]) == 0:
         History(words, input, seslist)
@@ -122,10 +142,6 @@ def DispatchCommand(input, seslist):
     if string.find("log", words[0]) == 0:
         Log(words, input, seslist)
         return
-
-    # quit? (this can't be abbreviated)
-    if regex.search("^quit", input) != -1:
-        Quit(words, input, seslist)
 
     # load aliases?
     if string.find("read", words[0]) == 0:
@@ -203,21 +219,29 @@ def DispatchCommand(input, seslist):
         return
 
 
-# This function must be created -- JA FIXME
-    # print the version
-    if string.find("version", words[0]) == 0:
-        PutUntouchedLine(data.version)
-        return
-
     # toggle verbose mode
     if string.find("verbose", words[0]) == 0:
         Verbose(words, input, seslist)
         return
 
-    # unrecognized command
-    Putline('error: command is not defined --%s--'%words[0])
-    return
+    # for commands in data.theapp.commands listing
+    try:    c = data.theapp.commands[words[0]]
+    except: 
+        # unrecognized command
+        Putline('error: command is not defined --%s--'%words[0])
+        return
 
+    return c(words, input, seslist)
+
+
+
+def LynImport(words, input, seslist):
+    """LynImport(words, input, seslist) -> None
+
+    imports a module which adds itself to the app and such.
+    """
+    Putline("importing " + words[1])
+    return
 
 
 def Showme(words, input, seslist):
@@ -234,6 +258,7 @@ def Showme(words, input, seslist):
         if ses is data.currsession:
             PutUntouchedLine(string.join(words[1:]))
 
+
 def SetSes(ses):
     """SetSes(ses) -> None
 
@@ -246,8 +271,9 @@ def SetSes(ses):
     ans = 'ok, session "' + ses.name + '" activated.'
     Putline(ans)
 
-def Ses(toaux, input,seslist):
-    """Ses(to) -> None
+
+def Ses(words, input, seslist):
+    """Ses(words, input, seslist) -> None
 
     to - 3 argument tuple: (name, host, port number)
 
@@ -256,7 +282,7 @@ def Ses(toaux, input,seslist):
     session list.
     """
     hooks.session_command_hook.run((input, seslist))
-    to=toaux[1:]
+    to = words[1:]
     if len(to) == 0:
         Putline("sessions: ")
     elif len(to) >= 3:
