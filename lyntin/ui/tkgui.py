@@ -192,7 +192,8 @@ class TkGui(BaseGUI):
             if line:
                 self.txt.configure(state='normal')
                 # self.txt.insert('end', line, "42")
-                self.txt.insert('end', "# " + line)
+                line = "# " + string.replace(line, "\n", "\n# ")
+                self.txt.insert('end', line)
                 self.txt.insert('end', "\n")
                 self.txt.configure(state='disabled')
 
