@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.32 2002/12/04 03:46:29 willhelm Exp $
+# $Id: textui.py,v 1.34 2002/12/06 04:34:29 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -120,7 +120,6 @@ class Textui(ui.BaseUI):
     import event, sys, select, os
     try:
       if os.name == 'posix':
-        """
         while not self.shutdownflag:
           readers,w,e = select.select([sys.stdin], [], [])
           if readers:
@@ -130,14 +129,6 @@ class Textui(ui.BaseUI):
                 self.handleinput(data)
               except IOError:
                 pass
-        """
-        while not self.shutdownflag:
-          try:
-            data = sys.stdin.readline()
-            self.handleinput(data)
-          except IOError:
-            pass
-
       else:
         while not self.shutdownflag:
           self.handleinput(sys.stdin.readline())
