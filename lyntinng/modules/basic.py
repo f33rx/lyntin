@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.53 2002/04/05 00:47:28 willhelm Exp $
+# $Id: basic.py,v 1.54 2002/04/05 23:55:46 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -1176,3 +1176,6 @@ def load():
   exported.add_command("wizlist", wizlist_cmd)
   exported.add_command("write", write_cmd)
   exported.add_command("zap", zap_cmd)
+
+def unload():
+  pass

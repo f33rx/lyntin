@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.27 2002/04/05 23:55:46 willhelm Exp $
+# $Id: engine.py,v 1.28 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -641,8 +641,10 @@ class Engine:
       'name' -- (string) the name of the command to remove
 
     """
-    try:    del self._command_list[name]
-    except: pass
+    try:
+      del self._command_list[name]
+    except:
+      pass
 
   def getCommand(self, name):
     """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.8 2002/04/10 02:59:23 willhelm Exp $
+# $Id: exported.py,v 1.9 2002/04/11 00:21:12 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -34,6 +34,15 @@ def add_command(str, func):
     'func' -- the function to call when that command is executed.
   """
   get_engine().addCommand(str, func)
+
+def remove_command(str):
+  """ Removes a command from Lyntin.
+
+  arguments:
+
+    'str' -- the command name.
+  """
+  get_engine().removeCommand(str)
 
 def get_commands():
   """ Returns a list of the commands currently bound.
