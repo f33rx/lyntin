@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.16 2002/08/23 02:34:25 willhelm Exp $
+# $Id: tkui.py,v 1.17 2002/08/27 01:19:05 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -16,23 +16,23 @@ import ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
 
-HELP_TEXT = """
-The tkui uses the Tk widget set and provides a graphical interface 
-to Lyntin.  There are a series of vastly useful things that it does
-above and beyond the textui:
+HELP_TEXT = """The tkui uses the Tk widget set and provides a graphical interface 
+to Lyntin.  It also has the following additional functionality:
 
  - numpad bindings (VK_NUMPAD0 through VK_NUMPAD9)
  - function key bindings (VK_F2 through VK_F12)
- - pgup and pgdown scroll back
+ - pgup and pgdown scroll back (escape to get rid of the split 
+   screen)
  - up and down command line history
  - ctrl-u removal of text
- - copy and paste from the screen
+ - ctrl-c copy from the text buffer and ctrl-v paste into the command
+   buffer (in Windows)
  - ctrl-t autotyper
 
 To bind function key and numpad bindings, create an alias for the
 symbol.  For example:
 
-#alias {VK_NUMPAD2} {south}
+   #alias {VK_NUMPAD2} {south}
 """
 
 """
