@@ -20,7 +20,13 @@ class PrintEvent(TimeEvent):
 #time_scheduler.add(PrintEvent('foo2', 1, 2))
 ##################################################################
 
+class RepeatEvent(TimeEvent):
+    def __init__(self, dowhat, interval=1,times=-1):
+	TimeEvent.__init__(self,interval, times)
+	self.dowhat=dowhat
 
+    def internal_perform(self, scheduler):
+	data.theapp.HandleUserInput(self.dowhat)
 
 ##################################################################
 # example of a function which interacts with a mud through lyntin
@@ -54,6 +60,22 @@ class timedfileexecution(TimeEvent):
                 scheduler.remove(self)
             else:
                 lyntin_command(line)
+
+##################################################################
+# This class is used to time a command so that it happens so many
+# seconds after the class is initialized.  Use like...
+#   time_scheduler.add(afterexec('say hi',1))
+# The previous python statement would cause "say hi" to be
+# executed by lyntin (in lyntin_command) after 1 second.
+
+class afterexec(TimeEvent):
+    def __init__(self, command, after=1):
+	self.command=command
+	TimeEvent.__init__(self,after,1)
+    
+    def internal_perform(self, scheduler):
+	lyntin_command(self.command)
+	scheduler.remove(self)
 
 ##################################################################
 # This is a very simple auto saver but can be dangerous to use if 

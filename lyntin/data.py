@@ -352,7 +352,8 @@ class session:
             varvals = {}
             # fill in values for all the variables in the match
             for i in xrange(len(actionvars)):
-                varvals[actionvars[i]]=string.replace(regac.group(i+1),';','_')
+                 #varvals[actionvars[i]]=string.replace(regac.group(i+1),';','_')
+                 varvals[actionvars[i]]=regac.group(i+1)
 
             # add special variables
             varvals['%a'] = string.replace(match,';','_')
