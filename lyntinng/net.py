@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.7 2002/02/04 01:10:17 willhelm Exp $
+# $Id: net.py,v 1.8 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -118,7 +118,7 @@ class SocketCommunicator:
     """
     try:
       if convert:
-        self._sock.send(string.replace(data, "\n", "\r\n"))
+        self._sock.send(data.replace("\n", "\r\n"))
       else:
         self._sock.send(data)
     except:
@@ -142,7 +142,7 @@ class SocketCommunicator:
       (string) the data without the telnet control codes
 
     """
-    i = string.find(data, IAC)
+    i = data.find(IAC)
 
     while (i != -1):
       try:
@@ -158,7 +158,7 @@ class SocketCommunicator:
           data = data[:i] + data[i+3:]
 
         elif data[i+1] == SB:
-          end = string.find(data, SE, i)
+          end = data.find(SE, i)
           data = data[:i] + data[end+1:]
 
         else:
@@ -169,7 +169,7 @@ class SocketCommunicator:
         data = data[:i]
         break
 
-      i = string.find(data, IAC, i)
+      i = data.find(IAC, i)
 
     return data
 

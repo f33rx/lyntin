@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.12 2002/03/03 19:09:55 willhelm Exp $
+# $Id: event.py,v 1.13 2002/03/10 04:49:31 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -33,7 +33,7 @@ class Event:
   def __str__(self):
     """ Allows us to print out event objects."""
     ret = str(self.__class__)
-    return ret[string.find(ret, ".") + 1:]
+    return ret[ret.find(".") + 1:]
 
   def enqueue(self):
     """ This enqueues this event into the event queue.  Don't

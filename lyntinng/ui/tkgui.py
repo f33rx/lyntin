@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.13 2002/02/24 00:32:26 willhelm Exp $
+# $Id: tkgui.py,v 1.14 2002/03/01 02:33:26 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -226,7 +226,7 @@ class TkGui(ui.BaseUI):
     the bottom of the text buffer can be seen.
     """
     temp = self._txt.index("end")
-    ind = string.find(temp, ".")
+    ind = temp.find(".")
     temp = temp[:ind]
     if (int(temp) > 800):
       self._txt.delete ("1.0", "100.end")
@@ -247,7 +247,7 @@ class TkGui(ui.BaseUI):
       self._txt.insert('end', "\n")
 
     elif message.type == ui.LTDATA:
-      message.data = "# " + string.replace(message.data, "\n", "\n# ")
+      message.data = "# " + message.data.replace("\n", "\n# ")
       self._txt.insert('end', message.data)
       self._txt.insert('end', "\n")
 
@@ -260,7 +260,7 @@ class TkGui(ui.BaseUI):
       start = 0
 
       # first we remove all \\r stuff
-      line = string.replace(message.data, "\r", "")
+      line = message.data.replace("\r", "")
 
       # then we handle unfinished colors--ansi color codes can
       # be split between calls to write.
@@ -321,7 +321,7 @@ class TkGui(ui.BaseUI):
         self._currcolors[:] = self._regcolors[:]
         return
 
-      numlist = string.split(newcolor, ";")
+      numlist = newcolor.split(";")
       numlist.sort()
 
       for num in numlist:
