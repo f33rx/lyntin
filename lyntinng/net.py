@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.35 2003/04/07 03:21:55 willhelm Exp $
+# $Id: net.py,v 1.36 2003/04/08 22:19:07 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -242,6 +242,11 @@ class SocketCommunicator:
     self._sock = None
     self._session = None
 
+    # sometimes the mud will hose up with echo off--we want to kick it
+    # on again.
+    event.EchoEvent(1).enqueue()
+
+    # output message so the user knows what happened.
     event.OutputEvent(ui.ui.Message("Lost connection to: %s\n" % self._host)).enqueue()
 
   def write(self, data, convert=1):
