@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.49 2002/10/13 02:27:59 willhelm Exp $
+# $Id: utils.py,v 1.50 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -1089,16 +1089,16 @@ def _strip_placement_vars(text):
   @return: list of replacement var strings
   @rtype: list of strings
   """
-  global VAR_REGEXP
+  global PVAR_REGEXP
 
   ret = []
-  match = VAR_REGEXP.search(text)
+  match = PVAR_REGEXP.search(text)
   while match:
     (b,e) = match.span()
     val = match.groups()[0]
     if val not in ret:
       ret.append(val)
-    match = VAR_REGEXP.search(text, e)
+    match = PVAR_REGEXP.search(text, e)
   return ret
 
 
@@ -1118,7 +1118,7 @@ def _lyntin_expand_placement_vars(input, expansion):
   @return: the expansion with all nested_vars replaced and
       placement vars replaced.
   """
-  vars = strip_placement_vars(expansion)
+  vars = _strip_placement_vars(expansion)
 
   if len(vars) > 0:
     varlookup = {}
@@ -1156,7 +1156,7 @@ def _lyntin_expand_placement_vars(input, expansion):
     if input.find(' ') > -1:
       expansion = expansion + ' ' + input.split(' ', 1)[1]
 
-  expansion = lyntin_denest_vars_worker("%", expansion)
+  expansion = _lyntin_denest_vars_worker("%", expansion)
 
   return expansion
 
