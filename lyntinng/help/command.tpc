@@ -1,23 +1,27 @@
-Commands in Lyntin are all located in the various modules in the 
-modules directory.  
+Lyntin has a series of commands that have been registered with the client
+to enable you to change client side things.  For instance, there are
+Lyntin commands for creating a session to a mud, creating aliases, removing
+aliases, manipulating variables, so on and so forth.
 
-To execute commands in the session you're currently in, just execute 
-the command.  To execute commands in another session, type:
+Commands in Lyntin are denoted by the command character.  By default, this
+character is "#" but it can be changed using the #config command and 
+changing the commandchar.
 
-	#<session_name> <command...>
+There are some other special things you can do using the command 
+character.
 
-To execute a command in all the sessions, type:
+1. You can execute commands in other sessions by typing 
 
-	#all <command...>
+	#<SESSION_NAME> <COMMAND...>
 
-To execute a command a number of times:
+2. You can execute commands in all sessions by typing 
 
-	#<number> <command...>
+	#all <COMMAND...>
 
-ex:
+3. You can execute a command a number of times by typing 
 
-	#5 say hello
-	#all say hello
-	#all #alias {sh} {say hello}
+	#<NUMBER> <COMMAND...>
+
+see also: semicolon
 
 category: manual

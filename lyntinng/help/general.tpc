@@ -1,7 +1,8 @@
 The "#session" command will allow you to start a session.  When you're
 done, "#end" will close Lyntin.
 
-Type "#help <command>" for help on commands.  These will be of
+Type "#help help" for help on how to use the in-game help system.
+Type "#help <command>" for help on commands.  These topics will be of
 great interest to you:
 
    action               alias
@@ -9,5 +10,9 @@ great interest to you:
    highlight            session
 
 Read through the "#help manual" topics--these will help as well.
+
+Also, each user interface has its own help topic:
+
+   tkui                 textui
 
 category: manual
