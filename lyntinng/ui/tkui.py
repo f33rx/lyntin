@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.28 2002/12/31 00:04:00 willhelm Exp $
+# $Id: tkui.py,v 1.29 2003/01/01 00:36:26 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -326,6 +326,9 @@ class Tkui(ui.BaseUI):
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
 
+    self._clipText()
+    self._yadjust()
+
 
   def convertColor(self, name):
     """
@@ -400,7 +403,8 @@ class CommandEntry(Tkinter.Entry):
     self._autotyper = None
     self._autotyper_ses = None
 
-    apply(Tkinter.Entry.__init__, (self, master), kw)
+    # apply(Tkinter.Entry.__init__, (self, master), kw)
+    Tkinter.Entry.__init__(self, master, kw)
 
     self.bind("<KeyPress-Return>", self.createInputEvent)
 
@@ -784,6 +788,9 @@ class NamedWindow:
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
 
+    self._clipText()
+    self._yadjust()
+
  
 class Autotyper:
   """
@@ -891,7 +898,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
                           ansi.get_color("default"))
     else:
       # if echo is not on--we don't print this
-      return color, leftover
+      return currentcolor, unfinishedcolor
 
   elif message.type == ui.LTDATA:
     if line[-1] == "\n":
@@ -980,9 +987,6 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
 
       # insert the text using the formatting tuple we just generated
       txtbuffer.insert('end', mem, tuple(format))
-
-  self._clipText()
-  self._yadjust()
 
   return color, leftover
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.2 2002/05/09 23:20:12 willhelm Exp $
+# $Id: __init__.py,v 1.3 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 
 import glob, os, string
@@ -20,7 +20,7 @@ def load_help():
   else:
     path = __file__[:index]
 
-  ospathjoin = apply( os.path.join, (path, "*.tpc",))
+  ospathjoin = os.path.join(path, "*.tpc")
 
   _help_list = glob.glob( ospathjoin )
   _help_list.sort()
