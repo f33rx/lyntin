@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.50 2002/06/02 15:10:56 jmberne Exp $
+# $Id: engine.py,v 1.51 2002/06/02 21:34:12 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -229,12 +229,13 @@ class Engine:
 
       if mem[0] == "!":
         memhistory = self.getHistoryManager().getHistoryItem(mem)
-        historyitems.append(memhistory)
         if memhistory != -1:
           self.handleUserData(memhistory, 1, session)
+          historyitems.append(memhistory)
           continue
-      else:
-        historyitems.append(mem)
+
+      #if we get here then it is not a valid !-expression.
+      historyitems.append(mem)
 
       # if it starts with a # it's a loop, session or command
       if len(mem) > 0 and mem[0] == lyntin.commandchar:
