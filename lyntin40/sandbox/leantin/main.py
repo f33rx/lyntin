@@ -1,12 +1,11 @@
 #!/usr/bin/python2.3
 # python imports
-import socket, Queue, time
 # our imports
-import sock, ui, tkui, mudcommands, engine, catcher, libmisc
+import engine
 import session
-import mytk
+import tkui
 
-__version__ = "$Revision: 1.9 $"
+__version__ = "$Revision: 1.10 $"
 
 """This is the main loop for leanlyn, currently it is just a test harness"""
 
