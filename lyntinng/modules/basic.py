@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.38 2002/03/24 21:00:18 willhelm Exp $
+# $Id: basic.py,v 1.39 2002/03/24 22:44:13 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -359,8 +359,8 @@ def if_cmd(session, words, input):
 
   Implements the Tintin++ #if command.
   """
-  # 3/18/2002: originally implemented by Sebastian John
-  # 3/20/2002: mildly editied by Will Guaraldi
+  # begin copyright 2002 Sebastian John
+  # if_cmd originally implemented
   if len(words) < 3:
     exported.write_error("syntax: #if {<expr>} {<action>}")
     return
@@ -379,6 +379,7 @@ def if_cmd(session, words, input):
   except Exception, e:
     exported.write_error("if: exception: %s" % e)
 
+  # end copyright 2002 Sebastian John
 
 def info_cmd(session, words, input):
   """#info
@@ -521,8 +522,8 @@ def read_cmd(session, words, input):
   try:
     filename = utils.strip_braces(words[1])
 
-    # 3/17/2002 http:// handling written by Sebastian John
-    # 3/18/2002 edited by Will
+    # begin copyright 2002 Sebastian John
+    # http:// handling for read_cmd
     if filename.find("http://") == 0:
       url = filename[7:]
       if url.find("/") == -1:
@@ -549,6 +550,7 @@ def read_cmd(session, words, input):
         return
       
       file = sock.getfile()
+      # end copyright 2002 Sebastian John block
     
     else:
       file = open(filename, "r")

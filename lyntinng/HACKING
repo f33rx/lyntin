@@ -4,7 +4,7 @@
 
 * VERSION
 
-$Id: HACKING,v 1.4 2002/03/01 04:32:47 willhelm Exp $
+$Id: HACKING,v 1.5 2002/03/25 02:11:10 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -147,7 +147,7 @@ Lyntin comes with a text ui which can be used over telnet/ssh
 or in a command shell.  It also comes with a tk gui.  The tk gui
 has functionality like split history screen (pgup and pgdown),
 its own command history buffer (up and down) and numpad bindings
-(VK_NUMPAD0 through VK_NUMPAD9).  There's also a very rudimentary
+(VK__NUMPAD0 through VK__NUMPAD9).  There's also a very rudimentary
 and unstable curses ui.
 
 Feel free to extend the ui code and send in patches.  Or even
@@ -204,7 +204,7 @@ Lyntin modules use the 'exported' module to access Lyntin internals.
 This API is guaranteed not to change (much) over versions of Lyntin.
 
 All modules are loaded dynamically when Lyntin starts.  The code
-for this is in modules/__init__.py.  You don't have to register your
+for this is in modules/____init____.py.  You don't have to register your
 module, but you do have to implement a 'load' function which gets
 called at startup.  This is where your module would bind to hooks,
 add Lyntin commands, and do whatever other startup things you need.
