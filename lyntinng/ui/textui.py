@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.40 2002/12/31 00:04:00 willhelm Exp $
+# $Id: textui.py,v 1.41 2003/01/01 00:36:26 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -60,6 +60,7 @@ class Textui(ui.BaseUI):
     exported.hook_register("shutdown_hook", self.shutdown)
     exported.hook_register("to_user_hook", self.write)
     exported.hook_register("mudecho_hook", self.echo)
+    exported.hook_register("bell_hook", self.bell)
     self._currcolors = {}
     self._unfinishedcolor = {}
 
@@ -131,6 +132,10 @@ class Textui(ui.BaseUI):
     except Exception, e:
       exported.write_error("textui: unable to turn off echo: %s" % e)
 
+
+  def bell(self, args):
+    """ Handles incoming bell characters."""
+    sys.stdout.write('\07')
 
   def echo(self, args):
     """ This turns echo on and off on the CommandEntry widget."""
