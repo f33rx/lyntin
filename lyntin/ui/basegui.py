@@ -1,111 +1,126 @@
 #!/usr/local/bin/python1.4
 
-from Tkinter import *
+####
+## import what you need here :)
+## from Tkinter import *
+## import tkhistentry, string, mud, sys, os, font, regex, data
 
-import tkhistentry, string, mud, sys, os, font, regex, data
+####
+## these could be useful but are X specific
+## txtAttribs = { } ## 0 -- all off. 1 -- bold  5 -- blinking
+##                 ## 7 -- reverse 8 hidden
 
-txtAttribs = { } ## 0 -- all off. 1 -- bold  5 -- blinking
-                 ## 7 -- reverse 8 hidden
+## fgColorCodes = { "30": "black", "31": "red", "32": "green",
+##                  "33": "yellow", "34": "blue", "35": "magenta",
+##                  "36": "cyan", "37": "white"}
 
-fgColorCodes = { "30": "black", "31": "red", "32": "green",
-                 "33": "yellow", "34": "blue", "35": "magenta",
-                 "36": "cyan", "37": "white"}
-
-bgColorCodes = { "40": "black", "41": "red", "42": "green",
-                 "43": "yellow", "44": "blue", "45": "magenta",
-                 "46": "cyan", "47": "white", "50": "purple" }
+## bgColorCodes = { "40": "black", "41": "red", "42": "green",
+##                  "43": "yellow", "44": "blue", "45": "magenta",
+##                  "46": "cyan", "47": "white", "50": "purple" }
 
 class Gui:
     def __init__(self):
-        self.viewhistory = 0
-        self.echo = 1
-        self.tk = Tk()
-        self.tk.geometry("800x600")
-        self.tk.title("Lyntin -- The Hacker's Mud Client")
-        self.currcolors = (0, 37, 40)
-        self.regcolors = (0, 37, 40)
-        self.unfinishedcolor = (0, "")
+####
+## setup the entire display but do not enter a loop or anything yet
+## this would include making widgets and setting the title bar
+## but would NOT include HANDLING input from the widgets.  That happens
+## when the main loop goes.
+
+##         self.viewhistory = 0
+##         self.echo = 1
+##         self.tk = Tk()
+##         self.tk.geometry("800x600")
+##         self.tk.title("Lyntin -- The Hacker's Mud Client")
+##         self.currcolors = (0, 37, 40)
+##         self.regcolors = (0, 37, 40)
+##         self.unfinishedcolor = (0, "")
         
         
-        if os.name != 'posix':
-            # require tcl/tk 8.0 on windows
-            fnt = font.Font(font=("Fixedsys", 12))
-            self.entry = tkhistentry.CommandEntry(self.tk, self, 
-                                                fg='white', bg='black',
-                                                insertbackground='yellow',
-                                                font=fnt,
-                                                insertwidth='2')
+##         if os.name != 'posix':
+##             # require tcl/tk 8.0 on windows
+##             fnt = font.Font(font=("Fixedsys", 12))
+##             self.entry = tkhistentry.CommandEntry(self.tk, self, 
+##                                                 fg='white', bg='black',
+##                                                 insertbackground='yellow',
+##                                                 font=fnt,
+##                                                 insertwidth='2')
 
-            self.txt = Text(self.tk, {'fg': 'white', 'bg': 'black',
-                                      'state': 'disabled', 'font': fnt,
-                                      'height': 20})
-            self.txtbuffer = Text(self.tk, {'fg': 'white', 'bg': 'black',
-                                      'state': 'disabled', 'font': fnt,
-                                      'height': 20})
-        else:
-            self.entry = tkhistentry.CommandEntry(self.tk, self,
-                                                fg='white', bg='black',
-                                                insertbackground='yellow',
-                                                insertwidth='2')
+##             self.txt = Text(self.tk, {'fg': 'white', 'bg': 'black',
+##                                       'state': 'disabled', 'font': fnt,
+##                                       'height': 20})
+##             self.txtbuffer = Text(self.tk, {'fg': 'white', 'bg': 'black',
+##                                       'state': 'disabled', 'font': fnt,
+##                                       'height': 20})
+##         else:
+##             self.entry = tkhistentry.CommandEntry(self.tk, self,
+##                                                 fg='white', bg='black',
+##                                                 insertbackground='yellow',
+##                                                 insertwidth='2')
 
-            self.txt = Text(self.tk, {'fg': 'white', 'bg': 'black',
-                                      'state': 'disabled',
-                                      'height': 20})
-            self.txtbuffer = Text(self.tk, {'fg': 'white', 
-                                      'bg': 'black', 'state': 'disabled', 
-                                      'height': 20})
-
-
-
-        # set up the scrollbar for the txtbuffer widget
-        self.scrollVertical = Scrollbar(self.tk,orient=VERTICAL)
-        self.txt.configure(yscrollcommand=self.scrollVertical.set)
-        self.scrollVertical.config(command=self.txt.yview)
-        # FIXME changed from LEFT and W
-        self.scrollVertical.pack(side=RIGHT, anchor=E, fill=Y)
+##             self.txt = Text(self.tk, {'fg': 'white', 'bg': 'black',
+##                                       'state': 'disabled',
+##                                       'height': 20})
+##             self.txtbuffer = Text(self.tk, {'fg': 'white', 
+##                                       'bg': 'black', 'state': 'disabled', 
+##                                       'height': 20})
 
 
-        self.entry.pack({'side': 'bottom', 'fill': 'both'})
-        self.entry.focus_set()
 
-        self.txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
+##         # set up the scrollbar for the txtbuffer widget
+##         self.scrollVertical = Scrollbar(self.tk,orient=VERTICAL)
+##         self.txt.configure(yscrollcommand=self.scrollVertical.set)
+##         self.scrollVertical.config(command=self.txt.yview)
+##         # FIXME changed from LEFT and W
+##         self.scrollVertical.pack(side=RIGHT, anchor=E, fill=Y)
+
+
+##         self.entry.pack({'side': 'bottom', 'fill': 'both'})
+##         self.entry.focus_set()
+
+##         self.txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
         
-        self.InitColorTags()
-        
-    def pageUp(self):
-        if self.viewhistory == 0:
-            self.txtbuffer.pack({'after': self.txt, 'side': 'bottom', 
-                                 'fill': 'both', 'expand': 1})
-            self.viewhistory = 1
-            self.txtbuffer.configure(state='normal')
-            self.txtbuffer.delete ("1.0", "end")
-            lotofstuff = self.txt.get ('1.0', 'end')
-            self.txtbuffer.insert ('end', lotofstuff)
-            self.txtbuffer.configure(state='disabled')
+##         self.InitColorTags()
 
-            self.txtbuffer.yview('moveto', '1')
-            if os.name != 'posix':
-                self.txtbuffer.yview('scroll', '20', 'units')
+####
+## These should all be functions of some sort that are executed by bound keys
+## not sure how these sorts of bindings would work but it's necessary that
+## there are no hard coded things that will cause problems for future
+## expansion
 
-            self.txt.yview('moveto', '1')
-            if os.name != 'posix':
-                self.txt.yview('scroll', '220', 'units')
+##     def pageUp(self):
+##         if self.viewhistory == 0:
+##             self.txtbuffer.pack({'after': self.txt, 'side': 'bottom', 
+##                                  'fill': 'both', 'expand': 1})
+##             self.viewhistory = 1
+##             self.txtbuffer.configure(state='normal')
+##             self.txtbuffer.delete ("1.0", "end")
+##             lotofstuff = self.txt.get ('1.0', 'end')
+##             self.txtbuffer.insert ('end', lotofstuff)
+##             self.txtbuffer.configure(state='disabled')
 
-        else:
-            # yscroll up stuff
-            self.txtbuffer.yview('scroll', '-15', 'units')
+##             self.txtbuffer.yview('moveto', '1')
+##             if os.name != 'posix':
+##                 self.txtbuffer.yview('scroll', '20', 'units')
 
-    def pageDown(self):
-        if self.viewhistory == 1:
-            # yscroll down stuff
-            self.txtbuffer.yview('scroll', '15', 'units')
+##             self.txt.yview('moveto', '1')
+##             if os.name != 'posix':
+##                 self.txt.yview('scroll', '220', 'units')
 
-    def escape(self):
-        if self.viewhistory == 1:
-            self.txtbuffer.forget()
-            self.viewhistory = 0
-        else:
-            self.entry.clear_input()
+##         else:
+##             # yscroll up stuff
+##             self.txtbuffer.yview('scroll', '-15', 'units')
+
+##     def pageDown(self):
+##         if self.viewhistory == 1:
+##             # yscroll down stuff
+##             self.txtbuffer.yview('scroll', '15', 'units')
+
+##     def escape(self):
+##         if self.viewhistory == 1:
+##             self.txtbuffer.forget()
+##             self.viewhistory = 0
+##         else:
+##             self.entry.clear_input()
 
     def mainloop(self):
         self.tk.after(100, self.iterate)
@@ -116,23 +131,47 @@ class Gui:
             self.tk.quit()
         self.tk.after(50, self.iterate)
 
-    def Prompt(self): self.txt.insert('end', "\n")
+    def Prompt(self): 
+	"""Prompt(self) -> None
+	
+	Sets a prompt for the user.
+	"""
+	self.txt.insert('end', "\n")
 
     def has_echo(self):
-        return 1
+	"""has_echo(self) -> true/false
+
+	Returns if the client has the ability to turn on and off echoing
+	for passwords and other stuff (the telnet echo option, mainly)
+	"""
+        return 0 #default is 0 because... this UI doesn't even have a display
     
     # turn on echo
     def OnEcho(self):
-        self.echo = 1
-        self.entry.configure(show='')
+	"""OnEcho(self) -> None
+
+	Turn on echo
+	"""
+	pass
+##        self.echo = 1
+##        self.entry.configure(show='')
     
     # turn off echo
     def OffEcho(self):
-        self.echo = 0
-        self.entry.configure(show='*')
+	"""OffEcho(self) -> None
+
+	Turn off echo
+	"""
+	pass
+##        self.echo = 0
+##        self.entry.configure(show='*')
 
 
     def CloseUI(self):
+	"""CloseUI(self) -> None
+
+	FIXME
+	"""
         pass
 
     def Putline(self, line):
@@ -173,11 +212,20 @@ class Gui:
 
 
     def PutUntouchedLine(self, line):
+	"""PutUntouchedLine(self, line) -> None
+
+	Prints a line for the user after adding a newline to the end of it
+	"""
+        ## This part actually looks like it'll be portable... fancy that :)
         if line:
             self.PutReallyUntouchedLine(line)
             self.PutReallyUntouchedLine('\n')
 
     def PutReallyUntouchedLine(self, line):
+	"""PutReallyUntouchedLine(self, line) -> None
+
+	Prints a line for the user without any preprocessing
+	"""
         if line:
             mud.log('really untouched ' + line)
             mud.log('last char: ' + line[-1])
