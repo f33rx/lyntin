@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.31 2003/02/04 00:15:00 willhelm Exp $
+# $Id: advanced.py,v 1.32 2003/02/28 01:08:53 jmberne Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -111,21 +111,26 @@ def load_cmd(ses, args, input):
   mod = args["modulename"]
   reload = args["reload"]
 
+  # if this module has previously been loaded, we try to reload it.
   if sys.modules.has_key(mod):
-    # if this module has previously been loaded, we try to reload it.
 
     _module = sys.modules[mod]
     _oldmodule = _module
     try:
-      if ((_module.__dict__.has_key("unload") and 
-          _module.__dict__.has_key("lyntin_import"))):
+      if _module.__dict__.has_key("lyntin_import"):
+        # if we're told not to reload it, we toss up a message and then
+        # do nothing
         if not reload:
+          exported.write_message("load: module %s has already been loaded." % mod)
           return
-        
-        try:
-          _module.unload()
-        except:
-          exported.write_traceback("load: module %s didn't unload properly." % mod)
+
+        # if we loaded it via a lyntin_import mechanism and it has an
+        # unload method, then we try calling that
+        if _module.__dict__.has_key("unload"):
+          try:
+            _module.unload()
+          except:
+            exported.write_traceback("load: module %s didn't unload properly." % mod)
       del sys.modules[mod]
       exported.write_message("load: reloading %s." % mod)
 
@@ -135,9 +140,10 @@ def load_cmd(ses, args, input):
   else:
     _oldmodule = None
 
+
+  # here's where we import the module
   try:
     _module = __import__( mod )
-
     _module = sys.modules[mod]
 
     if (_oldmodule and _oldmodule.__dict__.has_key("reload")):

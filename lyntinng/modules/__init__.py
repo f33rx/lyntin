@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.20 2003/02/04 00:15:00 willhelm Exp $
+# $Id: __init__.py,v 1.21 2003/02/15 03:35:06 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -43,6 +43,23 @@ def test_for_conflicts(name, module):
                          (name, module.__file__))
 
 
+def get_module_name(filename):
+  """
+  Takes in a fully qualified filename and returns the module name
+  portion.
+
+  example:
+    /home/willg/lyntinng/modules/alias.py -> alias
+
+  @param filename:  the fully qualified filename
+  @type filename: string
+
+  @returns: the module name
+  @rtype: string
+  """
+  path, filename = os.path.split(filename)
+  return os.path.splitext(filename)[0]
+  
 def load_modules():
   """
   Magically dynamically loads all the modules in the modules
@@ -62,7 +79,7 @@ def load_modules():
     # we skip over all files that start with a _
     # this allows hackers to be working on a module and not have
     # it die every time.
-    mem2 = mem[mem.rfind(os.sep)+1:mem.rfind(".")]
+    mem2 = get_module_name(mem)
     if mem2.startswith("_"):
       continue
 
@@ -74,7 +91,7 @@ def load_modules():
         _module.load()
 
       _module.__dict__["lyntin_import"] = 1
-      lyntin.lyntinmodules.append(mem)
+      lyntin.lyntinmodules.append(name)
     except:
       exported.write_traceback("Module '%s' refuses to load." % name)
 
@@ -90,7 +107,7 @@ def load_modules():
 
       # and toss all the contents of the directory in our _module_list
       for mem in _module_list:
-        mem2 = mem[mem.rfind(os.sep)+1:mem.rfind(".")]
+        mem2 = get_module_name(mem)
         if mem2.startswith("_"):
           continue
 
@@ -102,7 +119,7 @@ def load_modules():
           test_for_conflicts(mem, _module)
 
           _module.__dict__["lyntin_import"] = 1
-          lyntin.lyntinmodules.append(mem)
+          lyntin.lyntinmodules.append(mem2)
         except:
           exported.write_traceback("Module '%s' refuses to load." % mem)
 
