@@ -238,18 +238,26 @@ def LynImport(words, input, seslist):
     This is a user command.
     """
 
-    # FIXME - this is a quickie implementation to allow me
-    # to test other things.  later this will allow for more
-    # sophisticated importing based on LYNTINDIR and reloading
-    # of modules (theoretically).
+    # FIXME - this still needs to handle reloading
+    # and maybe other stuff...  but looks good so far.  :)
 
     import sys
     Putline("trying to import " + words[1])
     try:
         exec ("import " + words[1])
-        Putline('import succeeded.')
-    except:  
-        Putline('import failed.')
+        Putline("import successful.")
+    except ImportError:
+        Putline(words[1] + " module does not exist.")
+    except:
+        from sys import exc_info
+        from traceback import format_exception
+
+        info = exc_info()
+        exc_class = info[0]
+        info = format_exception(info[0], info[1], info[2])
+
+        message = 'Error: ' + info[-4] + info[-3] + info[-2] + info[-1]
+        Putline("import failed because of:\n" + message)
     return
 
 def Showme(words, input, seslist):
