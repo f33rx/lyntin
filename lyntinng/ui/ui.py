@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.6 2002/03/01 16:39:22 willhelm Exp $
+# $Id: ui.py,v 1.7 2002/03/02 18:10:39 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -15,12 +15,14 @@ will display the message differently depending on the type.
 import string, re, sys
 import engine, event, utils
 
+""" The message type constants."""
 ERROR = "ERROR: "
 USERDATA = "USERDATA: "
 MUDDATA = "MUDDATA: "
 LTDATA = "LTDATA: "
 TESTDATA = "TESTDATA: "
 
+""" Used for debugging purposes."""
 MESSAGETYPES = {ERROR: "ERROR: ",
                 USERDATA: "USERDATA: ",
                 MUDDATA: "MUDDATA: ",
@@ -32,7 +34,16 @@ class Message:
   Encapsulates a message to be written to the user.
   """
   def __init__(self, data, messagetype=LTDATA):
-    """ Initialize."""
+    """ Initialize.
+
+    arguments:
+
+      'data' -- the message string
+
+      'messagetype' -- the message type (hopefully a constant
+                       defined in ui.ui.py
+
+    """
     self.data = data
     self.type = messagetype
 
@@ -74,6 +85,11 @@ class BaseUI:
     input being printed to the screen.  If the message
     argument is a String object rather than a Message
     object, the ui should assume it's Lyntin output.
+
+    arguments:
+
+      'message' -- a ui.ui.Message instance
+
     """
     pass
 
@@ -91,15 +107,28 @@ class BaseUI:
     pass
 
   def shutdown(self, args):
+    """ Tells the user interface thread to shutdown.
+
+    arguments:
+
+      'args' -- we ignore this
+
+    """
     self.shutdownflag = 1
 
   def flush(self):
+    """ Flushes output to the user."""
     pass
 
   def handleinput(self, input):
     """ Nicely handles enqueuing of input events.
 
     Also deals with things like \n.
+
+    arguments:
+
+      'input' -- the raw input from the user
+
     """
     input = utils.chomp(input)
     if input == '':

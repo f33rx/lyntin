@@ -5,7 +5,7 @@
 
 * VERSION
 
-$Id: README,v 1.4 2002/02/06 23:10:24 willhelm Exp $
+$Id: README,v 1.5 2002/02/27 03:39:34 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -33,19 +33,17 @@ code.
 
 Lyntin is great if:
 
-	1. you're at work and you want to telnet/ssh to a server and
-	   then mud from there without anyone knowing
-	2. you want a mud client that you can see the source code to
+	1. you want a mud client that you can see the source code to
 	   and adjust it to suit your needs
-	3. you want a mud client that has a sophisticated API for 
+	2. you want a mud client that has a sophisticated API for 
 	   enhancing and building bots/agents/triggers more advanced than
 	   "if you see this then do this"
-	4. you want a mud client that works on all your machines 
-	   and has a text ui and a gui
+	3. you want a mud client that works on all your machines,
+	   has a text ui, a tk gui, and can also work over ssh/telnet
 
 Lyntin is not great if:
 
-	1. you prefer wizards to the command line
+	1. you prefer wizards and menus to the command line
 	2. you hate Python
 
 
@@ -76,7 +74,7 @@ more we have to go by to understand what the problem is.
 
 * HOW TO CONTRIBUTE
 
-Development and maintenance is currently entirely done by the maintainer.
+Development and maintenance is entirely done by the maintainer right now.
 If you're interested in sending in bug fixes, please feel welcome.  I'm
 extremely accomodating to most methods of sending in patches.
 
@@ -97,8 +95,8 @@ The latest release of Lyntin is always available from:
 Lyntin is still under development, and there aren't many testers, so
 we apologize profusely for any bugs you may encounter and such.
 
-In general, work on Lyntin progresses as time allows.  We do respond 
-to emails on the mailing list with a day or so.  All issues are tracked
+In general, work on Lyntin progresses as time allows.  I respond to
+emails on the mailing list within a day or so.  Most issues are tracked
 via the bug-tracker and task-tracker on our SourceForge project site.
 If you have problems and fix them, by all means send us patches and
 we'll happily work with them and credit you.
@@ -119,16 +117,20 @@ commands we do not currently support:
 ^>>
 
 
+
 * DOCUMENTATION 
 
-Lyntin incorporates the 'look and feel' of Tintin++, so it should be
-pretty easy to make the transition.  It offers all the major features
-of Tintin++, including multiple sessions, but leaves a few minor things
-out.
+Lyntin incorporates the 'look and feel' of Tintin++, so if you've used
+Tintin++ or a variant it should be pretty easy to make the transition.  
+It offers all the major features of Tintin++, including multiple 
+sessions, but leaves a few minor things out.
 
-There are "in-game" help files covering all the commands and most 
+There are "in-game" help files covering the commands and most 
 other things we could think of which can be accessed with the #help 
 command.
+
+All the documentation comes with Lyntin and is also available on
+the Lyntin website.
 
 If you find any bugs in the documentation or want to contribute
 documentation, please feel free to send such things to the mailing
@@ -139,7 +141,7 @@ list.
 * ERRATA
 
 That should be about it.  In-game help is accessed by typing #help.
-When you start Lyntin for the first time, type "#help general"
+When you start Lyntin for the first time, type '#help general'
 and that'll get you started.  Read through the various help files
 at your leisure.
 
