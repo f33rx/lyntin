@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.5 2002/05/05 17:49:52 willhelm Exp $
+# $Id: tintincmds.py,v 1.6 2002/05/05 18:45:37 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -366,8 +366,8 @@ def history_cmd(session, args, input):
 the !.  You can also do replacements via the sub=repl syntax.
 
 ex:
-   #history
-       prints the history buffer
+   #history [count=30]
+       prints the last count entries in the history buffer
    !
        executes the last thing you did
    !4
@@ -376,13 +376,15 @@ ex:
        executes the fourth to last thing you did after replacing
        3k with gk in it
   """
-  historylist = exported.get_history()
+  count = args["count"]
+  
+  historylist = exported.get_history(count)
   for i in range(0, len(historylist)):
     historylist[i] = repr(i) + " " + historylist[i]
   historylist.reverse()
   exported.write_message("History:\n" + string.join(historylist, "\n"))
 
-commands_dict["history"] = (history_cmd, "")
+commands_dict["history"] = (history_cmd, "count:int=30")
 
 
 def if_cmd(session, args, input):

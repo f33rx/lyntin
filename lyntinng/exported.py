@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.15 2002/05/04 04:31:48 willhelm Exp $
+# $Id: exported.py,v 1.16 2002/05/05 17:49:52 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -249,7 +249,7 @@ def write_mud_data(text, session=None):
   else:
     print "muddata:", text
 
-def get_history():
+def get_history(count=30):
   """ Retrieves the history as a oldest to youngest list of strings.
 
   returns:
@@ -257,7 +257,7 @@ def get_history():
     list of strings
 
   """
-  return get_engine().getHistoryManager().getHistory()
+  return get_engine().getHistoryManager().getHistory(count)
 
 def grep_databuffer(str, session):
   """ Not yet implemented."""
