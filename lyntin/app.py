@@ -11,7 +11,7 @@ contains the client class, which represents lyntin the process,
 some utility functions are at the end of the file.
 """
 
-import socket, select, sys, regex, time, regsub
+import socket, select, sys, re, regex, time, regsub
 import os, string, types, traceback
 import data, player, mud, hooks, cmdparse
 import dict_plus
@@ -344,7 +344,7 @@ class Client(dict_plus.c):
       """
       Re-does a command from the history list.
       """
-      if regex.search('^![0-9]*', input) == -1:
+      if not re.compile('^!\d*').search(input):
          # not a valid history command
          self.SendPlainInput(input)
       else:
@@ -417,7 +417,7 @@ class Client(dict_plus.c):
       # convert stuff like 2e5s into eesssss.
       while i < n:
          c = input[i]
-         if regex.match('[0-9]', c) != -1:
+         if re.compile('\d').match(c):
             # number: keep saving them till we see a char
             num = num + c
          elif num:
@@ -436,7 +436,7 @@ class Client(dict_plus.c):
       Repeatedly executes a command.
       """
       if words:
-         if regex.match('^[0-9]+$', words[0]) != -1:
+         if re.compile('^\d+$').match(words[0]):
             num = string.atoi(words[0]) # number of repeats
             words = words[1:]
             for i in range(num):
@@ -604,21 +604,6 @@ def split_braced(str):
       raise 'LTSyntaxError', 'unmatched braces'
    return one, two
 
-"""
-def CountRegex(pat, str):
-   CountRegex(pat, str) -> int
-
-   Returns the number of occurances of pattern in a string.
-   
-   s = str[:]
-   r = regex.compile(pat)
-   count = 0
-   while r.search(s) != -1:
-      count = count + 1
-      s = regsub.sub(pat, '', s)
-   return count
-"""
-
 def strip_vars(s):
    """strip_vars(s) -> list
 
@@ -628,18 +613,22 @@ def strip_vars(s):
    str = s[:]
    vars = []
    # regex to match nested variables within braces
-   nested_var = regex.compile('{.*%%\([0-9]+\).*}')
-   while nested_var.search(str) != -1:
+   nested_var = re.compile('{.*%%([0-9]+).*}')
+   match = nested_var.search(str)
+   while match:
       # found a nested variable: replace it with an unnested var
-      pat = '%%'+nested_var.group(1)
-      repl = '%'+nested_var.group(1)
-      str = regsub.gsub(pat, repl, str)
+      pat = '%%'+match.group(1)
+      repl = '%'+match.group(1)
+      str = re.sub(pat, repl, str)
+      match = nested_var.search(str)      
    ret = str[:]
-   while data.var_regex.search(str) != -1:
-      var = data.var_regex.group(1)
+   match = data.var_regex.search(str)
+   while match:
+      var = match.group(1)
       if var not in vars:
          vars = vars + [var]
-      str = regsub.sub(data.var_regex.givenpat, '', str)
+      str = re.sub(data.var_regex.pattern, '', str)
+      match = data.var_regex.search(str)
    return vars, ret
 
 def is_brace(input):
