@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: connection.py,v 1.2 2002/06/27 02:32:20 willhelm Exp $
+# $Id: connection.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -138,9 +138,9 @@ class Connection:
     response = ''
     for background in range(40,48):
       for foreground in range(30,38):
-        response += self.color(str(foreground), foreground, background)
-        response += self.color(str(foreground), foreground, background, 1)
-      response += "\n"
+        response += color(str(foreground), foreground, background)
+        response += color(str(foreground), foreground, background, 1)
+      response += "\33[0m\n"
 
     self.write(response)
 
@@ -153,6 +153,6 @@ class Connection:
              "line. It has the advantage of being platform-independent and " +
              "has multiple interfaces as well--I use Lyntin at home with " +
              "the Tk interface as well as over telnet using the text " +
-             "interface.")
+             "interface.\n")
     output = utils.wrap_text(output, 70, 0, 0)
     self.write(output)

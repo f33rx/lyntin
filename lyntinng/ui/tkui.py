@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.8 2002/07/12 00:17:23 willhelm Exp $
+# $Id: tkui.py,v 1.9 2002/07/14 15:14:00 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -12,7 +12,7 @@ Lyntin, but largely re-coded in various areas.
 """
 
 import string, os, Tkinter, tkFont, ScrolledText
-import ui, hooks, event, engine, exported, lyntin
+import ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
 
@@ -49,7 +49,7 @@ fg_color_codes = {"30": "#000000",
                   "36": "#008080",
                   "37": "#c0c0c0",
                   "b30": "#808080",
-                  "b31": "#ff6060",
+                  "b31": "#ff4040",
                   "b32": "#00ff00",
                   "b33": "#ffff00",
                   "b34": "#8080ff",
@@ -92,12 +92,13 @@ class Tkui(ui.BaseUI):
     ui.BaseUI.__init__(self)
 
     # (bold, foreground, background)
-    self._currcolors = [0, "37", "40"]
+    # self._currcolors = [0, "37", "40"]
+    # ses -> (bold, foreground, background) tuple
+    self._currcolors = {}
 
-    # (bold, foreground, background)
-    self._regcolors = [0, "37", "40"]
+    # ses -> string
+    self._unfinishedcolor = {}
 
-    self._unfinishedcolor = (0, "")
     self._viewhistory = 0
     self._do_i_echo = 1
     self._tk = Tkinter.Tk()
@@ -303,6 +304,8 @@ class Tkui(ui.BaseUI):
       self._txt.insert('end', message.data)
 
     elif message.type == ui.MUDDATA:
+      line = message.data
+
       index = 0
       start = 0
 
@@ -310,97 +313,50 @@ class Tkui(ui.BaseUI):
           and message.session != exported.get_current_session()):
         pretext = "[" + message.session.getName() + "] "
 
-        if message.data[-1] == "\n":
-          message.data = (pretext + 
-                          message.data[:-1].replace("\n", "\n" + pretext) + 
-                          "\n")
+        if line[-1] == "\n":
+          line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
         else:
-          message.data = pretext + message.data.replace("\n", "\n" + pretext)
+          line = pretext + line.replace("\n", "\n" + pretext)
 
       # first we remove all \\r stuff
-      line = message.data.replace("\r", "")
+      line = line.replace("\r", "")
 
-      # then we handle unfinished colors--ansi color codes can
-      # be split between calls to write.
-      if self._unfinishedcolor[0] == 1:
-      
-        index = line.find("m")
+      tokens = utils.split_ansi_from_text(line)
 
-        if index == -1:
-          self._unfinishedcolor = (1,
-                                   self._unfinishedcolor[1] + line[:index])
+      ses = message.session
+      if self._currcolors.has_key(ses):
+        color = self._currcolors[ses]
+      else:
+        color = [-1, "37", "40"]
+      if self._unfinishedcolor.has_key(ses):
+        leftover = self._unfinishedcolor[ses]
+      else:
+        leftover = ""
+
+      for mem in tokens:
+        if utils.is_color_token(mem):
+          color, leftover = utils.figure_color([mem], color, leftover)
         else:
-          self._colorChange(self._unfinishedcolor[1] + line[:index]) 
-          self._unfinishedcolor = (0, "")
+          if color[1] == -1:
+            fg = "37"
+          else:
+            fg = str(color[1])
 
-        start = index + 1
+          if color[2] == -1:
+            bg = "40"
+          else:
+            bg = str(color[2])
 
+          if color[0] == 1:
+            fg = "b" + fg
 
-      # now we handle all the text
-      index = line.find(chr(27), index)
-      while index > -1:
-        cstart = index
+          self._txt.insert('end', mem, (fg, bg))
 
-        self._txt.insert('end', 
-                         line[start:cstart], 
-                         (self._currcolors[1], self._currcolors[2]))
-
-        temp = line.find("m", index)
-        if temp == -1:
-          self._unfinishedcolor = (1, line[cstart:])
-          line = line[:cstart]
-        else:   
-          self._colorChange(line[cstart:temp])
-          start = temp + 1
-
-        index = line.find(chr(27), index+1)
-
-
-      if self._unfinishedcolor[0] == 0:
-        self._txt.insert('end', 
-                         line[start:], 
-                         (self._currcolors[1], self._currcolors[2]))
+      self._unfinishedcolor[ses] = leftover
+      self._currcolors[ses] = color
 
     self._clipText()
     self._yadjust()
-
-
-  def _colorChange(self, text):
-    """
-    Takes in a string and parses it into a series of numbers,
-    then sets the current colors accordingly.
-    """
-    if text[0] == chr(27):
-      # we strip off the ESC and the [
-      newcolor = text[2:]
-
-      # check to see if there's no actual color, or if
-      # it's ^[0m which resets the colors
-      if newcolor == '' or newcolor == "0":
-        self._currcolors[:] = self._regcolors[:]
-        return
-
-      numlist = newcolor.split(";")
-      numlist.sort()
-
-      for num in numlist:
-        if txt_attribs.has_key(num):
-        
-          if num == "1":
-            self._currcolors[0] = 1
-
-        elif fg_color_codes.has_key(num):
-            self._currcolors[1] = num
-
-        elif bg_color_codes.has_key(num):
-            self._currcolors[2] = num
-
-      if self._currcolors[0] == 1:
-        if self._currcolors[1][0] != "b":
-          self._currcolors[1] = "b" + self._currcolors[1]
-        # if self._currcolors[2][0] != "b":
-        #   self._currcolors[2] = "b" + self._currcolors[2]
-
 
   def _initColorTags(self):
     """ Sets up Tk tags for the text widget (fg/bg)."""
@@ -412,8 +368,6 @@ class Tkui(ui.BaseUI):
     for ck in bg_color_codes.keys():
       self._txt.tag_config(ck, background=bg_color_codes[ck])
       self._txtbuffer.tag_config(ck, background=bg_color_codes[ck])
-
-
 
 
 class CommandEntry(Tkinter.Entry):
