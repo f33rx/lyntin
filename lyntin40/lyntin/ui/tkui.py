@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.22 2004/05/10 13:59:02 glasssnake Exp $
+# $Id: tkui.py,v 1.23 2004/05/23 07:26:03 glasssnake Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -398,6 +398,9 @@ class Tkui(base.BaseUI):
     mess = args["message"]
     if type(mess) == types.StringType:
       mess = message.Message(mess, message.LTDATA)
+    elif "window" in mess.hints:
+      self.writeWindow_internal(mess.hints["window"], mess)
+      return
 
     line = mess.data
     ses = mess.session
