@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.27 2002/06/05 18:56:13 jmberne Exp $
+# $Id: tintincmds.py,v 1.28 2002/06/07 23:43:30 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -957,33 +957,10 @@ def ticksize_cmd(session, args, input):
 
   size = args["size"]
 
-  if size[0] == "0":
+  if size == 0:
     exported.write_message("ticksize: ticksize is %d seconds." % 
                            session.getTicker().getTickLen())
     return
-
-  if size.isdigit():
-    size = int(size)
-
-  else:
-    i = 0
-    temp = ""
-    tempsize = 0
-    for i in range(0, len(size)):
-      if size[i].isdigit():
-        temp += size[i]
-      else:
-        if temp:
-          if size[i] == "m":
-            tempsize += int(temp) * 60
-          elif size[i] == "h":
-            tempsize += int(temp) * 60 * 60
-          else:
-            tempsize += int(temp)
-
-        temp = ""
-
-    size = tempsize
 
   if size <= 0:
     exported.write_error("ticksize must be a positive number.")
@@ -992,7 +969,7 @@ def ticksize_cmd(session, args, input):
   session.getTicker().setTickLen(size)
   exported.write_message("ticksize: tick length set to %s." % str(size))
 
-commands_dict["ticksize"] = (ticksize_cmd, "size=0")
+commands_dict["ticksize"] = (ticksize_cmd, "size:timespan=0")
 
 
 def togglesubs_cmd(session, args, input):

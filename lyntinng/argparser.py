@@ -5,13 +5,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.18 2002/06/02 16:06:03 jmberne Exp $
+# $Id: argparser.py,v 1.19 2002/06/08 15:57:19 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
 automatically into a dictionary.
 """
-import string, re
+import string, re, time
 import utils
 
 defaultOptions={ "stripBraces": 1,
@@ -42,12 +42,6 @@ class ArgumentParser:
     # the syntax line is automatically generated from the argspec.
     # we print it out whenever we have a ParserException in the user input.
     self.syntaxline = ""
-
-    self.typecheckers = { "string": StringChecker(),
-                          "int": IntChecker(),
-                          "boolean": BooleanChecker(),
-                          "booleanornone": BooleanOrNoneChecker(),
-                          "eval": EvalChecker() }
 
     if argoptions:
       self.buildOptions(argoptions)
@@ -159,10 +153,9 @@ class ArgumentParser:
       else:
         parser = Parser(self,argname)
 
-      if self.typecheckers.has_key(typespec):
-        typechecker = self.typecheckers[typespec]
-      else:
-        raise ParserException, "Unknown type specified: %s" % (typespec)
+      typechecker = createChecker(typespec)
+      if not typechecker:
+        raise ParserException, "Unknown type specifier: %s" % (typespec)
 
       parser.typechecker = typechecker
 
@@ -416,11 +409,39 @@ class extraNamedParser(Parser):
       dict[self.argname] = {key:val}
 
 
+typecheckers = {}
+
+def createChecker(typespec):
+  """
+  This creates a typechecker based on the values in the dictionary
+  typecheckers.
+
+  First the typespec is split at its first colon.
+
+  The first element (the typename) of the typespec is used as a key
+  into typecheckers to find the function/class object to call to
+  create the typechecker. 
+
+  The rest of the typespec (the typeargs) is used with the function to
+  construct the typechecker desired.
+  """
+  typespec = typespec.split(":",1)
+  if len(typespec) == 1:
+    typename, typeargs = typespec[0],None
+  else:
+    typename, typeargs = typespec
+
+  if not typecheckers.has_key(typename):
+    return None
+  typechecker = typecheckers[typename](typename,typeargs)
+
+  return typechecker
+
 class Checker:
   """
   Trivial base class for argument checkers
   """
-  def __init__(self):
+  def __init__(self, typename, typeargs):
     return
 
   def check(self, arg):
@@ -431,30 +452,40 @@ class StringChecker(Checker):
   Essentiallly the same as the trivial base class, but it's explicit
   that we just return the string we take in. 
   """
-  def __init__(self):
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
     return
 
   def check(self,arg):
     return arg
 
-class IntChecker:
+typecheckers["string"] = StringChecker
+
+class IntChecker(Checker):
   """
   Accept only integer values and return integer objects.
   """
-  def __init__(self):
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
     return
 
   def check(self,arg):
     return int(arg)
 
-class BooleanChecker:
+typecheckers["int"] = IntChecker
+
+class BooleanChecker(Checker):
   """
   Accept only boolean values
   True values are :  on, true, 1
   False Values are : off, false, 0
   Any other values cause exceptions.
   """
-  def __init__(self):
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
     return
 
   def check(self,arg):
@@ -465,7 +496,9 @@ class BooleanChecker:
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
 
-class BooleanOrNoneChecker:
+typecheckers["boolean"] = BooleanChecker
+
+class BooleanOrNoneChecker(Checker):
   """
   Accept only boolean values or special "Not specified" values
   True values are :  on, true, 1
@@ -473,7 +506,9 @@ class BooleanOrNoneChecker:
   None Values are : -, None, ""
   Any other values cause exceptions.
   """
-  def __init__(self):
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
     return
 
   def check(self,arg):
@@ -486,11 +521,15 @@ class BooleanOrNoneChecker:
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
 
-class EvalChecker:
+typecheckers["booleanornone"] = BooleanOrNoneChecker
+
+class EvalChecker(Checker):
   """
   Evaluate its input argument as python code and return the resulting object.
   """
-  def __init__(self):
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
     return
 
   def check(self,arg):
@@ -499,6 +538,69 @@ class EvalChecker:
     except Exception, e:
       raise ParserException, "Error eval-ing argument (%s): %s" % (arg, e)
 
+typecheckers["eval"] = EvalChecker 
+
+class TimeSpanChecker(Checker):
+  """
+  Accepts an amount of time and converts it to a number of seconds.
+  """
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
+    return
+
+  def check(self, arg):
+    time = utils.parse_timespan(arg)
+    if time != None:
+      return time
+    else:
+      raise ParserException, "Invalid timespan specified %s" % (arg,)
+
+typecheckers["timespan"] = TimeSpanChecker
+  
+class TimeChecker(Checker):
+  """
+  Accepts a date specification.
+
+  Will also accept a time specification and apply it as a delta from
+  _now_.  converts to the standard seconds-from_epoch. 
+  """
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
+    return
+
+  def check(self, arg):
+    time = utils.parse_time(arg)
+    if time != None:
+      return time
+    else:
+      raise ParserException, "Invalid time specified %s" % (arg,)
+  
+class ChoiceChecker(Checker):
+  """
+  Allows for a value to come from a selection of different strings.
+  Automatically expands to one of them if it is uniquely specified.
+
+  typeargs should be a |-delimitted list of possibly values
+  """
+  def __init__(self, typename, typeargs):
+    if not typeargs:
+      raise ParserException("TypeArgs (%s) not specified for %s type - must allow at least one choice." % (typeargs, typename) )
+    self._choices = typeargs.split("|")
+    return
+
+  def check(self, args):
+    possibilities = []
+    for item in self._choices:
+      if item.find(args) == 0:
+        possibilities.append(item)
+    if len(possibilities) == 0 or len(possibilities) > 1:
+      raise ParserException, "Invalid argument, must be one of %s" % (self._choices,)
+    else:
+      return possibilities[0]
+
+typecheckers["choice"] = ChoiceChecker
 
 if __name__ == '__main__':
   testargs = {

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.30 2002/06/01 15:51:44 willhelm Exp $
+# $Id: utils.py,v 1.31 2002/06/04 00:52:39 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -12,12 +12,14 @@ classes in the application, but are useful in a variety of
 places.  They're not dependent on application things, so 
 they're highly unit tested.
 """
-import string, re
+import string, re, time
 
 SEMI_REGEXP = re.compile('(?<!\\\\);')
 VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
+TIMESPAN_REGEXP = re.compile(r"^(?P<days>\d+d)?(?P<hours>\d+h)?(?P<minutes>\d+m)?(?P<seconds>\d+s?)?$")
+TIME_REGEXP=re.compile(r"^(?P<hour>\d\d?)(:(?P<minute>\d\d)(:(?P<second>\d\d))?)?(?P<ampm>a|p)?$")
 
 def chomp(text):
   """ Removes all '\\r' and '\\n' from the input string.
@@ -562,6 +564,128 @@ def columnize(textlist, screenwidth=72, indent=0):
   rows = map(string.rstrip, map(string.join, rows))
   return (indent * " ") + string.join(rows, "\n" + (indent * " "))
 
+def parse_timespan(timespan):
+  """
+  Parses a timsspan into a number of seconds.  
+
+  arguments:
+
+    'timespan' -- (string) the timespan to parse
+
+  returns:
+
+    None if the timespan was unparseable, the number of
+    seconds otherwise. 
+  """
+  match=TIMESPAN_REGEXP.match(timespan)
+
+  if not match:
+    return None
+    
+  timespec=match.groupdict()
+
+  if not timespec["days"] and not timespec["hours"] and not timespec["minutes"] and not timespec["seconds"]:
+    return None
+
+  days = timespec["days"]
+  if not days:
+    days="0"
+  elif days[-1]=="d":
+    days=days[:-1]
+  days=int(days)
+
+  hours = timespec["hours"]
+  if not hours:
+    hours="0"
+  elif hours[-1]=="h":
+    hours=hours[:-1]
+  hours=int(hours)
+
+  minutes = timespec["minutes"]
+  if not minutes:
+    minutes="0"
+  elif minutes[-1]=="m":
+    minutes=minutes[:-1]
+  minutes=int(minutes)
+    
+  seconds = timespec["seconds"]
+  if not seconds:
+    seconds="0"
+  elif seconds[-1]=="s":
+    seconds=seconds[:-1]
+  seconds=int(seconds)
+      
+  return days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
+
+def parse_time(timearg):
+  """
+  Parses a time into the number of seconds since the epoch.
+ 
+  First attempts to parse as a time of day, and if that fails attempts
+  to parse as a timespan.  Timespans are interpretted as times from
+  time.time() (now). 
+
+  arguments:
+
+    'timearg' -- (string) the timespan to parse
+
+  returns:
+
+    None if the time was unparseable, the number of
+    seconds otherwise. 
+  """
+  match = TIME_REGEXP.match(timearg)
+
+  if not match:
+    timespan = parse_timespan(timearg)
+    if timespan != None:
+      return time.time() + timespan
+    else:
+      return None
+
+  timespec = match.groupdict()
+  currenttime = time.localtime()
+
+  hour=int(timespec["hour"])
+  ampm=timespec["ampm"]
+  if hour > 12:
+    if ampm:
+      return None
+    else:
+      ampm="p"
+  else:
+    if ampm == "p":
+      hour = hour + 12
+
+  if hour < 1 or hour > 24:
+    return None
+
+  minute = timespec["minute"]
+  if minute == None:
+    minute = 0
+  else:
+    minute = int(minute)
+  
+  second = timespec["second"]
+  if second == None:
+    second = 0
+  else:
+    second = int(second)
+
+  timetuple = (currenttime[0],currenttime[1],currenttime[2],hour,minute,second,currenttime[6],currenttime[7],currenttime[8])
+  if ampm:
+    increment=24
+  else:
+    increment=12
+    
+  while timetuple < currenttime:
+    timetuple = timetuple[:3] + (timetuple[3] + increment,) + timetuple[4:]
+  
+  try:
+    return time.mktime(timetuple)
+  except Exception, e:
+    print e
+    return None
 
 def _pass_fail(testoutput, realoutput):
   """ Used for testing purposes."""
@@ -569,7 +693,7 @@ def _pass_fail(testoutput, realoutput):
     print "   pass:", testoutput
   else:
     print "   fail:", testoutput
-
+3
 if __name__ == '__main__':
   print "split_commands tests"
   _pass_fail(split_commands('test'), 
@@ -609,3 +733,17 @@ if __name__ == '__main__':
   print replace_vars("#test 1 2 3", "#test %-1")
   print replace_vars("#test 1 2 3", "#test %:-1")
   print replace_vars("#test 1 2 3", "#test %1:-1")
+
+  print "time parsing test"
+  print parse_timespan("1h")
+  print parse_timespan("1m")
+  print parse_timespan("1s")
+  print parse_timespan("1h2m3s")
+  print parse_timespan("17")
+  print parse_timespan("95h")
+
+  print parse_time("4:20p")
+  print parse_time("4m")
+  print parse_time("9")
+  print parse_time("1:17:34a")
+  
