@@ -196,7 +196,7 @@ class CommandManager(manager.Manager):
       # this checks to see if it's a special #@ command.
       if input[0] == "@":
         self.getCommand("@")(ses, input.split(" "), input)
-        if internal==0: self.prompt()
+        if internal==0: ses.prompt()
         return
 
       # this finds the first matching command and ends there.
@@ -228,9 +228,13 @@ class CommandManager(manager.Manager):
               exported.write_error("%s: %s\nsyntax: %s%s %s" % 
                                    (mem, e, lyntin.commandchar, mem,
                                     argumentparser.syntaxline))
+          if internal == 0:
+            ses.prompt()
           break
 
       else:
+        if internal == 0:
+          ses.prompt()
         exported.write_error("Not a valid command: %s" % (words[0]))
       return
     return args[-1]

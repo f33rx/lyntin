@@ -233,9 +233,10 @@ class AliasManager(manager.Manager):
     # do the variable expansion and then recurse over the result
     ses = args[0]
     internal = args[1]
+    verbatim = args[2]
     text = args[-1]
   
-    if not self._aliasdata.has_key(ses):
+    if not self._aliasdata.has_key(ses) or verbatim == 1:
       return text
 
     aliasexpansion = self._aliasdata[ses].expand(text)

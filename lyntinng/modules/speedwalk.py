@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.2 2002/06/26 22:52:14 willhelm Exp $
+# $Id: speedwalk.py,v 1.3 2002/07/07 04:53:45 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -340,9 +340,10 @@ class SpeedwalkManager(manager.Manager):
     """
     ses = args[0]
     internal = args[1]
+    verbatim = args[2]
     text = args[-1]
     
-    if not self._hashes.has_key(ses) or lyntin.speedwalk == 0:
+    if not self._hashes.has_key(ses) or lyntin.speedwalk == 0 or verbatim == 1:
       return text
 
     sdata = self._hashes[ses]

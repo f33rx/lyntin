@@ -251,25 +251,15 @@ class Session:
     output for internal stuff too.  1 if internal, 0 if not.
     """
 
-    # this is the point of much recursion--we don't recurse on
-    # lyntin commands however--commands handle their own variable
-    # expansion and such.
-    if self._verbatim == 0 and (len(input) == 0 or input[0] != lyntin.commandchar):
-
-      spamtuple = self,internal,input,input
-      spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
-      if spamtuple == None:
-        return
-      else:
-        input = spamtuple[-1]
-
-    # handle lyntin commands
-    spamtuple = self,internal,input,input
-    input = exported.get_manager("command").filter(spamtuple)
-    if not input:
-      if internal == 0:
-        self.prompt()
+    # this is the point of much recursion.  everything is registered
+    # as a filter and recurses accordingly.
+    spamtuple = self,internal,self._verbatim,input,input
+    spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
+    if spamtuple == None:
       return
+    else:
+      input = spamtuple[-1]
+
 
     # after this point we don't do any more recursion.  so it's
     # safe to unescape things and such.

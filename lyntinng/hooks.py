@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.16 2002/06/08 15:57:19 willhelm Exp $
+# $Id: hooks.py,v 1.17 2002/06/18 04:01:12 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -276,7 +276,7 @@ all filter functions.
 
 These should return the text that should be sent to the mud.
 
-arg tuple will contain the session, the original text and the currently 
-filtered text.
+arg tuple will contain the session, the internal flag, the verbatim flag,
+the original text and the currently filtered text.
 """
 user_filter_hook = Hook(filter_mapper)

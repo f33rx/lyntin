@@ -74,7 +74,9 @@ class Engine:
     self._managers["history"] = history.HistoryManager()
 
     # our command manager
-    self._managers["command"] = commandmanager.CommandManager()
+    cm = commandmanager.CommandManager()
+    self._managers["command"] = cm
+    hooks.user_filter_hook.register(cm.filter, 100)
 
     # there is only one ui in the system.
     self._ui = None
