@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.53 2002/10/30 03:12:13 willhelm Exp $
+# $Id: tintincmds.py,v 1.54 2002/11/08 02:35:13 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -220,11 +220,13 @@ def log_cmd(session, args, input):
   """
   logfile = args["logfile"]
   databuffer = args["databuffer"]
+  stripansi = args["stripansi"]
 
   if not logfile:
+    exported.write_message(session.getLogfileStatus())
     if session.getLogfile() != None:
       exported.write_message("Currently logging to %s." 
-                             % session.getLogfileName())
+                             % session.getLogfileStatus())
     else:
       exported.write_message("Logging is disabled.")
     return
@@ -250,18 +252,23 @@ def log_cmd(session, args, input):
       buffer = session.getDataBuffer().fetchbuffer()
       f.write(buffer)
       exported.write_message("log: dumped %d lines of databuffer to logfile" % buffer.count("\n"))
-      session.setLogfile(f)
+      session.setLogfile(f, stripansi)
 
     else:
-      session.openLogfile(logfile)
+      session.openLogfile(logfile, stripansi)
 
-    exported.write_message("log: starting logging to '%s'." % 
-                             session.getLogfileName())
+    if stripansi:
+      stripansimessage = " stripping ansi"
+    else:
+      stripansimessage = ""
+
+    exported.write_message("log: starting logging to '%s'%s." % 
+                             (session.getLogfileName(), stripansimessage))
   except Exception, e:
     exported.write_error("log: logfile cannot be opened for appending. %s" % (e))
 
 
-commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false")
+commands_dict["log"] = (log_cmd, "logfile= databuffer:boolean=false stripansi:boolean=true")
 
          
 def loop_cmd(session, args, input):

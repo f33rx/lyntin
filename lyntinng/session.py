@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.69 2002/10/21 04:02:33 willhelm Exp $
+# $Id: session.py,v 1.70 2002/11/09 04:21:59 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -134,7 +134,7 @@ class Session:
     data.append("Session name: %s" % self._name)
     data.append("   socket: %s" % repr(self._socket))
     data.append("   ticker: %s" % self.getTicker().getInfo())
-    data.append("   logfile: %s" % self.getLogfileName())
+    data.append("   logfile: %s" % self.getLogfileStatus())
 
     return data
 
@@ -362,20 +362,23 @@ class Session:
 
   def log(self, input):
     """
-    Logs text to a file instance self._logfile.
+    Logs text to a file instance self._logfile[0] and optionally
+    filters ansi according to self._logfile[1].
 
     @param input: the string to log to the logfile for this session
     @type  input: string
     """
     try:
-      text = ansi.filter_ansi(utils.filter_cm(input))
+      if self._logfile[1] == 1:
+        input = ansi.filter_ansi(input)
+      text = utils.filter_cm(input)
       text = text.replace("\n", os.linesep)
-      self._logfile.write(text)
-      self._logfile.flush()
+      self._logfile[0].write(text)
+      self._logfile[0].flush()
     except:
       exported.write_error("Logfile cannot be written to.")
       self._logfile = None
-      exported.write_traceback("what the fuck?")
+      exported.write_traceback()
 
   def getLogfile(self):
     """
@@ -391,27 +394,34 @@ class Session:
     Closes the logfile if it's currently open.
     """
     if self._logfile:
-      self._logfile.close()
+      self._logfile[0].close()
       self._logfile = None
 
-  def openLogfile(self, filename):
+  def openLogfile(self, filename, stripansi=1):
     """
     Opens a new logfile.
 
     @param filename: the name of the new file to open in append mode.
     @type  filename: string
+
+    @param stripansi: whether (1) or not (0) to strip ansi from the
+        logs
+    @type  stripansi: boolean
     """
     # FIXME - what happens if we already have a logfile open?
-    self._logfile = open(filename, "a")
+    self._logfile = (open(filename, "a"), stripansi)
 
-  def setLogfile(self, fileob):
+  def setLogfile(self, fileob, stripansi=1):
     """
     Sets the logfile.
 
     @param fileob: the new File instance
     @type  fileob: File
     """
-    self._logfile = fileob
+    if self._logfile:
+      self._logfile[0] = fileob
+    else:
+      self._logfile = (fileob, stripansi)
 
   def getLogfileName(self):
     """
@@ -421,9 +431,18 @@ class Session:
     @rtype: string
     """
     if self._logfile:
-      return self._logfile.name
+      return self._logfile[0].name
     else:
       return "<none>"
+
+  def getLogfileStatus(self):
+    if self._logfile:
+      if self._logfile[1] == 0:
+        return self.getLogfileName() + " (noansi)"
+      else:
+        return self.getLogfileName()
+    else:
+      return "logging disabled"
 
 # Local variables:
 # mode:python
