@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.67 2002/10/12 22:14:47 willhelm Exp $
+# $Id: session.py,v 1.68 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -106,6 +106,12 @@ class Session:
     # unregister with the shutdown hook
     hooks.shutdown_hook.unregister(self.shutdown)
     if self.getName() != "common":
+      if quiet == 0:
+        event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
+      self._ticker.clear()
+      self.closeLogfile()
+      hooks.disconnect_hook.spamhook((self, self._host, self._port))
+
       try:
         exported.get_engine().unregisterSession(self)
       except Exception, e:
@@ -113,12 +119,6 @@ class Session:
           exported.write_message("Exception unregistering session %s." % e)
       if self._socket:
         self._socket.shutdown()
-
-    if quiet == 0:
-      event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
-    self._ticker.clear()
-    self.closeLogfile()
-    hooks.disconnect_hook.spamhook((self, self._host, self._port))
 
   def getStatus(self):
     """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.24 2002/10/12 22:14:47 willhelm Exp $
+# $Id: net.py,v 1.25 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -25,11 +25,13 @@ CODES = {255: "IAC",
          252: "WON'T",
          251: "WILL",
          250: "SB",
+         249: "GA",
          240: "SE",
          0:   "<IS>",
          1:   "[<ECHO> or <SEND>]",
          3:   "<SGA>",
          24:  "<TERMTYPE>",
+         25:  "<EOR>", 
          31:  "<NegoWindoSize>",
          32:  "<TERMSPEED>",
          35:  "<XDISPLAY>",
@@ -42,6 +44,8 @@ DO   = chr(253)
 WONT = chr(252)
 WILL = chr(251)
 SB   = chr(250)
+GA   = chr(249)
+NOP  = chr(241)
 SE   = chr(240)
 SEND = chr(1)
 IS   = chr(0)
@@ -56,6 +60,7 @@ DDWW     = DD + WW
 ECHO     = chr(1)
 SGA      = chr(3)
 TERMTYPE = chr(24)
+EOR      = chr(24)
 NAWS     = chr(31)
 ENV      = chr(39)
 
@@ -122,17 +127,17 @@ class SocketCommunicator:
     @param sessionname: the name of the new session
     @type  sessionname: string
     """
-    if type(port) == type(''):
-      port = int(port)
+    if not self._sock:
+      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      sock.connect((host, port))
+      sock.setblocking(1)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((host, port))
-    sock.setblocking(1)
-
-    self._host = host
-    self._port = port
-    self._sock = sock
-    self._sessionname = sessionname
+      self._host = host
+      self._port = port
+      self._sock = sock
+      self._sessionname = sessionname
+    else:
+      raise Exception, "Connection already exists."
 
   def _pollForData(self):
     """
@@ -212,6 +217,9 @@ class SocketCommunicator:
     if convert:
       data = data.replace("\n", "\r\n")
 
+    if IAC in data:
+      data = data.replace(IAC, IAC+IAC)
+
     if self._shutdownflag == 0:
       try:
         self._sock.send(data)
@@ -246,51 +254,61 @@ class SocketCommunicator:
     @return: the data without the telnet control codes
     @rtype:  string
     """
+    marker = -1
     i = data.find(IAC)
 
     while (i != -1):
-      # handles DO/DONT/WILL/WONT stuff
-      if data[i+1] in DDWW:
-        if len(data) > i + 2:
+      if i + 1 >= len(data):
+        marker = i
+        break
 
+      # handles GA and NOP
+      if data[i+1] in (GA, NOP):
+        data = data[:i] + data[i+2:]
+        
+      else:
+        if i + 2 >= len(data):
+          marker = i
+          break
+
+        # handles DO/DONT/WILL/WONT stuff
+        if data[i+1] in DDWW:
           if data[i+2] == ECHO:
-            if data[i+1] == WILL:
-              event.EchoEvent(0).enqueue()
-            elif data[i+1] == WONT:
-              event.EchoEvent(1).enqueue()
+            self.handleECHO(data[i+1])
+
           elif data[i+1] in DD:
             self.write(IAC + WONT + data[i+2])
 
           data = data[:i] + data[i+3:]
 
-        else:
-          self._nego_buffer = data[i:]
-          data = data[:i]
-          return data
+        # handles SB...SE stuff
+        elif data[i+1] == SB:
 
-      # handles SB...SE stuff
-      elif data[i+1] == SB:
+          end = data.find(SE, i)
+          if end == -1:
+            marker = i
+            break
 
-        end = data.find(SE, i)
-        if end == -1:
-          self._nego_buffer = data[i:]
-          data = data[:i]
-          return data
-        else:
           data = data[:i] + data[end+1:]
 
-      # i'm not sure what this clause is for....
-      else:
-        if len(data) > i+2:
-          data = data[:i] + data[i+3:]
+        # in case they passed us something weird we remove the IAC and 
+        # move on
         else:
-          self._nego_buffer = data[i:]
-          data = data[:i]
-          return data
+          data = data[:i] + data[i+1:]
 
       i = data.find(IAC, i)
 
+    if marker != -1:
+      self._nego_buffer = data[marker:]
+      data = data[:marker]
+
     return data
+
+  def handleECHO(self, ddww):
+    if ddww == WILL:
+      event.EchoEvent(0).enqueue()
+    elif ddww == WONT:
+      event.EchoEvent(1).enqueue()
 
 # Local variables:
 # mode:python

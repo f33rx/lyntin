@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.46 2002/09/30 18:29:25 willhelm Exp $
+# $Id: tintincmds.py,v 1.47 2002/10/05 22:29:06 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -459,7 +459,7 @@ def session_cmd(ses, args, input):
     exported.write_message(data[:-1])
     return
 
-  if not name or not host or not port or port == -1:
+  if not name or not host or port == -1:
     exported.write_error("syntax: #session <sesname> <host> <port>")
     return
 
@@ -562,6 +562,7 @@ def textin_cmd(session, args, input):
   try:
     file = open(filename, "r")
     contents = file.readlines()
+    f.close()
     for mem in contents:
       mem = utils.chomp(mem)
       session.getSocketCommunicator().write(mem + "\n")
