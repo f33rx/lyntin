@@ -1,0 +1,9 @@
+--------------------
+MODULES README
+--------------------
+
+These are Lyntin modules.  If you build a module that you want
+Lyntin to load at startup, add an import line to the moduleinit
+module.
+
+More information to appear here regarding building modules.

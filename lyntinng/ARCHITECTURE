@@ -1,0 +1,24 @@
+--------------------
+ARCHITECTURE
+--------------------
+
+This is a quick architecture document to help understand the
+internals of Lyntin.  Along with the online documentation (UML
+diagrams and ool docs), this should provide you with everything
+you need to know to build modules and help fix Lyntin bugs.
+
+
+ARCHITECTURE:
+
+engine.Engine
+   |-- 1 help.HelpManager
+   |-- * session.Session
+   |      |-- 1 net.SocketCommunicator
+   |      |-- 1 alias.AliasManager           (inherited from common)
+   |      |-- 1 action.ActionManager         (inherited from common)
+   |      |-- 1 gag.GagManager               (inherited from common)
+   |      |-- 1 substitute.SubstituteManager (inherited from common)
+   |      |-- 1 variable.VariableManager     (inherited from common)
+   |
+   |-- 1 threadmanager.ThreadManager
+   |-- 1 ui.Baseui subclass

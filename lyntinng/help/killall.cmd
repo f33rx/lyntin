@@ -1,0 +1,3 @@
+   syntax: #killall
+
+   Clears all sessions of actions/aliases/subs/gags/variables.
