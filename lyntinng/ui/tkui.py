@@ -4,14 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.29 2003/01/01 00:36:26 willhelm Exp $
+# $Id: tkui.py,v 1.30 2003/01/01 21:16:35 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
 Lyntin, but largely re-coded in various areas.
 """
 
-import os, Tkinter, tkFont, ScrolledText, types
+from Tkinter import *
+from ScrolledText import ScrolledText
+import os, tkFont, types, Queue
 import ansi, ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
@@ -28,6 +30,7 @@ to Lyntin.  It also has the following additional functionality:
  - ctrl-c copy from the text buffer and ctrl-v paste into the command
    buffer (in Windows)
  - ctrl-t autotyper
+ - NamedWindow handling
 
 To bind function key and numpad bindings, create an alias for the
 symbol.  For example:
@@ -87,6 +90,36 @@ def get_ui_instance():
     myui = Tkui()
   return myui
 
+class _Event:
+  def __init__(self):
+    pass
+
+  def execute(self, tkui):
+    pass
+
+class _OutputEvent(Event):
+  def __init__(self, text):
+    self._text = text
+
+  def execute(self, tkui):
+    tkui.write_internal(self._text)
+
+class _TitleEvent(Event):
+  def __init__(self, tk, title):
+    self._tk = tk
+    self._title = title
+
+  def execute(self, tkui):
+    tkui._tk.title(self._title)
+
+class _WriteWindowEvent(Event):
+  def __init__(self, windowname, message):
+    self._windowname = windowname
+    self._message = message
+
+  def execute(self, tkui):
+    tkui.writeWindow_internal(self._windowname, self._message)
+
 class Tkui(ui.BaseUI):
   """
   This is a ui class which handles the complete Tk user interface.
@@ -94,6 +127,9 @@ class Tkui(ui.BaseUI):
   def __init__(self):
     """ Initializes."""
     ui.BaseUI.__init__(self)
+
+    # internal ui queue
+    self._event_queue = Queue.Queue()
 
     # map of session -> (bold, foreground, background)
     self._currcolors = {}
@@ -103,8 +139,14 @@ class Tkui(ui.BaseUI):
 
     self._viewhistory = 0
     self._do_i_echo = 1
-    self._tk = Tkinter.Tk()
+
+    # holds a map of window names -> window references
+    self._windows = {}
+
+    # instantiate all the widgets
+    self._tk = Tk()
     self._tk.geometry("800x600")
+
     self.settitle()
 
     if os.name == 'posix':
@@ -112,53 +154,34 @@ class Tkui(ui.BaseUI):
     else:
       fnt = tkFont.Font(family="Fixedsys", size=12)
 
-    self._entry = CommandEntry(self._tk, 
-                               self,
-                               fg='white', 
-                               bg='black',
-                               insertbackground='yellow',
-                               font=fnt, 
+
+    self._entry = CommandEntry(self._tk, self, fg='white', bg='black',
+                               insertbackground='yellow', font=fnt, 
                                insertwidth='2')
+    self._entry.pack(side='bottom', fill='both')
 
-    self._txt = Tkinter.Text(self._tk, {'fg': 'white', 
-                                        'bg': 'black',
-                                        'font': fnt,
-                                        'height': 20})
+    self._topframe = Frame(self._tk)
+    self._topframe.pack(side='top', fill='both', expand=1)
 
-    # handles improper keypresses
+    self._txt = ScrolledText(self._topframe, fg='white', 
+                             bg='black', font=fnt, height=20)
+    self._txt.pack(side='bottom', fill='both', expand=1)
+
+
     self._txt.bind("<KeyPress>", self._ignoreThis)
-
-    self._txtbuffer = Tkinter.Text(self._tk, {'fg': 'white', 
-                                              'bg': 'black', 
-                                              'font': fnt, 
-                                              'height': 20})
-
-
-    # these deal with catching improper keypresses
+    self._txtbuffer = ScrolledText(self._topframe, fg='white', 
+                                   bg='black', font=fnt, height=20)
     self._txtbuffer.bind("<KeyPress-Escape>", self.escape)
     self._txtbuffer.bind("<KeyPress>", self._ignoreThis)
 
-    # set up the scrollbar for the txtbuffer widget
-    self._scrollVertical = Tkinter.Scrollbar(self._tk, 
-                                             orient=Tkinter.VERTICAL)
-    self._txt.configure(yscrollcommand=self._scrollVertical.set)
-    self._scrollVertical.config(command=self._txt.yview)
-    self._scrollVertical.pack(side=Tkinter.RIGHT, 
-                              anchor=Tkinter.E, 
-                              fill=Tkinter.Y)
 
-    self._entry.pack({'side': 'bottom', 'fill': 'both'})
     self._entry.focus_set()
-
-    self._txt.pack({'side': 'bottom', 'fill': 'both', 'expand': 1})
-
     self._initColorTags()
+    self.dequeue()
+
     exported.hook_register("mudecho_hook", self.echo)
     exported.hook_register("startup_hook", self.startui)
     exported.hook_register("to_user_hook", self.write)
-
-    # holds a map of window names -> window references
-    self._windows = {}
 
   def startui(self, args):
     """ Starts up the main thread."""
@@ -168,6 +191,14 @@ class Tkui(ui.BaseUI):
     exported.write_message("For tk help type \"#help tkui\".")
     exported.add_command("colorcheck", colorcheck_cmd)
 
+  def dequeue(self):
+    try:
+      ev = self._event_queue.get_nowait()
+      ev.execute(self)
+    except:
+      pass
+    self._tk.after(100, self.dequeue)
+
   def settitle(self, title=""):
     """
     Sets the title bar to the Lyntin title plus the given string.
@@ -176,9 +207,11 @@ class Tkui(ui.BaseUI):
     @type  title: string
     """
     if title:
-      self._tk.title(lyntin.LYNTINTITLE + title)
+      title = lyntin.LYNTINTITLE + title
     else:
-      self._tk.title(lyntin.LYNTINTITLE)
+      title = lyntin.LYNTINTITLE
+    self._event_queue.put(_TitleEvent(self._tk, title))
+    # self._tk.title = title
 
   def removeWindow(self, windowname):
     if self._windows.has_key(windowname):
@@ -196,10 +229,13 @@ class Tkui(ui.BaseUI):
     @param message: the message to write to the window
     @type  message: string or Message instance
     """
+    self._event_queue.put(_WriteWindowEvent(windowname, message))
+
+  def writeWindow_internal(self, windowname, message):
     if not self._windows.has_key(windowname):
       self._windows[windowname] = NamedWindow(windowname, self, self._tk)
     self._windows[windowname].write(message)
-
+     
   def _ignoreThis(self, tkevent):
     """ This catches keypresses from the history buffer."""
     # kludge so that ctrl-c doesn't get caught allowing windows
@@ -227,10 +263,7 @@ class Tkui(ui.BaseUI):
   def pageUp(self):
     """ Handles prior (Page-Up) events."""
     if self._viewhistory == 0:
-      self._txtbuffer.pack({'after': self._txt, 
-                            'side': 'bottom', 
-                            'fill': 'both', 
-                            'expand': 1})
+      self._txtbuffer.pack(side='top', fill='both', expand=1)
 
       self._viewhistory = 1
       self._txtbuffer.delete ("1.0", "end")
@@ -308,21 +341,24 @@ class Tkui(ui.BaseUI):
 
     This is overridden from the 'ui.BaseUI'.
     """
-    message = args[0]
-    if type(message) == types.StringType:
-      message = ui.Message(message, ui.LTDATA)
+    self._event_queue.put(_OutputEvent(args))
 
-    line = message.data
-    ses = message.session
+  def write_internal(self, args):
+    mess = args[0]
+    if type(mess) == types.StringType:
+      mess = ui.Message(mess, ui.LTDATA)
+
+    line = mess.data
+    ses = mess.session
 
     if line == '' or self.showTextForSession(ses) == 0:
       return
 
      
-    color, leftover = buffer_write(message, self._txt, self._currcolors, 
+    color, leftover = buffer_write(mess, self._txt, self._currcolors, 
                                    self._unfinishedcolor)
 
-    if message.type == ui.MUDDATA:
+    if mess.type == ui.MUDDATA:
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
 
@@ -393,7 +429,7 @@ class Tkui(ui.BaseUI):
     self._txt.insert('end', '\n')
 
 
-class CommandEntry(Tkinter.Entry):
+class CommandEntry(Entry):
   """ This class handles the user input area."""
 
   def __init__(self, master, partk, **kw):
@@ -403,8 +439,7 @@ class CommandEntry(Tkinter.Entry):
     self._autotyper = None
     self._autotyper_ses = None
 
-    # apply(Tkinter.Entry.__init__, (self, master), kw)
-    Tkinter.Entry.__init__(self, master, kw)
+    Entry.__init__(self, master, kw)
 
     self.bind("<KeyPress-Return>", self.createInputEvent)
 
@@ -664,10 +699,10 @@ class NamedWindow:
     @type  windowname: string
 
     @param master: the main tk window
-    @type  master: Tkinter.Tk
+    @type  master: toplevel
     """
     self._parent = master
-    self._tk = Tkinter.Toplevel(partk)
+    self._tk = Toplevel(partk)
     self._windowname = windowname
     
     # map of session -> (bold, foreground, background)
@@ -689,8 +724,9 @@ class NamedWindow:
       fontname = "Fixedsys"
     fnt = tkFont.Font(family=fontname, size=12)
     
-    self._txt = ScrolledText.ScrolledText(self._tk, fg="white", bg="black", font=fnt, height=20)
-    self._txt.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+    self._txt = ScrolledText(self._tk, fg="white", bg="black", 
+                             font=fnt, height=20)
+    self._txt.pack(side=TOP, fill=BOTH, expand=1)
     
     # handles improper keypresses
     self._txt.bind("<KeyPress>", self._ignoreThis)
@@ -802,19 +838,19 @@ class Autotyper:
     Initializes the autotyper.
     
     @param master: the main tk window
-    @type  master: Tkinter.Tk
+    @type  master: Tk
 
     @param sendfunc: the callback function
     @type  sendfunc: function
     """
     self._sendfunc = sendfunc
     
-    self._tk = Tkinter.Toplevel(master)
+    self._frame = Toplevel(master)
     
-    self._tk.geometry("400x300")
-    self._tk.title("Lyntin -- Autotyper")
+    # self._frame.geometry("400x300")
+    self._frame.title("Lyntin -- Autotyper")
     
-    self._tk.protocol("WM_DELETE_WINDOW", self.cancel)
+    self._frame.protocol("WM_DELETE_WINDOW", self.cancel)
     
     if os.name == "posix":
       fontname = "Courier"
@@ -822,33 +858,30 @@ class Autotyper:
       fontname = "Fixedsys"
     fnt = tkFont.Font(family=fontname, size=12)
     
-    self._txt = ScrolledText.ScrolledText(self._tk, fg="black", bg="white",
-      font=fnt, height=20)
-    self._txt.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+    self._txt = ScrolledText(self._frame, fg="white", bg="black", 
+                             font=fnt, height=20)
+    self._txt.pack(side=TOP, fill=BOTH, expand=1)
     
-    self._send_btn = Tkinter.Button(self._tk, text="Send", command=self.send)
-    self._send_btn.pack(side=Tkinter.LEFT, fill=Tkinter.X, expand=1)
+    self._send_btn = Button(self._frame, text="Send", command=self.send)
+    self._send_btn.pack(side=LEFT, fill=X, expand=0)
     
-    self._cancel_btn = Tkinter.Button(self._tk, text="Cancel",
-      command=self.cancel)
-    self._cancel_btn.pack(side=Tkinter.RIGHT, fill=Tkinter.X, expand=1)
+    self._cancel_btn = Button(self._frame, text="Cancel", command=self.cancel)
+    self._cancel_btn.pack(side=RIGHT, fill=X, expand=0)
     
-    engine.myengine.startthread("autotyper", self._tk.mainloop)
-  
   def send(self):
     """
     Will be called when the user clicks on the 'Send' button.
     """
-    text = fix_unicode(self._txt.get(1.0, Tkinter.END))
+    text = fix_unicode(self._txt.get(1.0, END))
     self._sendfunc(text)
-    self._tk.destroy()
+    self._frame.destroy()
   
   def cancel(self):
     """
     Will be called when the user clicks on the 'Cancel' button.
     """
     self._sendfunc(None)
-    self._tk.destroy()
+    self._frame.destroy()
 
 
 def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
@@ -861,7 +894,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
   @type  message: Message
 
   @param txtbuffer: the Tk Text buffer to write to
-  @type  txtbuffer: Tkinter.Text
+  @type  txtbuffer: Text
 
   @param currentcolor: the current color that we should start with
   @type  currentcolor: color (list of ints)
