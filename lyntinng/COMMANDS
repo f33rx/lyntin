@@ -1,0 +1,808 @@
+Title:  Lyntin Commands
+Author: Will Guaraldi
+
+
+
+VERSION
+=======
+
+Thu, 31 Oct 2002 02:46:40 +0000
+
+For more up-to-date information and documentation, please check the 
+web-site: http://Lyntin.sourceforge.net/
+
+
+
+COMMANDS IN LYNTIN
+==================
+
+Lyntin uses Lyntin commands to allow you to manipulate the Lyntin client
+and setup your session with aliases, variables, actions, and such.
+Commands start with the command character--by default this is "#".  It
+can be changed with the "#config" command.  The command character can
+also do some other special things:
+
+1. You can execute commands in another session by typing the command
+   character and then the sesion name: "#3k say hello" will say hello
+   in the 3k session.
+
+2. You can switch to another session by typing the command character
+   and then the session name: "#3k" will switch to the 3k session.
+
+3. You can execute a command in all sessions by typing the command
+   character then all: "#all say hello" will say hello in all sessions.
+
+4. You can execute a command a number of times by typing the command
+   character then a number, then the command: "#5 say hello" will
+   send "say hello" to the current session 5 times.
+
+Commands are separated by the semicolon.  Semicolons can be escaped
+with the \ character.
+
+Command arguments can be enclosed with { }.  This enables you to specify
+arguments that have multiple words in them.
+
+
+
+COMMAND REFERENCE
+=================
+
+COMMANDS.@
+
+   #@ allows you to execute arbitrary Python code inside of Lyntin.
+   It will first look for a module named "lyntinuser" and execute
+   the code inside that module's __dict__ environment.  If no
+   such module exists, it will execute the code inside 
+   modules.advanced .
+   
+   ex:
+     #@ print "hello"
+     #@ print string.join(exported.get_commands(), "\n")
+
+
+
+COMMANDS.ACTION
+
+   syntax: #action [<TRIGGER>] [<ACTION>] [<ONETIME:BOOLEAN=false>] [<QUIET:BOOLEAN=false>] 
+   
+   With no trigger and no action, prints all actions.
+   With a trigger and no action, prints actions that match the
+   trigger statement.
+   With a trigger and an action, creates an action.
+   
+   When data from the mud matches the trigger clause, the response
+   will be executed.  Trigger clauses can use anchors (^ and $)
+   to anchor the text to the beginning and end of the line 
+   respectively.
+   
+   Triggers can also contain Lyntin pattern-variables which start
+   with a % sign and have digits: %0, %1, %10...  When Lyntin sees 
+   a pattern-variable in an action trigger, it tries to match any 
+   pattern against it, and saves any match it finds so you can 
+   use it in the response.  See below for examples.
+   
+   Note: As a note, actions are matched via regular expressions.
+   %1 gets translated to (.+?) and %_1 gets translated to (\S+?).
+   The special variable "%a" means "the whole matched line".
+   
+   We handle regular expressions with a special r[ ... ] syntax.  If
+   you put an "i" or "I" after the ], then we'll ignorecase as well.
+   
+   The onetime argument can be set to true to have the action remove
+   itself automatically after it is triggered.
+   
+   examples:
+   
+      #action {^You are hungry} {get bread bag;eat bread}
+      #action {%0 gives you %5} {say thanks for the %5, %0!}
+      #action {r[^%_1 tells\s+you %2$]} {say %1 just told me %2}
+      #action {r[sven dealt .+? to %1$]i} {say i just killed %1!}
+
+
+
+COMMANDS.ALIAS
+
+   syntax: #alias [<ALIAS>] [<EXPANSION>] [<QUIET:BOOLEAN=false>] 
+   
+   With no arguments, prints all aliases.
+   With one argument, prints all aliases which match the arg.
+   With multiple arguments, creates an alias.
+   
+   You can use pattern variables which look like % and a number.  %0 
+   will be all the arguments passed in.
+   
+   Ranges can be used by using python colon-syntax, specifying a
+   half-open slice of the input items, so %0:3 is the alias name, first,
+   and second arguments of the input.
+   
+   Negative numbers count back from the end of the list.  So %-1 is the
+   last item in the list, %:-1 is everything but the last item in the
+   list. 
+   
+   examples:
+   
+     #alias {k*}                    - prints out aliases that start with k
+     #alias {k} {kill %1}           - builds a new alias
+     #alias {gg} {put %1: in chest} - builds a new alias
+
+
+
+COMMANDS.BOSS
+
+   This probably isn't as helpful as it could be.  Right now it
+   will print to your display code from Lyntin 2.x to make it seem
+   like you're doing work.
+
+
+
+COMMANDS.CLEAR
+
+   This command clears a session of all session data (except the actual 
+   connection).  This covers gags, subs, actions, aliases...
+
+
+
+COMMANDS.CONFIG
+
+   syntax: #config [<NAME>] [<VALUE>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to set a wide variety of options, some of which are
+   session oriented and some of which are global.  Typing "#config"
+   by itself will print out all the options it knows about.
+
+
+
+COMMANDS.CR
+
+   This sends a carriage return to the mud.  This is useful in aliases 
+   and actions that require a carriage return.
+
+
+
+COMMANDS.DATAGREP
+
+   syntax: #datagrep [PATTERN] [<SIZE:INT=300>] 
+   
+   Searches this session's databuffer with a regular expression printing 
+   all matches in their entirety.
+
+
+
+COMMANDS.DATAGREPLINES
+
+   syntax: #datagreplines [PATTERN] [<SIZE:INT=300>] 
+   
+   Searches the lines in this session's databuffer with a regular 
+   expression printing all matching lines in their entirety.
+
+
+
+COMMANDS.DEED
+
+   syntax: #deed [<TEXT>] [<QUIET:BOOLEAN=false>] 
+   
+   This adds a deed or prints all the deeds stored till now.
+
+
+
+COMMANDS.DIAGNOSTICS
+
+   syntax: #diagnostics [<LOGFILE>] 
+   
+   This is very useful for finding out all the information about Lyntin
+   while it's running.  This will print out operating system information,
+   Python version, what threads are running (assuming they're registered
+   with the ThreadManager), hooks, functions connected to hooks, and
+   #info for every session.  It's very helpful in debugging problems that
+   are non-obvious or are platform specific.  It's also invaluable in
+   bug-reporting.
+   
+   It can take a filename argument and will copy the #diagnostics output
+   to that file.  This allows you easier method of submitting diagnostics
+   output along with bug reports.
+   
+   Note: Windows users should either use two \'s or use / to separate
+   directory names.
+
+
+
+COMMANDS.END
+
+   Closes all sessions and quits out of Lyntin.
+   
+   Note, on most muds this will leave your character in a state of 
+   linkdeath--it does not sell all your stuff, return you to town, 
+   save your character, tell your friends goodbye, or anything of 
+   that nature.
+
+
+
+COMMANDS.GAG
+
+   syntax: #gag [TEXT...] [<QUIET:BOOLEAN=false>] 
+   
+   With no arguments, prints out all gags.
+   With arguments, creates a gag.
+   
+   Incoming lines from the mud which contain gagged text will
+   be removed and not shown on the ui.
+   
+   Gags get converted to regular expressions.  Feel free to use
+   regular expression matching syntax as you see fit.
+   
+   As with all commands, braces get stripped off and each complete
+   argument creates a gag.  gag accepts multiple gags at once, and
+   accepts a quiet argument to supress reporting of what has been
+   gagged.  
+   
+   ex:
+      #gag {has missed you.}    <-- will prevent any incoming line
+                                    with "has missed you" to be shown.
+   ex:
+      #gag has missed you       <-- will gag any text with "has",
+                                    "missed", or "you"
+
+
+
+COMMANDS.HELP
+
+   syntax: #help [<ITEM>] 
+   
+   With no arguments, shows all the help files available.
+   With an argument, shows that specific help file.
+   
+   examples:
+   
+     #help
+     #help help
+     #help commands.substitute
+
+
+
+COMMANDS.HIGHLIGHT
+
+   syntax: #highlight [<STYLE>] [<TEXT>] [<QUIET:BOOLEAN=false>] 
+   
+   With no arguments, prints all highlights.
+   With one argument, prints all highlights which match the arg.
+   With multiple arguments, creates a highlight.
+   
+   Highlights enable you to colorfully "tag" text that's of interest
+   to you with the given style.  This may not work or fully work in
+   all ui's.
+   
+   Styles available are:
+      bold     black    grey           b black
+      blink    red      light red      b red
+      reverse  green    light green    b green
+               yellow   light yellow   b yellow
+               blue     light blue     b blue
+               magenta  light magenta  b magenta
+               cyan     light cyan     b cyan
+               white    light white    b white
+   
+   Highlights also handle *.  So '*word*' will highlight an entire line
+   with "word" in it.  '*word' will highlight the line up to "word".  
+   'word*' will highlight the line from "word" to the end.
+   
+   ex:
+      #highlight {green} {Sven arrives.}
+      #highlight {reverse,green} {Sven arrives.}
+
+
+
+COMMANDS.HISTORY
+
+   syntax: #history [<COUNT:INT=30>] 
+   
+   #history prints the current history buffer.
+   
+   ! will call an item in the history indexed by the number after
+   the !.  You can also do replacements via the sub=repl syntax.
+   
+   examples:
+   
+     #history [count=30]
+         prints the last count entries in the history buffer
+     !
+         executes the last thing you did
+     !4
+         executes the fourth to last thing you did
+     !4 3k=gk
+         executes the fourth to last thing you did after replacing
+         3k with gk in it
+
+
+
+COMMANDS.IF
+
+   syntax: #if [EXPR] [ACTION] [<ELSEACTION>] 
+   
+   Allows you to do some boolean logic based on Lyntin variables
+   or any Python expression.  If this expression returns a non-false
+   value, then the action will be performed.
+   
+   Strings should be in single quotes:
+   
+   examples:
+   
+     #if {$myhpvar < 100} {#showme PANIC!}
+     #if {$myhpvar < 100 && $myspvar < 100} {#showme PANIC!}
+     #if {'$name' == 'Joe'} {#showme That joe is a jerk.}
+
+
+
+COMMANDS.IMPORT
+
+   syntax: #import [MODULENAME] 
+   
+   Imports/reloads a module.
+   
+   When reloading, it looks for an "unload" function and executes it
+   prior to reloading the module.
+   
+   After reloading/importing, it looks for a "load" function and
+   executes it.
+   
+   Lyntin modules located in the modules package are safe to reload 
+   in-game.  Lyntin core modules (engine, helpmanager, event...) are
+   NOT safe to import in-game.
+   
+   examples:
+   
+     #import modules.action
+     #import exportuser
+   
+   #import will look for the module on the sys.path.  So if your module
+   is not on the sys.path, you should first add the directory using #@:
+   
+     #@ import sys
+     #@ sys.path.append("/directory/where/my/module/exists")
+   
+   Directories specified by the moduledir command-line argument are
+   added to the sys.path upon Lyntin startup.
+
+
+
+COMMANDS.INFO
+
+   Prints all the information about the active session: 
+   actions, aliases, gags, highlights, variables, ticker, verbose, 
+   speedwalking, and other various things.
+
+
+
+COMMANDS.KILLALL
+
+   Clears all sessions of session oriented stuff: aliases,
+   substitutions, gags, variables, so on so forth.
+
+
+
+COMMANDS.LOG
+
+   syntax: #log [<LOGFILE>] [<DATABUFFER:BOOLEAN=false>] 
+   
+   Will start or stop logging to a given filename for that session.
+   Each session can have its own logfile.
+
+
+
+COMMANDS.LOOP
+
+   syntax: #loop [FROMTO] [COMM] 
+   
+   Executes a given command replacing %0 in the command with
+   the range of numbers specified in <from> and <to>.
+   
+   example:
+   
+     #loop {1,5} {reclaim %0.corpse}
+   
+   will execute:
+   
+     reclaim 1.corpse
+     reclaim 2.corpse
+     reclaim 3.corpse
+     reclaim 4.corpse
+     reclaim 5.corpse
+   
+   A better way to execute a command a number of times without regard
+   to an index, would be:
+   
+     #5 {reclaim corpse}
+   
+   which will send "reclaim corpse" to the mud 5 times.
+
+
+
+COMMANDS.MATH
+
+   syntax: #math [VAR] [OPERATION] [<QUIET:BOOLEAN=false>] 
+   
+   Implements the #math command which allows you to manipulate
+   variables above and beyond setting them.
+   
+   examples:
+   
+     #math {hps} {$hps + 5}
+
+
+
+COMMANDS.NOP
+
+   syntax: #nop [<INPUT>] 
+   
+   nop stands for "no operation".  So anything after a #nop
+   and before a ; (unless it's braced) will be ignored.
+   
+   This was quite possibly the easiest command to program ever.
+
+
+
+COMMANDS.RAW
+
+   syntax: #raw [<INPUT>] 
+   
+   Sends input straight to the mud.
+
+
+
+COMMANDS.READ
+
+   syntax: #read [FILENAME] 
+   
+   Reads in a file running each line as a Lyntin command.  This is the
+   opposite of #write which allows you to save session settings and
+   restore them using #read.
+   
+   You can also read in via the commandline when you start Lyntin:
+   
+     lyntin --read 3k
+   
+   And read can handle HTTP urls:
+   
+     lyntin --read http://lyntin.sourceforge.net/lyntinrc
+   
+     #read http://lyntin.sourceforge.net/lyntinrc
+   
+   Note: the first non-whitespace char is used to set the Lyntin
+   command character.  If you use non Lyntin commands in your file,
+   make sure the first one is a command char.  If not, use #nop .
+   
+   If you don't specify a directory, Lyntin will look for the file
+   in your datadir.
+
+
+
+COMMANDS.SESSION
+
+   syntax: #session [<SESSIONNAME>] [<HOST>] [<PORT:INT=-1>] 
+   
+   This command creates a connection to a specific mud.  When you create
+   a session, that session becomes the active Lyntin session.
+   
+   To create a session to 3k.org named "3k":
+   
+     #session 3k www.3k.org 5000
+   
+   Then to create another session to another mud:
+   
+     #session eto gytje.pvv.unit.no 4000
+   
+   Then if 3k was your active session, you could do things on the eto
+   session by prepending your command with "#eto ":
+   
+     #eto say hello
+   
+   or switch to the eto session by typing just "#eto".
+
+
+
+COMMANDS.SHOWME
+
+   syntax: #showme [<INPUT>] 
+   
+   Will display {text} on your screen.  Doesn't get sent to the mud--
+   just your screen.
+   
+   examples:
+     #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
+
+
+
+COMMANDS.SUBSTITUTE
+
+   syntax: #substitute [<ITEM>] [<SUBSTITUTION>] [<QUIET:BOOLEAN=false>] 
+   
+   With no arguments, prints all substitutes.
+   With one argument, prints all substitutes which match the argument.
+   Otherwise creates a substitution.
+   
+   Braces are advised around both 'name' and 'substitution'.
+
+
+
+COMMANDS.SWDIR
+
+   syntax: #swdir [<ALIAS>] [<DIR>] [<QUIET:BOOLEAN=false>] 
+   
+   This adds speedwalking aliases and tells you the current speedwalking dirs
+   already registered.
+   
+   ex:
+   
+      #swdir {n} {north}
+      #swdir {s} {south}
+      #swdir {e} {east}
+      #swdir {w} {west}
+      #swdir {NE} {northeast}
+      #swdir {l} {look}
+      ...
+   
+   see also: swexclude
+
+
+
+COMMANDS.SWEXCLUDE
+
+   syntax: #swexclude [EXCLUDE...] [<QUIET:BOOLEAN=false>] 
+   
+   Adds words that should be excluded from speedwalk expansion as well
+   as tells you which words are currently being excluded.
+   
+   If you had swdirs "n", "e", "s", and "w", you might want to create
+   excludes for the words "sense", "news", "sew", ...  Which are real
+   words that you most likely don't want to be expanded.
+   
+   see also: swdir
+
+
+
+COMMANDS.TEXTIN
+
+   syntax: #textin [FILE] 
+   
+   Takes the contents of the file and outputs it directly to the mud
+   without processing it (like #read does).
+   
+   If you don't specify a directory, Lyntin will look for the file in
+   the datadir.
+
+
+
+COMMANDS.TICK
+
+   Displays the number of seconds left before this session's
+   ticker ticks.
+   
+   When a tick happens, it will look for a TICK!!! alias.  Finding none,
+   it will print TICK!!! to the ui.
+   
+   
+   This allows you to perform an event every x number of seconds.
+
+
+
+COMMANDS.TICKOFF
+
+   Turns off the ticker for this session.
+   
+   see also: tick, tickon, ticksize
+
+
+
+COMMANDS.TICKON
+
+   Turns on the ticker for this session.
+   
+   see also: tick, tickoff, ticksize
+
+
+
+COMMANDS.TICKSIZE
+
+   syntax: #ticksize [<SIZE:TIMESPAN=0>] 
+   
+   Sets and displays the number of seconds between ticks for this
+   session.
+   
+   examples:
+     #ticksize
+     #ticksize 6
+     #ticksize 1h2m30s
+   
+   see also: tick, tickon, tickoff
+
+
+
+COMMANDS.UNACTION
+
+   syntax: #unaction [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Removes action(s) from the manager.
+   
+   examples:
+   
+     #unaction {missed you.}
+     #unaction missed*
+
+
+
+COMMANDS.UNALIAS
+
+   syntax: #unalias [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove aliases.
+
+
+
+COMMANDS.UNGAG
+
+   syntax: #ungag [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove gags.
+
+
+
+COMMANDS.UNHIGHLIGHT
+
+   syntax: #unhighlight [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove highlights.
+   
+   examples:
+   
+     #highlight {hello}
+     #highlight {blah*}
+
+
+
+COMMANDS.UNPOWERGAG
+
+   syntax: #unpowergag [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove powergags.
+
+
+
+COMMANDS.UNSUBSTITUTE
+
+   syntax: #unsubstitute [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove substitutes.
+
+
+
+COMMANDS.UNSWDIR
+
+   syntax: #unswdir [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove swdirs.
+
+
+
+COMMANDS.UNSWEXCLUDE
+
+   syntax: #unswexclude [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove swexcludes.
+
+
+
+COMMANDS.UNVARIABLE
+
+   syntax: #unvariable [<STR>] [<QUIET:BOOLEAN=false>] 
+   
+   Allows you to remove variables.
+
+
+
+COMMANDS.VARIABLE
+
+   syntax: #variable [<VAR>] [<EXPANSION>] [<QUIET:BOOLEAN=false>] 
+   
+   Creates a variable for that session of said name with said value.
+   Variables can then pretty much be used anywhere.
+   
+   ex:
+      #variable {hps} {100}
+      #action {HP: %0/%1 } {#variable {hps} {%0}}
+   
+   Variables can later be accessed via the variable character
+   (which defaults to $) and the variable name.  In the case of the
+   above, the variable name would be $hps.
+   
+   There are also system variables ($HOME, $TIMESTAMP, $DATADIR) and
+   global variables.  To set a global variable, it must be preceded
+   by a _.
+   
+   ex:
+     #variable {_fun} {happy fun ball}
+   
+   Global variables can be accessed by any session.
+
+
+
+COMMANDS.VERSION
+
+   Displays the version number, contact information, and web-site for
+   Lyntin.
+
+
+
+COMMANDS.WIZLIST
+
+   Tells you about all the people who have participated in Lyntin's
+   development--these are the Lyntin wizards.
+
+
+
+COMMANDS.WRITE
+
+   syntax: #write [FILE] [<QUIET:BOOLEAN=false>] 
+   
+   Writes all aliases, actions, gags, etc to the file specified.
+   You can then use the #read command to read this file in and
+   restore your session settings.
+   
+   The quiet argument lets you specify whether you want command data
+   to be written to the file so that when you read it back in with #read,
+   the commands are executed quietly.
+   
+   If you don't specify a directory, it will be written to your datadir.
+   
+   Note: Windows users should either use two \'s or use / to separate
+   directory names.
+
+
+
+COMMANDS.ZAP
+
+   This disconnects from the mud and closes the session.
+
+
+
+EVALMODES
+=========
+
+There are two user input evaluation modes in Lyntin: Lyntin mode and
+Tintin mode.  You can switch modes using the command-line argument:
+
+   --evalmode [mode]
+
+with valid modes being "tintin" and "lyntin".  You can also switch
+it ingame using the #config command:
+
+   #config evalmode [mode]
+
+with valid modes being "tintin" and "lyntin".
+
+The evalmodes differ in how variables, placement variables, and
+command arguments are expanded as well as the time at which they're 
+expanded.  Tintin mode emulates how Tintin works.  Lyntin mode is 
+born from our own preferred user input evaluation.
+
+Lyntin defaults to lyntin mode--so if you're a Tintin user and 
+want to user your Tintin command files, you should make sure to start 
+Lyntin up in tintin mode.
+
+
+
+README.EVALMODES.LYNTINMODE
+
+Explain lyntin evalmode here.
+
+
+
+README.EVALMODES.TINTINMODE
+
+Explain tintin evalmode here.
+
+
+
+
+Enjoy!
+
+the Lyntin development folks
+http://lyntin.sourceforge.net/

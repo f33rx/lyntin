@@ -6,7 +6,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-$Id$
+Thu, 31 Oct 2002 02:46:32 +0000
 
 For more up-to-date information and documentation, please check the 
 web-site: http://Lyntin.sourceforge.net/
@@ -57,6 +57,10 @@ If you encounter other operating system issues, let us know both the
 problem and the solution so we can add them here.
 
 
+
+
+
+
 GETTING STARTED
 ===============
 
@@ -74,6 +78,10 @@ the Lyntin website in HTML form.  If you find problems with the
 documentation or have fixes for it, let us know.
 
 Lyntin has a series of command line flags which change its behavior.
+
+
+
+
 
 
 LYNTIN vs. TINTIN
@@ -94,36 +102,37 @@ own commands in Lyntin.  See the "HACKING" document for more
 information.
 
 
+
+
+
+
 EVALMODES
 =========
 
 There are two user input evaluation modes in Lyntin: Lyntin mode and
 Tintin mode.  You can switch modes using the command-line argument:
 
-   --evalmode tintin
+   --evalmode [mode]
 
-   or
+with valid modes being "tintin" and "lyntin".  You can also switch
+it ingame using the #config command:
 
-   --evalmode lyntin
+   #config evalmode [mode]
 
-or ingame with:
-
-   #config evalmode lyntin
-
-   or
-
-   #config evalmode tintin
+with valid modes being "tintin" and "lyntin".
 
 The evalmodes differ in how variables, placement variables, and
 command arguments are expanded as well as the time at which they're 
 expanded.  Tintin mode emulates how Tintin works.  Lyntin mode is 
-born from our own preferred user input evaluation.  There are 
-probably good and bad points of each which is beyond the scope 
-of this document.
+born from our own preferred user input evaluation.
 
 Lyntin defaults to lyntin mode--so if you're a Tintin user and 
 want to user your Tintin command files, you should make sure to start 
 Lyntin up in tintin mode.
+
+
+
+
 
 
 BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
@@ -151,6 +160,10 @@ for both are on the Lyntin web-site:
    http://lyntin.sourceforge.net/
 
 
+
+
+
+
 HOW TO CONTRIBUTE
 =================
 
@@ -170,6 +183,10 @@ Please read through the web-site areas on coding conventions and such
 before sending in code.
 
 
+
+
+
+
 ERRATA
 ======
 
@@ -187,6 +204,10 @@ That should be about it.  In-game help is accessed by typing ``#help``.
 When you start Lyntin for the first time, type ``#help general``
 and that'll get you started.  Read through the various help files
 at your leisure.
+
+
+
+
 
 Enjoy!
 
