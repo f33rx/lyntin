@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.38 2002/07/14 15:14:00 willhelm Exp $
+# $Id: tintincmds.py,v 1.39 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -342,7 +342,7 @@ def nop_cmd(session, args, input):
 commands_dict["nop"] = (nop_cmd, "input=", "limitparsing=0")
 
 
-def read_cmd(session, args, input):
+def read_cmd(ses, args, input):
   """
   Reads in a file running each line as a Lyntin command.  This is the
   opposite of #write which allows you to save session settings and
@@ -388,12 +388,12 @@ def read_cmd(session, args, input):
     return
       
   if contents[0][0] != lyntin.commandchar:
-    session.handleUserData(lyntin.commandchar + "char " + contents[0][0])
+    exported.lyntin_command(lyntin.commandchar + "char " + contents[0][0], internal=1, session=ses)
 
   for mem in contents:
     mem = mem.strip()
     if len(mem) > 0:
-      exported.lyntin_command(mem, internal=1, session=session)
+      exported.lyntin_command(mem, internal=1, session=ses)
 
   exported.write_message("read: file " + filename + " read.")
 
@@ -686,18 +686,24 @@ def write_cmd(session, args, input):
   You can then use the #read command to read this file in and
   restore your session settings.
 
+  The quiet argument lets you specify whether you want things to
+  be persisted in such a way that when you #read the command file
+  they are quiet as opposed to verbose in their messages.
+
   category: commands
   """
   filename = args["file"]
+  quiet = args["quiet"]
+
   try:
     f = open(filename, "w")
-    hooks.write_hook.spamhook((session, f))
+    hooks.write_hook.spamhook((session, f, quiet))
     f.close()
     exported.write_message("write: file %s has been written." % filename)
   except Exception, e:
     exported.write_error("write: error writing to file %s. %s" % (filename, e))
 
-commands_dict["write"] = (write_cmd, "file")
+commands_dict["write"] = (write_cmd, "file quiet:boolean=false")
 
 
 def zap_cmd(session, args, input):

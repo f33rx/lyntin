@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.20 2002/07/12 00:11:56 willhelm Exp $
+# $Id: hooks.py,v 1.21 2002/07/21 04:14:48 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -239,7 +239,11 @@ to this hook gets the file object and writes stuff to the file
 object.  Do NOT save the file object or the session object
 for later use!  They may not be there!
 
-arg tuple is (session, file object).
+"quiet" is a flag (0 is no, 1 is yes) indicating whether the
+user wants the information persisted so that when it's read in
+with #read it's quiet as to its verbostiy.
+
+arg tuple is (session, file object, quiet).
 """
 write_hook = Hook()
 

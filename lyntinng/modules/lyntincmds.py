@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.14 2002/07/21 04:14:48 willhelm Exp $
+# $Id: lyntincmds.py,v 1.15 2002/07/30 23:07:42 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -29,6 +29,7 @@ def config_cmd(ses, args, input):
   """
   name = args["name"]
   value = args["value"]
+  quiet = args["quiet"]
 
   if not name:
     output = "Global:\n" + \
@@ -53,7 +54,8 @@ def config_cmd(ses, args, input):
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
       exec("ses._%s = value" % name)
-      exported.write_message("config: %s set to %s." % (name, bv(value)))
+      if not quiet:
+        exported.write_message("config: %s set to %s." % (name, bv(value)))
     else:
       exported.write_error("config: '%s' is not a valid boolean value." % (value))
     return
@@ -61,7 +63,8 @@ def config_cmd(ses, args, input):
   if name in ["variablechar", "commandchar"]:
     if len(value) == 1:
       exec("lyntin.%s = value" % name)
-      exported.write_message("config: %s set to '%s'." % (name, value))
+      if not quiet:
+        exported.write_message("config: %s set to '%s'." % (name, value))
     else:
       exported.write_error("config: '%s' is not a valid %s value." % (value, name))
     return
@@ -70,7 +73,8 @@ def config_cmd(ses, args, input):
     value = utils.convert_boolean(value)
     if value == 1 or value == 0:
       exec("lyntin.%s = value" % name)
-      exported.write_message("config: %s set to %s." % (name, bv(value)))
+      if not quiet:
+        exported.write_message("config: %s set to %s." % (name, bv(value)))
     else:
       exported.write_error("config: '%s' is not a valid boolean value." % (value))
     return
@@ -85,7 +89,8 @@ def config_cmd(ses, args, input):
     else:
       event.EchoEvent(0).enqueue() 
 
-    exported.write_message("config: %s set to %s." % (name, bv(value)))
+    if not quiet:
+      exported.write_message("config: %s set to %s." % (name, bv(value)))
     return
 
   if name == "evalmode":
@@ -93,18 +98,20 @@ def config_cmd(ses, args, input):
     if value == "tintin":
       lyntin.evalmode = lyntin.TINTIN
       hooks.evalmode_change_hook.spamhook((old, lyntin.TINTIN))
-      exported.write_message("config: %s set to %s." % (name, value))
+      if not quiet:
+        exported.write_message("config: %s set to %s." % (name, value))
     elif value == "lyntin":
       lyntin.evalmode = lyntin.LYNTIN
       hooks.evalmode_change_hook.spamhook((old, lyntin.LYNTIN))
-      exported.write_message("config: %s set to %s." % (name, value))
+      if not quiet:
+        exported.write_message("config: %s set to %s." % (name, value))
     else:
       exported.write_error("config: '%s' is not a valid value." % (value))
     return
 
   exported.write_error("config: did not recognize '%s' as an attribute." % name)
       
-commands_dict["config"] = (config_cmd, "name= value=")
+commands_dict["config"] = (config_cmd, "name= value= quiet:boolean=false")
   
 def datagrep_cmd(session, args, input):
   """

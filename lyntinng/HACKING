@@ -5,7 +5,7 @@
 VERSION
 =======
 
-$Id: HACKING,v 1.14 2002/07/21 17:37:05 willhelm Exp $
+$Id: HACKING,v 1.15 2002/07/30 04:02:52 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -16,7 +16,7 @@ NOTES
 =====
 
 This document is very much written off the top of my head.  The contents
-may not be accurate--when in doubt, read the code.  The code is very
+may not be accurate--when in doubt read the code.  The code is very
 well documented and will provide much insight as to how things work.
 If you have questions after analyzing the code, ask on the lyntin-devl
 mailing list.
@@ -46,7 +46,7 @@ extend Lyntin to do anything without going through hoops: check your
 email, record URLs you see and open up a browser to visit them, export
 mudmail, building complex bots, web-servers, AIM clients, automappers....
 
-There a a few different methods of hacking Lyntin to suit your needs.  
+There are a few different methods of hacking Lyntin to suit your needs.  
 They are briefly outlined here and described in more detail in their 
 respective sections:
 
@@ -81,8 +81,11 @@ thoughts:
 
 
 
-DIRECTORIES
-===========
+LYNTIN ARCHITECTURE
+===================
+
+FILE STRUCTURE
+--------------
 
 The Lyntin directory structure looks like this::
 
@@ -94,8 +97,8 @@ The Lyntin directory structure looks like this::
 
 
 
-ARCHITECTURE
-============
+DESIGN
+------
 
 Lyntin is multi-threaded and as such is built around an event queue.
 The event queue is synchronized and allows us to have multiple threads
@@ -136,7 +139,7 @@ for every session instance.
 
 
 MANAGERS
-========
+--------
 
 Managers manage things.  Most managers subclass the ``manager.Manager``
 class.  It doesn't really provide a lot of functionality, but it 
@@ -155,20 +158,15 @@ module.
 
 
 
-DATA HANDLING
-=============
+USER DATA HANDLING
+------------------
 
-Data comes from one of a couple of sources: the user or the mud.
-
-USER DATA
----------
-
-User data (sometimes called "input") is received from the ui.BaseUI
+User data (sometimes called "input") is received from the ``ui.BaseUI``
 subclasses and tossed into an ``event.InputEvent``.  When the
 engine handles the event, it is first passed to the engine's
 ``handleUserData`` method which deals with global things such
 as splitting the input into a series of separate commands.  Read
-the docstring for more information.
+the docstrings for more information.
 
 The user input is then passed to the session in question's 
 ``handleUserData`` method which does some stuff and passes it
@@ -182,16 +180,18 @@ For more specific information, read through the docstrings of
 the methods and classes involved.
 
 
-MUD DATA
---------
+
+MUD DATA HANDLING
+-----------------
 
 Data can also come from the mud.  Mud data comes from the 
-SocketCommunicator and is encapsulated in an ``event.MudEvent``.
+net module's ``SocketCommunicator`` and is encapsulated in 
+an ``event.MudEvent``.
 
 
 
 THE UI
-======
+------
 
 All user interfaces extend the ``ui.BaseUI`` class in the ``ui`` module.
 It has a series of methods which need to be overridden to give
@@ -217,7 +217,7 @@ For more information, read the ``ui`` module.
 
 
 HOOKS
-=====
+-----
 
 The engine is augmented by a series of hooks which allow modules to
 execute functions without having to change Lyntin's internals.  An
