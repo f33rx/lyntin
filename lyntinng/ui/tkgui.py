@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: tkgui.py,v 1.2 2001/12/11 06:34:08 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -83,7 +83,7 @@ class TkGui(ui.BaseUI):
                                           'height': 20})
 
       # handles improper keypresses
-      self._txt.bind("<Key>", self.ignoreThis)
+      self._txt.bind("<KeyPress>", self._ignoreThis)
 
       self._txtbuffer = Tkinter.Text(self._tk, {'fg': 'white', 
                                                         'bg': 'black', 
@@ -92,7 +92,7 @@ class TkGui(ui.BaseUI):
 
       # these deal with catching improper keypresses
       self._txtbuffer.bind("<KeyPress-Escape>", self.escape)
-      self._txtbuffer.bind("<Key>", self.ignoreThis)
+      self._txtbuffer.bind("<KeyPress>", self._ignoreThis)
 
       # set up the scrollbar for the txtbuffer widget
       self._scrollVertical = Tkinter.Scrollbar(self._tk, 
@@ -126,8 +126,13 @@ class TkGui(ui.BaseUI):
          self._tk.title("Lyntin -- The Hacker's Mudclient")
 
 
-   def ignoreThis(self, tkevent):
+   def _ignoreThis(self, tkevent):
       """ This catches keypresses from the history buffer."""
+      # kludge so that ctrl-c doesn't get caught allowing windows
+      # users to copy the buffer....
+      if tkevent.keycode == 17 or tkevent.keycode == 67:
+         return
+
       self._entry.focus()
       return "break"
 
