@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.23 2002/03/05 01:26:13 willhelm Exp $
+# $Id: basic.py,v 1.24 2002/03/07 22:21:41 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin, exported
@@ -78,10 +78,8 @@ def alias_cmd(session, words, input):
 
   try:
     # knock off the first word which is the command
-    inputadjusted = input.split(' ', 1)[1]
-
-    # split it into parts
-    (a, b) = utils.split_braced(inputadjusted)
+    # and split it into parts
+    (a, b) = utils.split_braced(input.split(' ', 1)[1])
 
     session.getManager("alias").addAlias(a, b)
     exported.write_message("alias: {" + a + "} -> {" + b + "} added.")
@@ -103,10 +101,16 @@ def ansi_cmd(session, words, input):
       exported.write_message("ansi: ansi color is disabled.")
     return
 
-  if words[1] == '1' or words[1] == 'on':
+  try:
+    option = utils.strip_braces(words[1])
+  except ValueError:
+    exported.write_error("ansi: mismatched braces.")
+    return
+
+  if option == '1' or option == 'on':
     lyntin.ansicolor = 1
     exported.write_message("ansi: ansi is now enabled.")
-  elif words[1] == '0' or words[1] == 'off':
+  elif option == '0' or option == 'off':
     lyntin.ansicolor = 0
     exported.write_message("ansi: ansi is now disabled.")
   else:
@@ -135,7 +139,13 @@ def char_cmd(session, words, input):
                                  lyntin.commandchar + ".")
     return
 
-  lyntin.commandchar = words[1]
+  try:
+    newchar = utils.strip_braces(words[1])
+  except ValueError:
+    exported.write_error("char: mismatched braces.")
+    return
+
+  lyntin.commandchar = newchar
   exported.write_message("char: new command character is " + 
                                lyntin.commandchar + ".")
 
@@ -202,13 +212,16 @@ def diagnostics_cmd(session, words, input):
   if len(words) == 2:
     import time
     try:
+      filename = utils.strip_braces(words[1])
       f = open(words[1], "w")
       f.write("This file was created on: " + time.ctime(time.time()) + 
               "\n\n")
       f.write(message)
       f.close()
+    except ValueError:
+      exported.write_error("diagnostics: mismatched braces.")
     except:
-      exported.write_error("Error writing to file " + words[1] + ".")
+      exported.write_error("diagnostics: Error writing to file " + words[1] + ".")
       traceback.print_exc()
 
 
@@ -236,7 +249,12 @@ def gag_cmd(session, words, input):
     exported.write_message(data)
     return
 
-  gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
+  try:
+    gaggedtext = utils.strip_braces(input.split(' ', 1)[1])
+  except ValueError:
+    exported.write_error("gag: mismatched braces")
+    return
+
   session.getManager("gag").addGag(gaggedtext)
   exported.write_message("gag: '" + gaggedtext + "' added.")
 
@@ -246,13 +264,13 @@ def help_cmd(session, words, input):
 
   This is the main help command for Lyntin.
   """
-  import os
+  import dircache
 
   helpdir = lyntin.lyntindir + "help"
   data = "::lyntin help::\n"
 
   if len(words) == 1:
-    file_list = os.listdir(helpdir)
+    file_list = dircache.listdir(helpdir)
     file_list.sort()
 
     topic_list = []
@@ -277,16 +295,16 @@ def help_cmd(session, words, input):
     exported.write_message(data)
     return
 
+  helpfiles = dircache.listdir(helpdir + "/")
 
   for mem in words[1:]:
-    try:
+    if mem + ".tpc" in helpfiles:
       f = open(helpdir + "/" + mem + ".tpc", "r")
-    except:
-      try:
-        f = open(helpdir + "/" + mem + ".cmd", "r")
-      except:
-        data += mem + " is not a valid help topic.\n"
-        continue
+    elif mem + ".cmd" in helpfiles:
+      f = open(helpdir + "/" + mem + ".cmd", "r")
+    else:
+      data += mem + " is not a valid help topic.\n"
+      continue
 
     lines = f.readlines()
     f.close()
@@ -470,6 +488,7 @@ def read_cmd(session, words, input):
     return
 
   try:
+    filename = utils.strip_braces(words[1])
     file = open(words[1], "r")
     contents = file.readlines()
 
@@ -483,6 +502,9 @@ def read_cmd(session, words, input):
       mem = mem.strip()
       session.handleUserData(mem)
     exported.write_message("read: file " + words[1] + " read.")
+
+  except ValueError:
+    exported.write_error("read: unmatched braces")
 
   except IOError:
     exported.write_error("read: file " + words[1] + " is not readable.")

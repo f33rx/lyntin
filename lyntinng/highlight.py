@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.8 2002/02/04 01:10:16 willhelm Exp $
+# $Id: highlight.py,v 1.9 2002/02/27 02:25:21 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -120,8 +120,8 @@ class HighlightManager(manager.Manager):
 
     data = ''
     for mem in list:
-      data = (data + lyntin.commandchar + "highlight {" + mem + "} {" + 
-              self._highlights[mem] + "}\n")
+      data = (data + lyntin.commandchar + 
+              "highlight {" + self._highlights[mem][0] + "} {" + mem + "}\n")
 
     return data[:-1]
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: unittest.py,v 1.5 2002/02/07 02:09:05 willhelm Exp $
+# $Id: unittest.py,v 1.6 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 import string, traceback, sys
 import utils, engine, exported
@@ -23,19 +23,25 @@ I'll add functionality as I need it here.
 # holds the lookup for tests and the list of commands and such
 # that compose the test.
 test_lookup = {
-               'alias': ["#alias bb cc",
+               'alias': ["print testing bracket handling."
+                         "#alias bb cc",
                          "#alias bb {say cc}",
                          "#alias {test} {say $word",
                          "#alias {test} {say $word}",
+                         "print testing printint out of aliases",
                          "#alias",
                          "#alias b*",
+                         "print testing unaliasing",
                          "#unalias",
                          "#unalias bb*"],
-               'gag': ["#gag this is bad",
-                       "#gag {this also is bad",
+               'gag': ["print testing bracketing",
+                       "#gag this is good",
+                       "#gag {this is bad",
                        "#gag this also is bad}",
-                       "#gag {this also is bad}",
+                       "#gag {this is good}",
+                       "print testing printing of gags",
                        "#gag",
+                       "print testing ungag",
                        "#ungag th*",
                        "#ungag"],
                'substitute': ["print Requires being connected to a mud."
@@ -44,7 +50,11 @@ test_lookup = {
                               "#sub The **THE**",
                               "look",
                               "#unsub The",
-                              "look"],
+                              "look",
+                              "print Testing bracket handling.",
+                              "#sub {The} **THE**",
+                              "#sub The **THE**",
+                              "#sub {The **THE"],
                'variable': ["print This test requires a server connection.",
                             "print Use the testserver.py if you like.",
                             "#variable word hoobie",
@@ -53,8 +63,13 @@ test_lookup = {
                             "bb",
                             "#variable",
                             "#variable wo*"],
+               'history': ["print testing history",
+                           "#showme one two three four",
+                           "#history",
+                           "!1 two=2"],
                'etc': ["print Testing loops....",
-                       "#5 #showme LOOP"]
+                       "#5 #showme LOOP",
+                       "#loop {1,3} {#showme $0 for the money!}"]
               }
 
 
