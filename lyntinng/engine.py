@@ -4,11 +4,11 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.72 2002/10/26 15:17:22 willhelm Exp $
+# $Id: engine.py,v 1.73 2002/11/06 02:09:07 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
-that do work in Lyntin as well as encapsulates event queue, the event
+that do work in Lyntin as well as encapsulates the event queue, event
 handling methods, and some of the other singleton managers such as
 the HelpManager, the ThreadManager, and the CommandManager.
 
@@ -88,7 +88,7 @@ class Engine:
     hooks.shutdown_hook.register(self.shutdown)
 
     # we register ourselves with the evalmode_change hook
-    hooks.evalmode_change_hook.register(evalmodechange)
+    hooks.evalmode_change_hook.register(_evalmodechange)
 
 
   def initialize(self):
@@ -104,7 +104,7 @@ class Engine:
     self._sessions["common"] = commonsession
     self._current_session = commonsession
 
-    evalmodechange((-1, lyntin.evalmode))
+    _evalmodechange((-1, lyntin.evalmode))
 
 
   ### ------------------------------------------
@@ -195,7 +195,7 @@ class Engine:
     @param internal: whether this should be executed internally or not.
         0 if we should spam the input hook and record
         the input to the historymanager; 1 if we shouldn't
-    @type  internal: int (0 or 1)
+    @type  internal: boolean
 
     @param session: the session scoping to execute this user input in
     @type  session: session.Session instance
@@ -324,7 +324,7 @@ class Engine:
     @type  name: string
 
     @return: 1 if the name is unique; 0 if not
-    @rtype: int (1 or 0)
+    @rtype: boolean
     """
     return not self._sessions.has_key(name)
 
@@ -450,7 +450,7 @@ class Engine:
     @type  session: string
 
     @return: 1 if successful; 0 if not
-    @rtype: int (1 or 0)
+    @rtype: boolean
     """
     if session == None:
       session = self._current_session
@@ -629,7 +629,7 @@ class Engine:
     @type  name: string
 
     @return: 0 if nothing happened, 1 if the manager was removed
-    @rtype: boolean (0 or 1)
+    @rtype: boolean
     """
     # FIXME - this shouldn't silently fail
     if self._managers.has_key(name):
@@ -684,7 +684,7 @@ class Engine:
     return data
 
 
-def evalmodechange(args):
+def _evalmodechange(args):
   """
   Handles when we change from one evalmode to another.
   """

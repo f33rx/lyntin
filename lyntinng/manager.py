@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.9 2002/10/12 22:14:47 willhelm Exp $
+# $Id: manager.py,v 1.10 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 Managers manage things.  Most X{manager}s subclass the "manager.Manager"
@@ -21,25 +21,26 @@ a new session and when the user has ended a session through the
 
 To build a new manager, you need to:
 
-1. extend the manager.Manager class
+  1. extend the manager.Manager class
 
-2. implement all the methods of manager.Manager that are marked as needing
-   to be overridden
+  2. implement all the methods of manager.Manager that are marked as 
+     needing to be overridden
 
-3. implement the additional methods that your manager needs
+  3. implement the additional methods that your manager needs
 
-3. create a "load()" function in the module your manager is defined in
-   which adds the manager to the engine via "exported.add_manager(...)"
+  4. create a "load()" function in the module your manager is 
+     defined in which adds the manager to the engine via 
+     "exported.add_manager(...)"
 
 
 Then to dynamically load your new module and instantiate your new manager
 you can do one of two things:
 
-1. put the .py file in the modules/ subdirectory where it will be loaded
-   automatcially
+  1. put the .py file in the modules/ subdirectory where it will be 
+     loaded automatcially
 
-2. execute an "#import modulenamehere" inside of Lyntin which will import
-   the module
+  2. execute an "#import modulenamehere" inside of Lyntin which will 
+     import the module
 """
 
 class Manager:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.31 2002/10/26 15:17:23 willhelm Exp $
+# $Id: exported.py,v 1.32 2002/10/26 21:05:09 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -21,9 +21,9 @@ def lyntin_command(text, internal=0, session=None):
   @param text: the command to execute.  ex. "#help"
   @type  text: string
 
-  @param internal: whether to execute the line internally suppressing
-      history and the spamhook.
-  @type  internal: int (0 or 1)
+  @param internal: whether (1) or not (0) to execute the line internally 
+      suppressing history and the spamhook.
+  @type  internal: boolean
 
   @param session: the session instance to execute this command in
       (defaults to the current session)
@@ -100,7 +100,7 @@ def remove_manager(name):
   @type  name: string
 
   @return: 0 if nothing happened, 1 if the manager was removed
-  @rtype: boolean (0 or 1)
+  @rtype: boolean
   """
   return get_engine().removeManager(name)
 
@@ -210,7 +210,7 @@ def get_session(name):
   @type  name: string
 
   @return: the session instance or None
-  @rtype: Session
+  @rtype: session.Session
   """
   return get_engine().getSession(name)
 

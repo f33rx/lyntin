@@ -4,11 +4,8 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.6 2002/08/18 00:57:24 willhelm Exp $
+# $Id: modutils.py,v 1.7 2002/10/13 03:04:34 willhelm Exp $
 #######################################################################
-import string
-import exported
-
 """
 This module holds helper functions for building other Lyntin modules.
 This module will likely make things easier for you, however, it is not
@@ -16,6 +13,9 @@ an API module and the contents herein are subject to change if we
 need to change them.  Having said that, I will note it doesn't change
 much.
 """
+import string
+import exported
+
 
 def load_commands(commands_dict):
   """

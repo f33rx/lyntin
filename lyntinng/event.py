@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.43 2002/10/24 23:07:03 willhelm Exp $
+# $Id: event.py,v 1.44 2002/10/26 15:17:23 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -71,13 +71,13 @@ class StartupEvent(Event):
     """
     This does the following Lyntin startup things:
 
-    1. instantiates and binds the ui.
-    2. if there's a .lyntinrc adds that to the readfile list.
-    3. loads the dynamically loading Lyntin modules.
-    4. loads the help topics in the help subdir.
-    5. reads in all the files in the readfile list.
-    6. starts the timer thread.
-    7. writes the startup message to the ui and the prompt.
+      1. instantiates and binds the ui.
+      2. if there's a .lyntinrc adds that to the readfile list.
+      3. loads the dynamically loading Lyntin modules.
+      4. loads the help topics in the help subdir.
+      5. reads in all the files in the readfile list.
+      6. starts the timer thread.
+      7. writes the startup message to the ui and the prompt.
     """
     import utils
 
@@ -192,7 +192,7 @@ class EchoEvent(Event):
     Initializes the EchoEvent.
 
     @param onoff: sets the new echo value.  1 for echo on, 0 for echo off.
-    @type  onoff: int (0 or 1)
+    @type  onoff: int
     """
     self._state = onoff
 
@@ -241,7 +241,7 @@ class InputEvent(Event):
     @param internal: whether this is an internally generated user
         input.  if it is internally generated then we don't record
         it in history.  1 if it's internal, 0 if not.
-    @type  internal: int (0 or 1)
+    @type  internal: int
 
     @param session: the session execute the input event in
     @type  session: session.Session

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.59 2002/10/26 15:17:23 willhelm Exp $
+# $Id: utils.py,v 1.60 2002/11/06 02:09:08 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -127,7 +127,7 @@ def compile_regexp(str):
   @type  str: string
 
   @return: the resulting regular expression
-  @rtype: RE
+  @rtype: Re
   """
   if not str:
     return re.compile("")
@@ -427,6 +427,7 @@ def columnize(textlist, screenwidth=72, indent=0):
   @type  indent: int
 
   @return: the final formatted columnized string
+  @rtype: string
   """
   if screenwidth > 2 + indent:
     screenwidth = screenwidth - 2 - indent
@@ -619,16 +620,16 @@ def expand_vars(text, varmap):
   at different points and are implemented differently for tintin and
   lyntin modes:
 
-  1. expand_vars - This expands variables in a function arbitrarily
-     according to the desired expansion policy.  It should be safe to
-     recusively evaluate this string and not have strings re-expanded.
+    1. expand_vars - This expands variables in a function arbitrarily
+       according to the desired expansion policy.  It should be safe to
+       recusively evaluate this string and not have strings re-expanded.
 
-  2. denest_vars - This finishes expansion of a string and should be
-     called after all expansions are done.
+    2. denest_vars - This finishes expansion of a string and should be
+       called after all expansions are done.
 
-  3. expand_arguments - This should be called by commands that want to
-     explicitly expand their arguments.  Note that in lyntin mode
-     arguments are already expanded and so nothing is done by this function.
+    3. expand_arguments - This should be called by commands that want to
+       explicitly expand their arguments.  Note that in lyntin mode
+       arguments are already expanded and so nothing is done by this function.
 
 
   Note that the variablemanager's "expand" function is used for
@@ -715,7 +716,12 @@ def _lyntin_expand_vars(text, varmap):
   return text
 
 def sort_by_length(item1, item2):
-  """ Takes two strings and compares them by length."""
+  """
+  Takes two strings and compares them by length.
+
+  @return: same as the Python cmp function
+  @rtype: int
+  """
   return cmp(len(item1), len(item2))
 
 def _tintin_expand_vars(text, varmap):
@@ -848,6 +854,7 @@ def expand_arguments(text, varmap):
   @type  varmap: dict
 
   @return: the text with all variables expanded
+  @rtype: string
   """
   if lyntin.evalmode == lyntin.EVALMODE_TINTIN:
     return _tintin_expand_arguments(text, varmap)

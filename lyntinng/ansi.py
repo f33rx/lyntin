@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.5 2002/10/26 04:32:39 willhelm Exp $
+# $Id: ansi.py,v 1.6 2002/10/27 20:41:32 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -30,93 +30,6 @@ REVERSE = 8
 NONDISPLAYED = 16
 
 
-class Color:
-  def __init__(self, fg=-1, bg=-1, options=0):
-    self._fg = fg
-    self._bg = bg
-    self._options = options
-
-  def getFG(self):
-    """
-    Returns the foreground color or -1 if no color is set.
-
-    @returns: the foreground color which is 30 through 37 or -1 if
-        it's not set
-    @rtype: int
-    """
-    return self._fg
-
-  def setFG(self, fg):
-    """
-    Sets the foreground color.
-
-    @param fg: the new foreground color (30 through 37) or -1 to
-        unset
-    @type  fg: int
-
-    @raises ValueError: if the foreground color isn't valid
-    """
-    if (fg >= 30 and fg <= 37) or fg == -1:
-      self._fg = fg
-    else:
-      raise ValueError, "Not a valid foreground color: '%i'" % fg
-
-  def getBG(self):
-    """
-    Returns the background color or -1 if no color is set.
-
-    @returns: the background color which is 40 through 47 or -1 if
-        it's not set
-    @rtype: int
-    """
-    return self._bg
-
-  def setBG(self, bg):
-    """
-    Sets the background color.
-
-    @param bg: the new background color (40 through 47) or -1 to
-        unset
-    @type  bg: int
-
-    @raises ValueError: if the background color isn't valid
-    """
-    if (bg >= 40 and bg <= 47) or bg == -1:
-      self._bg = bg
-    else:
-      raise ValueError, "Not a valid background color: '%i'" % bg
-
-  def setOption(self, item):
-    """
-    Sets an option.
-
-    @param item: the flag to check--see flag constants in ansi.py
-    @type  item: int
-    """
-    self._options = self._options | item
-
-  def unsetOption(self, item):
-    """
-    Unsets an option.
-
-    @param item: the flag to check--see flag constants in ansi.py
-    @type  item: int
-    """
-    self._options = self._options ^ item
-
-  def checkOption(self, item):
-    """
-    Checks whether an option is set.
-
-    @param item: the flag to check--see flag constants in ansi.py
-    @type  item: int
-
-    @returns: 0 if it's not set, 1 if it is.
-    @rtype: boolean
-    """
-    return self._options & item
-
-
 def filter_ansi(text):
   """
   Takes in text and filters out the ANSI color codes.
@@ -129,7 +42,9 @@ def filter_ansi(text):
 
 def is_color_token(token):
   """
-  Returns whether or not this is a color token.
+  Returns whether or not this is a color token.  It figures this out
+  by checking to see if the token matches this regexp: 
+  chr(27) + '\[[0-9;]*[m]'
 
   @param token: the token in question
   @type  token: string
@@ -145,8 +60,9 @@ def is_color_token(token):
 
 def fix_color(color):
   """
-  Helper function for debugging--it'll fix a color token
-  so it's readable in ascii.
+  Helper function for debugging--it'll fix a color token so it's 
+  readable in ascii.  It just replaces instances of chr(27) with 
+  "ESC".
 
   @param color: the color token
   @type  color: string
@@ -159,7 +75,8 @@ def fix_color(color):
 
 def split_ansi_from_text(text):
   """
-  Takes in a string and returns a list of text and ansi tokens.
+  Takes in a string and separates it into a list of strings and ansi
+  color strings.
 
   @param text: the full string to split up
   @type  text: string

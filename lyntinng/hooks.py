@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.26 2002/10/26 15:17:23 willhelm Exp $
+# $Id: hooks.py,v 1.27 2002/11/06 02:09:07 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -78,7 +78,8 @@ class Hook:
     
     
   def spamhook(self, arglist=(), mappingFunction=None):
-    """ Sends out input to all the registrants of a hook.
+    """
+    Sends out input to all the registrants of a hook.
 
     @param arglist: the list of arguments that gets passed to
         each function in the hook.  the actual arguments differs
@@ -168,7 +169,7 @@ class Hook:
 # When lyntin starts up.  This is a good time to initialize things
 # like ui's and other things that need a critical mass of things
 # to have been imported and instantiated before doing initialization.
-# 
+#
 # arg tuple: ()
 startup_hook = Hook()
 
@@ -312,8 +313,8 @@ def filter_mapper(x,y):
   This is the mapping function to use for filter-style hooks.  
   Spamhook should be called as:
 
-  1. spamtuple = hook.spamhook( (session, flags, original, original) )
-  2. output = spamtuple[-1]
+    1. spamtuple = hook.spamhook( (session, flags, original, original) )
+    2. output = spamtuple[-1]
 
   Each filter function will get (session, flags, original, filteredoriginal) 
   when it is called.

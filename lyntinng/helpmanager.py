@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.14 2002/10/20 16:09:57 willhelm Exp $
+# $Id: helpmanager.py,v 1.15 2002/10/31 02:40:49 willhelm Exp $
 #######################################################################
 """
 Lyntin has a comprehensive X{help} system that can be accessed in-game
@@ -13,20 +13,18 @@ and manipulated by the "HelpManager".  Help is organized as
 topics which exist in a hierarchy of categories and it comes from 
 a couple of sources:
 
-1. dynamically loaded at Lyntin startup from files located in 
-   the help subdirectory and ending with .tpc extension
+  1. dynamically loaded at Lyntin startup from files located in 
+     the help subdirectory and ending with .tpc extension
 
-2. when commands are registered via the exported.add_command
-   function
+  2. when commands are registered via the exported.add_command
+     function
 
-3. by any module using the exported.add_help function
+  3. by any module using the exported.add_help function
 
 
-There has been some effort to move the README into in-game
-help topics and then to actually produce the README file from
-the in-game help topics.  At some point this will allow us to
-create a Lyntin manual which details all the commands and their
-syntaxes.
+It's interesting to note that the README and COMMANDS files
+are generated entirely of in-game help topics using a template
+script file and my personal home-brew #exporthelp command.
 
 The help manager holds a hierarchy of help files indexed by category.
 It also houses a series of methods for adding new help text, parsing

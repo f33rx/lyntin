@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.30 2002/10/13 03:16:22 willhelm Exp $
+# $Id: argparser.py,v 1.31 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses X{command argument}s
@@ -149,12 +149,12 @@ class ArgumentParser:
 
     The argspec follows the following format:
 
-    1. [argname[:argtype]]+ 
-    2. [argname[:argtype]=defaultval]+ 
-    3. [argname:argtype*] 
-    4. [argname[:argtype]]+ 
-    5. [argname[:argtype]=defaultval]+ 
-    6. [argname:argtype**]
+      1. [argname[:argtype]]+ 
+      2. [argname[:argtype]=defaultval]+ 
+      3. [argname:argtype*] 
+      4. [argname[:argtype]]+ 
+      5. [argname[:argtype]=defaultval]+ 
+      6. [argname:argtype**]
 
     Any of the arguments can be specified either by name or populated
     by position, except for arguments after the index collector
@@ -199,12 +199,12 @@ class ArgumentParser:
           argname = argname[:-2]
           if i < len(parsedspec) -1:
             raise ParserException, "named collection argument must be the last argument (%s)" % (argname)
-          parser = extraNamedParser(self, argname)
+          parser = ExtraNamedParser(self, argname)
           namedCollector = 1
 
         else: #this is an index collection argument
           argname = argname[:-1]
-          parser = extraIndexParser(self, argname)
+          parser = ExtraIndexParser(self, argname)
           indexCollector = 1
           doneWithIndices = 1
           
@@ -509,7 +509,7 @@ class Parser:
     self.default = val
     self.defaultset = 1
       
-class extraIndexParser(Parser):
+class ExtraIndexParser(Parser):
   """
   This class captures the parsing behaviour for an index collector.
   for each call to parseInto an entry is put into the list value in
@@ -551,7 +551,7 @@ class extraIndexParser(Parser):
     else:
       dict[self.argname] = [val]
 
-class extraNamedParser(Parser):
+class ExtraNamedParser(Parser):
   """
   This class captures the parsing behaviour for a named value collector.
   for each call to parseInto a new key=value pair is put into a map
@@ -877,7 +877,7 @@ class ChoiceChecker(TypeChecker):
   Allows for a value to come from a selection of different strings.
   Automatically expands to one of them if it is uniquely specified.
 
-  typeargs should be a |-delimitted list of possibly values
+  Typeargs should be a |-delimitted list of possibly values
   """
   def __init__(self, typename, typeargs):
     """

@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.17 2002/10/26 15:17:24 willhelm Exp $
+# $Id: __init__.py,v 1.18 2002/11/06 01:56:51 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
 Modules get loaded when Lyntin starts up unless:
 
-1. the module throws an exception when getting imported
-2. the module's name starts with an _
+  1. the module throws an exception when getting imported
+  2. the module's name starts with an _
 
 On multi-user systems, you'll want to dump modules that everyone will want
 to use here.  Otherwise, users can put modules that they want to use in
