@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.9 2002/05/09 23:20:12 willhelm Exp $
+# $Id: testserver.py,v 1.10 2002/05/18 23:32:00 willhelm Exp $
 #######################################################################
 """
 This runs a multithreaded server on port 3000.
@@ -65,14 +65,14 @@ class ConnectionHandler(SocketServer.StreamRequestHandler):
       self.request.setblocking(1)
       data = ''
       while shutdown == 0:
-        #check to see what is ready on the socket
+        # check to see what is ready on the socket
         conns = select.select([self.request], [], [], 0)[0]
         for mem in conns:
-          #lets get the message
+          # lets get the message
           data += self.request.recv(1024)
 
           if data.find("\n") != -1:
-            message = data[:data.find("\n")-1]
+            message = data[:data.find("\n")]
             print "incoming: '%s'" % message
             self.messageHandler(message)
             data = data[data.find("\n") + 1:]

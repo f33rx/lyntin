@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.47 2002/05/31 02:08:30 willhelm Exp $
+# $Id: engine.py,v 1.48 2002/06/01 15:49:05 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -495,6 +495,9 @@ class Engine:
 
     If we see more than 20 errors, we shutdown.
     """
+    exported.write_error("WARNING: Unhandled error encountered.\n" +
+                         "Curret count %d.  Shutting down at %d such " +
+                         "errors." % (lyntin.errorcount, 20))
     lyntin.errorcount = lyntin.errorcount + 1
     hooks.error_occurred_hook.spamhook(lyntin.errorcount)
     if lyntin.errorcount > 20:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.28 2002/05/18 03:40:44 willhelm Exp $
+# $Id: utils.py,v 1.29 2002/05/18 03:45:59 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -196,7 +196,7 @@ def expand(str, list):
    
 def filter_ansi(text):
   """ Filters out ansi codes."""
-  return re.sub('\[[0-9;]*[mJ]', '', text)
+  return re.sub(chr(27) + '\[[0-9;]*[mJ]', '', text)
 
 
 def filter_cm(text):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.19 2002/05/25 18:43:45 jmberne Exp $
+# $Id: tintincmds.py,v 1.20 2002/06/01 15:49:05 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -762,7 +762,7 @@ def showme_cmd(session, args, input):
   """
   input = args["input"]
   if not input:
-    exported.write_error("syntax: #showme <message>")
+    exported.write_error("syntax: requires a message.")
   else:
     exported.write_message(input)
      
