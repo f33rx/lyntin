@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.8 2002/06/02 15:10:56 jmberne Exp $
+# $Id: history.py,v 1.9 2002/06/04 00:52:39 willhelm Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered
@@ -24,7 +24,7 @@ class HistoryManager:
   def __init__(self):
     self._history = []
 
-  def getHistoryItem(self, userinput, calledbyuser=1):
+  def getHistoryItem(self, userinput):
     """
     This retrieves the item (if it exists) and performs the 
     substitutions (if we need to).
@@ -35,13 +35,6 @@ class HistoryManager:
                      out which item they're referring to and
                      whether to apply a substitution
 
-      'calledbyuser=1' -- if this was called by the user, it means
-                          that the item in position 0 of self._history
-                          is actually a history command ("!4 blah=blah").
-                          if calledbyuser == 1, then we replace that
-                          position 0 of self._history with the newly
-                          figured out command
-                          
     returns:
 
       -1 if we didn't discover anything or the command string at
@@ -75,16 +68,6 @@ class HistoryManager:
         # FIXME - we should probably error out...  need to think about this
         pass
 
-    ## this is a side-effect of this function--if we were called
-    ## by the user, it means that the item in position 0 of
-    ## self._history actually contains a history command--so we replace
-    ## it with the something nice we just discovered.
-    #if calledbyuser:
-    #  if self._history[0].find(userinput) == -1:
-    #    self.history[0] = returninput
-    #  else:
-    #    self._history[0] = returninput.join(self._history[0].split(userinput,1))
-
     return returninput
 
   def getHistory(self,count):
@@ -95,7 +78,7 @@ class HistoryManager:
       list of strings
 
     """
-    return ["-"] + self._history[:count]
+    return self._history[:count]
 
   def recordHistory(self, input):
     """ Records an item in the history (which is a queue).

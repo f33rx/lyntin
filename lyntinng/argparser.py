@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.19 2002/06/08 15:57:19 willhelm Exp $
+# $Id: argparser.py,v 1.20 2002/06/09 02:11:45 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -601,6 +601,19 @@ class ChoiceChecker(Checker):
       return possibilities[0]
 
 typecheckers["choice"] = ChoiceChecker
+
+class ReChecker(Checker):
+  """
+  Compiles the incoming argument as a regular expression.
+  """
+  def __init__(self, typename, typeargs):
+    if typeargs:
+      raise ParserException, "TypeArgs (%s) specified for non-configurable type (%s)" % (typeargs, typename)
+
+  def check(self, arg):
+    return re.compile(arg)
+
+typecheckers["re"] = ReChecker
 
 if __name__ == '__main__':
   testargs = {

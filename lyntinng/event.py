@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.33 2002/06/04 15:14:47 jmberne Exp $
+# $Id: event.py,v 1.34 2002/06/07 23:43:30 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -252,7 +252,8 @@ class InputEvent(Event):
 
   def execute(self):
     """ Execute."""
-    exported.write_user_data(self._input)
+    if not self._internal:
+      exported.write_user_data(self._input)
 
     engine.myengine.handleUserData(self._input, internal=self._internal, session=self._session)
 

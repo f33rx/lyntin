@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.28 2002/06/07 23:43:30 willhelm Exp $
+# $Id: tintincmds.py,v 1.29 2002/06/09 02:11:45 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -358,7 +358,7 @@ def history_cmd(session, args, input):
   """
   count = args["count"]
   
-  historylist = exported.get_history(count)[1:]
+  historylist = exported.get_history(count)
   for i in range(0, len(historylist)):
     historylist[i] = repr(i+1) + " " + historylist[i]
   historylist.reverse()
