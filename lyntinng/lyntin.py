@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.15 2002/04/08 21:53:05 willhelm Exp $
+# $Id: lyntin.py,v 1.16 2002/04/09 22:11:59 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -22,31 +22,31 @@ architecture docs, et al, see http://lyntin.sourceforge.net/
 """
 
 # help text which gets printed to stdout if you do 'Lyntin.py --help'
-HELPTEXT = """syntax: Lyntin.py [--help] [--readfile <file>] [--datadir <dir>] [--ui <ui>]
+HELPTEXT = """syntax: lyntin.py [--help] [--read <file>] [--datadir <dir>] [--ui <ui>] [--version]
 
   --help
          displays this text and exits.
 
-  --datadir
+  --datadir or -d
          If you don't set your datadir, Lyntin will set the datadir to
          the HOME environment variable.  Using this option allows you to
          set it manually.
 
-  --readfile
+  --read or --readfile or -r
          reads a file in at startup populating the common
          session with aliases, actions, and whatnot.
 
-  --ui
+  --ui or -u
          launches a specific ui for Lyntin.  current options
          are 'text', 'tk', and 'curses'.
+
+  --version or -v
+         prints out the version information and exits.
 """
 
 # the wizlist of folks without whom Lyntin wouldn't exist.
 WIZLIST = """This is the wizlist--people who have worked to bring you Lyntin:
-Lyn Headley    - he who wrote the first Lyntin
-Will Guaraldi  - he who took it over, debugged a bit, and wrote Lyntin 3.0
-Sebastian John - helped with Lyntin 3.0 by testing, code submissions, 
-                 and peer-review
+Lyn Headley, Will Guaraldi, James, Aquarius, Sebastian John
 """
 
 # bosstext - code derived from the original Lyntin
@@ -83,9 +83,12 @@ BOSSTEXT = """
       if not input:
 """
 
+
+
+
 # holds the application options--these are adjusted
 # by command-line arguments only
-options = {'ui': 'textui', 'readfile': '', 'datadir': ''}
+options = {'ui': 'textui', 'readfile': [], 'datadir': ''}
 
 # the character used to denote variables.
 variablechar = '$'
@@ -118,9 +121,44 @@ lyntindir = "."
 # many indicating a "bigger problem".
 errorcount = 0
 
+def parse_args(args):
+  """
+  Takes in a list of args and parses it out into a hashmap
+  of arg-name to value(s).
+
+  arguments:
+
+    'args' -- The list of command-line arguments.
+
+  returns:
+
+    list of tuples of (arg, value) pairings
+  """
+  i = 0
+  optlist = []
+  while (i < len(args)):
+
+    if args[i][0] == "-":
+      if (i+1 < len(args)):
+        if args[i+1][0] != "-":
+          optlist.append((args[i], args[i+1]))
+          i = i + 1
+        else:
+          optlist.append((args[i], ""))
+      else:
+        optlist.append((args[i], ""))
+
+    else:
+      optlist.append(("", args[i]))
+
+    i = i + 1
+
+  return optlist
+
+
 if __name__ == '__main__':
   try:
-    import sys, os, getopt
+    import sys, os
     import lyntin, engine, event
 
     # figure out where the lyntin files are
@@ -130,20 +168,14 @@ if __name__ == '__main__':
     lyntin.lyntindir = tmp[:tmp.rfind("/")+1].replace("/", os.sep)
 
     # read through options and arguments
-    optlist, args = getopt.getopt(sys.argv[1:], 
-                                  'u:r:d:vh',
-                                  ['ui=', 
-                                   'readfile=', 
-                                   'datadir=', 
-                                   'help', 
-                                   'version'])
+    optlist = lyntin.parse_args(sys.argv[1:])
 
     for mem in optlist:
       if mem[0] == '--ui' or mem[0] == '-u':
         lyntin.options['ui'] = mem[1]
 
-      elif mem[0] == '--readfile' or mem[0] == '-r':
-        lyntin.options['readfile'] = mem[1]
+      elif mem[0] == '--readfile' or mem[0] == "--read" or mem[0] == '-r':
+        lyntin.options['readfile'].append(mem[1])
 
       elif mem[0] == '--datadir' or mem[0] == '-d':
         if mem[1][-1] != os.sep:
@@ -177,7 +209,7 @@ if __name__ == '__main__':
     # generate a startup event.
     # StartupEvent handles all the rest of the initialization
     # including parsing command-line arguments and such.
-    event.StartupEvent(sys.argv).enqueue()
+    event.StartupEvent().enqueue()
 
     # start the engine which will execute the startupevent
     # and start executing.

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.19 2002/04/08 21:53:05 willhelm Exp $
+# $Id: event.py,v 1.20 2002/04/09 22:11:59 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -54,15 +54,10 @@ class StartupEvent(Event):
   When Lyntin is started, we try to do as much as we can
   inside of the SstartupEvent and through the startup hook.
   """
-  def __init__(self, args):
+  def __init__(self):
     """ Initialize.
-
-    arguments:
-
-      'args' -- (list of strings) the sys.args sent in
-
     """
-    self._args = args
+    pass
 
   def execute(self):
     """ Execute."""
@@ -98,17 +93,15 @@ class StartupEvent(Event):
 
     # if we don't have a readfile set by --read flag, then we
     # try to use ~/.lyntinrc
-    if lyntin.options['readfile'] == '' and lyntin.options['datadir'] != '':
-      lyntin.options['readfile'] = lyntin.options['datadir'] + ".lyntinrc"
-      exported.write_message("Setting readfile to " + 
-                    lyntin.options['readfile'])
+    if len(lyntin.options['readfile']) == 0 and lyntin.options['datadir'] != '':
+      lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
+      lyntin.options['readfile'].append(lyntinrcfile)
+      exported.write_message("Setting readfile to " + lyntinrcfile)
 
     # handle command files
-    f = lyntin.options['readfile']
-
-    if f != '':
-      exported.write_message("Reading in file " + f)
-      engine.myengine.getSession('common').handleUserData(lyntin.commandchar + 'read ' + f)
+    for mem in lyntin.options['readfile']:
+      exported.write_message("Reading in file " + mem)
+      engine.myengine.getSession('common').handleUserData(lyntin.commandchar + 'read ' + mem)
 
     # start the timer thread
     engine.myengine.startthread("timer", engine.myengine.runtimer)

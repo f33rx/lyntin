@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.7 2002/04/08 21:53:05 willhelm Exp $
+# $Id: exported.py,v 1.8 2002/04/10 02:59:23 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -13,16 +13,16 @@ it does change it'll be between major Lyntin versions.
 """
 import engine, ui.ui
 
-def lyntin_command(str):
+def lyntin_command(text):
   """
   The best way of executing a Lyntin command as if the user
   had typed it.
 
   arguments:
 
-    'str' -- the command to execute.  ex. "#help"
+    'text' -- the command to execute.  ex. "#help"
   """
-  get_engine().handleUserData(str)
+  get_engine().handleUserData(text)
 
 def add_command(str, func):
   """ The best way to add commands to Lyntin.
@@ -111,7 +111,7 @@ def set_num_errors(num):
   """
   lyntin.errorcount = num
 
-def write_ui(text, sess=None):
+def write_ui(text):
   """ Calls engine.myengine.writeUI which writes a message to the ui.
 
   arguments:
@@ -119,12 +119,9 @@ def write_ui(text, sess=None):
     'text' -- (string or ui.Message) the message to write 
               to the ui
 
-    'session=None' -- (session.Session instance) the session the
-                      mud data is associated with
-
   """
   if get_engine():
-    get_engine().writeUI(text, session=sess)
+    get_engine().writeUI(text)
   else:
     print text
 
