@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.21 2003/03/12 22:04:37 willhelm Exp $
+# $Id: substitute.py,v 1.22 2003/03/28 00:06:47 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -248,6 +248,11 @@ class SubstituteManager(manager.Manager):
   def getInfo(self, ses, text=''):
     if self._subs.has_key(ses):
       return self._subs[ses].getInfo(text)
+    return ""
+
+  def getAntiSubstitutesInfo(self, ses, text=''):
+    if self._subs.has_key(ses):
+      return self._subs[ses].getAntiSubstitutesInfo(text)
     return ""
 
   def getStatus(self, ses):

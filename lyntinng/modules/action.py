@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.26 2003/03/12 22:04:36 willhelm Exp $
+# $Id: action.py,v 1.27 2003/03/19 23:49:24 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -18,7 +18,8 @@ An action consists of:
 
 1. the trigger statement
 2. the response statement
-3. whether or not the action is a onetime action
+3. the priority of the action
+4. whether or not the action is a onetime action
 
 We also store a compiled regular expression of the trigger which
 we use on incoming mud_data to check for triggered actions.
@@ -39,7 +40,7 @@ class ActionData:
     self._actions = {}
     self._ses = ses
 
-  def addAction(self, trigger, response, onetime=0):
+  def addAction(self, trigger, response, priority=5, onetime=0):
     """
     Compiles a trigger pattern and adds the entire action to the
     hash.
@@ -49,6 +50,11 @@ class ActionData:
 
     @param response: what to do when the trigger pattern is found
     @type  response: string
+
+    @param priority: the priority to run this action at.  actions
+        are sorted by priority then by the trigger statement when
+        we go to check for triggered actions.  default is 5
+    @type  priority: int
 
     @param onetime: if the trigger is found, should this action then
         get removed after the response is executed
@@ -65,7 +71,7 @@ class ActionData:
       expansion = trigger
 
     compiled = utils.compile_regexp(expansion, 1)
-    self._actions[trigger] = (trigger, compiled, response, onetime)
+    self._actions[trigger] = (trigger, compiled, response, priority, onetime)
     return 1
 
   def _recompileRegexps(self):
@@ -74,13 +80,13 @@ class ActionData:
     regular expressions for the actions in this session.
     """
     for mem in self._actions.keys():
-      (trigger, compiled, response, onetime) = self._actions[mem]
+      (trigger, compiled, response, priority, onetime) = self._actions[mem]
       expansion = exported.expand_ses_vars(trigger, self._ses)
       if not expansion:
         expansion = trigger
       compiled = utils.compile_regexp(expansion, 1)
 
-      self._actions[trigger] = (trigger, compiled, response, onetime)
+      self._actions[trigger] = (trigger, compiled, response, priority, onetime)
 
   def clear(self):
     """
@@ -135,9 +141,12 @@ class ActionData:
     # FIXME - make sure this works even when lines are broken up.
     matched = []
 
+    actionlist = self._actions.values()
+    actionlist.sort(lambda x,y:cmp(x[3], y[3]))
+
     # go through all the lines in the data and see if we have
     # any matches
-    for (action, actioncompiled, response, onetime) in self._actions.values():
+    for (action, actioncompiled, response, priority, onetime) in actionlist:
       line = utils.filter_cm(ansi.filter_ansi(text))
       match = actioncompiled.search(line)
       if match:
@@ -208,9 +217,9 @@ class ActionData:
     for mem in listing:
       actup = self._actions[mem]
 
-      data.append("%saction {%s} {%s} onetime={%s}" % 
+      data.append("%saction {%s} {%s} priority={%d} onetime={%s}" % 
               (lyntin.commandchar, utils.escape(mem), 
-               utils.escape(actup[2]), actup[3]))
+               utils.escape(actup[2]), actup[3], actup[4]))
 
     return string.join(data, "\n")
 
@@ -228,10 +237,10 @@ class ActionManager(manager.Manager):
   def __init__(self):
     self._actions = {}
 
-  def addAction(self, ses, trigger, response, onetime=0):
+  def addAction(self, ses, trigger, response, priority, onetime=0):
     if not self._actions.has_key(ses):
       self._actions[ses] = ActionData(ses)
-    return self._actions[ses].addAction(trigger, response, onetime)
+    return self._actions[ses].addAction(trigger, response, priority, onetime)
     
   def clear(self, ses):
     if self._actions.has_key(ses):
@@ -261,7 +270,7 @@ class ActionManager(manager.Manager):
       if self._actions.has_key(basesession):
         acdata = self._actions[basesession]._actions
         for mem in acdata.keys():
-          self.addAction(newsession, mem, acdata[mem][2], acdata[mem][3])
+          self.addAction(newsession, mem, acdata[mem][2], acdata[mem][3], acdata[mem][4])
 
   def removeSession(self, ses):
     if self._actions.has_key(ses):
@@ -397,6 +406,7 @@ def action_cmd(ses, args, input):
   """
   trigger = args["trigger"]
   action = args["action"]
+  priority = args["priority"]
   onetime = args["onetime"]
   quiet = args["quiet"]
 
@@ -421,13 +431,13 @@ def action_cmd(ses, args, input):
     return
 
   try:
-    am.addAction(ses, trigger, action, onetime)
+    am.addAction(ses, trigger, action, priority, onetime)
     if not quiet:
-      exported.write_message("action: {%s} {%s} added." % (trigger, action), ses)
+      exported.write_message("action: {%s} {%s} {%d} added." % (trigger, action, priority), ses)
   except:
     exported.write_traceback("action: exception thrown.", ses)
 
-commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false quiet:boolean=false")
+commands_dict["action"] = (action_cmd, "trigger= action= priority:int=5 onetime:boolean=false quiet:boolean=false")
 
 def unaction_cmd(ses, args, input):
   """
