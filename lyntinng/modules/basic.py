@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.3 2001/12/11 02:34:33 willhelm Exp $
+# $Id: basic.py,v 1.4 2001/12/14 05:30:01 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -320,7 +320,7 @@ def highlight_cmd(session, words, input):
       (a, b) = utils.split_braced(inputadjusted)
 
       session.getHighlightManager().addHighlight(a, b)
-      engine.myengine.writeMessage("highlight " + a + " -> '" + b + "'")
+      engine.myengine.writeMessage("highlight '" + b + "' with style " + a + ".")
    except:
       engine.myengine.writeError("highlight cannot be set.")
       traceback.print_exc()
