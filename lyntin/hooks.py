@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: hooks.py,v 1.6 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
 """
-contains the hook class, which is a sequence of user
+Contains the hook class, which is a sequence of user
 defined functions, called at certain times during lyntin's 
 execution
 
@@ -17,28 +17,28 @@ contains all of lyntin's hooks
 
 
 class Hook:
-    """
-    Represents a (possibly empty) sequence of user-defined
-    functions.  provides user with the opportunity of reacting
-    to events internal to lyntin.  All functions take a single
-    argument which is a tuple.  see the specific hooks below for
-    more info.
-    """
-    def __init__(self, funclist = []):
-        self.funclist = funclist
+   """
+   Represents a (possibly empty) sequence of user-defined
+   functions.  provides user with the opportunity of reacting
+   to events internal to lyntin.  All functions take a single
+   argument which is a tuple.  see the specific hooks below for
+   more info.
+   """
+   def __init__(self, funclist = []):
+      self.funclist = funclist
 
-    # execute all the functions in the funclist
-    def run(self, arg=()):
-        for func in self.funclist:
-            func(arg)
+   # execute all the functions in the funclist
+   def run(self, arg=()):
+      for func in self.funclist:
+         func(arg)
 
-    # add a function to the funclist
-    def add(self, func):
-        self.funclist = self.funclist + [func]
+   # add a function to the funclist
+   def add(self, func):
+      self.funclist = self.funclist + [func]
         
-    # clear the funclist
-    def clear(self):
-        self.funclist = []
+   # clear the funclist
+   def clear(self):
+      self.funclist = []
 
 
 

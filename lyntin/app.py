@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: app.py,v 1.30 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
 """
 contains the client class, which represents lyntin the process,
@@ -16,16 +16,29 @@ import os, string, types, traceback
 import data, player, mud, hooks, cmdparse
 import dict_plus
 
-"""LYNTINDIR"""
-_ltd = ''
+
+_ltd = ''        # LYNTINDIR
 
 
 class LTSyntaxError:
+   """
+   Lyntin syntax error for bootstrapping and initialization.
+   """
    def __init__(self, value):
       self.value = value
 
    def __str__(self):
       return `self.value`
+
+class BadUserError:
+   """
+   BadUser exception
+   """
+   def __init__(self, why):
+      self.why = why
+
+   def __str__(self):
+      return `self.why`
 
 class Client(dict_plus.c):
    """
@@ -39,16 +52,15 @@ class Client(dict_plus.c):
        self.commands = {}  # holds command mappings above and beyond core
       
    def ReturnCommandHash(self):
-       """ReturnCommandList(self) -> command hash
-
+       """
        Returns the hash of commands.
        """
        return self.commands
 
    def AddCommand(self, name, func):
-       """AddCommand(self) -> 1 if success 0 if failure
-       
-       Adds a command binding to self.commands .
+       """
+       Adds a command binding to self.commands .  Returns a 1 if success and
+       a 0 if failure.
        """
        if callable(func):
            self.commands[name] = func
@@ -70,8 +82,7 @@ class Client(dict_plus.c):
            return 0
 
    def RemoveCommand(self, name):
-       """RemoveCommand(self) -> None
-       
+       """
        Removes a command binding from self.commands .
        """
        try:    del self.commands[name]
@@ -96,7 +107,7 @@ class Client(dict_plus.c):
            player.Quit(None,None,None)
        except SystemExit: # handle sys.exit
            return None
-       except BadUser, spec:
+       except BadUserError, spec:
            player.PutError('User variable %s unset!  Abort!'%spec.why)
            return None
 
@@ -112,7 +123,7 @@ class Client(dict_plus.c):
 
            info = exc_info()
            exc_class = info[0]
-           player.PutError("Cough...  sputter...  lyntin internal error:")
+           player.PutError("Cough...  sputter...  Lyntin internal error:")
            player.PutMessage(string.join(format_exception(info[0], info[1], info[2]), ""))
 
            self.numerrors = self.numerrors + 1
@@ -120,7 +131,7 @@ class Client(dict_plus.c):
            try:
                if self.numerrors >= self.too_many_errors:
                    hooks.too_many_errors_hook.run(())
-           except BadUser, spec:
+           except BadUserError, spec:
                player.PutError('User variable %s unset!  Abort!'%spec.why)
                raise SystemExit
        return 1
@@ -207,9 +218,9 @@ class Client(dict_plus.c):
         
    def PreHandleUserInput(self, input):
       """
-      do stuff that we want to do one time for each command, like
+      Do stuff that we want to do one time for each command, like
       registering the command in the history list.
-      we can't do this in HandleUserInput because it is recursive
+      We can't do this in HandleUserInput because it is recursive
       """
       if input == '\n':
           self.SendPlainInput('\r')
@@ -233,8 +244,9 @@ class Client(dict_plus.c):
       if not input:
          return
       ses = None
+
       # trim leading/trailing whitespace
-      #input = string.strip(input)
+      input = string.strip(input)
 
       # check for a sequence of commands separated by ';'
       whether, result = is_sequence(input)
@@ -362,7 +374,6 @@ class Client(dict_plus.c):
          input = cmdparse.do_history_subs(input, h)
          self.HandleUserInput(input)
 
-   # save input in the history list
    def RecordHistory(self, input):
       """
       Save input in the history list.
@@ -453,13 +464,6 @@ class Client(dict_plus.c):
             return 0
 
 
-class BadUser:
-   """
-   BadUser exception
-   """
-   def __init__(self, why):
-      self.why = why
-
 ##################################################################
 # Utility Functions
 ##################################################################
@@ -545,8 +549,7 @@ def strip_final_elt_if(seq, remlist):
    return seq
 
 def get_appropriate_file(str, Access):
-   """get_approproate_file(str, Access) -> file
-
+   """
    return a file opened from the given string, with the given 
    access paramter.  if they give us a full path name, try to open it.
    otherwise prepend the datadir to the argument.
@@ -565,8 +568,7 @@ def get_appropriate_file(str, Access):
 
     
 def split_braced(str):
-   """split_braced(str) -> tuple of innards
-
+   """
    Takes a string like {blah} {blah} and returns a tuple of the innards
    """
    nesting = 0
@@ -613,8 +615,7 @@ def split_braced(str):
    return one, two
 
 def strip_vars(s):
-   """strip_vars(s) -> list
-
+   """
    Returns a list of all variables in a string.  No element
    will occur twice in the list.
    """
@@ -640,8 +641,7 @@ def strip_vars(s):
    return vars, ret
 
 def is_brace(input):
-   """is_brace(input) -> bool
-
+   """
    Returns whether the input is enclosed in braces.
    """
    if len(input) < 2:
@@ -649,8 +649,7 @@ def is_brace(input):
    return input[0] == '{' and input[-1] == '}'
 
 def is_sequence(input):
-   """is_sequence(input) -> bool
-
+   """
    check for sequencing, i.e. commands separated by ';'
    no choice but to do a grungy old parse
    on the way, we find syntax errors in lyntin commands
@@ -671,7 +670,7 @@ def is_sequence(input):
       nesting = 0
       for c in input:
          if nesting < 0 and is_command:
-            raise 'LTSyntaxError', 'Unmatched Braces'
+            raise LTSyntaxError('Unmatched Braces')
          elif c == '{':
             nesting = nesting + 1
             parsed = parsed + c
@@ -695,7 +694,7 @@ def is_sequence(input):
             parsed = parsed + c
       # done parsing, check for mismatched braces
       if nesting != 0 and is_command:
-         raise 'LTSyntaxError', 'Unmatched Braces'
+         raise LTSyntaxError('Unmatched Braces')
    else:
       return 0, input
 
@@ -708,15 +707,13 @@ def is_sequence(input):
 
 
 def is_history(input):
-   """is_history(input) -> bool
-
-   Returns whether this is a history command.
+   """
+   Returns whether this is a history command (bool).
    """
    return re.compile('^!\d*').search(input)
 
 def history_number(input):
-   """history_number(input) -> int
-
+   """
    Returns the number of a history command that input
    is referencing.
    e.g. !4 returns 4
@@ -727,21 +724,19 @@ def history_number(input):
    return string.atoi(match.group(1))
 
 def get_user_custom(var):
-   """get_user_custom(var) -> depends
-
+   """
    Gets a user-customized variable
    """
    try:
       uc = player.user.user_custom
    except:
-      raise BadUser, BadUser('NoModule')
+      raise BadUserError('No Module')
    if uc.has_key(var):
       return uc[var]
-   raise BadUser, BadUser(var)
+   raise BadUserError(var)
 
 def abort_due_to_errors(arg):
-   """abort_due_to_errors(arg) -> None
-
+   """
    There have been too many errors.  so we quit.
    """
    player.PutError('too many errors! abort! abort! abort!')

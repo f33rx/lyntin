@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: data.py,v 1.33 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
 """
 contains the session class, which represents a user connection
@@ -137,8 +137,7 @@ debug = 1
 
 
 def clear_all():
-   """clear_all() -> None
-
+   """
    Closes all open sessions which are stored in the ses global
    variable.
    """
@@ -147,9 +146,8 @@ def clear_all():
 
 
 def get_session(str):
-   """get_session(str) -> Session
-
-   retrieves the session by name or None if it's not found.
+   """
+   Retrieves the session by name or None if it's not found.
    """
    global sessionlist
 
@@ -168,9 +166,8 @@ def get_session(str):
    return None
 
 def filter_crud(txt):
-   """filter_crud(txt) -> string
-
-   filter ansi and ^M stuff out of text used when logging 
+   """
+   Filter ansi and ^M stuff out of text used when logging 
    files.
    """
    txt = re.sub('\015|\r', '', txt)
@@ -178,16 +175,14 @@ def filter_crud(txt):
    return txt
 
 def filter_cm(txt):
-   """filter_cm(txt) -> string
-
-   filter ^M stuff out of text.
+   """
+   Filter ^M stuff out of text.
    """
    txt = re.sub('\015|\r', '', txt)
    return txt
 
 def split_into_lines(str):
-   """split_into_lines(str) -> []
-
+   """
    Split a string into a list of lines.
    """
    if string.find(str, '\r') != -1:
@@ -197,8 +192,7 @@ def split_into_lines(str):
 
 
 def compile_trigger(trig):
-   """compile_trigger(trig) -> regex
-
+   """
    Convert a trigger with pattern variables into a
    compiled regular expression
    """
@@ -223,7 +217,6 @@ class Session:
       self.sorck = None # the socket
       self.domain = None
       self.handlers = []
-
 
       self.ansi_colors = 1  # should we show ansi colors?
 
@@ -254,6 +247,9 @@ class Session:
 
    # write anything from our connection to stdout
    def ReadMud(self):
+      """
+      Pull data from the mud and return it.
+      """
       try:
          # check if there's anything to read
          if not self.connected:
@@ -270,12 +266,15 @@ class Session:
          self.Die(x)
 
    def Die(self, exc=''):
+      """
+      Die closure.
+      """
       pass
 
 
 class UserSession(Session):
    """
-   session class for the user interface
+   Session class for the user interface
    """
    def __init__(self, name, domain, port):
       Session.__init__(self, name, domain, port)
@@ -310,9 +309,8 @@ class UserSession(Session):
          return '<session "%s">'%self.name
 
    def InitLocalSession(self):
-      """InitLocalSession(self) -> None
-
-      initialize a new local session.  inherits all its aliases
+      """
+      Initialize a new local session.  Inherits all its aliases
       etc from the common session.
       """
       self.aliases = copy.copy(common.aliases)
@@ -321,10 +319,11 @@ class UserSession(Session):
       self.gags = copy.copy(common.gags)
       self.subs = copy.copy(common.subs)
 
-   # die
-   # triggers hooks.death_hook, which takes a session argument
-   # death_hook called *before* the session is actually killed
    def Die(self, exc=''):
+      """
+      Triggers death_hook which takes a session argument
+      death_hook called *before* the session is actually killed.
+      """
       global common, numsessions, sessionlist, currsession
       import types
       if type(exc) == types.StringType:
@@ -351,14 +350,22 @@ class UserSession(Session):
          player.prompt()
       theapp.ui.OnEcho()
 
-   # write text to session's log file, but only if logging is turned on
    def log(self, text):
+      """
+      Writes text to a session's log file but only if logging is turned
+      on.
+      """
       if self.logging and self.logfile != None:
          self.logfile.write(data.filter_crud(text))
 
    # add trigger as an action which invokes response
    # also compile and insert trigger's regex into action_list
    def add_action(self, trigger, response):
+      """
+      Add trigger as an action which invokes response
+      Also compiles and inserts trigger's regex into the
+      action_list.
+      """
       if self.actions.has_key(trigger):
          self.actions[trigger] = response
       else:
@@ -366,16 +373,21 @@ class UserSession(Session):
          compiled = compile_trigger(trigger)
          self.action_list.append((trigger, compiled))
 
-   # see if text contains anything in our gag list
    def CheckForGaggedText(self, text):
+      """
+      See if text contains anything in our gag list.
+      If so, returns a 1, else a 0.
+      """
       if text:
          for gt in self.gags:
             if re.compile(gt).search(text):
                return 1
          return 0
 
-   # connect to a mud
    def Connect(domain, port):
+      """
+      Connects to a mud.
+      """
       try:
          if not self.domain or not self.port:
             return
@@ -385,8 +397,10 @@ class UserSession(Session):
       except:
          player.PutError('unable to connect')
 
-   # write something to our connection
    def WriteTo(self, data):
+      """
+      Writes something out to our connection.
+      """
       # mud.log(data)
       self.log(data)
       if not self.connected:
@@ -399,23 +413,35 @@ class UserSession(Session):
 
    # close the instance's socket
    def Close(self):
+      """
+      Closes the socket connection.
+      """
       if self.connected:
          try:
             self.sorck.close()
          except socket.error:
             pass
 
-   # input a string, return a list of all the aliases that match it
    def ExpandAlias(self, str):
+      """
+      Returns a list of all the aliases that matches given string.
+      """
       return self.Expand(str, self.aliases.keys())
 
-   # input a string, return a list of all the action triggers that match it
    def ExpandAction(self, str):
+      """
+      Returns a list of all the action triggers that match a given
+      string.
+      """
       return self.Expand(str, self.actions.keys())
 
    # input a string and a list, return a list of all the elements
    # in the list that match the string
    def Expand(self, s, list):
+      """
+      Given a string and a list, returns a list of all the elements
+      in the list that match the string.
+      """
       str = s[:]
       ret = []
       wildcard = string.count(str, '*')
@@ -435,6 +461,9 @@ class UserSession(Session):
 
    # wipe session clean of actions/aliases/subs/gags
    def Clear(self):
+      """
+      Wipes a session clean of actions/aliases/subs/gags.
+      """
       self.aliases = {}
       self.actions = {}
       self.action_list = [] # -- JA Was not cleared before... oops :)
@@ -442,41 +471,50 @@ class UserSession(Session):
       self.gags = []
       self.vars = {}
 
-   # see if text is either a variable or the beginning of a variable
-   def Isvar(self, text):
+   def IsVar(self, text):
+      """
+      See if text is either a variable or the beginning of a variable.
+      """
       for v in self.vars.keys():
          if string.find(v, text) == 0:
             return 1
       return 0
 
-   # see if text is a variable
-   def IsRealvar(self, text):
+   def IsRealVar(self, text):
+      """
+      See if the text is a variable.
+      """
       for v in self.vars.keys():
          if v == text:
             return 1
       return 0
 
-   # get a string suitable for displaying the value of var name
    def GetVarDisplayString(self, name):
+      """
+      Get a string suitable for displaying the value of a var name.
+      """
       val = self.vars[name]
       ans = '{%s} = {%s}'%(name, val)
       return ans
 
-   # see if any mud output triggers an action.
-   # any trigger causes the action_hook to be run, just
-   # before the action response is taken
-
-   # FIXME - need to handle $n as well as %n syntax.
-   # the former should replace all ; with \; and I think
-   # that'll fix the problem.
    def CheckActions(self, output):
+      """
+      see if any mud output triggers an action.
+      any trigger causes the action_hook to be run, just
+      before the action response is taken
 
-      # works with the trigger
-      # get a list of variables in str, in the order in
-      # which they appear.
-      # i.e., for the three variables %4 %1 %3, keylist
-      # will get the list ["4","1","3"]
+      FIXME - need to handle $n as well as %n syntax.
+      the former should replace all ; with \; and I think
+      that'll fix the problem.
+      """
       def orderedvars(instr):
+         """
+         works with the trigger
+         get a list of variables in str, in the order in
+         which they appear.
+         i.e., for the three variables %4 %1 %3, keylist
+         will get the list ["4","1","3"]
+         """
          str = instr[:] # we'll mutilate this copy
          keylist = []
          speckeylist = []
@@ -539,20 +577,26 @@ class UserSession(Session):
 
 ##################################################################
 # databuffer class:
-# class for storing previous output from the mud.
-# mainly for inspection from python functions, but 
-# grepping methods are also provided.
-# anytime text is added to the databuffer, the hook 'data_hook',
-# is called.  it receives a one elt tuple containing the databuffer.
 ##################################################################
 
 class databuffer:
+   """
+   Class for storing previous output from the mud.
+   mainly for inspection from python functions, but 
+   grepping methods are also provided.
+   Anytime text is added to the databuffer, the hook 'data_hook',
+   is called.  It receives a one elt tuple containing the 
+   databuffer.
+   """
    def __init__(self, size=20):
       self.size = size
       self.list = []
 
-   # add a chunk of text
+
    def add(self, text):
+      """
+      Add a chunk of text to the data buffer.
+      """
       self.list = [text] + self.list  # ack, optimize
       # chop the storage list if it's too big
       if len(self.list) > self.size:
@@ -561,24 +605,32 @@ class databuffer:
       # run the hook, which does nothing by default
       hooks.data_hook.run((self,))
 
-   # resize the buffer
+
    def resize(self, s):
+      """
+      Resize the buffer.
+      """
       if not (0 < s):
          raise 'LTDatabufferError', 'Negative Size Argument'
       self.size = s
 
-   # search through the databuffer for a regular expression.
-   # return a list of all the entries that matched it.
+
    def grep(self, pat):
+      """
+      Search through the databuffer for a regular expression.
+      Return a list of all the entries that matched it.
+      """
       ret = []
       for l in self.list:
          if re.compile(pat).search(l):
             ret.append(l)
       return ret
 
-   # search through the databuffer for a regular expression.
-   # return a list of all the _lines_ that matched it.
    def greplines(self, pat):
+      """
+      Search through the databuffer for a regular expression.
+      Return a list of all the _lines_ that matched it.
+      """
       build = []
       for g in self.list:
          lines = split_into_lines(g)

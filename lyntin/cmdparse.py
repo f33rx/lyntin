@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: cmdparse.py,v 1.7 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
 """
 contains utility functions for parsing user-commands
@@ -42,9 +42,9 @@ def substitute_vars(input):
     whether = 0
     for c in input:
         if varhunt:
-            if data.currsession.Isvar(v+c):
+            if data.currsession.IsVar(v+c):
                 v = v + c
-            elif data.currsession.IsRealvar(v):
+            elif data.currsession.IsRealVar(v):
                 # found a complete variable
                 # chop off var_char from parsed
                 parsed = parsed[:-1] + data.currsession.vars[v]

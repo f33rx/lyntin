@@ -4,13 +4,11 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: cursesui.py,v 1.8 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
-
 """
 This module holds the Curses ui.  It could use some serious work.
 """
-
 import data, string, sys, mud, app, select, os, time, regsub
 import regsub
 from basegui import BaseGUI
@@ -34,6 +32,10 @@ class Cursesui(BaseGUI):
    """
    
    def setup(self):
+      """
+      Sets up the screen into a series of windows.  Then initializes
+      the ui.
+      """
       self._main = None
       self._input = None
       self._output = None
@@ -70,14 +72,19 @@ class Cursesui(BaseGUI):
 
 
    def refresh_all(self):
+      """
+      Refreshes the display.
+      """
       self._main.refresh()
 
 
    def close(self):
-      """close(self) -> None
-
+      """
       Over-ridden from basegui.  This is called when the client
       is closing down.
+
+      This is important because it ends the curses session
+      returning the client back to "normal" land.
       """
       self._closing = 1
       curses.nocbreak()
@@ -87,13 +94,18 @@ class Cursesui(BaseGUI):
 
 
    def filter_crud(self,txt):
+      """
+      Filters out crud (and ansi colors).
+      """
       txt = regsub.gsub('\015\\|\r', '', txt)
       txt = regsub.gsub('[[0-9;]*[mJ]', '', txt)
       return txt
 
 
-   """overridden function"""
    def print_string(self,line,modifiers=None,ending='\n',target=None):
+      """
+      Prints a string to the output so the user can read it.
+      """
       if modifiers == 'client':
          line = string.replace(line, "\n", "\n## ")
      
@@ -122,8 +134,10 @@ class Cursesui(BaseGUI):
       self._output.refresh()
 
     
-   """overridden function"""
    def get_input(self):
+      """
+      Retrieves input 20 characters at a time.
+      """
       newline = self._newline
       newchar = 0
 
@@ -145,7 +159,9 @@ class Cursesui(BaseGUI):
          elif newchar == 13:
             pass
 
-         elif newchar == curses.KEY_DC or newchar == curses.KEY_BACKSPACE or newchar == 8 or newchar == 127:
+         elif newchar == curses.KEY_DC or 
+            newchar == curses.KEY_BACKSPACE or 
+            newchar == 8 or newchar == 127:
             if newline:
                newline = newline[:-1]
                (y,x) = self._input.getyx()
@@ -163,10 +179,17 @@ class Cursesui(BaseGUI):
 
 
 
-   """overridden function"""
-   def echo(self,yesno):
+   def echo(self, yesno):
+      """
+      Overridden function.  Changes echo to yesno (hopefully
+      either a 1 or 0).
+      """
       self._echoon = yesno
 
     
    def has_echo(self):
+      """
+      Returns whether or not we have the echo ability--which
+      we do.
+      """
       return 1

@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: handler.py,v 1.6 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
 """
-a hander intercepts server output at a primitive level and can
+A hander intercepts server output at a primitive level and can
 respond to it or change the input for the next handler.
 """
 
@@ -16,26 +16,26 @@ respond to it or change the input for the next handler.
 import mud
 
 class Handler:
-    def handle(self, session, read):
-        """
-        return (continue, read) where continue is either STOP
-        or CONTINUE and read is the input to pass to the next handler
-        """
-        pass
+   def handle(self, session, read):
+      """
+      Return (continue, read) where continue is either STOP
+      or CONTINUE and read is the input to pass to the next handler
+      """
+      pass
 
 class AppHandler:
-    """
-    the main lyntin app handler
-    """
-    def handle(self, session, read):
-        if not read:
-            read = session.ReadMud()
+   """
+   The main Lyntin app handler.
+   """
+   def handle(self, session, read):
+      if not read:
+         read = session.ReadMud()
 
-        if read:
-            # handle actions and displaying stuff from mud
-            mud.handle_mud_output(read, session)
+      if read:
+         # handle actions and displaying stuff from mud
+         mud.handle_mud_output(read, session)
 
-        return (CONTINUE, read)
+      return (CONTINUE, read)
 
 
 

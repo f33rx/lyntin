@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id$
+# $Id: player.py,v 1.44 2001/08/06 02:00:19 willhelm Exp $
 ##################################################################
 """
 defines lyntin's user-level commands
@@ -28,8 +28,7 @@ class SessionError: pass
 command_table = {}
 
 def dispatch_command(input, seslist):
-   """dispatch_command(input, seslist) -> None
-
+   """
    input - the input string
    seslist - list of session objects
 
