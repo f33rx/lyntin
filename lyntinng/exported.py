@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.20 2002/06/07 23:43:30 willhelm Exp $
+# $Id: exported.py,v 1.21 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -50,12 +50,7 @@ def add_command(command, func, arguments=None, argoptions=None, helptext=""):
     'helptext=""' -- (string) the help text for this command
 
   """
-  get_engine().addCommand(command, func, arguments, argoptions)
-  if helptext:
-    try:
-      add_help(command, helptext)
-    except:
-      pass
+  get_engine().addCommand(command, func, arguments, argoptions, helptext)
 
 def remove_command(str):
   """ Removes a command from Lyntin.
@@ -116,8 +111,11 @@ def add_help(fqn, helptext):
 
     'helptext' -- (string) the help text
 
+  returns:
+
+    (string) the fqn
   """
-  get_engine().getManager("help").addHelp(fqn, helptext)
+  return get_engine().getManager("help").addHelp(fqn, helptext)
 
 def remove_help(fqn):
   """ Removes a help topic from Lyntin.

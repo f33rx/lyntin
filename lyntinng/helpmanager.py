@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.7 2002/05/25 18:42:08 jmberne Exp $
+# $Id: helpmanager.py,v 1.8 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -36,8 +36,10 @@ class HelpManager(manager.Manager):
 
       'helptext' -- (string) the help data in raw text format
 
-    """
+    returns:
 
+      (string) the fqn of the help topic we just added
+    """
     categorylist, helpname = self.splitName(fqn)
 
     if not helptext or not helpname:
@@ -76,6 +78,11 @@ class HelpManager(manager.Manager):
     else:
       place[helpname] = helptext
 
+    if categorylist:
+      fqn = "%s.%s" % (string.join(categorylist, "."), helpname)
+    else:
+      fqn = "root.%s" % helpname
+    return fqn
 
   def removeHelp(self, fqn):
     """
@@ -97,14 +104,14 @@ class HelpManager(manager.Manager):
         breadcrumbs.append(place)
         place = place[mem]
       else:
-        raise ValueError, "That topic does not exist."
+        raise ValueError, "Topic '%s' does not exist." % fqn
 
     if place.has_key(name):
       del place[name]
       self.trimTree(self._help_tree)
 
     else:
-      raise ValueError, "That topic does not exist."
+      raise ValueError, "Topic '%s' does not exist." % fqn
 
 
   def trimTree(self, tree):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.55 2002/06/18 04:17:45 willhelm Exp $
+# $Id: engine.py,v 1.56 2002/06/20 01:20:10 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -34,6 +34,30 @@ myengine is a singleton.  so when it gets instantiated, this
 variable can be used to retrieve the engine singleton.
 """
 myengine = None
+
+class CommandData:
+  """
+  Holds data relating to a command.  It's a helper class.
+  """
+  def __init__(self):
+    self._name = ""
+    self._func = None
+    self._argparser = None
+    self._fqn = ""
+
+  def __repr__(self): return self._name
+  def __str__(self): return self._name
+
+  def setName(self, name): self._name = name
+  def getName(self): return self._name
+  def setNameAdjusted(self, name): self._name_adjusted = name
+  def getNameAdjusted(self): return self._name_adjusted
+  def setFunc(self, func): self._func = func
+  def getFunc(self): return self._func
+  def setArgParser(self, ap): self._argparser = ap
+  def getArgParser(self): return self._argparser
+  def setFQN(self, fqn): self._fqn = fqn
+  def getFQN(self): return self._fqn
 
 class Engine:
   """
@@ -88,11 +112,8 @@ class Engine:
     # the current session.  points to a Session object.
     self._current_session = None
 
-    # holds all the commands
-    self._command_list = {}
-
-    # holds argparsers for commands that get arguments pre-parsed
-    self._command_arguments = {}
+    # holds command name -> CommandData mappings
+    self._commands = {}
 
     # we register ourselves with the shutdown hook
     hooks.shutdown_hook.register(self.shutdown)
@@ -102,14 +123,6 @@ class Engine:
     """ Handles initialization that requires an engine object."""
     commonsession = session.Session()
     commonsession.setName("common")
-
-    # commonsession.setManager("action", action.ActionManager())
-    # commonsession.setManager("alias", alias.AliasManager())
-    # commonsession.setManager("gag", gag.GagManager())
-    # commonsession.setManager("highlight", highlight.HighlightManager())
-    # commonsession.setManager("substitute", substitute.SubstituteManager())
-    # commonsession.setManager("variable", variable.VariableManager())
-    # commonsession.setManager("speedwalk", speedwalk.SpeedwalkManager())
 
     # this creates a "common" entry in all the managers that manage
     # session scoped data
@@ -622,7 +635,6 @@ class Engine:
     finally:
       self._ui_lock.release()
 
-
   def writePrompt(self):
     """ Tells the ui to print a prompt."""
     if self._ui:
@@ -646,9 +658,9 @@ class Engine:
       (list of strings) all the commands that have been registered
 
     """
-    return self._command_list.keys()
+    return self._commands.keys()
 
-  def addCommand(self, name, func, arguments=None, argoptions=None):
+  def addCommand(self, name, func, arguments=None, argoptions=None, helptext=""):
     """
     Registers a command.
 
@@ -664,52 +676,66 @@ class Engine:
       'argoptions=None' -- (string) options for how the argument spec
                            should be parsed
 
+      'helptext=""' -- (string) the help text for this command
+      
     """
     if not callable(func):
       raise ValueError, "%s is uncallable." % name
 
-    syntaxline = None
+    cd = CommandData()
 
-    # first, try to figure out the arguments thing
+    syntaxline = ""
+
+    # try to figure out the arguments and syntax line stuff
     if arguments != None:
       try:
-        self._command_arguments[name] = argparser.ArgumentParser(arguments, argoptions)
-        syntaxline = self._command_arguments[name].syntaxline
+        cd.setName(name)
+        cd.setArgParser(argparser.ArgumentParser(arguments, argoptions))
+        syntaxline = cd.getArgParser().syntaxline
       except Exception, e:
         raise Exception, "Error with arguments for command %s, (%s)" % (name,e)
 
-    # second, add the command to the command list
-    self._command_list[name] = func
+    # add the command to the command list
+    cd.setFunc(func)
 
-    # third, deal with the help text
-    if func.__doc__:
-      helptext = inspect.getdoc(func)
-    else:
-      helptext = "\nThis command has no help."
+    # toss the command thing in the list
+    self._commands[name] = cd
+
+    # deal with the help text
+    if not helptext:
+      if func.__doc__:
+        helptext = inspect.getdoc(func)
+      else:
+        helptext = "\nThis command has no help."
 
     if name[0] == "^":
-      nameadjusted = name[1:]
+      cd.setNameAdjusted(name[1:])
     else:
-      nameadjusted = name
-    if syntaxline != None:
-      helptext = "syntax: %s%s %s\n" % (lyntin.commandchar, nameadjusted, syntaxline) + helptext
+      cd.setNameAdjusted(name)
 
-    exported.add_help(nameadjusted, helptext)
+    if syntaxline:
+      helptext = ("syntax: %s%s %s\n" % 
+             (lyntin.commandchar, cd.getNameAdjusted(), syntaxline) + helptext)
+
+    fqn = exported.add_help(cd.getNameAdjusted(), helptext)
+    cd.setFQN(fqn)
         
   def removeCommand(self, name):
     """
-    Removes a command for whatever reasons.
+    Removes a command (and the help text) for whatever reasons.
 
     arguments:
 
       'name' -- (string) the name of the command to remove
 
     """
-    if self._command_list.has_key(name):
-      del self._command_list[name]
-
-    if self._command_arguments.has_key(name):
-      del self._command_arguments[name]
+    if self._commands.has_key(name):
+      cd = self._commands[name]
+      del self._commands[name]
+      try:
+        exported.remove_help(cd.getFQN())
+      except:
+        pass
 
   def getCommand(self, name):
     """
@@ -724,16 +750,16 @@ class Engine:
       (function) the function in question or None
 
     """
-    if self._command_list.has_key(name):
-      return self._command_list[name]
+    if self._commands.has_key(name):
+      return self._commands[name].getFunc()
 
-    if self._command_list.has_key("^" + name):
-      return self._command_list["^" + name]
+    if self._commands.has_key("^" + name):
+      return self._commands["^" + name].getFunc()
 
     # this is kind of a kluge to handle the #@ arbitrary
     # python stuff so that it can be in its own module.
-    if name[0] == "@" and self._command_list.has_key("@"):
-      return self._command_list["@"]
+    if name[0] == "@" and self._commands.has_key("@"):
+      return self._commands["@"].getFunc()
 
     return None
 
@@ -752,8 +778,8 @@ class Engine:
                       to convert incoming arguments into a dictionary
       
     """
-    if self._command_arguments.has_key(name):
-      return self._command_arguments[name]
+    if self._commands.has_key(name):
+      return self._commands[name].getArgParser()
 
     return None
 
