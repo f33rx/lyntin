@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.3 2003/08/01 00:14:52 willhelm Exp $
+# $Id: __init__.py,v 1.4 2003/08/06 22:59:44 willhelm Exp $
 #######################################################################
 """
 Lyntin is an open-source mud client framework written in Python which allows
@@ -12,6 +12,7 @@ for additional functionality to be written in Python as Lyntin modules.
 """
 __docformat__ = 'epytext en'
 
+# __version__ = '4.0beta1'
 __version__ = 'CVS-DEV'
 __author__ = 'Will Guaraldi <willhelm@users.sourceforge.net>'
 __url__ = 'http://lyntin.sourceforge.net/'
