@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: scheduler.py,v 1.1 2003/02/14 00:20:39 willhelm Exp $
 #######################################################################
 """
 This module defines the ScheduleManager which manages scheduling 
@@ -171,7 +171,7 @@ class Scheduler:
 
     return []
 
-  def addEvent(self, tick, sevent, real=0):
+  def addEvent(self, tick, sevent, real=0, id=-1):
     """
     Adds an event to the scheduler.
 
@@ -185,8 +185,11 @@ class Scheduler:
         epoch) or a regular event (tick is an offset of seconds from now)
     @type  real: int
     """
-    eid = self._eid
-    self._eid += 1
+    if id == -1:
+      eid = self._eid
+      self._eid += 1
+    else:
+      eid = id
 
     sevent._id = str(eid)
 
@@ -218,9 +221,6 @@ class Scheduler:
       for mem in self._events[tick]:
         events.append(mem)
 
-        # handles repeating events
-        if mem._repeat == 1:
-          self.addEvent(tick + mem._offset, mem)
       del self._events[tick]
 
     self._current_tick = tick
@@ -248,6 +248,9 @@ class Scheduler:
         except:
           exported.write_traceback("exception kicked up while trying to execute event.")
 
+      # handles repeating events
+      if mem._repeat == 1:
+        self.addEvent(tick + mem._offset, mem, id=mem._id)
 
 def schedule_cmd(ses, args, input):
   """
