@@ -1,12 +1,12 @@
-:Title: Lyntin Readme
-:Author: Will
+Title:  Lyntin Readme
+Author: Will Guaraldi
 
 
 
 VERSION
 =======
 
-$Id: README,v 1.13 2002/08/15 01:26:11 willhelm Exp $
+$Id: README,v 1.14 2002/08/22 01:34:47 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -20,7 +20,7 @@ WHY SHOULD YOU USE LYNTIN?
 Lyntin is written entirely in Python--a nicely written and very portable
 programming language.  Thusly Lyntin is platform independent.  Lyntin is
 exposes the Python interpreter allow you more freedom than mere
-'if you see this then send this' aliases and triggers.  They can be 
+"if you see this then send this" aliases and triggers.  They can be 
 Python functions which do anything from setting a variable to forking 
 a web spider.  In addition, your code can interface with Lyntin's code.  
 
@@ -116,20 +116,24 @@ commands we do not currently support for various reasons:
    * a paltry few because we haven't gotten around to it
 
 If you miss some Tintin things, it's pretty easy to implement your
-own commands in Lyntin.  See the ``HACKING`` document for more
+own commands in Lyntin.  See the "HACKING" document for more
 information.
 
 There are two user input evaluation modes in Lyntin: Lyntin mode and
-Tintin mode.  You can switch modes using the command-line argument::
+Tintin mode.  You can switch modes using the command-line argument:
 
    --evalmode tintin
+
    or
+
    --evalmode lyntin
 
-or ingame with::
+or ingame with:
 
    #config evalmode lyntin
+
    or
+
    #config evalmode tintin
 
 The evalmodes differ in how variables and placement variables are
@@ -147,13 +151,13 @@ Lyntin up in tintin mode.
 DOCUMENTATION 
 =============
 
-Lyntin incorporates the *look and feel* of Tintin, so if you've used
+Lyntin incorporates the _look and feel_ of Tintin, so if you've used
 Tintin or a variant it should be pretty easy to make the transition.  
 It offers all the major features of Tintin, including multiple 
 sessions, but leaves a few minor things out.
 
 There are *in-game* help files covering the commands and most 
-other things we could think of which can be accessed with the ``#help`` 
+other things we could think of which can be accessed with the "#help"
 command.
 
 All the documentation comes with Lyntin and is also available on
@@ -200,8 +204,8 @@ via the bug-tracker and task-tracker on our SourceForge project site.
 If you have problems and fix them, by all means send us patches and
 we'll happily work with them and credit you.
 
-That should be about it.  In-game help is accessed by typing ``#help``.
-When you start Lyntin for the first time, type ``#help general``
+That should be about it.  In-game help is accessed by typing "#help".
+When you start Lyntin for the first time, type "#help general"
 and that'll get you started.  Read through the various help files
 at your leisure.
 

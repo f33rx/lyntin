@@ -1,11 +1,11 @@
-:Title: Hacking Guide to Lyntin
-:Author: Will
+Title:  Hacking Guide to Lyntin
+Author: Will Guaraldi
 
 
 VERSION
 =======
 
-$Id: HACKING,v 1.17 2002/09/04 05:36:12 willhelm Exp $
+$Id: HACKING,v 1.18 2002/10/12 22:14:47 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -15,16 +15,18 @@ http://lyntin.sourceforge.net/
 NOTES
 =====
 
-This document is very much written off the top of my head.  The contents
-may not be accurate--when in doubt read the code.  The code is very
-well documented and will provide much insight as to how things work.
-If you have questions after analyzing the code, ask on the lyntin-devl
-mailing list.
+This document provides a rough overview of how things in Lyntin are
+architected and how they work.  The API documentation which is viewable
+online on the Lyntin site and is in the source code itself which comes
+with every copy of Lyntin (because it _is_ Lyntin) is where you will
+find the answers to all your questions and more!
 
-In general, in depth knowledge of Python programming is required to
-really hack Lyntin.  If you don't know Python, you should go to
-http://www.python.org/ and familiarize yourself with the language, its
-constructs, and the Python community.
+If you have questions, ask on the lyntin-devl mailing list.
+
+In depth knowledge of the Python programming language is required to
+really get into Lyntin since it's all written in Python.  If you
+don't know Python, go visit http://www.python.org and familiarize
+yourself with the language, its constructs. and the Python community.
 
 
 
@@ -68,21 +70,22 @@ first.  But before that, we should cover Lyntin's philosophy.
 PHILOSOPHY
 ==========
 
-If you enter into the Python interactive mode (by typing ``python``
-at the prompt) and type ``import this`` you get a list of Python's
+If you enter into the Python interactive mode (by typing "python"
+at the prompt) and type "import this" you get a list of Python's
 design philosophies.  When working on Lyntin, we have similar
 thoughts:
 
-* Beautiful is better than ugly.
-* Simple is better than complex.
-* Readability before most things.
-* Even readable things need documentation.
-* Optimization if we have to.
-* Leave power and choice in the hands of the user.
-* Get it right the third time--the first two times explore the issue
-  and perhaps implement solutions until the true solution is obvious.
-* Discussion before implementation.
-* Possibly specification and test cases before implementation.
+   * Beautiful is better than ugly.
+   * Simple is better than complex.
+   * Readability before most things.
+   * Even readable things need documentation.
+   * Optimization if we have to.
+   * Leave power and choice in the hands of the user.
+   * Get it right the third time--the first two times explore 
+     the issue and perhaps implement solutions until the true
+     solution is obvious.
+   * Discussion before implementation.
+   * Possibly specification and test cases before implementation.
 
 
 
@@ -92,7 +95,7 @@ LYNTIN ARCHITECTURE
 FILE STRUCTURE
 --------------
 
-The Lyntin directory structure looks like this::
+The Lyntin directory structure looks like this:
 
    lyntinng/
       |-- ui/         -- user interfaces
@@ -119,26 +122,26 @@ accessing Lyntin internals without causing them to block.
 
 The engine holds:
 
-* the HistoryManager
-* the ThreadManager
-* the HelpManager
-* the list of Sessions
-* the user interface
-* a series of managers which manage aliases, actions,
-  gags, highlights, substitutes, variables and other such 
-  things
+   * the HistoryManager
+   * the ThreadManager
+   * the HelpManager
+   * the list of Sessions
+   * the user interface
+   * a series of managers which manage aliases, actions,
+     gags, highlights, substitutes, variables and other such 
+     things
 
 
-All these things exist on the *engine scoping*.
+All these things exist on the _engine scoping_.
 
 Each session has:
 
-* its own SocketCommunicator which abstracts socket
-  connections and network issues
-* a Ticker which allows you to do things at intervals
+   * its own SocketCommunicator which abstracts socket
+     connections and network issues
+   * a Ticker which allows you to do things at intervals
 
 
-These things exist on a *session scoping* -- there are one of these
+These things exist on a _session scoping_ -- there are one of these
 for every session instance.
 
 
@@ -146,20 +149,19 @@ for every session instance.
 MANAGERS
 --------
 
-Managers manage things.  Most managers subclass the ``manager.Manager``
+Managers manage things.  Most managers subclass the "manager.Manager"
 class.  It doesn't really provide a lot of functionality, but it 
 allows us to group them all and treat them all the same.  Adding 
 new managers is much easier because of this.
 
 Also, managers register themselves with the engine via the
-``exported.add_manager`` function.  The engine will cycle
+"exported.add_manager" function.  The engine will cycle
 through registered managers for things like status and persistence.
 In addition, registered managers get told when the user has created
 a new session and when the user has ended a session through the
-``addSession`` and ``removeSession`` methods.
+"addSession" and "removeSession" methods.
 
-For more information, read through the code for the ``manager``
-module.
+For more information, check out the "manager" module in the API.
 
 
 
@@ -169,14 +171,14 @@ COMMANDS
 Lyntin comes with a series of commands for manipulating aliases, actions,
 highlights, and various other things.  Both the commands and the 
 managers that hold the data are all defined in various Lyntin modules
-in the modules/ subdirectory and are loaded up at Lyntin startup.
+in the "modules/" subdirectory and are loaded up at Lyntin startup.
 
 Lyntin has an extremely powerful argument parser that allows Lyntin
 module writers to worry about the functionality of their command without
 having to deal with parsing out the arguments, type-checking, 
 raising exceptions with command syntax help, and data conversion.
 
-Commands are stored internally in the ``CommandManager``.  They are
+Commands are stored internally in the "CommandManager".  They are
 global to Lyntin--there are no commands that only exist in the session
 they were declared in.  Commands, however, are executed in a specific
 session.  When they are executed, they are given three arguments:
@@ -199,8 +201,8 @@ LYNTIN HELP
 -----------
 
 Lyntin has a comprehensive help system that can be accessed in-game
-through the ``#help`` command.  The help material is all organized
-and manipulated by the ``HelpManager``.  Help is organized as
+through the "#help" command.  The help material is all organized
+and manipulated by the "HelpManager".  Help is organized as
 topics which exist in a hierarchy of categories and it comes from 
 a couple of sources:
 
@@ -224,19 +226,19 @@ syntaxes.
 USER DATA HANDLING
 ------------------
 
-User data (sometimes called "input") is received from the ``ui.BaseUI``
-subclasses and tossed into an ``event.InputEvent``.  When the
+User data (sometimes called "input") is received from the "ui.BaseUI"
+subclasses and tossed into an "event.InputEvent".  When the
 engine handles the event, it is first passed to the engine's
-``handleUserData`` method which deals with global things such
+"handleUserData" method which deals with global things such
 as splitting the input into a series of separate commands.  Read
 the docstrings for more information.
 
 The user input is then passed to the session in question's 
-``handleUserData`` method which does some stuff and passes it
-through the ``user_filter_hook``.  This is where the magic happens.
+"handleUserData" method which does some stuff and passes it
+through the "user_filter_hook".  This is where the magic happens.
 All user input handlers in Lyntin (the alias manager, the variable
 manager ...) register with the user_filter_hook at various 
-priorities.  The ``user_filter_hook`` then cycles through the
+priorities.  The "user_filter_hook" then cycles through the
 user filters in order of priority.
 
 For more specific information, read through the docstrings of
@@ -247,9 +249,9 @@ the methods and classes involved.
 MUD DATA HANDLING
 -----------------
 
-Data can also come from the mud.  Mud data comes from the 
-net module's ``SocketCommunicator`` and is encapsulated in 
-an ``event.MudEvent``.
+Data can also come from the mud.  Mud data comes from the net 
+module's "SocketCommunicator" and is encapsulated in an 
+"event.MudEvent".
 
 tbd.
 
@@ -258,11 +260,11 @@ tbd.
 THE UI
 ------
 
-All user interfaces extend the ``ui.BaseUI`` class in the ``ui`` module.
+All user interfaces extend the "ui.BaseUI" class in the "ui" module.
 It has a series of methods which need to be overridden to give
 the ui functionality.  In addition, ui's can specify additional
 Lyntin commands, they can bind to Lyntin hooks (most ui's bind
-to the ``startup_hook`` allowing them to perform certain functionality
+to the "startup_hook" allowing them to perform certain functionality
 at Lyntin startup rather than when the module is imported or when
 the ui is instantiated), and anything else that modules can do.
 
@@ -277,7 +279,7 @@ Feel free to extend the ui code and send in patches.  Or even
 write your own ui based on another widget set or whatever you
 want to do.
 
-For more information, read the ``ui`` module.
+For more information, read the "ui" module.
 
 
 
@@ -286,16 +288,16 @@ HOOKS
 
 The engine is augmented by a series of hooks which allow modules to
 execute functions without having to change Lyntin's internals.  
-Examples of this would be the ``startup_hook`` and ``shutdown_hook``.  
+Examples of this would be the "startup_hook" and "shutdown_hook".  
 Any functions that hook into these hooks will be executed upon 
 startup or shutdown of Lyntin.  Lyntin also uses these hooks to 
 implement its functionality.
 
-For example, the tk ui uses the ``startup_hook`` to register with
-the ``to_user_hook``, add the tkui help topic, and start the ui
+For example, the Tk ui uses the "startup_hook" to register with
+the "to_user_hook", add the tkui help topic, and start the ui
 user listener thread.
 
-Hooks and the Hook class are defined in the ``hooks`` module as is
+Hooks and the Hook class are defined in the "hooks" module as is
 a whole lot of documentation on which hooks exist, and what is
 passed to them.
 
@@ -333,29 +335,29 @@ of rexec bastion or anything.
 Every Lyntin module is written in Python.  Lyntin modules can be
 loaded by Lyntin in two different ways.  The first is at Lyntin
 startup when Lyntin lookes through all the Python modules in
-the Lyntin modules/ directory excluding modules whose names
-start with a _.  The second is using the ``#import`` Lyntin
+the Lyntin "modules/" directory excluding modules whose names
+start with a _.  The second is using the "#import" Lyntin
 command.
 
 In both instances, when the Lyntin modules is loaded, Lyntin
-will check the module for a ``load`` function and if it exists, 
+will check the module for a "load" function and if it exists, 
 Lyntin will execute it.  This function lets you separate Python
 importing of the module from the Lyntin initialization.  All
-the Lyntin modules that come with Lyntin use the ``load``
+the Lyntin modules that come with Lyntin use the "load"
 function for binding to Lyntin hooks, adding new commands, 
 adding new help text, and doing other initialization sorts
 of things.
 
-When ``#import`` is executed, it first checks to see if the module
-is already loaded.  If it is and the module has an ``unload``
+When "#import" is executed, it first checks to see if the module
+is already loaded.  If it is and the module has an "unload"
 function it will call this prior to reloading the module and
-calling the ``load`` function if it exists.  We typically use
-the ``unload`` function for unregistering functions with Lyntin
+calling the "load" function if it exists.  We typically use
+the "unload" function for unregistering functions with Lyntin
 hooks as well as removing commands.  This allows you to cleanly
 reload modules you're testing/debugging without stopping and
 restarting your Lyntin session.
 
-Lyntin modules should use the ``exported`` module to access Lyntin 
+Lyntin modules should use the "exported" module to access Lyntin 
 internals.  This API is guaranteed not to change (much) over versions 
 of Lyntin.
 
@@ -372,28 +374,28 @@ COMMAND LINE HACKING
 ====================
 
 Lyntin allows you to execute arbitrary Python at the command line.
-If you have a ``user`` Lyntin module, then the code will be executed 
-in there.  Otherwise the code is executed in the ``advanced`` Lyntin 
+If you have a "user" Lyntin module, then the code will be executed 
+in there.  Otherwise the code is executed in the "advanced" Lyntin 
 module.
 
-For example::
+For example:
 
    #@print "hello"
 
 will print hello to the console.  There are some significant differences
 between Lyntin 2.x and 3.x in how this works.  In the 2.x series, 
-raw Python was executed in the ``user`` module.  It was encouraged that 
-you add your own functions to the ``user`` module and then these would
+raw Python was executed in the "user" module.  It was encouraged that 
+you add your own functions to the "user" module and then these would
 be available to you at the Lyntin command line.
 
-In 3.0, ``user`` is a Lyntin module in the modules directory.  It does 
+In 3.0, "user" is a Lyntin module in the modules directory.  It does 
 not come with Lyntin--it's something you can create if you want to 
 build your own environment to execute Python commands in.
 
-If you don't have a ``user`` module, raw Python code gets executed in 
-the ``advanced`` module where the #@ functionality exists.
+If you don't have a "user" module, raw Python code gets executed in 
+the "advanced" module where the #@ functionality exists.
 
-A basic ``user`` module could be as follows::
+A basic "user" module could be as follows::
 
    """
    This is my user.py module.  I can do whatever I want in here.
@@ -425,9 +427,13 @@ Now at the Lyntin command prompt I can do things like::
 THE END
 =======
 
-That about covers it.  If you have questions, subscribe to the
-lyntin-devl mailing list and ask us.  The list is low volume high signal.
+That about covers it.  Read through the API and the source code.  If you 
+have questions, subscribe to the lyntin-devl mailing list and ask us.  
+The list is low volume high signal.
 
    http://sourceforge.net/mail/?group_id=6730
 
 Happy hacking!
+
+the Lyntin development folks
+http://lyntin.sourceforge.net/

@@ -4,11 +4,8 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.11 2002/07/21 04:14:48 willhelm Exp $
+# $Id: __init__.py,v 1.12 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
-
-import glob, os, sys, traceback
-import exported
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
 Modules get loaded when Lyntin starts up unless:
@@ -16,6 +13,9 @@ Modules get loaded when Lyntin starts up unless:
 1. the module throws an exception when getting imported
 2. the module's name starts with an _
 """
+
+import glob, os, sys, traceback
+import exported
 
 def load_modules():
   """
