@@ -33,9 +33,15 @@ def setPath():
     sys.path.append(ltd + 'ui')
 
 def InstallError():
+    ltd = os.environ.get('LYNTINDIR')
     print '\nLyntin was not installed correctly'
-    print 'please check that your LYNTINDIR is correctly set'
-    print 'try to reinstall Lyntin before sending a bug report'
+    if ltd:
+        print 'please check that your LYNTINDIR is correctly set'
+        print 'its current value is:', ltd
+    else:
+        print 'your LYNTINDIR is not set'
+
+    print 'remember that some shells require an "export LYNTINDIR"\n'
     sys.exit(1)
     
 def InternalError():
