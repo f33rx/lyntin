@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.81 2002/04/29 23:14:13 willhelm Exp $
+# $Id: basic.py,v 1.82 2002/05/01 23:01:43 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -846,37 +846,37 @@ def swdir_cmd(session, args, input):
     session.getManager("speedwalk").addDir(alias, dir)
     if not quiet:
       exported.write_message("swdir: {%s} {%s} added." % (alias, dir))
-  except SpeedwalkError, e:
+  except ValueError, e:
     exported.write_error("swdir: cannot add alias: %s." % e)
 
 commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
 
 
 def swexclude_cmd(session, args, input):
-  """#swexclude [<exclusion>]
+  """#swexclude [<exclude>]
 
-  This adds speedwalking exclusions and tells you the current exclusions
-  already registered. Exclusions are a bit like antisubstitutes, but for
+  This adds speedwalking excludes and tells you the current excludes
+  already registered. Excludes are a bit like antisubstitutes, but for
   speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
   get speedwalk-parsing.
   """
-  exclusion = args["exclusion"]
+  exclude = args["exclude"]
   quiet = args["quiet"]
 
-  # they typed '#swexclude'--print out all current speedwalking exclusions
-  if not exclusion:
-    data = session.getManager("speedwalk").getExclusionsInfo()
+  # they typed '#swexclude'--print out all current speedwalking excludes
+  if not exclude:
+    data = session.getManager("speedwalk").getExcludesInfo()
     if data == '':
-      data = "swexcl: no speedwalking exclusions defined."
+      data = "swexcl: no speedwalking excludes defined."
 
     exported.write_message(data)
     return
 
-  session.getManager("speedwalk").addExclusion(exclusion)
+  session.getManager("speedwalk").addExclude(exclude)
   if not quiet:
-    exported.write_message("swexclude: {%s} added." % exclusion)
+    exported.write_message("swexclude: {%s} added." % exclude)
 
-commands_dict["swexclude"] = (swexclude_cmd, "exclusion= quiet:boolean=false")
+commands_dict["swexclude"] = (swexclude_cmd, "exclude= quiet:boolean=false")
 
 
 def substitute_cmd(session, args, input):

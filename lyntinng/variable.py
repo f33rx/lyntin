@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.11 2002/04/11 23:30:47 willhelm Exp $
+# $Id: variable.py,v 1.12 2002/04/29 00:31:42 jmberne Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -44,8 +44,7 @@ class VariableManager(manager.Manager):
 
   def clear(self):
     """ Removes all the variables."""
-    for mem in self._variables.keys():
-      del self._variables[mem]
+    self._variables.clear()
 
   def removeVariables(self, text):
     """ Removes variables from the list.

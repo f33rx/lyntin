@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: speedwalk.py,v 1.6 2002/05/01 23:01:43 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -15,9 +15,6 @@ This module defines the speedwalking code.
 import re
 import manager, utils, lyntin
 
-class SpeedwalkError(Exception):
-  pass
-
 class SpeedwalkManager(manager.Manager):
   """
   This is the Speedwalk Manager which does all the speedwalk expanding.
@@ -25,7 +22,7 @@ class SpeedwalkManager(manager.Manager):
   def __init__(self):
     self._dirs = {}
     self.compileRegexp()
-    self._exclusions = []
+    self._excludes = []
   
   def clearDirs(self):
     """
@@ -49,7 +46,7 @@ class SpeedwalkManager(manager.Manager):
 
     for mem in self._dirs.keys():
       if mem.find(alias) != -1 or mem.find(dir) != -1:
-        raise SpeedwalkError, "possible ambiguity"
+        raise ValueError, "possible ambiguity"
     self._dirs[alias] = dir
     self.compileRegexp()
   
@@ -144,81 +141,81 @@ class SpeedwalkManager(manager.Manager):
     else:
       self._regexp = None
   
-  def clearExclusions(self):
+  def clearExcludes(self):
     """
-    Clears the list of exclusions (things we don't want to expand speedwalking
+    Clears the list of excludes (things we don't want to expand speedwalking
     on).
     """
-    self._exclusions = []
+    self._excludes = []
   
-  def addExclusion(self, exclusion):
+  def addExclude(self, exclude):
     """
-    Adds a speedwalking exclusion to the manager.
+    Adds a speedwalking exclude to the manager.
     
     arguments:
     
-      'exclusion' -- (string) the exclusion to add
+      'exclude' -- (string) the exclude to add
     
     """
-    if exclusion not in self._exclusions:
-      self._exclusions.append(exclusion)
+    if exclude not in self._excludes:
+      self._excludes.append(exclude)
   
-  def removeExclusion(self, exclusion):
+  def removeExclude(self, exclude):
     """
-    Removes a speedwalking exclusion (and only one, no wildcards or the like)
+    Removes a speedwalking exclude (and only one, no wildcards or the like)
     from the manager.
     
     arguments:
     
-      'exclusion' -- (string) the exclusion to remove
+      'exclude' -- (string) the exclude to remove
     
     returns:
     
-      list with the exclusion removed
+      list with the exclude removed
     """
     try:
-      self._exclusions.remove(exclusion)
+      self._excludes.remove(exclude)
     except ValueError:
       return []
     else:
-      return [exclusion]
+      return [exclude]
   
-  def getExclusions(self):
+  def getExcludes(self):
     """
-    Returns the exclusion list we are managing.
+    Returns the exclude list we are managing.
     
     returns:
     
-      the sorted list of exclusions being managed
+      the sorted list of excludes being managed
     
     """
-    self._exclusions.sort()
-    return self._exclusions
+    self._excludes.sort()
+    return self._excludes
   
-  def getExclusionsInfo(self, text=""):
+  def getExcludesInfo(self, text=""):
     """
-    Returns information about the speedwalking exclusions in here.
+    Returns information about the speedwalking excludes in here.
     
-    This is used by #swexcl to tell all the exclusions involved as well as
+    This is used by #swexcl to tell all the excludes involved as well as
     #write which takes this information and dumps it to the file.
     
     arguments:
     
-      'text=""' -- (string) the text to expand on to find exclusions that the
+      'text=""' -- (string) the text to expand on to find excludes that the
                    user is interested in
     
     returns:
     
-      a string of all the speedwalking exclusion list information
+      a string of all the speedwalking exclude list information
     
     """
-    if len(self._exclusions) == 0:
+    if len(self._excludes) == 0:
       return ""
     
     if text == "":
-      list = self._exclusions
+      list = self._excludes
     else:
-      list = utils.expand(text, self._exclusions)
+      list = utils.expand(text, self._excludes)
     
     cmdchar = lyntin.commandchar
     
@@ -228,23 +225,23 @@ class SpeedwalkManager(manager.Manager):
     
     return data[:-1]
   
-  def getExclusionsCount(self):
+  def getExcludeCount(self):
     """
-    Returns the number of exclusions currently stored.
+    Returns the number of excludes currently stored.
     
     returns:
     
-      (int) the number of exclusions being managed
+      (int) the number of excludes being managed
     
     """
-    return len(self._exclusions)
+    return len(self._excludes)
   
   def clear(self):
     """
-    Clears both speedwalking dir aliases and exclusions.
+    Clears both speedwalking dir aliases and excludes.
     """
     self.clearDirs()
-    self.clearExlusions()
+    self.clearExcludes()
   
   def getInfo(self):
     """
@@ -256,19 +253,19 @@ class SpeedwalkManager(manager.Manager):
       (string) the combined speedwalking info for #write
     
     """
-    return self.getDirsInfo() + "\n" + self.getExclusionsInfo()
+    return self.getDirsInfo() + "\n" + self.getExcludesInfo()
   
   def getCount(self):
     """
-    Returns the number of speedwalking dirs plus the number of exclusions.
+    Returns the number of speedwalking dirs plus the number of excludes.
     
     returns:
     
       (int) the number of speedwalking dirs together with the number of
-      exclusions
+      excludes
     
     """
-    return self.getDirsCount() + self.getExclusionsCount()
+    return self.getDirsCount() + self.getExcludesCount()
   
   def filter(self, args):
     """
@@ -276,7 +273,8 @@ class SpeedwalkManager(manager.Manager):
     """
     text = args[-1]
      
-    if lyntin.speedwalk == 0 or not self._dirs or text in self._exclusions or not self._regexp.search(text):
+    if lyntin.speedwalk == 0 or not self._dirs or text in self._excludes \
+        or not self._regexp.search(text):
       return text
 
     swdirs = []

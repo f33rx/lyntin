@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.21 2002/04/29 01:06:46 jmberne Exp $
+# $Id: action.py,v 1.22 2002/04/30 02:53:46 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -65,8 +65,7 @@ class ActionManager(manager.Manager):
     """
     Clears all the stored actions from the action manager.
     """
-    for mem in self._actions.keys():
-      del self._actions[mem]
+    self._actions.clear()
 
   def removeActions(self, text):
     """
@@ -220,7 +219,6 @@ class ActionManager(manager.Manager):
     if len(self._actions.keys()) == 0:
       return ''
 
-    list = []
     if text=='':
       list = self._actions.keys()
     else:
@@ -228,8 +226,8 @@ class ActionManager(manager.Manager):
 
     data = ''
     for mem in list:
-      data = (data + lyntin.commandchar + 
-              "action {" + mem + "} {" + self._actions[mem][2] + "}\n")
+      data = ("%s%saction {%s} {%s}\n" % 
+              (data, lyntin.commandchar, mem, self._actions[mem][2]))
 
     return data[:-1]
 

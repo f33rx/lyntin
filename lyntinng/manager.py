@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.1 2002/02/27 02:25:22 willhelm Exp $
+# $Id: manager.py,v 1.2 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the basic manager which handles various things
@@ -19,8 +19,6 @@ To build a new manager on a session scoping, you need to
 that manager.
 
 """
-import utils, lyntin
-
 class Manager:
   """ Base manager class for managing things in Lyntin."""
   def __init__(self):

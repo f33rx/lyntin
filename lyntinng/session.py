@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.44 2002/04/29 01:06:46 jmberne Exp $
+# $Id: session.py,v 1.45 2002/04/29 23:14:13 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -86,7 +86,7 @@ class Session:
     if self.getName() != "common":
       engine.myengine.unregisterSession(self.getName())
       if self._socket: self._socket.shutdown()
-    event.OutputEvent("Session " + self._name + " shutdown.\n").enqueue()
+    event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
     self._ticker.clear()
 
   def getInfo(self):
@@ -382,18 +382,10 @@ class ManagerFilterAdapter:
 
 
 hooks.user_filter_hook.register(ManagerFilterAdapter("variable"),0)
-
 hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
-
 hooks.user_filter_hook.register(ManagerFilterAdapter("speedwalk"),80)
-
 hooks.user_filter_hook.register(ManagerFilterAdapter("variable",variable.VariableManager.unescapeVariables),90)
-
 hooks.mud_filter_hook.register(ManagerFilterAdapter("gag"),20)
-
 hooks.mud_filter_hook.register(ManagerFilterAdapter("substitute"),50)
-
 hooks.mud_filter_hook.register(ManagerFilterAdapter("action"),75)
-
 hooks.mud_filter_hook.register(ManagerFilterAdapter("highlight"),90)
-

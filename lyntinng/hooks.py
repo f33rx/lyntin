@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.11 2002/04/27 20:58:19 jmberne Exp $
+# $Id: hooks.py,v 1.12 2002/04/29 00:31:42 jmberne Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -21,8 +21,13 @@ These are priority constants.  They should rarely be used.
 FIRST = 0
 LAST = 99
 
-class StopSpammingException:
-  pass
+class StopSpammingException(Exception):
+  def __init__(self, value=""):
+    self.value = value
+
+  def __str__(self):
+    return `self.value`
+
 
 class Hook:
   """
@@ -263,6 +268,3 @@ arg tuple will contain the session, the original text and the currently
 filtered text.
 """
 user_filter_hook = Hook(filter_mapper)
-
-
-
