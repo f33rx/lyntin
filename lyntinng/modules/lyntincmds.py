@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.32 2003/02/12 15:36:13 jmberne Exp $
+# $Id: lyntincmds.py,v 1.33 2003/02/25 00:08:10 willhelm Exp $
 #######################################################################
 import types, re
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -212,7 +212,11 @@ def grep_cmd(ses, args, input):
 
       ret.append(mem)
 
-  exported.write_message("grep %s results:\n%s" % (pattern, "---\n".join(ret)), ses)
+  if context == 0:
+    splitter = ""
+  else:
+    splitter = "---\n"
+  exported.write_message("grep %s results:\n%s" % (pattern, splitter.join(ret)), ses)
 
 commands_dict["grep"] = (grep_cmd, "pattern size:int=300 context:int=0")
 
