@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.39 2002/03/24 22:44:13 willhelm Exp $
+# $Id: basic.py,v 1.40 2002/03/25 23:08:58 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -163,6 +163,34 @@ def cr_cmd(session, words, input):
   in aliases and the like.
   """
   session.writeSocket("\n")
+
+
+def deed_cmd(session, words, input):
+  """#deed [deed|count]
+  
+  This adds a deed or prints all the deeds stored till now.
+  """
+  
+  if len(words) == 1:
+    data = session.getManager("deed").getInfo()
+    if data == "":
+      data = "deed: no deeds defined."
+    
+    exported.write_message(data)
+    return
+  
+  deedtext = utils.strip_braces(input.split(" ", 1)[1])
+  
+  if deedtext.isdigit():
+    data = session.getManager("deed").getInfo(deedtext)
+    if data == "":
+      data = "deed: no deeds defined."
+    
+    exported.write_message(data)
+    return
+  
+  session.getManager("deed").addDeed(deedtext)
+  exported.write_message("deed: '%s' added." % deedtext)
 
 
 def diagnostics_cmd(session, words, input):
@@ -966,6 +994,7 @@ def load():
   exported.add_command("^cr", cr_cmd)
   # exported.add_command("datagrep", datagrep_cmd)
   # exported.add_command("datagreplines", datagreplines_cmd)
+  exported.add_command("deed", deed_cmd)
   exported.add_command("diagnostics", diagnostics_cmd)
   # exported.add_command("echo", echo_cmd)
   exported.add_command("^end", end_cmd)

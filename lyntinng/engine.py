@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.20 2002/03/22 01:27:24 willhelm Exp $
+# $Id: engine.py,v 1.21 2002/03/24 21:00:16 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -27,7 +27,7 @@ calls easier to deal with.
 import Queue, traceback, copy, string, re, thread
 
 import threadmanager, session, ui.ui, alias, lyntin, utils, event
-import history, action, alias, gag, highlight, substitute, variable
+import action, alias, deed, gag, highlight, history, substitute, variable
 import exported
 
 """
@@ -109,6 +109,7 @@ class Engine:
 
     commonsession.setManager("action", action.ActionManager())
     commonsession.setManager("alias", alias.AliasManager())
+    commonsession.setManager("deed", deed.DeedManager())
     commonsession.setManager("gag", gag.GagManager())
     commonsession.setManager("highlight", highlight.HighlightManager())
     commonsession.setManager("substitute", substitute.SubstituteManager())
