@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.30 2002/06/09 17:09:36 jmberne Exp $
+# $Id: tintincmds.py,v 1.31 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -381,7 +381,8 @@ def math_cmd(session, args, input):
 
   try:
     rvalue = eval(ops)
-    session.getManager("variable").addVariable(var, str(rvalue))
+    if varman:
+      varman.addVariable(session,var, str(rvalue))
     if not quiet:
       exported.write_message("math: %s = %s = %s." % (var, ops, str(rvalue)))
   except Exception, e:
