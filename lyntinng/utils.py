@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.33 2002/06/19 03:19:43 willhelm Exp $
+# $Id: utils.py,v 1.34 2002/06/27 18:02:01 jmberne Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -19,11 +19,14 @@ VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
 NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
 ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
 TIMESPAN_REGEXP = re.compile(r"^(?P<days>\d+d)?(?P<hours>\d+h)?(?P<minutes>\d+m)?(?P<seconds>\d+s?)?$")
-TIME_REGEXP=re.compile(r"^(?P<hour>\d\d?):(?P<minute>[0-5]\d)(:(?P<second>[0-5]\d))?(?P<ampm>a|p)?$")
+TIME_REGEXP1=re.compile(r"^(?P<hour>[1-9]|1[0-2])(?P<ampm>a|p)$")
+TIME_REGEXP2=re.compile(r"^(?P<hour>[1-9]|1[0-2]):(?P<minute>[0-5][0-9])(:(?P<second>[0-5]\d))?(?P<ampm>a|p)?$")
+TIME_REGEXP3=re.compile(r"^(?P<hour>0|1[3-9]|2[0-3]):(?P<minute>[0-5][0-9])(:(?P<second>[0-5]\d))?$")
+
 
 def chomp(text):
   """ Removes all '\\r' and '\\n' from the input string.
-
+  
   arguments:
 
     'text' -- (string) the text to chomp
@@ -634,7 +637,7 @@ def parse_time(timearg):
     None if the time was unparseable, the number of
     seconds otherwise. 
   """
-  match = TIME_REGEXP.match(timearg)
+  match = TIME_REGEXP1.match(timearg) or TIME_REGEXP2.match(timearg) or TIME_REGEXP3.match(timearg)
 
   if not match:
     timespan = parse_timespan(timearg)
@@ -646,8 +649,10 @@ def parse_time(timearg):
   timespec = match.groupdict()
   currenttime = time.localtime()
 
-  hour=int(timespec["hour"])
-  ampm=timespec["ampm"]
+  print timespec
+
+  hour=int(timespec.get("hour",None))
+  ampm=timespec.get("ampm",None)
   if hour > 12:
     if ampm:
       return None
@@ -660,13 +665,13 @@ def parse_time(timearg):
   if hour < 1 or hour > 24:
     return None
 
-  minute = timespec["minute"]
+  minute = timespec.get("minute",None)
   if minute == None:
     minute = 0
   else:
     minute = int(minute)
   
-  second = timespec["second"]
+  second = timespec.get("second",None)
   if second == None:
     second = 0
   else:
@@ -748,7 +753,7 @@ def figure_color(textlist, currentcolor, leftover=""):
     mem = textlist[-1]
     if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
       leftover = mem
-
+      
   return currentcolor, leftover
 
 
@@ -758,39 +763,39 @@ def _pass_fail(testoutput, realoutput):
     print "   pass:", testoutput
   else:
     print "   fail:", testoutput
-3
+
 if __name__ == '__main__':
   print "split_commands tests"
   _pass_fail(split_commands('test'), 
-            ['test'])
+             ['test'])
   _pass_fail(split_commands('test;test2'), 
-            ['test', 'test2'])
+             ['test', 'test2'])
   _pass_fail(split_commands('#alias t3k #ses a localhost 3000'),
-            ['#alias t3k #ses a localhost 3000'])
+             ['#alias t3k #ses a localhost 3000'])
   _pass_fail(split_commands('#alias gv {put all in vortex;get all}'),
-            ['#alias gv {put all in vortex;get all}'])
+             ['#alias gv {put all in vortex;get all}'])
   _pass_fail(split_commands('#alias sv {put all in vortex;get all};test'),
-            ['#alias sv {put all in vortex;get all}', 'test'])
-
+             ['#alias sv {put all in vortex;get all}', 'test'])
+  
   print 
-
+  
   _pass_fail(split_ansi_from_text("This is some text."),
-            ["This is some text."])
+             ["This is some text."])
   _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0m text."),
-            ["\33[1;37m", "This is", "\33[0m", " text."])
+             ["\33[1;37m", "This is", "\33[0m", " text."])
   _pass_fail(split_ansi_from_text("Hi \33[1;37mThis is\33[0m text."),
-            ["Hi ", "\33[1;37m", "This is", "\33[0m", " text."])
+             ["Hi ", "\33[1;37m", "This is", "\33[0m", " text."])
   _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0"),
-            ["\33[1;37m", "This is", "\33[0"])
-
+             ["\33[1;37m", "This is", "\33[0"])
+  
   print
-
+  
   text = "This is a really long line to see if we're wrapping correctly.  Because it's way cool when we write code that works.  Yay!"
-
+  
   print wrap_text(text)
   print wrap_text(text, indent=5)
   print wrap_text(text, indent=5, firstline=1)
-
+  
   print "replace_vars tests"
   print replace_vars("#test 1 2 3", "#test")
   print replace_vars("#test 1 2 3", "#test %1 %2")
@@ -798,13 +803,7 @@ if __name__ == '__main__':
   print replace_vars("#test 1 2 3", "#test %-1")
   print replace_vars("#test 1 2 3", "#test %:-1")
   print replace_vars("#test 1 2 3", "#test %1:-1")
-
-  """
-  print "figure color test"
-  textlist = split_ansi_from_text("Hi \33[1;37mThis is\33[0m text.")
-  _pass_fail(figure_color(
-  """
-
+  
   print "time parsing test"
   print parse_timespan("1h")
   print parse_timespan("1m")
@@ -812,8 +811,11 @@ if __name__ == '__main__':
   print parse_timespan("1h2m3s")
   print parse_timespan("17")
   print parse_timespan("95h")
-
+  
   print parse_time("4:20p")
   print parse_time("4m")
   print parse_time("9")
+  print parse_time("9p")  
   print parse_time("1:17:34a")
+  
+
