@@ -1,6 +1,12 @@
---------------------
-ARCHITECTURE
---------------------
+*Title: Architecture
+*Author: Will
+
+* VERSION
+
+$Id$
+
+
+* SYNOPSIS
 
 This is a quick architecture document to help understand the
 internals of Lyntin.  Along with the online documentation (UML
@@ -8,8 +14,9 @@ diagrams and ool docs), this should provide you with everything
 you need to know to build modules and help fix Lyntin bugs.
 
 
-ARCHITECTURE:
+* ARCHITECTURE
 
+^<<
 engine.Engine
    |-- 1 help.HelpManager
    |-- * session.Session
@@ -23,3 +30,4 @@ engine.Engine
    |
    |-- 1 threadmanager.ThreadManager
    |-- 1 ui.Baseui subclass
+^>>

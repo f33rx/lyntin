@@ -1,27 +1,40 @@
---------------------
-INSTALLATION
---------------------
+*Title: INSTALLATION
+*Author: Will
+
+* VERSION
+
+$Id$
+
+For more up-to-date documentation, check out the web-site at:
+http://lyntin.sourceforge.net/
+
+
+* SUMMARY
 
 This file holds installation instructions for Lyntin.  It should be
 revisited and re-written at some point.
 
 
-Unix/Linux 
-1. make sure you have at least Python 2.0
-2. download the version you're looking for (below) 
-3. untar the client into ~/lyntin or something along those lines
-4. set the lyntin.py file to be executable
-5. run lyntin.py
+* UNIX/LINUX
+
+	1. make sure you have at least Python 2.0
+	2. download the version you're looking for (below) 
+	3. untar the client into ~/lyntin or something along those lines
+	4. set the lyntin.py file to be executable
+	5. run lyntin.py
 
 lyntin.py takes a series of options.  For a list of options 
 and explanations, run:
 
+^<<
    lyntin.py --help
+^>>
 
 
-Windows 
-1. make sure you have at least Python 2.0
-2. unzip the client into c:\lyntin
-3. double-click on lyntin.py to run lyntin
-4. probably want to build a shortcut for Lyntin to make it easier
-   to run from your desktop.
+* WINDOWS
+
+	1. make sure you have at least Python 2.0
+	2. unzip the client into c:\lyntin
+	3. double-click on lyntin.py to run lyntin
+	4. probably want to build a shortcut for Lyntin to make it easier
+	   to run from your desktop.

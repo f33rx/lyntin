@@ -1,18 +1,21 @@
---------------------
-README
---------------------
+*Title: README
+*Author: Will
+
+* VERSION
+
+$Id$
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
 
 
-WHY SHOULD YOU USE LYNTIN?
+* WHY SHOULD YOU USE LYNTIN?
 
 Lyntin is: 
 
-  1) a featureful and highly extensible mud client
-  2) a bot/agent development environment
-  3) based on Tintin++ functionality--tried and true
+	1. a featureful and highly extensible mud client
+	2. a bot/agent development environment
+	3. based on Tintin++ functionality--tried and true
 
 Lyntin is written entirely in Python--a nicely written and very portable
 programming language.  Thusly Lyntin is very platform independent (minus
@@ -39,19 +42,20 @@ telnet that you can use on your desktop.
 
 
 
-INSTALLATION
+* INSTALLATION
 
-- see the file INSTALL.
+	- see the file INSTALL.
 
-- NOTE: you will need Python 2.0 or greater installed at your site.
+	- _NOTE:_ you will need Python 2.0 or greater installed at 
+	  your site.
 
-- NOTE: Lyntin testing has been limited.  Should work fine on Win98/NT
-  and Linux in TkGUI and Text modes.  Curses has been tested under
-  Linux (briefly) as well but is still an alpha ui.
+	- _NOTE:_ Lyntin testing has been limited.  Should work fine 
+	  on Win98/NT and Linux in TkGUI and Text modes.  Curses has 
+	  been tested under Linux (briefly) as well but is still an 
+	  alpha ui.
 
 
-
-BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
+* BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
 
 Lyntin was originally written by Lyn Headley, laheadle@cs.uchicago.edu .
 Lyntin is currently being maintained by Will Guaraldi, 
@@ -73,7 +77,7 @@ buggy.
 
 
 
-OTHER CONCERNS
+* OTHER CONCERNS
 
 The latest release of Lyntin is always available from
 http://lyntin.sourceforge.net/
@@ -89,7 +93,21 @@ we'll happily work with them and credit you.
 
 
 
-DOCUMENTATION 
+* LYNTIN vs. TINTIN++
+
+Lyntin has many of the same features as TINTIN++ and the commands
+are based on TINTIN++.  However, there are a series of TINTIN++
+commands we do not currently support:
+
+^<<
+  map           mark            path
+  pathdir       snoop           split
+  tickset       unsplit         unpath
+  suspend       system
+^>>
+
+
+* DOCUMENTATION 
 
 Lyntin incorporates the 'look and feel' of Tintin++, so it should be
 pretty easy to make the transition.  It offers all the major features
@@ -105,8 +123,7 @@ documentation, please feel free to send such things to the mailing
 list.
 
 
-
-ERRATA
+* ERRATA
 
 That should be about it.  In-game help is accessed by typing #help.
 When you start Lyntin for the first time, type "#help general"
@@ -116,3 +133,4 @@ at your leisure.
 Enjoy!
 
 the Lyntin development folks
+http://lyntin.sourceforge.net/
