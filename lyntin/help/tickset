@@ -4,6 +4,7 @@
    With an argument of 'off', it turns off the ticker.
    With an argument of 'toggle', it toggles the ticker on/off.
    With an argument of 'clear', it clears the tickaction and the time.
+   With an argument of 'status', it shows the complete status.
    With a numeric argument, the tick amount is set to that number.
    With any other argument, the tick action is set to that command.
 

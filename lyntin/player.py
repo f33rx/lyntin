@@ -1133,6 +1133,20 @@ def Tickset(words, input, seslist):
                 else:
                     Putline('Ticker is now off (ticklen = %d) (tickaction = %s)'%(ses.ticklen, ses.tickaction))
 
+        elif words[1] == 'status':
+            for ses in seslist:
+                Putline('Ticker status:')
+                if ses.ticker:
+                    Putline('Ticker is on')
+                    Putline('Ticklength = %d'%ses.ticklen)
+                    Putline('Tickaction = %s'%ses.tickaction)
+                    Putline('Time to next tick = %d'%(ses.ticklen - ses.lasttickclock))
+                else:
+                    Putline('Ticker is off')
+                    Putline('Ticklength = %d'%ses.ticklen)
+                    Putline('Tickaction = %s'%ses.tickaction)
+                    Putline('Time to next tick = %d'%(ses.ticklen - ses.lasttickclock))
+                    
         else:
             # set ticklength
             for ses in seslist:

@@ -157,7 +157,7 @@ class client(dict_plus.c):
       if len(sys.argv) > 1:
          # handle file args
          for opt in sys.argv[1:]:
-            if opt == '-tk' or opt == '-nc': pass
+            if opt[0] == '-': pass
             else:
                player.DispatchCommand('#read %s'%opt,[data.common])
 
