@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.22 2002/06/02 15:10:56 jmberne Exp $
+# $Id: tintincmds.py,v 1.23 2002/06/02 16:06:03 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -411,7 +411,7 @@ commands_dict["if"] = (if_cmd, "expr action elseaction=")
 
 def ignore_cmd(session, args, input):
   """
-  Toggles whether actions for that session are ignored or not.
+  Toggles whether to ignore actions for a particular session.
 
   category: commands
   """
@@ -419,16 +419,25 @@ def ignore_cmd(session, args, input):
     exported.write_error("ignore cannot be applied to common session.")
     return
 
-  if session._ignoreactions == 1:
+  option = args["option"]
+
+  if option == 1:
+    session._ignoreactions = 1
+    exported.write_message("ignore: now enabled for session %s."
+                           % session.getName())
+  elif option == 0:
     session._ignoreactions = 0
-    exported.write_message("ignore: actions are active for session %s." 
+    exported.write_message("ignore: now disabled for session %s." 
                            % session.getName())
   else:
-    session._ignoreactions = 1
-    exported.write_message("ignore: now ignoring actions for session %s." 
-                           % session.getName())
+    if session._ignoreactions:
+      exported.write_message("ignore: enabled for %s." 
+                             % session.getName())
+    else:
+      exported.write_message("ignore: disabled for %s."
+                             % session.getName())
 
-commands_dict["ignore"] = (ignore_cmd, "")
+commands_dict["ignore"] = (ignore_cmd, "option:booleanornone=")
 
 
 def info_cmd(session, args, input):
@@ -958,7 +967,8 @@ commands_dict["ticksize"] = (ticksize_cmd, "size:int=0")
 
 def togglesubs_cmd(session, args, input):
   """
-  Toggles whether substitutions for that session are ignored or not.
+  Toggles whether to ignore substitutions for a particular session
+  or not.
 
   category: commands
   """
