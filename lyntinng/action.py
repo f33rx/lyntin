@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.20 2002/04/13 05:10:33 willhelm Exp $
+# $Id: action.py,v 1.21 2002/04/29 01:06:46 jmberne Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -14,7 +14,7 @@ import re
 import manager, utils, event, lyntin
 
 # the placement variable regular expression
-VARREGEXP = re.compile('%(\d+)')
+VARREGEXP = re.compile('%_?(\d+)')
 
 class ActionManager(manager.Manager):
   """ Extends the base manager class to manages actions."""
@@ -37,6 +37,7 @@ class ActionManager(manager.Manager):
 
     """
     regexp = re.sub('%[0-9]+', '(.+?)', trigger)
+    regexp = re.sub('%_[0-9]+', '(\S+?)', regexp)
     return re.compile(regexp)
 
   def addAction(self, trigger, response):
@@ -135,7 +136,7 @@ class ActionManager(manager.Manager):
       keylist.append('%' + var)
 
       # this is not a gsub!
-      str = re.sub('%[0-9]+', '', str, 1)
+      str = re.sub('%_?\d+', '', str, 1)
 
       match = VARREGEXP.search(str)
 
@@ -189,12 +190,12 @@ class ActionManager(manager.Manager):
         if response.find(var) > -1:
           response = re.sub(var, varvals[var], response)
 
-      # replace occurrances of '$i' with val replacing ; with \;
-      if ("$" + var[1:]).find(response) != -1:
-        response = re.sub("$" + var[1:],
-                   varvals[var].replace(";", "\;"), 
-                   response, 
-                   1)
+        # replace occurrances of '$i' with val replacing ; with \;
+        if ("$" + var[1:]).find(response) != -1:
+          response = re.sub("$" + var[1:],
+                     varvals[var].replace(";", "\;"), 
+                     response, 
+                     1)
 
       event.InputEvent(response, internal=1).enqueue()
 
