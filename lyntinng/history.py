@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.2 2002/03/05 01:26:13 willhelm Exp $
+# $Id: history.py,v 1.3 2002/03/22 01:27:24 willhelm Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered
@@ -81,7 +81,7 @@ class HistoryManager:
       list of strings
 
     """
-    return self._history
+    return self._history[:]
 
   def recordHistory(self, input):
     """ Records an item in the history (which is a queue).

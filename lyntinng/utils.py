@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.10 2002/03/19 23:05:44 willhelm Exp $
+# $Id: utils.py,v 1.11 2002/03/22 02:40:18 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -72,6 +72,12 @@ def expand(str, list):
 
     # replace $ with \$
     str = re.sub('\$', '\\\$', str)
+
+    # replace ( with \(
+    str = re.sub('\(', '\\\(', str)
+
+    # replace ) with \)
+    str = re.sub('\)', '\\\)', str)
 
     str = '^' + str + '$'
     regex = re.compile(str)
@@ -190,7 +196,7 @@ def split_braced(text):
         
   # if we don't have a breakpoint or the count > 0 at the end
   if breakpoint == -1 or count > 0:
-    raise ValueError, "Unmatched braces."
+    raise ValueError, "unmatched braces"
 
   return [strip_braces(text[:breakpoint]), strip_braces(text[breakpoint:])]
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.52 2002/04/04 01:04:31 willhelm Exp $
+# $Id: basic.py,v 1.53 2002/04/05 00:47:28 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -83,9 +83,8 @@ def alias_cmd(session, words, input):
 
     session.getManager("alias").addAlias(a, b)
     exported.write_message("alias: {%s} -> {%s} added." % (a,b))
-  except:
-    exported.write_error("alias: cannot be added.")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("alias: cannot be added. %s" % e)
 
 
 def ansi_cmd(session, words, input):
@@ -171,7 +170,7 @@ def datagrep_cmd(session, words, input):
   printing all matches in their entirety.
   """
   if (len(words) < 2):
-    exported.write_error("syntax: datagrep {pattern}")
+    exported.write_error("syntax: #datagrep {pattern}")
     return
 
   if (session.getName() == "common"):
@@ -191,7 +190,7 @@ def datagreplines_cmd(session, words, input):
   entirety.
   """
   if (len(words) < 2):
-    exported.write_error("syntax: datagreplines {pattern}")
+    exported.write_error("syntax: #datagreplines {pattern}")
     return
 
   if (session.getName() == "common"):
@@ -280,9 +279,9 @@ def diagnostics_cmd(session, words, input):
               "\n\n")
       f.write(message)
       f.close()
-    except:
-      exported.write_error("diagnostics: Error writing to file %s." % words[1])
-      traceback.print_exc()
+    except Exception, e:
+      exported.write_error("diagnostics: Error writing to file %s. %s" 
+                            % (words[1], e))
 
 
 def end_cmd(session, words, input):
@@ -407,9 +406,8 @@ def highlight_cmd(session, words, input):
     session.getManager("highlight").addHighlight(a, b)
     exported.write_message("highlight: '%s' with style '%s'." % (b, a))
 
-  except:
-    exported.write_error("highlight: cannot be set.")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("highlight: cannot be set. %s" % e)
 
 
 def history_cmd(session, words, input):
@@ -435,8 +433,12 @@ def if_cmd(session, words, input):
     exported.write_error("syntax: #if {<expr>} {<action>}")
     return
 
-  inputadjusted = input.split(" ", 1)[1]
-  expr, action = utils.split_braced(inputadjusted)
+  try:
+    inputadjusted = input.split(" ", 1)[1]
+    expr, action = utils.split_braced(inputadjusted)
+  except Exception, e:
+    exported.write_error("if: problems splitting arguments. %s" % e)
+    return
 
   expr = expr.replace("&&", " and ")
   expr = expr.replace("||", " or ")
@@ -484,7 +486,6 @@ def killall_cmd(session, words, input):
 
   Wipes all the sessions of all information.
   """
-  # for mem in engine.myengine._sessions.values():
   for mem in exported.get_active_sessions():
     mem.clear()
     exported.write_message("killall: session %s cleared." % mem.getName())
@@ -561,9 +562,8 @@ def loop_cmd(session, words, input):
       loopcommand = command.replace("%0", repr(i))
       event.InputEvent(input=loopcommand, internal=1).enqueue()
 
-  except:
-    exported.write_error("loop: error in the loop.")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("loop: error in the loop. %s", e)
 
 
 def mudecho_cmd(session, words, input):
@@ -680,7 +680,7 @@ def session_cmd(session, words, input):
   if len(words) == 1:
     data = "Sessions available:\n"
     # for mem in engine.myengine.getSessions():
-    for mem in exported.get_sessions():
+    for mem in exported.get_active_sessions():
       data = data + "   " + mem.getName() + ": " + repr(mem._socket) + "\n"
 
     exported.write_message(data[:-1])
@@ -690,9 +690,13 @@ def session_cmd(session, words, input):
     exported.write_error("syntax: #session <sesname> <host> <port>")
     return
 
-  inputadjusted = input.split(' ', 1)[1]
-  sessionname, b = utils.split_braced(inputadjusted)
-  host, port = b.split(' ')
+  try:
+    inputadjusted = input.split(' ', 1)[1]
+    sessionname, b = utils.split_braced(inputadjusted)
+    host, port = b.split(' ')
+  except Exception, e:
+    exported.write_error("session: problems splitting arguments. %s" % e)
+    return
 
   if port.isdigit():
     port = int(port)
@@ -734,15 +738,14 @@ def session_cmd(session, words, input):
     # start the network thread
     exported.get_engine().startthread("network", sock.run)
 
-  except:
-    traceback.print_exc()
+  except Exception, e:
     try: 
       exported.get_engine().unregisterSession(sessionname)
       exported.get_engine().closeSession(sessionname)
       sock.shutdown()
     except:
       pass
-    exported.write_error("session: unable to connect.")
+    exported.write_error("session: unable to connect. %s" % e)
     exported.write_error("session: had problems creating the session.")
 
 
@@ -814,9 +817,8 @@ def substitute_cmd(session, words, input):
 
     session.getManager("substitute").addSubstitute(a, b)
     exported.write_message("substitute: '" + a + "' -> '" + b + "'")
-  except:
-    exported.write_error("substitute: cannot be set.")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("substitute: cannot be set. %s" % e)
 
 
 def textin_cmd(session, words, input):
@@ -1030,9 +1032,8 @@ def variable_cmd(session, words, input):
 
     session.getManager("variable").addVariable(a, b)
     exported.write_message("variable: " + a + " -> '" + b + "'")
-  except:
-    exported.write_error("variable: cannot be set.")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("variable: cannot be set. %s", e)
 
 
 def verbatim_cmd(session, words, input):
@@ -1066,7 +1067,7 @@ def version_cmd(session, words, input):
 def wizlist_cmd(session, words, input):
   """#wizlist
 
-  Lists all the contributors to Lyntin over the years.
+  List of people without whom Lyntin wouldn't exist.
   """
   exported.write_message(lyntin.WIZLIST)
 
@@ -1088,10 +1089,8 @@ def write_cmd(session, words, input):
     f.close()
     exported.write_message("write: file " + filename +
                                  " has been written.")
-  except:
-    exported.write_error("write: error writing to file " + 
-                                 filename + ".")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("write: error writing to file %s. %s" % (filename, e))
 
 
 def zap_cmd(session, words, input):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.4 2002/03/22 01:27:24 willhelm Exp $
+# $Id: exported.py,v 1.5 2002/03/24 21:00:17 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -66,7 +66,7 @@ def get_active_sessions():
 
     list of session.Session instances
   """
-  get_engine().getSessions()
+  return get_engine()._sessions.values()
 
 def get_current_session():
   """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.25 2002/04/02 03:22:45 willhelm Exp $
+# $Id: engine.py,v 1.26 2002/04/03 03:14:15 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -347,7 +347,7 @@ class Engine:
     return self._current_session
 
   def getSessions(self):
-    """ Returns a list of session.
+    """ Returns a list of session names.
 
     returns:
 
