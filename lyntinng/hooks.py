@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.38 2003/04/07 03:21:54 willhelm Exp $
+# $Id: hooks.py,v 1.39 2003/04/12 22:23:23 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -22,10 +22,95 @@ Hooks and the Hook class are defined in the "hooks" module as is
 a whole lot of documentation on which hooks exist, and what is
 passed to them.  Registering, unregistering, and retrieving Hooks
 should be done through the exported module.
+
+@var  FIRST: Used for hook registration priority.
+@type FIRST: int
+
+@var  LAST: Used for hook registration priority.
+@type LAST: int
+
+@var startup_hook: Allows you to initialize things when Lyntin is
+    starting up.  Arg tuple: ()
+
+@var shutdown_hook: Allows you to finalize things when Lyntin is 
+    shutting down.  Arg tuple: (quiet:boolean)
+
+@var mudecho_hook: When the mud sends an echo on/off, we spam it to
+    this hook.  Arg tuple: (echostate:boolean)
+
+@var bell_hook: When the mud sends a ^G, we spam this hook.  Arg tuple:
+    (session:Session)
+
+@var prompt_hook: When the mud sends a IAC+GA/IAC+TELOPT_EOR indicating
+    a prompt or they send a string (needs to be set via the 
+    buildPromptRegex method of the SocketCommunicator), we spam this hook.
+    Arg tuple: (session:Session, text:string)
+
+@var evalmode_change_hook: When the user changes the evalmode, we spam
+    this hook with the old evalmode and the new one.  Arg tuple: 
+    (oldevalmode:int, newevalmode:int)
+
+@var variable_change_hook: When the user changes the value of a variable
+    (or it gets changed through some other means), we spam this hook.
+    Arg tuple: (session:Session, varname:string, oldvalue:string, 
+    newvalue:string)
+
+@var death_hook: When the session dies (i.e. it gets #zap'd), we spam this
+    hook.  Arg tuple: (session:Session)
+
+@var connect_hook: When the session gets connected to a mud, we spam this
+    hook.  Arg tuple: (session:Session, hostname:string, port:int)
+
+@var disconnect_hook: When the session gets disconnected from a mud, we
+    spam this hook.  Arg tuple: (session:Session, hostname:string, port:int)
+
+@var from_user_hook: Everything the user types gets sent through this hook
+    prior to getting evaluated.  Arg tuple: (data:string)
+
+@var from_mud_hook: Everything the mud sends gets passed on this hook
+    prior to getting evaluated.  Arg tuple: (session:Session, data:string)
+
+@var to_mud_hook: This differs from the from_user_hook in that this is
+    everything we send on the socket to the mud.  
+    Arg tuple: (session:Session, data:string, tag:varies)
+
+@var to_user_hook: The ui listens on this hook to display things to the
+    user.  Data on this hook can come from a variety of sources such
+    as Lyntin error messages, Lyntin regular messages, mud data, user
+    input...  Arg tuple: (data:string|ui.ui.Message)
+
+@var timer_hook: The timer hook runs every second.  The scheduler uses this
+    to know when to wake up and deal with things.  Arg tuple: (ticknumber:int)
+
+@var write_hook: This hook runs whenever someone types "#write <filename>".
+    Arg tuple: (session:Session, file:File, quiet:boolean)
+
+@var error_occurred_hook: When an error is kicked up via the event loop.
+    The arg tuple is empty--you should check sys.exc_traceback if you're
+    interested in the unhandled exception.
+
+@var too_many_errors_hook: When the user_custom variable too_many_errors
+    is exceeded.
+
+@var mud_filter_hook: Whenever data comes from the user, it gets split into
+    lines and passed through the mud_filter_hook.  Functions should return
+    the adjusted text which becomes the filteredtext input to the next 
+    function.
+    Arg tuple: (session:Session, originaltext:string, filteredtext:string)
+
+@var user_filter_hook: Whenever data comes from the user, it gets passed
+    through all the filter functions.  Functions that register with this
+    hook should return the adjusted text which gets passed in as the
+    adjustedtext input for the next function.
+    Arg tuple: (session:session, internal:boolean, verbatim:boolean, 
+    originaltext:string, adjustedtext:string)
+
+@var default_resolver_hook: When the command manager needs to get a function
+    to produce default arguments for a given command on a given session it
+    will call this hook.  Arg tuple: (session:Session, commandname:string)
 """
 import session, manager
 
-# These are priority constants.  They should rarely be used.
 FIRST = 0
 LAST = 99
 
@@ -351,7 +436,7 @@ shutdown_hook = get_hook_manager().getHook("shutdown_hook")
 
 # When the mud sends an echo on or an echo off.
 # 
-# arg tuple: (int)
+# arg tuple: (boolean)
 #  - new echo state: 1 if on, 0 if off
 mudecho_hook = get_hook_manager().getHook("mudecho_hook")
 
@@ -365,7 +450,7 @@ bell_hook = get_hook_manager().getHook("bell_hook")
 # Some muds send a GA/TELOPT_EOR character indicating a prompt.  This
 # hook allows you to react to those prompts.
 #
-# arg tuple: (Session)
+# arg tuple: (Session, string)
 #  - the session the prompt came from
 #  - the prompt text
 prompt_hook = get_hook_manager().getHook("prompt_hook")
@@ -470,11 +555,10 @@ timer_hook = get_hook_manager().getHook("timer_hook")
 #
 #   #alias {g} {get all} quiet={true}
 # 
-# arg tuple: (session, file object, int)
+# arg tuple: (session, file object, boolean)
 #  - the session instance
 #  - the file object we're writing to
-#  - 0 or 1 as to whether or not we should be persisting things
-#    quietly
+#  - whether (1) or not (0) we should be persisting things quietly
 write_hook = get_hook_manager().getHook("write_hook")
 
 # When an error is kicked up via the event loop.  The arg tuple
@@ -566,7 +650,7 @@ mud_filter_hook = get_hook_manager().getHook("mud_filter_hook")
 get_hook_manager().addHook("user_filter_hook", FilterHook())
 user_filter_hook = get_hook_manager().getHook("user_filter_hook")
 
-# When the command manager needs to get a functino to produce default
+# When the command manager needs to get a function to produce default
 # arguments for a given command on a given session it will call
 # this hook.
 #
@@ -575,7 +659,6 @@ user_filter_hook = get_hook_manager().getHook("user_filter_hook")
 # return the default string value, or None if no default is present
 get_hook_manager().addHook("default_resolver_hook", QueryHook())
 default_resolver_hook = get_hook_manager().getHook("default_resolver_hook")
-
 
 
 # Local variables:

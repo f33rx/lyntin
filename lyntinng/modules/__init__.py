@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.21 2003/02/15 03:35:06 willhelm Exp $
+# $Id: __init__.py,v 1.22 2003/03/15 01:22:32 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -48,7 +48,8 @@ def get_module_name(filename):
   Takes in a fully qualified filename and returns the module name
   portion.
 
-  example:
+  example::
+
     /home/willg/lyntinng/modules/alias.py -> alias
 
   @param filename:  the fully qualified filename

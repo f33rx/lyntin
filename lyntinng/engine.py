@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.84 2003/02/15 03:35:04 willhelm Exp $
+# $Id: engine.py,v 1.85 2003/04/08 22:19:07 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -23,6 +23,10 @@ threads.
 The Engine class is a singleton and the reference to it is stored in
 "engine.myengine".  However, you should use the exported module
 to access the engine using the "get_engine()" function.
+
+@var  myengine: The engine singleton.  Don't reference this though--it's
+    better to go through the exported module.
+@type myengine: Engine
 """
 import Queue, thread, sys
 from threading import Thread
