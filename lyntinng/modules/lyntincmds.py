@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.31 2003/01/30 20:28:36 willhelm Exp $
+# $Id: lyntincmds.py,v 1.32 2003/02/12 15:36:13 jmberne Exp $
 #######################################################################
 import types, re
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -80,35 +80,52 @@ def config_cmd(ses, args, input):
 
   # set the variable to this value
   if name in ["ignoreactions", "ignoresubs", "verbatim"]:
-    value = utils.convert_boolean(value)
-    if value == 1 or value == 0:
-      setattr(ses, "_%s" % name, value)
-      if not quiet:
-        exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
+    if not value:
+      value = getattr(ses, "_%s" % name)
+      exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     else:
-      exported.write_error("config: '%s' is not a valid boolean value." % (value), ses)
+      value = utils.convert_boolean(value)
+      if value == 1 or value == 0:
+        setattr(ses, "_%s" % name, value)
+        if not quiet:
+          exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
+      else:
+        exported.write_error("config: '%s' is not a valid boolean value." % (value), ses)
     return
 
   if name in ["variablechar", "commandchar"]:
-    if len(value) == 1:
-      setattr(lyntin, name, value)
-      if not quiet:
-        exported.write_message("config: %s set to '%s'." % (name, value), ses)
+    if not value:
+      value = getattr(lyntin, name)
+      exported.write_message("config: %s set to '%s'." % (name, value), ses)
     else:
-      exported.write_error("config: '%s' is not a valid %s value." % (value, name), ses)
+      if len(value) == 1:
+        setattr(lyntin, name, value)
+        if not quiet:
+          exported.write_message("config: %s set to '%s'." % (name, value), ses)
+      else:
+        exported.write_error("config: '%s' is not a valid %s value." % (value, name), ses)
     return
 
   if name in ["ansicolor", "speedwalk"]:
-    value = utils.convert_boolean(value)
-    if value == 1 or value == 0:
-      setattr(lyntin, name, value)
-      if not quiet:
-        exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
+    if not value:
+      value = getattr(lyntin, name)
+      exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
     else:
-      exported.write_error("config: '%s' is not a valid boolean value." % (value), ses)
+      value = utils.convert_boolean(value)
+      if value == 1 or value == 0:
+        setattr(lyntin, name, value)
+        if not quiet:
+          exported.write_message("config: %s set to %s." % (name, bv(value)), ses)
+      else:
+        exported.write_error("config: '%s' is not a valid boolean value." % (value), ses)
     return
 
   if name == "mudecho":
+    if not value:
+      value = lyntin.mudecho
+      exported.write_message("config: %s set to %s." % (name, bv(value)))
+      return
+
     import event
     old = lyntin.mudecho
     value = utils.convert_boolean(value)
@@ -123,6 +140,11 @@ def config_cmd(ses, args, input):
     return
 
   if name == "evalmode":
+    if not value:
+      value = lyntin.evalmode
+      exported.write_message("config: %s set to %s." % (name, value), ses)
+      return
+
     old = lyntin.evalmode
     if value == "tintin":
       lyntin.evalmode = lyntin.EVALMODE_TINTIN
