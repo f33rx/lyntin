@@ -55,6 +55,7 @@ class Textui(ui.BaseUI):
     ui.BaseUI.__init__(self)
     self._do_i_echo = 1
     exported.hook_register("startup_hook", self.startui)
+    exported.hook_register("shutdown_hook", self.shutdown)
     exported.hook_register("to_user_hook", self.write)
     exported.hook_register("mudecho_hook", self.echo)
     self._currcolors = {}
@@ -70,6 +71,9 @@ class Textui(ui.BaseUI):
       exported.write_error("Warming: echo off is unavailable.  " +
                            "Your password will be visible.")
       
+  def shutdown(self, args):
+    """ makes sure we're echoing!"""
+    self.turnonecho()
 
   def turnonecho(self):
     if tio == 0:
@@ -116,6 +120,7 @@ class Textui(ui.BaseUI):
     import event, sys, select, os
     try:
       if os.name == 'posix':
+        """
         while not self.shutdownflag:
           readers,w,e = select.select([sys.stdin], [], [])
           if readers:
@@ -125,6 +130,13 @@ class Textui(ui.BaseUI):
                 self.handleinput(data)
               except IOError:
                 pass
+        """
+        while not self.shutdownflag:
+          try:
+            data = sys.stdin.readline()
+            self.handleinput(data)
+          except IOError:
+            pass
 
       else:
         while not self.shutdownflag:
