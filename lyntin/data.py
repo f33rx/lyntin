@@ -19,7 +19,7 @@ contains global variables
 """
 
 
-import socket, select, re, regex, os, string, regsub, copy
+import socket, select, re, os, string, copy
 import mud, app, player, hooks, handler
 
 
@@ -167,8 +167,8 @@ def filter_crud(txt):
     filter ansi and ^M stuff out of text used when logging 
     files.
     """
-    txt = regsub.gsub('\015\\|\r', '', txt)
-    txt = regsub.gsub('[[0-9;]*[mJ]', '', txt)
+    txt = re.sub('\015|\r', '', txt)
+    txt = re.sub('\[\[0-9;\]*\[mJ\]', '', txt)
     return txt
 
 def filter_cm(txt):
@@ -176,7 +176,7 @@ def filter_cm(txt):
  
     filter ^M stuff out of text.
     """
-    txt = regsub.gsub('\015\\|\r', '', txt)
+    txt = re.sub('\015|\r', '', txt)
     return txt
 
 def split_into_lines(str):
@@ -362,7 +362,7 @@ class UserSession(Session):
     def CheckForGaggedText(self, text):
         if text:
             for gt in self.gags:
-                if regex.search(gt, text) != -1:
+                if re.compile(gt).search(text):
                     return 1
             return 0
 
@@ -413,12 +413,12 @@ class UserSession(Session):
         wildcard = string.count(str, '*')
         if wildcard:
             # convert '*' to '.*'
-            str = regsub.gsub('\*', '.*', str)
+            str = re.sub('\*', '.*', str)
             # insert anchors
             str = '^' + str + '$'
         for s in list:
             if wildcard:
-                if regex.match(str, s) != -1:
+                if re.compile(str).match(s):
                     ret = ret + [s]
             else:
                 if str == s:
@@ -498,7 +498,6 @@ class UserSession(Session):
 
         for (match, ac, regac) in matched:
             
-            # register the backreferences ('group' method on regex objects)
             matchobj = regac.search(match)
             response = self.actions[ac] # the response
 
@@ -565,9 +564,8 @@ class databuffer:
     # return a list of all the entries that matched it.
     def grep(self, pat):
         ret = []
-        regsearch = regex.search
         for l in self.list:
-            if regsearch(pat, l) != -1:
+            if re.compile(pat).search(l):
                 ret.append(l)
         return ret
 
@@ -575,12 +573,12 @@ class databuffer:
     # return a list of all the _lines_ that matched it.
     def greplines(self, pat):
         build = []
-        regsearch = regex.search
         for g in self.list:
             lines = split_into_lines(g)
             for line in lines:
-                if regsearch(pat, line) != -1:
+                if re.compile(pat).search(line):
                     build.append(line)
+        build.reverse()
         return build
 
 
