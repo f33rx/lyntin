@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.35 2002/03/22 01:27:24 willhelm Exp $
+# $Id: basic.py,v 1.36 2002/03/22 02:40:18 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -368,8 +368,8 @@ def if_cmd(session, words, input):
   inputadjusted = input.split(" ", 1)[1]
   expr, action = utils.split_braced(inputadjusted)
 
-  expr = expr.replace("&&", "and")
-  expr = expr.replace("||", "or")
+  expr = expr.replace(" && ", " and ")
+  expr = expr.replace(" || ", " or ")
 
   try:
     if eval(expr):
