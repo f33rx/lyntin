@@ -1,0 +1,1686 @@
+\input texinfo   @c -*-texinfo-*-
+@c %**start of header
+@setfilename lyntin.info
+@settitle Lyntin
+@c %**end of header
+@c an index type for Lyntin commands
+@defindex cm
+@defindex mt
+@defindex cl
+@defindex hk
+@defindex fc
+
+@setchapternewpage odd
+
+@titlepage
+@sp 10
+@comment The title is printed in a large font.
+@center @titlefont{The Lyntin Agent Framework}
+
+
+@end titlepage
+
+@node    Top, Getting Started, (dir), (dir)
+
+@*
+Lyntin@*
+======
+
+This document describes Lyntin, an extensible Mud client and framework
+for the creation of autonomous agents, or bots. Lyntin is centered
+around Python, a dynamic, object-oriented, and fun programming language.
+
+Parts of this document assume you are, or want to be, a hacker.
+
+@c ************** Top Level Menu ****************
+
+@menu
+* Getting Started::             If you want to dive right in
+* Concepts::                    Lyntin Concepts
+* Commands::                    Lyntin Commands
+* Python::                      The joy of hacking
+* Library::                     The Agent Development Library
+* Credits::                     Guilty parties
+* Index::                       A big list
+
+Here are some nodes which are really subnodes of the above, collected
+here so you can get to them in one hop.
+
+ --- The Detailed Node Listing ---
+
+Getting Started
+
+* Install::                     How to install Lyntin
+* Connect::                     How to connect to a server
+
+Concepts
+
+* Session::                     A Specific connection to a server
+* LYNTINDIR::                   A special directory
+* Lyntin Char::                 The special Lyntin character
+* The Databuffer::              A repository of previous server output
+* Variables::                   Variables stand for values
+* Hooks::                       Functions called at certain times
+
+Commands
+
+* Sessions::                    For creating and manipulating sessions
+* Aliases::                     For abbreviating commonly typed phrases
+* Actions::                     For automatically triggering a response
+* Substitutes::                 For doctoring up server output
+* Databuffer::                  For operating on the databuffer
+* Ticker::                      For monitoring server ticks
+* Recording::                   For keeping a record of events
+* State::                       For saving and restoring sessions
+* History::                     A list of previous commands
+* Miscellaneous::               Other stuff which won't fit anywhere else
+
+Python
+
+* Init File::                   Where to put initialization code
+* Running Your Code::           Calling Python from Lyntin
+* Hook List::                   All the hooks
+
+Library
+
+* Exported::                    Your interface to Lyntin's internals
+* Scheduler::                   Schedule your own events
+* Examples::                    How to use the library
+
+@end menu
+
+@c ************** Chapter 1 ****************
+@node Getting Started, Concepts, Top, Top
+@chapter Getting Started
+
+@menu
+* Install::                     How to install Lyntin
+* Connect::                     How to connect to a server
+@end menu
+
+
+@node Install, Connect, Getting Started, Getting Started
+@section Installing Lyntin
+
+Installing Lyntin is very easy.  Currently, Lyntin only runs under Unix,
+but this should change very soon.
+
+@enumerate
+@item
+Install python 1.3 or greater.
+@item
+unzip and untar lyntin; this will result in a directory named 'lt'.
+@item
+set the environment variable LYNTINDIR to be the name of the directory
+you just created.
+@item
+modify/set the environment variable PYTHONPATH to include the name of
+the directory you just created.
+@item
+mv the file 'direc_you_just_created/lt', eg lt/lt to a directory in
+your path.
+@item
+type 'lt', and you're running lyntin.
+@end enumerate
+
+lyntin accepts command line arguments, and interprets them as files
+filled with aliases/actions/subs/vars/gags
+
+
+@node Connect,  , Install, Getting Started
+@section Connecting to a Server
+
+In brief, you use the #session command.  Here is a sample transcript:
+
+@format
+
+
+
+
+[6:41pm] laheadle@@yeenoghu: lt ma
+Loading . . . . . . . . . . 
+
+############################################
+#          Welcome to LynTin...            #
+#          The Hacker's mud client.        #
+############################################
+
+
+#OK.
+#21 ALIASES LOADED.
+#1 ACTIONS LOADED.
+#0 SUBSTITUTES LOADED.
+#0 VARIABLES LOADED.
+#0 GAGS LOADED.
+
+
+
+
+>#ses a tdome.montana.com 5555
+#TRYING TO CONNECT...
+
+                _______                    .                         .
+               |__   __|   _                          __ __ 
+                  | |   __| | ___  _ __ ___   ___    |_ | _|
+                  | |  / _` |/ _ \| '_ ` _ \ / _ \    | | | 
+           .      | | | (_| | (_) | | | | | |  __/    | | |       .
+                  |_|  \__,_|\___/|_| |_| |_|\___|    | | | 
+                                                     |__|__|
+    .                     R I S E    O F    T H E                  .
+                            . 
+    ']|''''|     .                      ||           .     '|| .
+     ]|  .   ... ..    ....    ....    ...  ....     ....   ||  ..   ....
+     ]|''|    ||' '' .|...|| .|...||    ]| '' .||  .|   ''  || .'   ||. '
+     ]|       ||     ||      ||         ]| .|' ||  ||       ||'|.   . '|..
+    .]|.     .||.     '|...'  '|...'    ]| '|..'|'  '|...' .||. ||. |'..|'
+                                     .. ]'             .
+        .                              ''                              
+                             .
+
+                   + About as original as 25 year old reruns +                  
+
+  
+________________________________________________________________________
+
+
+     What is your name? smak
+     Password:
+
+[snip]
+
+< 15H 100M 109V > say hello from lyntin!
+You say 'hello from lyntin!'
+@end format
+
+@c ************** Chapter 2 ****************
+@node Concepts, Commands, Getting Started, Top
+@chapter Concepts
+
+Learning these concepts now will make the rest of the manual easier to
+understand.
+
+@menu
+* Session::                     A Specific connection to a server
+* LYNTINDIR::                   A special directory
+* Lyntin Char::                 The special Lyntin character
+* The Databuffer::              A repository of previous server output
+* Variables::                   Variables stand for values
+* Hooks::                       Functions called at certain times
+@end menu
+
+@node Session, LYNTINDIR, Concepts, Concepts
+@section What is a Session?
+
+A session represents a specific connection to a server, along with its
+associated actions, aliases, substitutes, gags and other definitions.
+Each session has a name which must be unique.  When a session is
+disconnected from its server, it goes away, or "dies."
+
+I lied.  There is one session which is not connected to any server and
+which is always alive.  Its name is "common," and it contains any
+definitions which are defined when there is no other active session.
+@emph{Do not} treat this session as a regular one.  In particular,
+@emph{Do not} switch into it or try to make it current.  That is not its
+purpose.
+
+@*The reason "common" exists is so that you can have definitions which
+
+@enumerate
+@item
+exist apart from any specific server connection
+@item
+are inherited by all newly created sessions
+@end enumerate
+
+Thus, if you have definitions which you want to share between all active
+sessions, you should load them into common, usually at
+startup@footnote{alternatively you could do '#all #al name expansion'}.
+
+@node LYNTINDIR, Lyntin Char, Session, Concepts
+@section LYNTINDIR, The home of Lyntin
+
+Before you can use Lyntin, you must set the environment variable
+LYNTINDIR to the root directory of the Lyntin installation.
+
+The most important consequence of this setting is its impact on Lyntin's
+notion of a file@footnote{or directory}. In the course of using Lyntin,
+whenever you specify a file which is @emph{not} a full pathname, Lyntin
+will assume you mean a file relative to LYNTINDIR.  Full pathnames will
+be treated like full pathnames.
+
+@*Other useful properties of LYNTINDIR:
+
+@itemize -
+@item
+it allows Lyntin to find its own code
+@item
+it allows Lyntin to find its standard library
+@end itemize
+
+@node Lyntin Char, The Databuffer, LYNTINDIR, Concepts
+@section The Lyntin Character
+
+The Lyntin character is a special character which notifies Lyntin that
+you have typed a command meant for Lyntin, rather than your server.  By
+default the Lyntin character is '#'.  So, for example, when you type the
+command #alias, Lyntin knows that you are sending it a
+command.
+
+You can change the Lyntin character with the command #char.
+@xref{Miscellaneous, #char}.
+
+@node The Databuffer, Variables, Lyntin Char, Concepts
+@section The Databuffer
+
+The databuffer is a repository of previous output from the server.  It
+is useful both from python programs and from user commands.  Think of it
+as a list: each time a chunk of output comes from the server, it is
+added to the front of the list.
+
+Lyntin provides commands for Searching the Databuffer and setting its
+size. @xref{Databuffer}
+
+Whenever any output from the server is added to the Databuffer, the hook
+@code{data_hook} is run @xref{Event Hooks}.
+
+@node Variables, Hooks, The Databuffer, Concepts
+@section Variables
+
+There are two types of variables within Lyntin:@footnote{Actually, there
+are 3 types of variables, if you count Python variables, which of course
+You should :-).} pattern variables and Lyntin variables.
+
+@itemize @bullet
+@item
+A pattern variable "matches" a portion of text, and can be
+used later to refer that that portion.  Pattern variables look like
+this: %1, %2, etc.  For example if you specify an action @xref{Actions},
+whose left side looks like this:
+@example
+@{%1 tells you '%2'@}
+@end example
+and then the server sends you
+@example
+John tells you 'You disgust me'
+@end example
+then in the right hand side of the action, %1 will expand to 'John', and
+%2 will expand to 'You disgust me'.
+
+@item
+A Lyntin Variable is a variable with a value within the Lyntin system.
+Lyntin variables look like $name and can be used within Lyntin
+commands. @xref{Miscellaneous, #var}.
+
+@end itemize
+
+@node Hooks,  , Variables, Concepts
+@section Hooks
+
+@itemize @bullet
+@item
+A hook is a (possibly empty) list of user-defined functions, which
+lyntin calls at certain times to allow the user a chance to customize
+lyntin's behavior.
+@item
+Lyntin is sprinkled with dozens of hooks, each of which is called
+at a certain time.
+@item
+a list of all hooks can be found in the file hooks.py, but each is
+described in this manual at the most appropriate place.
+@item
+each hook will receive an argument tuple @xref{Hook List}.
+@item
+@mtindex hook add
+add a function to a hook by calling the hook's 'add' method with the
+function as an argument
+@item
+@mtindex hook clear
+clear a hook of all functions by calling the hook's 'clear' method.
+@end itemize
+
+@noindent
+Example:
+@example
+hooks.death_hook.add(my_death_function)
+@end example
+
+This adds the function my_death_function to the list of functions in the
+hook death_hook.  Remember, my_death_function must be a predeclared
+function which accepts the right type of argument tuple.
+
+
+@c ************** Chapter 3 ****************
+@node Commands, Python, Concepts, Top
+@chapter Commands
+
+Lyntin contains a wealth of user-level commands designed to make
+your online experience more convenient.
+
+@sp 1
+
+In this manual, command descriptions look like this:@*
+command arg1 [arg2] [arg3]  etc.@*
+
+@sp 1
+
+where command is the name of the command, arg1 is a required
+argument, and arg2 and arg3 are optional arguments.
+
+@noindent
+All lyntin commands can be sequenced with ';'.
+
+@noindent
+Examples:
+@example
+l n;l e;l s;l w  -- sends one command, then the next, etc.
+#al jj jump;#al bb bounce
+@end example
+
+@noindent
+All Lyntin commands can be abreviated, except #quit and #clear.
+
+Invoking any command causes that command's command hook to be run
+@xref{Command Hooks}.
+
+@menu
+* Sessions::                    For creating and manipulating sessions
+* Aliases::                     For abbreviating commonly typed phrases
+* Actions::                     For automatically triggering a response
+* Substitutes::                 For doctoring up server output
+* Databuffer::                  For operating on the databuffer
+* Ticker::                      For monitoring server ticks
+* Recording::                   For keeping a record of events
+* State::                       For saving and restoring sessions
+* History::                     A list of previous commands
+* Miscellaneous::               Other stuff which won't fit anywhere else
+@end menu
+
+@c ****************** SESSIONS *************************
+@node Sessions, Aliases, Commands, Commands
+@section Sessions
+
+Don't know what a Session is? @xref{Session}
+
+@cmindex session
+@deffn Command #session name host port
+@end deffn
+
+@itemize @bullet
+@item
+create a session called @var{name}, connected to the server specified by
+@var{host} and @var{port}.  If the connection succeeds, the hook
+@code{connect_succeeded_hook} is run.  If it fails, the hook
+@code{connect_failed_hook} is run @xref{Event Hooks}.
+@end itemize
+
+@cmindex session name
+@deffn Special-Command #Session-Name [Command]
+@end deffn
+
+@itemize @bullet
+@item
+If only one argument is given, This switches the current session to the
+session called "Session-Name", Assuming you have already created a
+session by that name.
+@item
+If @var{Command} is supplied, three things happen in sequence:
+
+@example
+1. The current session becomes Session-Name
+2. Command is Evaluated -- this can be any Lyntin command.
+3. The current session becomes what it was before.
+@end example
+@end itemize
+
+@cmindex all sessions
+@deffn Special-Command #all command
+@end deffn
+
+@itemize @bullet
+@item
+This causes @var{command} to be evaluated in every existing session, one
+after another.
+@end itemize
+
+@sp 3@*
+Examples:
+@example
+#ses a tdome.montana.com 5555
+#myses 
+#all say hello
+@end example
+
+@cmindex killall
+@deffn Command #killall
+@end deffn
+
+@itemize @bullet
+@item
+clear all sessions of actions/aliases/subs/gags/variables.  Triggers the
+hook @code{death_hook} for each session @xref{Event Hooks}.
+@end itemize
+
+
+
+@c ****************** ALIASES *************************
+@node Aliases, Actions, Sessions, Commands
+@section Aliases
+
+An alias is a shorthand for a command you type a lot.
+@sp 2
+
+@cmindex alias
+@deffn Command #alias [@{name@}] [@{expansion@}]@*
+@end deffn
+
+@itemize @bullet
+@item
+with no arguments, #alias simply prints all defined aliases.
+@item
+with one argument, it prints the alias(es) which correspond to that
+argument (wildcard expansion of '*' is supported). 
+@item
+otherwise, it creates an alias called name which expands to expansion.
+from here on out, typing name at the beginning of a command will invoke
+the alias expansion, which will be interpreted instead of what you
+typed.  The expansion can contain lyntin pattern-variables, which look
+like %[number].  The variable %0 contains the entire text typed after
+the alias.  Other than that, %n is the nth word after the alias. If the
+expansion contains no pattern-variables, and you type in arguments to
+the alias, lyntin just appends whatever arguments you typed to the
+expansion, and sends that.
+
+@item
+when defining an alias, braces are only necessary around the
+expansion if the expansion contains semicolons.  however, braces are
+advised around both the name and the expansion.
+
+@end itemize
+
+Examples:
+
+@example
+#al insult @{say you know, you're a %1, a complete and total %1@}
+#al kk kill dog (define an alias named kk which expands to kill dog)
+#al lookround @{look n;look e;look s;look w@}
+#al @{k@} @{kill@} (typing 'k dog' now sends 'kill dog')
+#al k* (print all aliases starting with k)
+#al al #al (define an alias named al which expands to #al)
+#al kll kill (define an alias named kll which expands to "kill arguments")
+@end example
+
+
+@cmindex unalias
+@deffn Command #unalias pattern
+@end deffn
+
+@itemize @bullet
+@item
+remove all aliases which match @var{pattern} from the current
+session. The * Wildcard is supported in @var{pattern}.
+@end itemize
+
+
+
+@c ****************** ACTIONS *************************
+@node Actions, Substitutes, Aliases, Commands
+@section Actions
+
+An action is an automatic response to server output.  Actions are handy
+for automating things you do a lot, and speeding up reaction time in
+critical situations.
+
+@sp 2
+@cmindex action
+@deffn Command #action [@{trigger@}] [@{response@}]@*
+@end deffn
+
+
+@itemize @bullet
+
+@item
+with no arguments, prints all actions
+
+@item
+with a single argument @var{trigger} (with or witout braces), prints all
+actions which match @var{trigger} (with wildcard expansion of '*'
+supported)
+
+@item
+With two brace-enclosed arguments, defines an action.  Basically,
+whenever lyntin sees anything from the mud which contains the text
+@var{trigger}, it evaluates the text @var{response}.  @var{response} is
+handled just as if you had typed it yourself, so it can be plain text to
+send to the server, or any lyntin command. 
+
+@item
+When defining an action, braces ( '@{' and '@}' ) are mandatory around
+_both_ the trigger and the response.  Actions can be 'anchored' to the
+beginning of a line by prepending the trigger with '^'.  Then, the
+action will not be triggered unless it occurs at the beginning of a
+line.
+
+@item
+actions can contain lyntin pattern-variables, which look like %[integer]
+@xref{Variables}. when lyntin sees a pattern-variable in an action
+trigger, it tries to match any pattern against it, and saves any match
+it finds so you can use it in the response.  see below for examples.
+
+@item
+@var{response} can contain the special variable %a, which means "the
+whole matched line."
+
+@end itemize
+
+Examples:
+
+@example
+#ac @{^You are hungry@} @{get bread bag;eat bread@}
+#ac @{EVISCERATES joey@} @{rescue joey@}
+#ac @{%0 gives you %5@} @{say thanks for the %5, %0!@}
+#ac @{%1 tells you %2@} @{say %1 just told me %2@}
+@end example
+
+
+@cmindex action
+@deffn Command #unaction pattern
+@end deffn
+
+@itemize @bullet
+@item
+remove any actions which match @var{pattern} from the current session.
+The * Wildcard is supported in @var{pattern}.
+@end itemize
+
+Examples:
+@example
+#unac *fountain*
+#unac @{^Bill is here@}
+@end example
+
+@c ****************** SUBS *************************
+@node Substitutes, Databuffer, Actions, Commands
+@section Substitutes
+
+A substitute is something you want to see instead of what
+the server actually sent.
+
+@sp 2
+@cmindex substitute
+@deffn Command #substitute [@{what@}] [@{replacement@}]
+@end deffn
+
+@itemize @bullet
+@item
+with one argument, displays all substitutes which match @var{what}.
+
+@item
+with two arguments, 
+defines a substitute such that, whenever lyntin encounters the text
+@var{what}, it will replace it with @var{replacement}.  
+
+@end itemize
+
+
+
+Examples:
+
+@example
+#sub @{a green dragon is here.@} @{VERY DANGEROUS GREEN DRAGON PRESENT@}
+#sub ralph @{cousin ralph@}
+@end example
+
+
+@cmindex unsubstitute
+@deffn Command #unsubstitute
+@end deffn
+
+@itemize @bullet
+@item
+remove all substitutes which match @var{pattern} from the current
+session.
+The * Wildcard is supported in @var{pattern}.
+@end itemize
+
+
+A gag is a means for ignoring text. It is useful for shutting up
+spammers and people who annoy you.
+
+@cmindex gag
+@deffn Command #gag [@{what@}]
+@end deffn
+
+@itemize @bullet
+@item
+with no arguments, print all current gags
+@item
+with one argument, define @var{what} as a gag for the current session.
+From here on out, any time lyntin sees @var{what}, it won't display the
+line which contains it.
+
+@end itemize
+
+@cmindex ungag
+@deffn Command #ungag pattern
+@end deffn
+
+@itemize @bullet
+@item
+remove all gags which match @var{pattern} from the current session.
+The * Wildcard is supported in @var{pattern}.
+@end itemize
+
+
+@c ****************** Databuffer *************************
+@node Databuffer, Ticker, Substitutes, Commands
+@section Databuffer
+
+The databuffer is a repository of previous output from the server.
+@xref{The Databuffer}.
+
+@cmindex databuffer
+@deffn Command #databuffer [size]
+@end deffn
+
+@itemize @bullet
+@item
+with no arguments, display the size of the session's databuffer
+@item
+with one numeric argument, set the size of the session's databuffer to @var{size}
+@end itemize
+
+@cmindex datagreplines
+@deffn Command #datagreplines regex
+@end deffn
+
+@itemize @bullet
+@item
+search for @var{regex} in the current session's databuffer.  print any 
+lines in which a match was found.
+@item
+@var{regex} can be any python regular expression, or just the exact text
+you want to find.
+@end itemize
+
+Examples:
+
+@example
+#datagrep gossip
+#datagrep leather.*here
+@end example
+
+@cmindex datagrep
+@deffn Command #datagrep regex
+@end deffn
+
+@itemize @bullet
+@item
+search for @var{regex} in the current session's databuffer.  If a
+match is found, print the entire data chunk containing the match.
+@item
+@var{regex} can be any python regular expression, or just the exact text
+you want to find.
+@end itemize
+
+Examples:
+
+@example
+#datagrep gossip
+#datagrep leather.*here
+@end example
+
+@c ****************** Ticker *************************
+@node Ticker, Recording, Databuffer, Commands
+@section Ticker
+
+These commands deal with the server's notion of a tick, which is
+the passing of a unit of time.  Lyntin monitors this time by means
+of the "ticker."  
+
+@cmindex tick
+@deffn Command #tick
+@end deffn
+
+@itemize @bullet
+@item
+Queries the ticker as to how much time remains until the next tick.
+The time remaining is printed.
+@end itemize
+
+
+@cmindex tickset
+@deffn Command #tickset argument
+@end deffn
+
+
+
+@itemize @bullet
+@item
+With no arguments, it resets the ticker as if a tick had just occurred.
+@item
+With an @var{argument} of "on" (no quotes) It turns on the ticker.
+@item
+With an @var{argument} of "off," it turns off the ticker
+@item
+With an @var{argument} of "toggle," it toggles the ticker to be either on or
+off
+@item
+With a numeric @var{argument}, the length of a tick is set to that number.
+@end itemize
+
+
+
+
+
+@c ****************** Recording *************************
+@node Recording, State, Ticker, Commands
+@section Recording
+
+@cmindex log
+@deffn Command #log file
+@end deffn
+
+@itemize @bullet
+@item
+with no arguments, if the current session is logging, 
+lyntin stops logging.
+@item
+with one argument, start a logging file for the current session in the
+file @var{file} @xref{LYNTINDIR}.  From here out any output from the
+server to that session will be recorded in @var{file}, and anything that
+session sends to the server will be too.
+@end itemize
+
+Examples:
+@example
+#log myfile.txt
+#a log myfile.txt
+@end example
+
+@cmindex report
+@deffn Command #report [file textstring]
+@end deffn
+
+@itemize @bullet
+@item
+This command takes zero or two arguments.
+@item
+with no arguments, print all reports.
+@item
+if args _are_ present, establish a report which prints any line
+containing @var{textstring} to @var{file}.
+@item
+@var{textstring} may contain multiple words and python
+regular expressions.
+@item
+All word borders are collapsed into a single whitespace.
+@end itemize
+
+Examples:
+@example
+#a #report  -- prints all of session a's reports
+#report myfile janey gossips -- records all of janey's gossips
+@end example
+
+@c ****************** State *************************
+@node State, History, Recording, Commands
+@section State
+
+These commands have to do with the state, or "current settings" of the
+current session.
+
+@cmindex read
+@deffn Command #read file
+@end deffn
+
+@itemize @bullet
+@item
+load @var{file} @xref{LYNTINDIR} into the current session as a set of
+lyntin actions/aliases/substitutes/gags/variables
+@end itemize
+
+
+Examples:
+@example
+#a #read biff
+#read /usr/local/lib/file1
+@end example
+
+@cmindex write
+@deffn Command #write file
+@end deffn
+
+@itemize @bullet
+@item
+save the current session's actions/aliases/subs/gags/vars to @var{file}.
+@end itemize
+
+Examples:
+@example
+#a #write biff
+#write /usr/local/lib/file1
+@end example
+
+@cmindex clear
+@deffn Command #clear
+@end deffn
+
+@itemize @bullet
+@item
+clear the current session of all aliases, actions, etc
+@end itemize
+
+@c ****************** History *************************
+@node History, Miscellaneous, State, Commands
+
+Lyntin keeps a list of previous commands typed by you, the user.
+You can ask it to repeat one of these commands instead of having
+to retype it yourself.
+
+@cmindex do historic command
+@deffn Special-Command ![NUMBER] [old]=[new]
+@end deffn
+
+@itemize @bullet
+@item
+redo a command from the history list.  @var{number} defaults to 0,
+so ! and !0 are the same.  If @var{old} and @var{new} are present, all
+occurrences of @var{old} are replaced by @var{new}.
+@end itemize
+
+Examples:
+@example
+!
+!0
+!4 jeff=jay
+@end example
+
+
+@cmindex history
+@deffn Command #history [number]
+@end deffn
+
+@itemize @bullet
+@item
+with no arguments, print the current history list.  These can be
+reexecuted with the '!' command.
+@item
+with one argument, set the size of the history list to @var{number}.
+@end itemize
+
+
+
+
+
+
+
+@c ****************** Miscellaneous *************************
+@node Miscellaneous,  , History, Commands
+@section Miscellaneous
+
+Other commands:
+
+@cmindex textin
+@deffn Command #textin file
+@end deffn
+
+@itemize @bullet
+@item
+execute @var{file} as a sequence of commands.  handy for posting messages
+and doing character creation, to name a couple.
+@end itemize
+
+@cmindex speedwalk
+@deffn Command #speedwalk
+@end deffn
+
+@itemize @bullet
+@item
+toggle speedwalking for the current session.  If speedwalk is on, any
+command which consists solely of the letters nwseud combined with digits
+(eg nnnwu, 3e5nnnn) will be interpreted as a speedwalking directive, and
+lyntin will send the appropriate number of directional commands to your
+mud. If speedwalking is off, lyntin will just send such commands
+directly to your mud without breaking them up or interpreting them.
+@end itemize
+
+
+@cmindex showme
+@deffn Command #showme
+@end deffn
+
+@itemize @bullet
+@item
+display @var{text} on your screen.  useful for sending messages to
+yourself.
+@end itemize
+
+
+Examples:
+@example
+#ac @{%1 tells you %2@} @{#showme %1 just told me %2@}
+@end example
+
+@cmindex quit
+@deffn Command #quit
+@end deffn
+
+@itemize @bullet
+@item
+kill lyntin immediately.  This will cut you off from any servers you
+are currently connected to.
+@end itemize
+
+
+@cmindex char
+@deffn Command #char tochar
+@end deffn
+
+@itemize @bullet
+@item
+the Lyntin character is the character you type before each lyntin
+command. (by default, it is '#').
+@item
+with no arguments, print the current lyntin character.
+@item
+with a single character argument, change the lyntin character to
+@var{tochar}
+@end itemize
+
+@cmindex variable
+@deffn Command #variable [name] [value]
+@end deffn
+
+This command deals with Lyntin variables @xref{Variables}.
+
+@itemize @bullet
+@item
+with no arguments, display all Lyntin variables for the current session
+@item
+with one argument, display any Lyntin variables matching the argument, with
+wildcard expansion supported
+@item
+with two arguments, define a Lyntin variable @var{name} whose value is
+@var{value}.  Lyntin variables are different from pattern variables in
+that they stay in memory as long as lyntin does.
+@item
+the value of name can be referenced at anytime with $@var{name}.
+@end itemize
+
+Examples:
+@example
+#var water fountain
+@end example
+@example
+#al kk @{kill $victim@}
+
+note the braces.  they are necessary because otherwise kk would be
+defined as kill (whatever the value of victim happens to be when you
+define the alias)
+@end example
+@example
+#al swv @{#all #var @{victim@} @{%%1@}@}
+
+whoa!! note the nested braces.  A pattern variable must contain as many
+%'s as its nesting depth.
+@end example
+
+@cmindex cr
+@deffn Command #cr
+@end deffn
+
+@itemize @bullet
+@item
+send a carriage return to the mud from the current session.  Useful
+when an alias needs to send a return.
+@end itemize
+
+
+@node Python, Library, Commands, Top
+@chapter Python
+
+Alright, now we get to the point.  All that other stuff was just fluff.
+I mean, we're here to @emph{hack}, right?  Are you with me?!  Onward,
+brothers and sisters!
+
+@menu
+* Init File::                   Where to put initialization code
+* Running Your Code::           Calling Python from Lyntin
+* Hook List::                   All the hooks
+@end menu
+
+
+@node Init File, Running Your Code, Python, Python
+@section Init File
+
+When Lyntin starts up, it evaluates the contents of a Python file named
+user.py, which you should use to initialize whatever python data you
+will need in the course of your Lyntin session.  It is in the context of
+this file that the #@ command is executed @xref{Running Your Code}.
+
+If you look in this file, you will see a Python dictionary called
+user_custom.  This dictionary contains variables whose values you can
+change to suit your tastes. @emph{Do Not} remove them or change their
+datatypes, or bad things will happen @footnote{As they like to say in
+the C world, "the result of this behavior is undefined"}.
+
+The user_custom dictionary contains the following keys and default
+values:
+
+@table @asis
+@item 'too_many_errors' (20)
+The number of errors which Lyntin considers "too many."  Once
+the number of errors reaches this number, the hook error_occurred_hook
+is called @xref{Hook List}.
+@item 'history_size' (30)
+The maximum size of the history list
+@item 'extra_source_dirs' ([])
+A list of directory names, as strings, which will be added at startup to
+Lyntin's module search path.  Directory names are interpreted in the
+usual Lyntin way @xref{LYNTINDIR}.
+@end table
+
+@node Running Your Code, Hook List, Init File, Python
+@section Running Your Code
+
+Any self-respecting agent will need to execute lots of python code.
+Here's how to do that.
+
+@cmindex execute python code
+@deffn Special-Command #@@STATEMENT
+@end deffn
+@itemize @bullet
+@item
+this is the biggy.  Execute an _arbitrary_ python @var{statement} in
+the context of user.py's global variables. 
+@end itemize
+
+Trivial Examples:
+@example
+#@@for c in 'hello': print c
+#@@Putline('this is lyntin speaking')
+#@@dead = 'yep'
+#@@othermodule.doit()
+@end example
+
+@node Hook List, , Running Your Code, Python
+@section Hook List
+
+This is a listing of all the hooks in Lyntin @xref{Hooks}.  Note that
+each of these hooks receives a @emph{tuple} argument.
+
+@menu
+* Event Hooks::              Hooks corresponding to Lyntin events
+* Command Hooks::            Hooks called when commands are run
+@end menu
+
+@node Event Hooks, Command Hooks, , Hook List
+@subsection Event Hooks
+
+These hooks are triggered at various times throughout Lyntin's
+execution.
+
+@hkindex death_hook
+@deffn Hook death_hook
+@end deffn
+@example
+when a session dies.
+arg tuple contains a session instance
+@end example
+
+@hkindex action_hook    
+@deffn Hook action_hook  
+@end deffn 
+@example
+when actions are triggered.
+arg tuple contains a session instance, the action triggered (a string)
+the line it matched (a string) , and the response sent to the mud (a string).
+@end example
+
+@hkindex data_hook    
+@deffn Hook data_hook  
+@end deffn 
+@example
+when the databuffer grows, i.e. when any output is received
+from the mud.
+arg tuple contains a databuffer instance.
+@end example
+
+@hkindex set_session_hook    
+@deffn Hook set_session_hook  
+@end deffn 
+@example
+when the active session is changed.
+arg tuple contains the old session instance, and the new one
+@end example
+
+@hkindex shut_down_lyntin_hook    
+@deffn Hook shut_down_lyntin_hook  
+@end deffn 
+@example
+when lyntin shuts down.
+arg tuple is empty
+@end example
+
+@hkindex received_user_input_hook    
+@deffn Hook received_user_input_hook  
+@end deffn 
+@example
+when the user types something.
+arg tuple contains the string received from the user.
+@end example
+
+@hkindex connect_succeeded_hook    
+@deffn Hook connect_succeeded_hook  
+@end deffn 
+@example
+when a connection is made successfully
+arg tuple contains the session name (a string)
+the host (string) and port (int)
+@end example
+
+@hkindex connect_failed_hook    
+@deffn Hook connect_failed_hook  
+@end deffn 
+@example
+when creating a new connection fails
+arg tuple contains the session name (a string)
+the host (string) and port (int)
+@end example
+
+@hkindex internal_tick_hook    
+@deffn Hook internal_tick_hook  
+@end deffn 
+@example
+invoked every nth iteration through lyntin's main loop.
+(currently n is 5)
+arg tuple is empty
+@end example
+
+@hkindex ticker_warn_hook    
+@deffn Hook ticker_warn_hook  
+@end deffn 
+@example
+when a session is warned of an upcoming tick.
+arg tuple contains the session
+@end example
+
+@hkindex ticker_pass_hook    
+@deffn Hook ticker_pass_hook  
+@end deffn 
+@example
+when a session is informed of a mud-level tick
+arg tuple contains the session
+@end example
+
+@hkindex error_occurred_hook    
+@deffn Hook error_occurred_hook  
+@end deffn 
+@example
+when an error occurs in user code
+arg tuple is empty (check sys.exc_traceback)
+@end example
+
+@hkindex too_many_errors_hook    
+@deffn Hook too_many_errors_hook  
+@end deffn 
+@example
+when the user_custom variable too_many_errors is exceeded.
+arg tuple is empty
+@end example
+
+@node Command Hooks, , Event Hooks, Hook List
+@subsection Command Hooks
+
+These hooks are triggered by invoking lyntin commands. Almost all take
+2-element tuples: the string typed by the user, minus the first '', and
+a list of applicable session.
+
+
+@hkindex exec_user_code_hook    
+@deffn Hook exec_user_code_hook  
+@end deffn 
+@example
+when the #@ command is executed.
+arg tuple contains the string typed by the user,
+minus the first '#'
+@end example
+
+@hkindex action_command_hook    
+@deffn Hook action_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex alias_command_hook    
+@deffn Hook alias_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#' and a list of applicable sessions.
+@end example
+
+@hkindex clear_command_hook    
+@deffn Hook clear_command_hook  
+@end deffn 
+@example
+arg tuple contains a list of applicable sessions.
+@end example
+
+@hkindex char_command_hook    
+@deffn Hook char_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex cr_command_hook    
+@deffn Hook cr_command_hook  
+@end deffn 
+@example
+arg tuple contains a list of applicable sessions.
+@end example
+
+@hkindex databuffer_command_hook    
+@deffn Hook databuffer_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex datagrep_command_hook    
+@deffn Hook datagrep_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex datagreplines_command_hook    
+@deffn Hook datagreplines_command_hook  
+@end deffn 
+@example    
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex gag_command_hook    
+@deffn Hook gag_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex history_command_hook    
+@deffn Hook history_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex killall_command_hook    
+@deffn Hook killall_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex log_command_hook    
+@deffn Hook log_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex read_command_hook    
+@deffn Hook read_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex report_command_hook    
+@deffn Hook report_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex session_command_hook    
+@deffn Hook session_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex showme_command_hook    
+@deffn Hook showme_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex substitute_command_hook    
+@deffn Hook substitute_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex speedwalk_command_hook    
+@deffn Hook speedwalk_command_hook  
+@end deffn 
+@example
+# a one means speedwalking is on, and will become off.
+a zero's meaning should now be obvious.
+arg tuple contains a list of applicable sessions.
+check the instance variable 'speedwalk' of each session.
+@end example
+
+@hkindex unaction_command_hook    
+@deffn Hook unaction_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex textin_command_hook    
+@deffn Hook textin_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex unalias_command_hook    
+@deffn Hook unalias_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex ungag_command_hook    
+@deffn Hook ungag_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex unsubstitute_command_hook    
+@deffn Hook unsubstitute_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex variable_command_hook    
+@deffn Hook variable_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex write_command_hook    
+@deffn Hook write_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex tickset_command_hook    
+@deffn Hook tickset_command_hook  
+@end deffn 
+@example
+arg tuple contains the string typed by the user,
+minus the first '#', and a list of applicable sessions.
+@end example
+
+@hkindex tick_command_hook    
+@deffn Hook tick_command_hook  
+@end deffn 
+@example
+arg tuple contains a list of sessions
+@end example
+
+@node Library, Credits, Python, Top
+@chapter The Lyntin Agent Development Library
+
+The ADL is a library of python code which supports the development of,
+well, agents.  It is hoped that the ADL will become the primary purpose
+for Lyntin's existence, so get out there and write clean, portable
+modules and send 'em in!
+
+@menu
+* Exported::                    Your interface to Lyntin's internals
+* Scheduler::                   Schedule your own events
+* Examples::                    How to use the library
+@end menu
+
+@node Exported, Scheduler, , Library
+@section Standard Module Exported
+
+This is a standard module intended to provide users with an interface
+to the internals of lyntin. 
+
+@fcindex lyntin_command
+@deffn {Function of module exported} lyntin_command(@var{str})
+@end deffn
+@example
+The preferred way of interacting with lyntin.  Treat @var{str} as either a
+lyntin command (if it begins with a "#") or as input to a server
+@end example
+
+@fcindex get_session
+@deffn {Function of module exported} get_session(@var{sesname})
+@end deffn
+@example
+returns the session named sesname
+@end example
+
+@fcindex get_active_sessions
+@deffn {Function of module exported} get_active_sessions()
+@end deffn
+@example
+returns a list of all active sessions
+@end example
+
+@fcindex get_current_session
+@deffn {Function of module exported} get_current_session()
+@end deffn
+@example
+returns the current session
+@end example
+
+@fcindex set_current_session
+@deffn {Function of module exported} set_current_session(@var{ses})
+@end deffn
+@example
+sets the current session to @var{ses}
+@end example
+
+@fcindex get_num_errors
+@deffn {Function of module exported} get_num_errors()
+@end deffn
+@example
+returns the total number of errors Lyntin has encountered
+@end example
+
+@fcindex set_num_errors
+@deffn {Function of module exported}  set_num_errors(@var{num})
+@end deffn
+@example
+sets the total number of errors Lyntin has encountered
+@end example
+
+@fcindex get_history()
+@deffn {Function of module exported} 
+@end deffn
+@example
+returns the history list
+@end example
+
+@fcindex set_history
+@deffn {Function of module exported} set_history(@var{lst})
+@end deffn
+@example
+sets the history list to @var{lst}
+@end example
+
+@fcindex grep_databuffer
+@deffn {Function of module exported} grep_databuffer(@var{str}, @var{ses})
+@end deffn
+@example
+returns a list of entries from session @var{ses}'s databuffer which
+match string @var{str}
+@end example
+
+@fcindex grep_databuffer_lines
+@deffn {Function of module exported} grep_databuffer_lines(@var{str}, @var{ses})
+@end deffn
+@example
+returns a list of lines from ses's databuffer which match @var{str}
+@end example
+
+@fcindex 
+@deffn {Variable of module exported} time_scheduler
+@end deffn
+@example
+a scheduler on which you should put events which need to execute at
+specified intervals @xref{Scheduler}.
+@end example
+
+@node Scheduler, Examples, Exported, Library
+@section Standard Module Scheduler
+
+This is a standard module meant for scheduling and invoking events
+based on arbitrary criteria.  It contains two classes:
+
+@clindex Scheduler
+@deffn Class Scheduler
+@end deffn
+
+The Scheduler class holds a list of events, and is responsible for
+querying each event every so often to see if the event is ready to
+perform.  If so, it calls the event's @code{perform} method.
+
+@clindex TimeEvent
+@deffn {Base Class} TimeEvent
+@end deffn
+
+TimeEvent is a base class for defining time-based events, i.e. events
+that are triggered at certain intervals.
+
+@mtindex TimeEvent __init__
+@deffn {TimeEvent Constructor} __init__(@var{interval}=1, @var{times}=-1)
+@end deffn
+
+The constructor takes two arguments: @var{interval} is the length of
+time between invocations of the event, and @var{times} is the number of
+times to invoke the event before descheduling it.  A @var{times} of -1
+means it should be invoked forever.  Don't forget to call TimeEvent's
+@code{__init__} method from your derived event's @code{__init__} method.
+
+
+@mtindex TimeEvent internal_perform
+@deffn {Method on TimeEvent} internal_perform(@var{scheduler})
+@end deffn
+
+This method does nothing in the TimeEvent class.  It is meant to be
+overridden in subclasses of TimeEvent.In the code for this method, you
+write what you want the event to do when invoked (this can include
+scheduling/descheduling other events).
+
+Next, you create an instance of your TimeEvent with a given
+@var{interval} and a given @var{times}. After creating the TimeEvent,
+you simply add it to the scheduler, which exists as the variable
+time_scheduler in exported.py.  For an example of how to do all this,
+see the standard module examples.py.
+  
+TimeEvent is only one possible event type!  This scheme is meant
+to be general, and users are encouraged to add their own events,
+possibly for inclusion in the standard library.  To do this you must
+create a class which contains two methods.
+
+@mtindex YourEvent internal_perform
+@deffn {Method on YourEvent} ready_to_perform()
+@end deffn
+
+This should return a true value whenever YourEvent is ready to be
+performed, based on whatever criteria you decide. 
+
+@mtindex YourEvent perform
+@deffn {Method on YourEvent} perform(@var{scheduler})
+@end deffn
+
+This should do the actual performing of the event, i.e. whatever you
+want.
+
+@node Examples,  , Scheduler, Library
+@section Standard Module Examples
+
+This is a standard module which contains a few examples of how to write
+code which will work with lyntin.  Browse the file and see what's in
+there.
+
+@node Credits, Index, Library, Top
+@unnumbered Bug Reports, Questions, Comments, Curses?
+
+lyntin was written by Lyn Headley, laheadle@@cs.uchicago.edu.
+I appreciate ALL of the above sources of feedback
+
+Ticker Code provided by Mathew Schlegel of First Step Internet Services,
+nitehawk@@1ststep.net.  Hacked on by Lyn Headley.
+
+
+@c ************** Index ****************
+
+@node Index,  , Credits, Top
+@unnumbered Index
+
+@noindent
+Commands:
+
+@printindex cm
+
+@noindent
+Hooks:
+
+@printindex hk
+
+@noindent
+Classes:
+
+@printindex cl
+
+@noindent
+Functions:
+
+@printindex fc
+
+@noindent
+Methods:
+
+@printindex mt
+
+@contents
+@bye
+
