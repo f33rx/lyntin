@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.33 2003/01/02 01:50:07 jmberne Exp $
+# $Id: argparser.py,v 1.34 2003/01/05 22:55:18 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses X{command argument}s
@@ -37,13 +37,15 @@ Supported options::
             into dict, the rest of the input line goes into 
             dict["input"]
 
+  nodefaults:bool (default=off): turn off default lookups through variables.
+
 Refer to the modules.lyntincmds and modules.tintincmds for examples
 on arg specs and commands and how it all intertwines.
 """
 import string, re, time
 import utils
 
-defaultOptions={ "stripBraces": 1, "noparsing": 0, "limitparsing": -1 }
+defaultOptions={ "stripBraces": 1, "noparsing": 0, "limitparsing": -1, "nodefaults":0 }
 optionParser = None
 
 class ParserException(Exception):
@@ -237,13 +239,18 @@ class ArgumentParser:
         self.extraindexparser = parser
         self.parsers[argname] = parser
     
-  def parse(self, input):
+  def parse(self, input, defaultresolver=None):
     """
     Takes an input string and produces the populated dictionary
     matching self's argspec.  
 
     @param input: the user input string
     @type  input: string
+
+    @param defaultresolver: A function that will take an argument name and return a default value (None if there should be none) to override builtin defaults.
+    #type  function
+    
+    @type  session: session
 
     @return: the populated dictionary of all the args and values
     @rtype: dict
@@ -294,11 +301,26 @@ class ArgumentParser:
     # where available
     for key in self.parsers.keys():
       if not dict.has_key(key):
+        # gotta be careful here with the extra defaultset value since
+        # the parser may parse a string into None, or anything really
+        default = None
+        defaultset = 0
         parser = self.parsers[key]
-        if not parser.defaultset and not self.getOption("noparsing"):
+
+        if not self.getOption("nodefaults") and defaultresolver:
+          default = defaultresolver(key)
+          if default != None:
+            default = parser.parse(default)
+            defaultset = 1
+            
+        if not defaultset and parser.defaultset:
+          default = parser.default
+          defaultset = 1
+        
+        if not defaultset and not self.getOption("noparsing"):
           raise ParserException, "Must specify a value for argument %s" % (key)
         else:
-          dict[key] = parser.default
+          dict[key] = default
           
     return dict
 
@@ -916,6 +938,8 @@ class ChoiceChecker(TypeChecker):
     for item in self._choices:
       if item.find(args) == 0:
         possibilities.append(item)
+        if len(item) == len(args):
+          return item
     if len(possibilities) == 0 or len(possibilities) > 1:
       raise ParserException, "Invalid argument, must be one of %s." % (self._choices,)
     else:

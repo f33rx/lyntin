@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.19 2002/12/22 23:07:21 willhelm Exp $
+# $Id: variable.py,v 1.20 2002/12/31 04:21:41 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -137,6 +137,31 @@ class VariableData:
     else:
       return default
 
+  def defaultResolver(self, command):
+    """
+    Returns a defaultresolver that will look up potential default values in this session's variables.
+
+    lookup will be first
+       "default.%s.%s" % (command, argument,)
+    then
+       "default.%s" % (argument,)
+
+    to allow for overriding all arguments of a given name, or only arguments for specific commands.
+
+    @param command: the command to look up arguments for
+    @type  command: string
+
+    @returns:  a function object that will do the desired lookup
+    @rtype:    function object
+    """
+    def resolver(argument, vdata=self, command=command):
+      output = vdata.getVariable( "default.%s.%s" % (command, argument,))
+      if output == None:
+        output = vdata.getVariable( "default.%s" % (argument,))
+      return output
+
+    return resolver
+
   def getStatus(self):
     """
     Returns a one-liner as to the status of this data class.
@@ -231,6 +256,12 @@ class VariableManager(manager.Manager):
     if self._variables.has_key(ses):
       return self._variables[ses].getVariable(name, default)
     return default
+
+  def defaultResolver(self, tuple):
+    ses, command = tuple
+    if self._variables.has_key(ses):
+      return self._variables[ses].defaultResolver(command)
+    return None
 
   def expand(self, ses, text):
     text = self._global.expand(text)
@@ -410,6 +441,7 @@ def load():
   exported.add_manager("variable", vm)
   hooks.user_filter_hook.register(vm.userfilter, 10)
   hooks.user_filter_hook.register(vm.denestVars, 95)
+  hooks.default_resolver_hook.register(vm.defaultResolver)
   hooks.write_hook.register(vm.persist)
 
 def unload():
@@ -419,6 +451,7 @@ def unload():
   exported.remove_manager("variable")
   hooks.user_filter_hook.unregister(vm.userfilter)
   hooks.user_filter_hook.unregister(vm.denestVars)
+  hooks.default_resolver_hook.unregister(vm.defaultResolver)
   hooks.write_hook.unregister(vm.persist)
 
 # Local variables:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.7 2002/11/18 02:43:53 willhelm Exp $
+# $Id: commandmanager.py,v 1.8 2002/12/02 05:24:19 willhelm Exp $
 #######################################################################
 """
 Lyntin comes with a series of X{command}s for manipulating aliases, 
@@ -31,7 +31,7 @@ command examples.  Additionally, check out the Lyntin module repository
 on http://lyntin.sourceforge.net/ for more examples.
 """
 import inspect, re
-import manager, lyntin, exported, argparser
+import manager, lyntin, exported, argparser, hooks
 
 class _CommandData:
   """
@@ -259,8 +259,10 @@ class CommandManager(manager.Manager):
             if len(fixedmem) > 0 and fixedmem[0] == '^':
               fixedmem = fixedmem[1:]
 
+            resolver = hooks.default_resolver_hook.spamhook( (ses, mem) )
+
             try:
-              dict = argumentparser.parse(words[1])
+              dict = argumentparser.parse(words[1],resolver)
               dict["command"]=mem
               command(ses, dict, input)
             except ValueError, e:

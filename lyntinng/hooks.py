@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.32 2003/01/18 16:49:10 willhelm Exp $
+# $Id: hooks.py,v 1.33 2003/01/19 14:17:02 jmberne Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -31,6 +31,10 @@ LAST = 99
 
 class StopSpammingException(Exception):
   pass
+
+class DoneSpammingException(Exception):
+  def __init__(self, output):
+    self.output = output
 
 class HookManager(manager.Manager):
   """
@@ -132,6 +136,12 @@ class HookManager(manager.Manager):
     self._hook_map[hookname] = newhook
 
 
+def QueryHook():
+  return Hook(mapper=query_mapper, done=query_done)
+
+def FilterHook():
+  return Hook(mapper=filter_mapper)
+
 class Hook:
   """
   Represents a (possibly empty) sequence of user-defined
@@ -143,7 +153,7 @@ class Hook:
   hooks that come with Lyntin as well as which arguments they 
   take in the arg tuple.
   """
-  def __init__(self, mapper=lambda x,y:x):
+  def __init__(self, mapper=lambda x,y:x, empty=lambda x:x, done=lambda x:x):
     """
     Initializes.
 
@@ -151,6 +161,12 @@ class Hook:
         function in the hook.  Must take two arguments: the previous 
         arglist and the return from the previous function.
     @type  mapper: function
+
+    @param empty: function to be called when there are no functions in the hook
+    @type empty: function
+
+    @param done: function to be called when spamming finished normally
+    @type done: function
     """
     # this is the master priority list
     self._functionlist = {}
@@ -160,6 +176,10 @@ class Hook:
     self._orderedlist = []
 
     self._mapper = mapper
+
+    self._empty = empty
+
+    self._done = done
 
   def setFilterMapper(self, newmapper):
     """
@@ -189,7 +209,7 @@ class Hook:
         self._orderedlist.append(mem)
     
     
-  def spamhook(self, arglist=(), mappingFunction=None):
+  def spamhook(self, arglist=(), mappingFunction=None, emptyFunction=None, doneFunction=None):
     """
     Sends out input to all the registrants of a hook.
 
@@ -203,19 +223,36 @@ class Hook:
         arglist and the return from the previous function.
     @type  mappingFunction: function
 
+    @param emptyFunction: Function to be called with arglist if there are no
+        objects registered with this hook.  Must take 1 argument, the arglist
+        tuple, and return what spamhook should return.
+    @type  emptyFunction: function
+
+    @param doneFunction: Functino to be called when spamming finishes normally.
+        Should take 1 argument and return what spamhook should return.
+    @type  doneFunction: function
+        
+
     @return: arglist
     @rtype:  tuple of arguments
     """
     mappingFunction = mappingFunction or self._mapper
+    emptyFunction = emptyFunction or self._empty
+    doneFunction = doneFunction or self._done
 
     try:
-      for mem in self._orderedlist:
-        output = mem(arglist)
-        arglist = mappingFunction(arglist, output)
+      if self._orderedlist:
+        for mem in self._orderedlist:
+          output = mem(arglist)
+          arglist = mappingFunction(arglist, output)
+      else:
+        arglist = emptyFunction(arglist)
     except StopSpammingException, e:
       return None
+    except DoneSpammingException, d:
+      return d.output
 
-    return arglist
+    return doneFunction(arglist)
 
   def unregister(self, func):
     """
@@ -443,7 +480,6 @@ error_occurred_hook = get_hook_manager().getHook("error_occurred_hook")
 # arg tuple: ()
 too_many_errors_hook = get_hook_manager().getHook("too_many_errors_hook")
 
-
 ##################################################################
 # Filtered hooks
 ##################################################################
@@ -464,6 +500,26 @@ def filter_mapper(x,y):
   else:
     raise StopSpammingException
 
+def query_mapper(x,y):
+  """
+  This is the mapping function to be used for query-style hooks.
+  Spamhook should be called as:
+  1. output = hook.spamhook( arguments )
+
+  Each hook function will be called with the arguments until one function
+  returns non-None.  That non-None value will be returned from spamhook
+  """
+  if y != None:
+    raise DoneSpammingException(y)
+  else:
+    return x
+
+def query_done(x):
+  """
+  This is the done hook function to go with the query mapper for proper behaviour.
+  """
+  return None
+
 # Whenever data comes back from the mud it will first be passed through
 # all filter functions.
 # 
@@ -479,7 +535,7 @@ def filter_mapper(x,y):
 # Functions that register with this hook should return the adjusted text.
 # For example, the SubstituteManager returns text with substitutions
 # expanded.
-get_hook_manager().addHook("mud_filter_hook", Hook(filter_mapper))
+get_hook_manager().addHook("mud_filter_hook", FilterHook())
 mud_filter_hook = get_hook_manager().getHook("mud_filter_hook")
 
 # Whenever data comes from the user it will first be passed through
@@ -497,8 +553,19 @@ mud_filter_hook = get_hook_manager().getHook("mud_filter_hook")
 #
 # Functions that register with this hook should return the adjusted text.
 # For example, the AliasManager returns text with aliases expanded.
-get_hook_manager().addHook("user_filter_hook", Hook(filter_mapper))
+get_hook_manager().addHook("user_filter_hook", FilterHook())
 user_filter_hook = get_hook_manager().getHook("user_filter_hook")
+
+# When the command manager needs to get a functino to produce default
+# arguments for a given command on a given session it will call
+# this hook.
+#
+# arg tuple: (session, commandname)
+# output: function that can accept 1 paramter, the argument name, and will return
+# the default string value, or None if no default is present
+get_hook_manager().addHook("default_resolver_hook", QueryHook())
+default_resolver_hook = get_hook_manager().getHook("default_resolver_hook")
+
 
 
 # Local variables:
