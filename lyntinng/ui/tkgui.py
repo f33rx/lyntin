@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.21 2002/03/29 18:09:59 willhelm Exp $
+# $Id: tkgui.py,v 1.22 2002/04/01 18:24:36 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -386,7 +386,7 @@ class CommandEntry(Tkinter.Entry):
     self.bind("<Control-KeyPress-Down>", self.callPopInputStack)
     self.bind("<KeyPress-Escape>", self.callEsc)
 
-    self.bind("<KeyPress-F1>", self.callBinding) - reserved for help
+    self.bind("<KeyPress-F1>", self.callBinding) # reserved for help
 
     self.bind("<KeyPress-F2>", self.callBinding)
     self.bind("<KeyPress-F3>", self.callBinding)
@@ -456,7 +456,7 @@ class CommandEntry(Tkinter.Entry):
     """ Handles arbitrary bindings of function call keypresses."""
 
     # handle all the function keys except F1
-    if tkevent.keysym = "F1":
+    if tkevent.keysym == "F1":
       self._partk.handleinput(lyntin.commandchar + "help")
       return "break"
       
