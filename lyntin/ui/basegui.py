@@ -14,6 +14,9 @@ To implement a ui, override the following functions:
 
    def warn_no_echo(self)
 
+   def beep(self)
+     gets called whenever we catch a 0x07 character on the line.
+
    def close(self)
      closes the ui
 
@@ -123,6 +126,17 @@ class BaseGUI:
                     return
             except SystemExit:
                 return
+
+    def Beep(self):
+        self.beep()
+
+    def beep(self):
+        """beep(self) -> None
+
+        Some muds send the bel character (7) and if we get one,
+        we'll call the beep of the ui.
+        """
+        pass
 
     def Prompt(self):
         self.prompt()

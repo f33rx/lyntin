@@ -23,6 +23,8 @@ DO   = chr(253) # '\375'
 WONT = chr(252) # '\374'
 WILL = chr(251) # '\373'
 
+"""the beep constant"""
+BEEP = chr(7)
 
 def handle_mud_output(output, ses):
     """handle_mud_output(output, ses) -> None
@@ -53,10 +55,11 @@ def handle_mud_output(output, ses):
         if opt:
             if opt == WILL:
                 if c == '\001':
-                    echo_off()
+                    data.theapp.ui.OffEcho()
             elif opt == WONT:
                 if c == '\001':
-                    echo_on()
+                    data.theapp.ui.OnEcho()
+
             # we don't take orders
             # FIXME
             elif opt == DO:
@@ -78,7 +81,10 @@ def handle_mud_output(output, ses):
         elif c == IAC:
             iac = 1
         else:
-            charlist.append(c)
+            if c == BEEP:
+                data.theapp.ui.Beep()
+            else:
+                charlist.append(c)
 
     cleandata = string.join(charlist, '')
     if cleandata:

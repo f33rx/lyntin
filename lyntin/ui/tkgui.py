@@ -96,6 +96,10 @@ class TkGui(BaseGUI):
         
         self.InitColorTags()
         
+    """overriden function"""
+    def beep(self):
+        self.PutMessage("BEEP!")
+
     """overriden function--though it might never be called"""
     def scrollback_scroll(self, direction='back'):
         if direction=='back':
