@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.11 2002/10/19 19:13:51 willhelm Exp $
+# $Id: action.py,v 1.12 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -373,17 +373,13 @@ def action_cmd(ses, args, input):
   pattern against it, and saves any match it finds so you can 
   use it in the response.  See below for examples.
 
-  Triggers get converted to regular expressions by converting
-  placement variables %[0-9]+ to (.+?).  Feel free to use
-  regular expression matching stuff.
+  Note: As a note, actions are matched via regular expressions.
+  %1 gets translated to (.+?) and %_1 gets translated to (\S+?).
+  The special variable "%a" means "the whole matched line".
 
-  Note: It should be noted that actions are matched via regular 
-  expressions.   %1 gets translated to (.+?) and %_1 gets translated
-  to (\S+?).
-
-  The response can be any mud command or Lyntin command and can
-  contain placement-variables and the special variable %a which
-  means "the whole matched line".
+  We handle regular expressions with a special r[ ... ] syntax.  If
+  you put an "i" or "I" between the ] and }, then we'll ignorecase
+  as well.
 
   The onetime argument can be set to true to have the action remove
   itself automatically if it is ever executed.
@@ -391,9 +387,9 @@ def action_cmd(ses, args, input):
   examples:
 
      #action {^You are hungry} {get bread bag;eat bread}
-     #action {EVISCERATES joey} {rescue joey}
      #action {%0 gives you %5} {say thanks for the %5, %0!}
-     #action {^%_1 tells\s+you %2$} {say %1 just told me %2}
+     #action {r[^%_1 tells\\s+you %2$]} {say %1 just told me %2}
+     #action {r[sven\\s*dealt .+? to %1$]i} {say i just killed %1!}
 
   category: commands
   """
