@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.20 2002/05/18 03:40:44 willhelm Exp $
+# $Id: highlight.py,v 1.21 2002/05/18 03:45:59 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -137,13 +137,31 @@ class HighlightManager(manager.Manager):
       faketext = utils.filter_ansi(text)
       textlist = utils.split_ansi_from_text(text)
       for mem in self._highlights.keys():
-        i = faketext.find(mem)
+
+        # first we deal with those silly stars....
+        hltext = mem
+        if mem[0] == "*":
+          hltext = hltext[1:]
+        if mem[-1] == "*":
+          hltext = hltext[:-1]
+        i = faketext.find(hltext)
+
+        # then we go hunting for the unstarred text
         while i != -1:
           begin = i
-          hl = self._highlights[mem][1]
-          textlist = self.highlight(textlist, i, len(mem), hl)
-          i = faketext.find(mem, begin + 1)
+          end = len(hltext)
+          if mem[0] == "*":
+            begin = 0
+            end = i + len(hltext)
+          if mem[-1] == "*":
+            end = len(faketext) - begin
 
+          hl = self._highlights[mem][1]
+          textlist = self.highlight(textlist, begin, end, hl)
+          i = faketext.find(hltext, i + 1)
+
+      # here we sweep through the text string to update our current
+      # color and leftover color attributes
       self._currcolor, self._colorleftover = self.figureColor(textlist, self._currcolor)
 
       text = string.join(textlist, "")
@@ -156,6 +174,7 @@ class HighlightManager(manager.Manager):
     It's messy.
     """
     # first we find the place to stick the highlight thingy.
+    i = 0
     for i in range(0, len(textlist)):
       if not utils.is_color_token(textlist[i]):
         if place > len(textlist[i]):
@@ -172,7 +191,7 @@ class HighlightManager(manager.Manager):
 
     # if the string to highlight begins and ends in the
     # same token we deal with that and eject
-    if len(textlist[i][place:]) > memlength:
+    if len(textlist[i][place:]) >= memlength:
       newlist.append(textlist[i][place:place + memlength])
       newlist.append(chr(27) + "[0m")
       color = self.convertColor(newcolor)
@@ -189,6 +208,7 @@ class HighlightManager(manager.Manager):
 
     # now we have to find the end of the highlight
     memlength -= len(textlist[i][place:])
+    j = i+1
     for j in range(i+1, len(textlist)):
       if not utils.is_color_token(textlist[j]):
         if memlength > len(textlist[j]):
