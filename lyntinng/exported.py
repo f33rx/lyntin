@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.27 2002/08/31 16:36:17 jmberne Exp $
+# $Id: exported.py,v 1.28 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -205,13 +205,11 @@ def get_session(name):
   """
   Returns a named session.
 
-  arguments:
+  @param name: the name of the session to retrieve
+  @type  name: string
 
-    'name' -- the name of the session to retrieve
-
-  returns
-
-    session.Session instance or None if it doesn't exist
+  @return: the session instance or None
+  @rtype: Session
   """
   return get_engine().getSession(name)
 
@@ -282,9 +280,6 @@ def write_message(text):
 
   @param text: the message to send
   @type  text: string
-
-  @param ses: the session instance the Lyntin message is associated with
-  @type  ses: session.Session
   """
   text = str(text)
   if get_engine():
@@ -292,7 +287,7 @@ def write_message(text):
   else:
     print "message:", text
 
-def write_error(text, session=None):
+def write_error(text, ses=None):
   """
   Calls engine.myengine.writeError which writes ERROR message.
   If there is no engine instance available, it prints it to sysout.
@@ -305,11 +300,11 @@ def write_error(text, session=None):
   """
   text = str(text)
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.ERROR, session))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.ERROR, ses))
   else:
     print "error:", text
 
-def write_user_data(text, session=None):
+def write_user_data(text, ses=None):
   """
   Calls engine.myengine.writeUserData which writes a USERDATA message.
   If there is no engine instance available, it prints it to sysout.
@@ -322,7 +317,7 @@ def write_user_data(text, session=None):
   """
   text = str(text)
   if get_engine():
-    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.USERDATA, session))
+    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.USERDATA, ses))
   else:
     print "userdata:", text
 

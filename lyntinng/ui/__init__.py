@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.4 2002/05/14 22:46:26 willhelm Exp $
+# $Id: __init__.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 import glob, os
 
@@ -12,15 +12,13 @@ def get_ui(uiname):
   """
   Attempts to retrieve the ui by that name.
 
-  arguments:
+  @param uiname: the name of the ui passed in by the command line
+  @type  uiname: string
 
-    'uiname' -- (string) the name of the ui passed in by the
-                command line
-
-  returns:
-
-    a ui.BaseUI subclass instance, or None if it could not
-    be instantiated
+  @return: a BaseUI subclass instance corresponding to the name
+      of the ui the user wants to instantiate.  or None if the ui
+      could not be found or instantiated.
+  @rtype: BaseUI subclass
   """
   index = __file__.rfind(os.sep)
   if index == -1:

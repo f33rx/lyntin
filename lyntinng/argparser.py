@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.28 2002/09/04 05:36:12 willhelm Exp $
+# $Id: argparser.py,v 1.29 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -895,8 +895,8 @@ class ChoiceChecker(TypeChecker):
     value the user passed in was "blue", then we would raise a 
     ParserException since that's not a valid value.
 
-    @param arg: the argument
-    @type  arg: string
+    @param args: the argument
+    @type  args: string
 
     @returns: the choice
     @rtype: int

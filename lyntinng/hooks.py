@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.22 2002/08/13 02:30:12 willhelm Exp $
+# $Id: hooks.py,v 1.23 2002/10/12 22:14:47 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -28,13 +28,16 @@ class Hook:
   to events internal to Lyntin.  All functions take a single
   argument which is a tuple.  see the specific hooks below for
   more info.
-
-  @param mapper: function whose output will be passed to the next
-      function in the hook.  Must take two arguments, the previous 
-      arglist and the return from the previous function.
-  @type  mapper: function
   """
   def __init__(self,mapper= lambda x,y:x):
+    """
+    Initializes.
+
+    @param mapper: function whose output will be passed to the next
+        function in the hook.  Must take two arguments, the previous 
+        arglist and the return from the previous function.
+    @type  mapper: function
+    """
     # this is the master priority list
     self.functionlist = {}
 
@@ -104,7 +107,8 @@ class Hook:
         
 
   def register(self, func, place=LAST):
-    """ Registers a function with a hook.
+    """
+    Registers a function with a hook.
 
     hook should be one of the hook constants.  func 
     should be a callable function.  place is optional--it allows 

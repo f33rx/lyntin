@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.48 2002/10/12 22:14:47 willhelm Exp $
+# $Id: utils.py,v 1.49 2002/10/13 02:27:59 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -1113,7 +1113,7 @@ def _lyntin_expand_placement_vars(input, expansion):
   @type  input: string
 
   @param expansion: the expansion of the alias in the input
-  @type input:
+  @type  expansion: string
 
   @return: the expansion with all nested_vars replaced and
       placement vars replaced.

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.68 2002/08/30 02:27:05 willhelm Exp $
+# $Id: engine.py,v 1.69 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -609,7 +609,7 @@ class Engine:
   ### Manager functions
   ### ------------------------------------------------
 
-  def addManager(self, name, mgr):
+  def addManager(self, name, manager):
     """
     Adds a manager to our list.
 
@@ -619,7 +619,7 @@ class Engine:
     @param manager: the manager instance to add
     @type  manager: manager.Manager subclass
     """
-    self._managers[name] = mgr
+    self._managers[name] = manager
 
   def removeManager(self, name):
     """

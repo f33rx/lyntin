@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.23 2002/07/21 04:14:48 willhelm Exp $
+# $Id: net.py,v 1.24 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -204,7 +204,7 @@ class SocketCommunicator:
 
     @param convert: whether (1) or not (0) we should convert eol stuff to 
         CRLF
-    @type  data: boolean
+    @type  convert: boolean
 
     @raises Exception: if we have problems sending the data over the
         socket

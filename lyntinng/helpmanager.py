@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.11 2002/08/23 01:01:36 jmberne Exp $
+# $Id: helpmanager.py,v 1.12 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -198,13 +198,12 @@ class HelpManager(manager.Manager):
     @param fqn: the fully qualified name or topic name
     @type  fqn: string
 
-    returns:
-
-      A tuple composed of three strings.  The first string is
-      error text (if any or empty string if none).  The second
-      string is the breadcrumbs trail.  The third string is the
-      help text found or a columnized text of what tree elements
-      exist at that level.
+    @return: A tuple composed of three strings.  The first string is
+        error text (if any or empty string if none).  The second
+        string is the breadcrumbs trail.  The third string is the
+        help text found or a columnized text of what tree elements
+        exist at that level.
+    @rtype: tuple of (string, string, string)
     """
     categorylist, name = _split_name(fqn)
 
