@@ -123,6 +123,11 @@ class client:
             ui = cursesui.Textui()
             self.ui = ui
             ui.app = self
+	 if sys.argv[1] == '-nc' and not self.ui:
+	    import ncgui
+	    ui = ncgui.Gui()
+	    self.ui = ui
+	    ui.app = self
          if sys.argv[1] == '-tk' and not self.ui:
             import tkgui
             ui = tkgui.Gui()
@@ -144,7 +149,7 @@ class client:
       if len(sys.argv) > 1:
          # handle file args
          for opt in sys.argv[1:]:
-            if opt == '-tk': pass
+            if opt == '-tk' or opt == '-nc': pass
             else:
                player.DispatchCommand('#read %s'%opt,[data.common])
 

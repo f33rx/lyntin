@@ -349,10 +349,10 @@ class session:
             varvals = {}
             # fill in values for all the variables in the match
             for i in xrange(len(actionvars)):
-                varvals[actionvars[i]] = regac.group(i+1)
+                varvals[actionvars[i]]=string.replace(regac.group(i+1),';','_')
 
             # add special variables
-            varvals['%a'] = match
+            varvals['%a'] = string.replace(match,';','_')
 
             # fill in response variables from those that
             # matched on the trigger
