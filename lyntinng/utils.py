@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.61 2002/11/06 03:03:19 willhelm Exp $
+# $Id: utils.py,v 1.62 2002/11/09 04:21:59 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -319,13 +319,32 @@ def parse_args(args):
 
 
 def _find_next_break(token, marker, wrapcount, wraplength):
+  """
+  Figures out where the next break should be while word-wrapping.
+
+  @param token: the token we're working on
+  @type  token: string
+
+  @param marker: the point at which to start looking--the break is
+      after this marker in the token
+  @type  marker: int
+
+  @param wrapcount: 
+
+  @param wraplength: the line length to wrap at or under
+  @type  wraplength: int
+
+  @returns: index of where to wrap at or -1 if we don't need
+      to wrap on this token
+  @rtype: int
+  """
   # first we check to see to see if we need to find a break
-  if len(token) < marker - wrapcount + wraplength:
+  if len(token) <= marker - wrapcount + wraplength:
     return -1
 
   # first we look at carriage returns--they're fun and yummy!
-  x = token.rfind("\n", marker, marker + wrapcount - wraplength)
-  if x != -1 and x - wrapcount - marker < wraplength:
+  x = token.rfind("\n", marker, marker - wrapcount + wraplength)
+  if x != -1:
     return x
 
   # ok--no carriage returns.  so we try going out wraplength and working
@@ -396,8 +415,13 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
     # and things for this text token
     while x != -1:
       # insert the carriage return, any indent, and lstrip the line as well
-      textlist[i] = (textlist[i][:x] + '\n' + (indent * ' ') + textlist[i][x+1:].lstrip())
-      marker = x + indent + 1
+      # print "'" + textlist[i] + "'", len(textlist[i]), x
+      if textlist[i][x] == "\n":
+        textlist[i] = (textlist[i][:x+1] + (indent * ' ') + textlist[i][x:].lstrip())
+      else:
+        textlist[i] = (textlist[i][:x+1] + '\n' + (indent * ' ') + textlist[i][x+1:].lstrip())
+
+      marker = x + indent + 2
       wrapcount = 0
 
       x = _find_next_break(textlist[i], marker, wrapcount, wraplength - indent)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.6 2002/10/20 16:09:57 willhelm Exp $
+# $Id: test.py,v 1.7 2002/10/25 23:44:29 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -20,7 +20,9 @@ def _pass_fail(desc, testoutput, realoutput):
     # print "   pass:", testoutput
     print "   pass:", desc
   else:
-    print "   fail:", desc, "\n", testoutput
+    print "   fail:", desc
+    print "'" + str(testoutput) + "'"
+    print "'" + str(realoutput) + "'"
     test.failures += 1
 
 
@@ -68,45 +70,55 @@ if __name__ == '__main__':
   from utils import wrap_text
   _pass_fail("wrap text 1",
             wrap_text(text),
-"""This is a really long line to see if we're
-wrapping correctly.  Because it's way cool when
+"""This is a really long line to see if we're 
+wrapping correctly.  Because it's way cool when 
 we write code that works.  Yay!""")
 
   _pass_fail("wrap text 2",
             wrap_text(text, indent=5),
-"""This is a really long line to see if we're
-     wrapping correctly.  Because it's way cool
+"""This is a really long line to see if we're 
+     wrapping correctly.  Because it's way cool 
      when we write code that works.  Yay!""")
   _pass_fail("wrap text 3",
             wrap_text(text, indent=5, firstline=1),
-"""     This is a really long line to see if we're
-     wrapping correctly.  Because it's way cool
+"""     This is a really long line to see if we're 
+     wrapping correctly.  Because it's way cool 
      when we write code that works.  Yay!""")
 
 
   text = "Hi.  Check this out: Thistexthasnospacesinitandmightcausethingstocrashorgointoaninfiniteloopandstuff.whichwouldbesuperbad.  What do you think?"
   _pass_fail("wrap_text 4 (big big string)", wrap_text(text),
-"""Hi.  Check this out:
-Thistexthasnospacesinitandmightcausethingstocras
-orgointoaninfiniteloopandstuff.whichwouldbesuper
+"""Hi.  Check this out: 
+Thistexthasnospacesinitandmightcausethingstocrash
+orgointoaninfiniteloopandstuff.whichwouldbesuperb
 ad.  What do you think?""")
   _pass_fail("wrap_text 5 (big big string with indent)", 
             wrap_text(text, indent=5),
-"""Hi.  Check this out:
-     Thistexthasnospacesinitandmightcausethingst
-     crashorgointoaninfiniteloopandstuff.whichwo
+"""Hi.  Check this out: 
+     Thistexthasnospacesinitandmightcausethingsto
+     crashorgointoaninfiniteloopandstuff.whichwou
      ldbesuperbad.  What do you think?""")
+  _pass_fail("wrap_text 6 (long url like string with indent)",
+            wrap_text("[You said to notadragon17]: http://abcnews.go.com/sections/us/DailyNews/terrifica021105.html", 70, 5, 0),
+"""[You said to notadragon17]: 
+     http://abcnews.go.com/sections/us/DailyNews/terrifica021105.html
+     """)
+  _pass_fail("wrap_text 7 (long series of digits with indent)",
+            wrap_text("[notadragon17 said]: 123456789012345678901234567890124567890123456789012345678901234567890123456789012345678901234567890", 70, 5, 0),
+"""[notadragon17 said]: 
+     1234567890123456789012345678901245678901234567890123456789012345
+     67890123456789012345678901234567890""")
+
 
 
   text = "This is some text \33[1;37mwith some\33[0m ansi formatting in it to see if we can handle wrapping with it \33[1;37mtoo.\33[0m"
-  _pass_fail("wrap_text 6 (with ansi)", wrap_text(text),
-"""This is some text \33[1;37mwith some\33[0m ansi formatting in
-it to see if we can handle wrapping with it \33[1;37mtoo.
-\33[0m""")
+  _pass_fail("wrap_text 8 (with ansi)", wrap_text(text),
+"""This is some text \33[1;37mwith some\33[0m ansi formatting in 
+it to see if we can handle wrapping with it \33[1;37mtoo.\33[0m""")
 
-  _pass_fail("wrap_text 7 (with ansi)", wrap_text(text, indent=5),
-"""This is some text \33[1;37mwith some\33[0m ansi formatting in
-     it to see if we can handle wrapping with
+  _pass_fail("wrap_text 9 (with ansi)", wrap_text(text, indent=5),
+"""This is some text \33[1;37mwith some\33[0m ansi formatting in 
+     it to see if we can handle wrapping with 
      it \33[1;37mtoo.\33[0m""")
 
   print
