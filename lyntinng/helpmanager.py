@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.9 2002/06/20 03:23:27 willhelm Exp $
+# $Id: helpmanager.py,v 1.10 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -218,7 +218,12 @@ class HelpManager(manager.Manager):
       error = ""
 
     if type(tree) == type({}):
-      list = tree.keys()
+      list = []
+      for key,value in tree.items():
+        if type(value) == type({}):
+          list.append("%s*" % (key,))
+        else:
+          list.append(key)
       list.sort()
       if tree.has_key("__doc__"):
         list.remove("__doc__")
