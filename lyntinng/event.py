@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.50 2002/12/31 00:03:59 willhelm Exp $
+# $Id: event.py,v 1.51 2003/02/04 00:14:59 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -187,23 +187,6 @@ class ShutdownEvent(Event):
   def execute(self):
     """ Execute the shutdown."""
     sys.exit(0)
-
-
-class BellEvent(Event):
-  """
-  Bell events get created when the connected server sends a ^G.
-  Anything listening to the bell_hook will get a cue to do the bell
-  thing.
-  """
-  def __init__(self, ses):
-    """
-    Initializes the BellEvent with the session it came from.
-    """
-    self._ses = ses
-
-  def execute(self):
-    """ Runs the bell event through anything listening."""
-    exported.get_hook("bell_hook").spamhook((self._ses,))
 
 class EchoEvent(Event):
   """

@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.32 2003/02/15 03:35:05 willhelm Exp $
+# $Id: net.py,v 1.33 2003/03/19 23:49:56 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
 connections with a mud and polling the connection for data.
 """
-import socket, select
+import socket, select, re
 import event, ui.ui, lyntin, os, exported
 
 ### --------------------------------------------
@@ -85,7 +85,12 @@ class SocketCommunicator:
     self._shutdownflag = 0
     self._session = None
 
+    self._line_buffer = ''
+
     self._debug = 0
+
+    # this is the prompt regex that we use to split the incoming text.
+    self._prompt_regex = self._buildPromptRegex()
 
     # handle termtype issues
     if lyntin.options.has_key("term"):
@@ -98,6 +103,27 @@ class SocketCommunicator:
     # we keep track of all the telnet stuff we're doing here
     # so we can look at it and dump it or whatever
     self._controllog = []
+
+  def _buildPromptRegex(self, prompt=""):
+    """
+    Builds the prompt regex.  A prompt is IAC+GA or IAC+TELOPT_EOR or
+    any string prompt.  Note that prompts eat up the characters.  So if
+    the prompt is "\\n> " those characters will disappear from the stream.
+
+    Note: the prompt is NOT escaped before it is added to the regexp.  It's
+    up to you to re.escape the bits that need escaping.
+
+    @param prompt: the text prompt to use (if any)
+    @type  prompt: string
+
+    @returns: the compiled regular expression for prompt detection
+    @rtype: Regexp object
+    """
+    if prompt:
+      r = "(" + IAC+GA + "|" + IAC+TELOPT_EOR + "|" + prompt + ")"
+    else:
+      r = "(" + IAC+GA + "|" + IAC+TELOPT_EOR + ")"
+    return re.compile(r)
 
   def __repr__(self):
     return "connection %s %d" % (self._host, self._port)
@@ -194,9 +220,6 @@ class SocketCommunicator:
               # actually handle whatever we've gotten because
               # we got a full line, or we polled for more and there was none.
 
-              if IAC in data or self._nego_buffer != '':
-                data = self.handleNego(self._nego_buffer + data)
-
               self.handleData(data)
               data = None
 
@@ -263,12 +286,36 @@ class SocketCommunicator:
     """
     global BELL
 
+    data = self._nego_buffer + data
+
+    # handle the bell
     count = data.count(BELL)
     for i in range(count):
-      event.BellEvent(self._session).enqueue()
+      event.SpamEvent(exported.get_hook("bell_hook"), (self._session,)).enqueue()
     data = data.replace(BELL, "")
 
-    event.MudEvent(self._session, data).enqueue()
+    # handle IAC GA, IAC TELOPT_EOR, and text prompts
+    splitdata = self._prompt_regex.split(data)
+
+    # we split on prompts so that we serialize MudEvents with prompt_hook
+    # calls.  this allows inline prompt detection in the stream.
+    for d in splitdata:
+      if self._prompt_regex.match(d):
+        event.SpamEvent(exported.get_hook("prompt_hook"), (self._session,)).enqueue()
+      else:
+        
+        # handle telnet option stuff
+        if IAC in d:
+          d = self.handleNego(d)
+
+        # the rest of it is mud data
+        event.MudEvent(self._session, d).enqueue()
+
+    index = data.rfind("\n")
+    if index == -1:
+      self._line_buffer = data
+    else:
+      self._line_buffer = data[index:]
 
   def handleNego(self, data):
     """
@@ -289,13 +336,7 @@ class SocketCommunicator:
         marker = i
         break
 
-      if data[i+1] == GA:
-        # FIXME - right now we're taking out the GA because I don't
-        # know what we should do with it yet
-        data = data[:i] + data[i+2:]
-        self.logControl("receive: IAC GA")
-        
-      elif data[i+1] == NOP:
+      if data[i+1] == NOP:
         data = data[:i] + data[i+2:]
         self.logControl("receive: IAC NOP")
 
@@ -303,13 +344,6 @@ class SocketCommunicator:
         data = data[:i] + data[i+1:]
         i = i + 1
         self.logControl("receive: IAC IAC")
-
-      elif data[i+1] == TELOPT_EOR:
-        # data = data[:i] + data[i+1:]
-        data = data[:i] + data[i+2:]
-        # FIXME - right now we're taking out the EOR because I don't
-        # know what we should do with it yet
-        self.logControl("receive: IAC TELOPT EOR")
 
       else:
         if i + 2 >= len(data):
@@ -320,7 +354,10 @@ class SocketCommunicator:
         if data[i+1] in DDWW:
           if data[i+2] == ECHO:
             self.logControl("receive: IAC " + CODES[ord(data[i+1])]+" ECHO")
-            self.handleECHO(data[i+1])
+            if data[i+1] == WILL:
+              event.EchoEvent(0).enqueue()
+            elif data[i+1] == WONT:
+              event.EchoEvent(1).enqueue()
 
           elif data[i+2] == TERMTYPE:
             self.logControl("receive: IAC " + CODES[ord(data[i+1])]+" TERMTYPE")
@@ -369,19 +406,6 @@ class SocketCommunicator:
       data = data[:marker]
 
     return data
-
-  def handleECHO(self, ddww):
-    """
-    Generates an EchoEvent depending on whether we were told the
-    server WILL (0) or WONT (1) echo.
-
-    @param ddww: do/dont/will/wont
-    @type  ddww: int
-    """
-    if ddww == WILL:
-      event.EchoEvent(0).enqueue()
-    elif ddww == WONT:
-      event.EchoEvent(1).enqueue()
 
 # Local variables:
 # mode:python

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.35 2003/02/01 01:52:59 willhelm Exp $
+# $Id: hooks.py,v 1.36 2003/02/12 15:15:22 jmberne Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -355,11 +355,19 @@ shutdown_hook = get_hook_manager().getHook("shutdown_hook")
 #  - new echo state: 1 if on, 0 if off
 mudecho_hook = get_hook_manager().getHook("mudecho_hook")
 
-# When the mud sends a ^G character, we kick off a BellEvent
+# When the mud sends a ^G character, we kick off a SpamEvent
 # which spams the bell_hook.
 #
-# no arg tuple
+# arg tuple: (Session)
+#  - the session the bell was kicked off in
 bell_hook = get_hook_manager().getHook("bell_hook")
+
+# Some muds send a GA/TELOPT_EOR character indicating a prompt.  This
+# hook allows you to react to those prompts.
+#
+# arg tuple: (Session)
+#  - the session the prompt came from
+prompt_hook = get_hook_manager().getHook("prompt_hook")
 
 # Whenever we switch evalmodes, we call everything on this hook.
 # 
