@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.65 2002/07/30 03:14:41 jmberne Exp $
+# $Id: engine.py,v 1.66 2002/08/13 02:24:50 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -261,8 +261,7 @@ class Engine:
             self._current_session = self._sessions[ses]
             exported.write_message(ses + " now current session.")
           else:
-            self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
-                                                     internal )
+            self.handleUserData(input[1], internal=1, session=self._sessions[ses])
           historyitems.append(mem)
           continue
 
