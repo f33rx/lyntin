@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.74 2002/04/26 20:11:02 willhelm Exp $
+# $Id: basic.py,v 1.75 2002/04/26 20:22:41 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -632,17 +632,16 @@ def nop_cmd(session, args, input):
   """
   return
 
-commands_dict["nop"] = (nop_cmd, "comment*", "noparsing")
+commands_dict["nop"] = (nop_cmd, "", "noparsing")
 
 def raw_cmd(session, args, input):
   """#raw text_to_mud
 
   Takes its arguments and sends them straight to the mud.
   """
-  session.writeSocket(string.join(args["input"]," ") + "\n")
-  exported.write_message(string.join(args["input"]," "))
-
-commands_dict["raw"] = (raw_cmd, "input*")
+  session.writeSocket(args["input"] + "\n")
+  
+commands_dict["raw"] = (raw_cmd, "input=", "noparsing")
 
 def read_cmd(session, args, input):
   """#read <filename>
@@ -789,13 +788,13 @@ def showme_cmd(session, args, input):
 
   Prints stuff to the user display.
   """
-  if input.find(" ") == -1:
+  input = args["input"]
+  if not input:
     exported.write_error("syntax: #showme <message>")
   else:
-    input = input[input.find(" ")+1:]
     exported.write_message(input)
      
-commands_dict["showme"] = (showme_cmd, "message*", "noparsing")
+commands_dict["showme"] = (showme_cmd, "", "noparsing")
 
 
 def speedwalk_cmd(session, args, input):
