@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.27 2002/11/09 01:06:17 willhelm Exp $
+# $Id: net.py,v 1.28 2002/12/22 23:07:20 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
 connections with a mud and polling the connection for data.
 """
 import socket, string, select
-import event, ui.ui
+import event, ui.ui, lyntin, os
 
 ### --------------------------------------------
 ### CONSTANTS
@@ -80,6 +80,14 @@ class SocketCommunicator:
     self._nego_buffer = ''
     self._shutdownflag = 0
     self._session = None
+
+    # handle termtype issues
+    if lyntin.options.has_key("term"):
+      self._termtype = lyntin.options["term"][0]
+    elif os.environ.has_key("TERM"):
+      self._termtype = os.environ["TERM"]
+    else:
+      self._termtype = "lyntin"
 
   def __repr__(self):
     return "connection %s %d" % (self._host, self._port)
@@ -262,10 +270,22 @@ class SocketCommunicator:
         marker = i
         break
 
-      # handles GA and NOP
-      if data[i+1] in (GA, NOP):
+      if data[i+1] == GA:
         data = data[:i] + data[i+2:]
         
+      elif data[i+1] == NOP:
+        data = data[:i] + data[i+2:]
+
+      elif data[i+1] == IAC:
+        data = data[:i] + data[i+1:]
+        i = i + 1
+
+      elif data[i+1] == EOR:
+        # data = data[:i] + data[i+1:]
+        data = data[:i] + data[i+2:]
+        # FIXME - right now we're taking out the EOR because I don't
+        # know what we should do with it yet
+
       else:
         if i + 2 >= len(data):
           marker = i
@@ -275,6 +295,16 @@ class SocketCommunicator:
         if data[i+1] in DDWW:
           if data[i+2] == ECHO:
             self.handleECHO(data[i+1])
+
+          elif data[i+2] == TERMTYPE:
+            if data[i+1] == DO:
+              self.write(IAC + WILL + data[i+2], 0)
+            else:
+              self.write(IAC + WONT + data[i+2], 0)
+
+          elif data[i+2] == EOR:
+            if data[i+1] == WILL:
+              self.write(IAC + DO + data[i+2], 0)
 
           elif data[i+1] in DD:
             self.write(IAC + WONT + data[i+2], 0)
@@ -289,12 +319,10 @@ class SocketCommunicator:
             marker = i
             break
 
-          data = data[:i] + data[end+1:]
+          if data[i+2] == TERMTYPE:
+            self.write(IAC + SB + TERMTYPE + self._termtype + IAC + SE, 0)
 
-        # handles IAC IAC
-        elif data[i+1] == IAC:
-          data = data[:i] + data[i+1:]
-          i = i + 1
+          data = data[:i] + data[end+1:]
 
         # in case they passed us something weird we remove the IAC and 
         # move on
@@ -310,6 +338,13 @@ class SocketCommunicator:
     return data
 
   def handleECHO(self, ddww):
+    """
+    Generates an EchoEvent depending on whether we were told the
+    server WILL (0) or WONT (1) echo.
+
+    @param ddww: do/dont/will/wont
+    @type  ddww: int
+    """
     if ddww == WILL:
       event.EchoEvent(0).enqueue()
     elif ddww == WONT:

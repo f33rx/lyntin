@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.23 2002/12/06 00:33:32 willhelm Exp $
+# $Id: lyntincmds.py,v 1.24 2002/12/22 23:07:20 willhelm Exp $
 #######################################################################
 import string
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -19,6 +19,20 @@ def bv(bool):
     return "on"
   return "off"
 
+def _fixmap(w, themap):
+  keys = themap.keys()
+  keys.sort()
+  output = []
+
+  for mem in keys:
+    if type(themap[mem]) == type([]):
+      output.append("   %s %s" % (mem.ljust(w), themap[mem][0]))
+      for mem2 in themap[mem]:
+        output.append((18 * " ") + mem2)
+    else:
+      output.append("   %s %s" % (mem.ljust(w), themap[mem]))
+  return "\n".join(output)
+
 def config_cmd(ses, args, input):
   """
   Allows you to set a wide variety of options, some of which are
@@ -32,22 +46,32 @@ def config_cmd(ses, args, input):
   quiet = args["quiet"]
 
   if not name:
-    output = "Global:\n" + \
-             "   ansicolor     " + bv(lyntin.ansicolor) + "  (boolean)\n" + \
-             "   commandchar   " + lyntin.commandchar + "  (char)\n" + \
-             "   mudecho       " + bv(lyntin.mudecho) + "  (boolean)\n" + \
-             "   speedwalk     " + bv(lyntin.speedwalk) + "  (boolean)\n"
-    if lyntin.evalmode == lyntin.EVALMODE_LYNTIN:
-      output += "   evalmode      lyntin  (\"lyntin\" or \"tintin\")\n"
-    elif lyntin.evalmode == lyntin.EVALMODE_TINTIN:
-      output += "   evalmode      tintin  (\"lyntin\" or \"tintin\")\n"
-    else:
-      output += "   evalmode      unknown (\"lyntin\" or \"tintin\")\n"
 
-    output += "Session:\n" + \
-              "   ignoreactions " + bv(ses._ignoreactions) + "  (boolean)\n" + \
-              "   ignoresubs    " + bv(ses._ignoresubs) + "  (boolean)\n" + \
-              "   verbatim      " + bv(ses._verbatim) + "  (boolean)\n"
+    globmap = {"ansicolor": bv(lyntin.ansicolor) + " (boolean)",
+               "commandchar": lyntin.commandchar + " (char)",
+               "mudecho": bv(lyntin.mudecho) + " (boolean)",
+               "speedwalk": bv(lyntin.speedwalk) + " (boolean)"}
+    if lyntin.evalmode == lyntin.EVALMODE_LYNTIN:
+      globmap["evalmode"] = "lyntin  (\"lyntin\" or \"tintin\")"
+    elif lyntin.evalmode == lyntin.EVALMODE_TINTIN:
+      globmap["evalmode"] = "tintin  (\"lyntin\" or \"tintin\")"
+    else:
+      globmap["evalmode"] = "unknown (\"lyntin\" or \"tintin\")"
+
+
+    sesmap = {"ignoreactions": bv(ses._ignoreactions) + " (boolean)",
+              "ignoresubs": bv(ses._ignoresubs) + " (boolean)",
+              "verbatim": bv(ses._verbatim) + " (boolean)"}
+
+    output = "Commandline:\n"
+    output += _fixmap(14, lyntin.options) + "\n"
+
+    output += "Global:\n"
+    output += _fixmap(14, globmap) + "\n"
+
+    output += "Session:\n"
+    output += _fixmap(14, sesmap) + "\n"
+
     exported.write_message(output, ses)
     return
 

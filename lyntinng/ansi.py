@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.7 2002/11/06 03:03:19 willhelm Exp $
+# $Id: ansi.py,v 1.8 2002/11/09 01:06:17 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -182,6 +182,14 @@ def figure_color(textlist, currentcolor, leftover=""):
           elif 0 < i and i < 10:
             # these are ansi color attributes
             currentcolor[0] = i
+
+          elif i == 22:
+            # shuts off bold
+            currentcolor[0] = 0
+
+          elif i == 39:
+            # sets default foreground
+            currentcolor[1] = -1
 
           elif 30 <= i and i < 40:
             # these are foreground attributes
