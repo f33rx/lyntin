@@ -4,20 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.2 2002/06/18 23:42:22 willhelm Exp $
+# $Id: variable.py,v 1.3 2002/06/21 02:27:17 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
-It also defines some builtin variables like $TIMESTAMP.
+It also defines global variables like $TIMESTAMP.
 """
 import re, string, time
 import manager, utils, lyntin, engine, hooks, exported, modutils
-
-localvarchar = lyntin.variablechar
-VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
-
-def _fixvariableregexp():
-  VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
 
 """
 This hook will get called every time a variable is changed.  arg tuple
@@ -27,21 +21,17 @@ variable_change_hook = hooks.Hook()
 
 class TimeStampBuiltin:
   """
-  Allows us to do dynamic TIMESTAMPs as a builtin variable.
+  Allows us to do dynamic TIMESTAMPs as a global variable.
   """
   def __init__(self): pass
-  def __str__(self): return time.asctime(time.localtime())
+  def __str__(self): return time.asctime()
 
 
 class VariableData:
   def __init__(self):
     self._variables = {}
-    self._builtins = []
 
-    # add built-in variables
-    self.addVariable("TIMESTAMP", TimeStampBuiltin(), 1)
-
-  def addVariable(self, var, expansion, builtin=0):
+  def addVariable(self, var, expansion):
     """ Adds a variable to the dict.
 
     arguments:
@@ -49,27 +39,14 @@ class VariableData:
       'var' -- the variable name
 
       'expansion' -- the variable value
-
-      'builtin' -- (int) 0 if the variable is not a builtin, 1 if it is.
-                   It should be noted that builtin variables should
-                   never be removed.
-
-    returns:
-
-      (int) we always return 1.  we might at some point return 
-      0 if we don't like the the value or something like that.
     """
     self._variables[var] = expansion
-    if builtin == 1 and var not in self._builtins:
-      self._builtins.append(var)
-
 
   def clear(self):
     """ Removes all the variables."""
     list = self._variables.keys()
     for mem in list:
-      if mem not in self._builtins:
-        del self._variables[mem]
+      del self._variables[mem]
 
   def removeVariables(self, text):
     """ Removes variables from the list.
@@ -86,15 +63,28 @@ class VariableData:
       list of (name, value) tuples of removed variables
 
     """
-    badvariables = utils.expand(text, self._variables.keys())
+    badvariables = utils.expand_text(text, self._variables.keys())
 
     ret = []
     for mem in badvariables:
-      if mem not in self._builtins:
-        ret.append((mem, self._variables[mem]))
-        del self._variables[mem]
+      ret.append((mem, self._variables[mem]))
+      del self._variables[mem]
 
     return ret
+
+  def expand(self, text):
+    """ Expands variables in the text.
+
+    arguments:
+
+      'text' -- (string) the text to expand variables in
+
+    returns:
+
+      the text with variables expanded
+    """
+    text = utils.expand_vars(text, self._variables)
+    return text
 
   def getVariables(self):
     """ Returns the keys of the variables dict.
@@ -127,47 +117,6 @@ class VariableData:
     else:
       return default
 
-  def expand(self, text):
-    """ Looks at user input and expands any variables involved.
-
-    It'll return the expansion if there is one.  Otherwise
-    it returns None.
-    """
-    global localvarchar, VARIABLE_REGEXP
-
-    replacedvars = 0
-    if len(text) > 0:
-      marker = 0
-
-      if localvarchar != lyntin.variablechar:
-        _fixvariableregexp()
-
-      matchob = VARIABLE_REGEXP.search(text)
-      if matchob:
-        while (matchob):
-          (b, e) = matchob.span()
-          if text[b-1] == "\\":
-            matchob = VARIABLE_REGEXP.search(text, e)
-            continue
-
-          count = text[marker:b].count('{') - text[marker:b].count('}')
-
-          if count == 0:
-            for mem in self._variables.keys():
-              if text[b:].find(lyntin.variablechar + mem) == 0:
-                repl = str(self._variables[mem])
-                replacedvars = 1
-                text = text[:b] + repl + text[b+len(mem)+1:]
-                break
-            marker = e
-
-          matchob = VARIABLE_REGEXP.search(text, e)
-
-    if replacedvars == 0:
-      return None
-    else:
-      return text
-
   def getStatus(self):
     """ Returns a one-liner as to the status of this data class.
 
@@ -175,7 +124,7 @@ class VariableData:
 
       (string) the one-line status
     """
-    return "%d variable(s)." % (len(self._variables) - len(self._builtins))
+    return "%d variable(s)." % len(self._variables)
 
   def getInfo(self, text=""):
     """ Returns information about the variables in here.
@@ -200,13 +149,11 @@ class VariableData:
     if text=='':
       list = self._variables.keys()
     else:
-      list = utils.expand(text, self._variables.keys())
+      list = utils.expand_text(text, self._variables.keys())
 
     data = []
     for mem in list:
-      if mem not in self._builtins:
-        data.append("%svariable {%s} {%s}" % 
-                    (lyntin.commandchar, mem, self._variables[mem]))
+      data.append("%svariable {%s} {%s}" % (lyntin.commandchar, mem, self._variables[mem]))
 
     return string.join(data, "\n")
 
@@ -217,18 +164,32 @@ class VariableManager(manager.Manager):
 
     # this handles builtins even when we don't have a VariableData
     # instance for that session
-    self._default = VariableData()
+    self._global = VariableData()
+
+    # add built-in variables
+    self._global.addVariable("TIMESTAMP", TimeStampBuiltin())
+    self._global.addVariable("DATADIR", lyntin.options["datadir"])
+
+    import os
+    if os.environ.has_key("HOME"):
+      self._global.addVariable("HOME", os.environ["HOME"])
+
 
   def addVariable(self, ses, var, expansion):
     if not self._variables.has_key(ses):
       self._variables[ses] = VariableData()
 
+    # check to see if it's a global variable
+    if var[0] == "_":
+      vdata = self._global
+    else:
+      vdata = self._variables[ses]
+
     # save the old value (if any)
-    vdata = self._variables[ses]
     oldvalue = vdata.getVariable(var)
 
     # set the variable
-    self._variables[ses].addVariable(var, expansion)
+    vdata.addVariable(var, expansion)
 
     # spam the hook
     variable_change_hook.spamhook((ses, var, oldvalue, expansion))
@@ -256,9 +217,10 @@ class VariableManager(manager.Manager):
     return default
 
   def expand(self, ses, text):
+    text = self._global.expand(text)
     if self._variables.has_key(ses):
       return self._variables[ses].expand(text)
-    return self._default.expand(text)
+    return text
 
   def getInfo(self, ses, text=""):
     if self._variables.has_key(ses):
@@ -313,38 +275,19 @@ class VariableManager(manager.Manager):
     text = args[-1]
 
     varexpansion = self.expand(ses, text)
-    if varexpansion:
+    if varexpansion == text:
+      return text
+    else:
       engine.myengine.handleUserData(varexpansion, 1, ses)
       return None
-    else:
-      return text
 
-
-def unescape_variables(input):
-  """ Changes \$ into $.
-
-  Accounts for the fact that the user can change the variable
-  character.
-
-  aguments:
-
-    'input' == (tuple) mud_filter_hook hook tuple.
-
-  returns:
-
-    the unescaped string
-
-  """
-  text = input[-1]
-  return text.replace("\\" + lyntin.variablechar, lyntin.variablechar)
 
 commands_dict = {}
 
 def variable_cmd(ses, args, input):
   """
   Creates a variable for that session of said name with said value.
-  Variables can then be used in #if commands and any predicates
-  of #alias or #action.
+  Variables can then pretty much be used anywhere.
 
   ex:
      #variable {hps} {100}
@@ -353,6 +296,15 @@ def variable_cmd(ses, args, input):
   Variables can later be accessed via the variable character
   (which defaults to $) and the variable name.  In the case of the
   above, the variable name would be $hps.
+
+  There are also system variables ($HOME, $TIMESTAMP, $DATADIR) and
+  global variables.  To set a global variable, it must be preceded
+  by a _.
+
+  ex:
+    #variable {_fun} {happy fun ball}
+
+  Global variables can be accessed by any session.
 
   category: commands
   """
@@ -378,10 +330,15 @@ def variable_cmd(ses, args, input):
     exported.write_message("variables:\n" + data)
     return 
 
+  # need to expand the var
+  varexpansion = vm.expand(ses, var)
+  if varexpansion:
+    var = varexpansion
+
   try:
     vm.addVariable(ses, var, expansion)
     if not quiet:
-      exported.write_message("variable: {%s} {%s} added." % (var, expansion))
+      exported.write_message("variable: {%s}={%s} added." % (var, expansion))
 
   except Exception, e:
     exported.write_error("variable: cannot be set. %s", e)
@@ -413,7 +370,7 @@ def load():
   # scheme of things.  we should probably do something to make this
   # more obvious.
   hooks.user_filter_hook.register(vm.filter, 0)
-  hooks.user_filter_hook.register(unescape_variables, 90)
+  # hooks.user_filter_hook.register(unescape_variables, 90)
   hooks.write_hook.register(vm.persist)
 
 def unload():
@@ -422,5 +379,6 @@ def unload():
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("variable")
   hooks.user_filter_hook.unregister(vm.filter)
-  hooks.user_filter_hook.unregister(unescape_variables)
+  # hooks.user_filter_hook.unregister(unescape_variables)
   hooks.write_hook.unregister(vm.persist)
+

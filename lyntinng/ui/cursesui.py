@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.13 2002/05/31 03:25:20 willhelm Exp $
+# $Id: cursesui.py,v 1.14 2002/06/07 23:43:31 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -69,7 +69,7 @@ class Cursesui(ui.BaseUI):
                        curses.COLOR_WHITE]
     #supported prompts
     self._Prompts = { '' : '\nlyntin: ', ui.ERROR :'\nerror: ',
-                      ui.LTDATA : '\nlyntin: ', ui.TESTDATA : '\nTEST: ',
+                      ui.LTDATA : '\nlyntin: ', 
                       ui.USERDATA : '', ui.MUDDATA : ''}
 
     #partial color code support

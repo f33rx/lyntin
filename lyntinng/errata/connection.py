@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: connection.py,v 1.1 2002/06/26 22:50:42 willhelm Exp $
+# $Id: connection.py,v 1.2 2002/06/27 02:32:20 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -80,7 +80,7 @@ class Connection:
     else:
       # CATCH ALL for bad commands
       self.write(color("huh? '%s'\n" % input, 35))
-    self.write(" > ")
+    self.write("> ")
 
   def handle_set(self, world, input):
     """ Lets you set things: (name, desc...)."""

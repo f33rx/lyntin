@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.8 2002/06/18 04:17:45 willhelm Exp $
+# $Id: lyntincmds.py,v 1.9 2002/06/20 01:20:11 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -134,7 +134,7 @@ def diagnostics_cmd(session, args, input):
     import time
     try:
       f = open(logfile, "w")
-      f.write("This file was created on: %s\n\n" % time.ctime(time.time()))
+      f.write("This file was created on: %s\n\n" % time.asctime())
       f.write(message)
       f.close()
       exported.write_message("diagnostics: written out to file %s." % logfile)

@@ -4,29 +4,39 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.34 2002/06/27 18:02:01 jmberne Exp $
+# $Id: utils.py,v 1.35 2002/06/27 18:41:09 jmberne Exp $
 #######################################################################
 """
-This has a series of utility functions that aren't related to
-classes in the application, but are useful in a variety of
-places.  They're not dependent on application things, so 
-they're highly unit tested.
+This has a series of utility functions that aren't related to classes 
+in the application, but are useful in a variety of places.  They're 
+not dependent on application things, so they're highly unit tested.
 """
 import string, re, time
 
-SEMI_REGEXP = re.compile('(?<!\\\\);')
-VAR_REGEXP = re.compile('%(-?(\d+):?-?(\d*)|:-?(\d+))')
-NESTED_VAR_REGEXP = re.compile('{.*%%([0-9]+).*}')
+SEMI_REGEXP = re.compile(r'(?<!\\);')
+
 ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
+
 TIMESPAN_REGEXP = re.compile(r"^(?P<days>\d+d)?(?P<hours>\d+h)?(?P<minutes>\d+m)?(?P<seconds>\d+s?)?$")
 TIME_REGEXP1=re.compile(r"^(?P<hour>[1-9]|1[0-2])(?P<ampm>a|p)$")
 TIME_REGEXP2=re.compile(r"^(?P<hour>[1-9]|1[0-2]):(?P<minute>[0-5][0-9])(:(?P<second>[0-5]\d))?(?P<ampm>a|p)?$")
 TIME_REGEXP3=re.compile(r"^(?P<hour>0|1[3-9]|2[0-3]):(?P<minute>[0-5][0-9])(:(?P<second>[0-5]\d))?$")
 
 
+
+def filter_ansi(text):
+  """ Filters out ansi codes."""
+  return re.sub(chr(27) + '\[[0-9;]*[mJ]', '', text)
+
+
+def filter_cm(text):
+  """ Filters out ^M.  Useful for logging."""
+  return re.sub('\r', '', text)
+
+
 def chomp(text):
-  """ Removes all '\\r' and '\\n' from the input string.
-  
+  """ Removes all cr and nl from the input string.
+
   arguments:
 
     'text' -- (string) the text to chomp
@@ -36,9 +46,7 @@ def chomp(text):
     (string) chomped text
 
   """
-  text = text.replace("\n", "")
-  text = text.replace("\r", "")
-  return text
+  return re.sub("\n|\r", '', text)
 
 
 def http_get(url):
@@ -109,8 +117,8 @@ def fix_color(color):
 
     string
   """
-  color = color.replace(chr(27), "ESC")
-  return color
+  return color.replace(chr(27), "ESC")
+
 
 def split_ansi_from_text(text):
   """ Takes in a string and returns a list of text and ansi tokens.
@@ -156,7 +164,7 @@ def split_ansi_from_text(text):
   return [text]
 
 
-def expand(str, list):
+def expand_text(str, list):
   """ Returns a subset of the list that matches the given string.
 
   Takes a list and a string and returns a list of items
@@ -175,10 +183,9 @@ def expand(str, list):
 
   """
   ret = []
-  wildcardcheck = str.find('*')
 
   # if they didn't have wildcards....
-  if wildcardcheck == -1:
+  if not "*" in str:
     for mem in list:
       if mem == str:
         ret.append(mem)
@@ -201,16 +208,6 @@ def expand(str, list):
   return ret
 
    
-def filter_ansi(text):
-  """ Filters out ansi codes."""
-  return re.sub(chr(27) + '\[[0-9;]*[mJ]', '', text)
-
-
-def filter_cm(text):
-  """ Filters out ^M.  Useful for logging."""
-  return re.sub('\015|\r', '', text)
-
-
 def split_commands(text):
   """ Takes text and splits it into separate commands.
 
@@ -228,9 +225,15 @@ def split_commands(text):
     # if the entire segment we're looking at doesn't have
     # a full set of matched braces, we ignore this semi-colon
     # as a split point.
-    # FIXME - we need to take into account \{ and \}
-    count = (text[marker:b].count('{') - 
-             text[marker:b].count('}'))
+    left = 0
+    right = 0
+    for i in range(marker, b):
+      if text[i] == '{' and (i == 0 or text[i-1] != "\\"):
+        left += 1
+      if text[i] == '}' and (i == 0 or text[i-1] != "\\"):
+        right += 1 
+
+    count = left - right
 
     if count == 0:
       ret.append(text[marker:b])
@@ -296,109 +299,7 @@ def parse_args(args):
       optlist.append(("", args[i]))
 
     i = i + 1
-
   return optlist
-
-
-def replace_nested_vars(text):
-  """ Replaces all the nested variables with appropriate variables.
-
-  arguments:
-
-    'text' -- (string) the text to replace nested vars with
-
-  returns:
-
-    (string) the adjusted text
-  """
-  global NESTED_VAR_REGEXP
-  match = NESTED_VAR_REGEXP.search(text)
-  while match:
-    pat = '%%'+match.group(1)
-    repl = '%'+match.group(1)
-    text = re.sub(pat, repl, text)
-    match = NESTED_VAR_REGEXP.search(text)
-
-  return text
-
-def strip_placement_vars(text):
-  """ Returns a list of all the variables in a string.
-
-  arguments:
-
-    'text' -- (string) the text to strip placement vars from
-
-  returns:
-
-    list of replacement var strings
-  """
-  global VAR_REGEXP
-
-  ret = []
-  match = VAR_REGEXP.search(text)
-  while match:
-    (b, e) = match.span() 
-    if text[b+1:e] not in ret:
-      ret.append(text[b+1:e])
-    match = VAR_REGEXP.search(text, e)
-  return ret
-
-
-def replace_vars(input, expansion):
-  """ Takes an input and an expansion and replaces expansion
-  variables with the components from the input.
-
-  Returns the finalized string.
-
-  arguments:
-
-    'input' -- (string) the user's input
-
-    'expansion' -- (string) the expansion of the alias in the 
-                   input
-
-  returns:
-
-    The expansion with all nested_vars replaced and placement
-    vars replaced.
-  """
-  expansion = replace_nested_vars(expansion)
-  vars = strip_placement_vars(expansion)
-
-  if len(vars) > 0:
-    varlookup = {}
-    inputsplit = input.split(' ')
-
-    # for all the variables, find what it translates to
-    for mem in vars:
-      if mem.find(':') < 0:
-        start = int(mem)
-        if start == -1:
-          end = len(inputsplit)
-        else:
-          end = start + 1
-      else:
-        startmem,endmem = mem.split(':')
-        if startmem:
-          start = int(startmem)
-        else:
-          start = 0
-        if endmem:
-          end = int(endmem)
-        else:
-          end = max(len(inputsplit),start)
-
-      varlookup[mem] = ' '.join(inputsplit[start:end])
-
-    # run through the replacements
-    for mem in varlookup.keys():
-      expansion = re.sub("%" + mem, varlookup[mem], expansion)
-
-  else:
-    if input.find(' ') > -1:
-      expansion = expansion + ' ' + input.split(' ', 1)[1]
-
-  return expansion
 
 
 def insert_cr(text, index, indent=0):
@@ -421,6 +322,7 @@ def insert_cr(text, index, indent=0):
 
   """
   return (text[:index] + '\n' + (indent * ' ') + text[index+1:].lstrip())
+
 
 def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
   """
@@ -567,6 +469,7 @@ def columnize(textlist, screenwidth=72, indent=0):
   rows = map(string.rstrip, map(string.join, rows))
   return (indent * " ") + string.join(rows, "\n" + (indent * " "))
 
+
 def parse_timespan(timespan):
   """
   Parses a timsspan into a number of seconds.  
@@ -577,8 +480,7 @@ def parse_timespan(timespan):
 
   returns:
 
-    None if the timespan was unparseable, the number of
-    seconds otherwise. 
+    None if the timespan was unparseable, the number of seconds otherwise. 
   """
   match=TIMESPAN_REGEXP.match(timespan)
 
@@ -620,6 +522,7 @@ def parse_timespan(timespan):
       
   return days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
 
+
 def parse_time(timearg):
   """
   Parses a time into the number of seconds since the epoch.
@@ -634,8 +537,7 @@ def parse_time(timearg):
 
   returns:
 
-    None if the time was unparseable, the number of
-    seconds otherwise. 
+    None if the time was unparseable, the number of seconds otherwise. 
   """
   match = TIME_REGEXP1.match(timearg) or TIME_REGEXP2.match(timearg) or TIME_REGEXP3.match(timearg)
 
@@ -691,6 +593,7 @@ def parse_time(timearg):
   except Exception, e:
     print e
     return None
+
 
 def figure_color(textlist, currentcolor, leftover=""):
   """ 
@@ -757,65 +660,61 @@ def figure_color(textlist, currentcolor, leftover=""):
   return currentcolor, leftover
 
 
-def _pass_fail(testoutput, realoutput):
-  """ Used for testing purposes."""
-  if testoutput == realoutput:
-    print "   pass:", testoutput
-  else:
-    print "   fail:", testoutput
+def expand_vars(text, varmap):
+  """ Looks at user input and expands any variables involved.
 
-if __name__ == '__main__':
-  print "split_commands tests"
-  _pass_fail(split_commands('test'), 
-             ['test'])
-  _pass_fail(split_commands('test;test2'), 
-             ['test', 'test2'])
-  _pass_fail(split_commands('#alias t3k #ses a localhost 3000'),
-             ['#alias t3k #ses a localhost 3000'])
-  _pass_fail(split_commands('#alias gv {put all in vortex;get all}'),
-             ['#alias gv {put all in vortex;get all}'])
-  _pass_fail(split_commands('#alias sv {put all in vortex;get all};test'),
-             ['#alias sv {put all in vortex;get all}', 'test'])
-  
-  print 
-  
-  _pass_fail(split_ansi_from_text("This is some text."),
-             ["This is some text."])
-  _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0m text."),
-             ["\33[1;37m", "This is", "\33[0m", " text."])
-  _pass_fail(split_ansi_from_text("Hi \33[1;37mThis is\33[0m text."),
-             ["Hi ", "\33[1;37m", "This is", "\33[0m", " text."])
-  _pass_fail(split_ansi_from_text("\33[1;37mThis is\33[0"),
-             ["\33[1;37m", "This is", "\33[0"])
-  
-  print
-  
-  text = "This is a really long line to see if we're wrapping correctly.  Because it's way cool when we write code that works.  Yay!"
-  
-  print wrap_text(text)
-  print wrap_text(text, indent=5)
-  print wrap_text(text, indent=5, firstline=1)
-  
-  print "replace_vars tests"
-  print replace_vars("#test 1 2 3", "#test")
-  print replace_vars("#test 1 2 3", "#test %1 %2")
-  print replace_vars("#test 1 2 3", "#test %0")
-  print replace_vars("#test 1 2 3", "#test %-1")
-  print replace_vars("#test 1 2 3", "#test %:-1")
-  print replace_vars("#test 1 2 3", "#test %1:-1")
-  
-  print "time parsing test"
-  print parse_timespan("1h")
-  print parse_timespan("1m")
-  print parse_timespan("1s")
-  print parse_timespan("1h2m3s")
-  print parse_timespan("17")
-  print parse_timespan("95h")
-  
-  print parse_time("4:20p")
-  print parse_time("4m")
-  print parse_time("9")
-  print parse_time("9p")  
-  print parse_time("1:17:34a")
-  
+  It'll return the expansion if there is one.  Otherwise
+  it returns None.
 
+  arguments:
+
+    'text' -- (string) the text to expand variables on
+
+    'varmap' -- (dict) the varname to expansion mapping
+
+  returns:
+
+    the text with all variables expanded
+  """
+  if not ("%" in text or "$" in text) or len(text) == 0:
+    return text
+
+  varmapkeys = varmap.keys()
+  i = 0
+  count = 1
+
+  # we go through the text expanding things one at a time.
+  while (i < len(text)):
+    mem = text[i]
+    if i != 0:
+      memm1 = text[i-1]
+    else:
+      memm1 = None
+
+    if mem == "{" and memm1 != "\\":
+      count += 1
+
+    elif mem == "}" and memm1 != "\\":
+      count -= 1
+
+    elif (mem == "%" or mem == "$") and memm1 != "\\":
+      j = i
+      ccount = 0
+
+      # count the $/% thingies first
+      while j < len(text) and text[j] == mem:
+        ccount += 1
+        j += 1
+ 
+      if ccount == count:
+        textfragment = text[j:]
+        for mem in varmapkeys:
+          if textfragment.find(mem) == 0:
+            repl = str(varmap[mem])
+            text = text[:i] + repl + text[i+len(mem)+ccount:]
+            break
+      else:
+        i += ccount
+
+    i += 1
+  return text

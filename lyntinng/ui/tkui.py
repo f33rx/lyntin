@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.3 2002/06/15 14:17:01 willhelm Exp $
+# $Id: tkui.py,v 1.4 2002/06/23 14:35:12 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -286,9 +286,6 @@ class Tkui(ui.BaseUI):
 
       self._txt.insert('end', message.data)
 
-    elif message.type == ui.TESTDATA:
-      self._txt.insert('end', message.data, "42")
-
     elif message.type == ui.MUDDATA:
       index = 0
       start = 0
@@ -487,8 +484,8 @@ class CommandEntry(Tkinter.Entry):
 
   def _executeBinding(self, binding):
     """ Returns the alias for this keybinding."""
-    session = engine.myengine.currentSession()
-    action = session.getManager("alias").getAlias(binding)
+    ses = exported.get_current_session()
+    action = exported.get_manager("alias").getAlias(ses, binding)
     if action:
       self._partk.handleinput(action)
       return 1

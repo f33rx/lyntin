@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
+# $Id: speedwalk.py,v 1.2 2002/06/26 22:52:14 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -114,7 +114,7 @@ class SpeedwalkHash:
     if text == "":
       list = self._dirs.keys()
     else:
-      list = utils.expand(text, self._dirs.keys())
+      list = utils.expand_text(text, self._dirs.keys())
     
     cmdchar = lyntin.commandchar
     
@@ -223,7 +223,7 @@ class SpeedwalkHash:
     if text == "":
       list = self._excludes
     else:
-      list = utils.expand(text, self._excludes)
+      list = utils.expand_text(text, self._excludes)
     
     cmdchar = lyntin.commandchar
     

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.12 2002/04/11 03:58:23 willhelm Exp $
+# $Id: ui.py,v 1.13 2002/06/07 23:43:31 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -20,14 +20,12 @@ ERROR = "ERROR: "
 USERDATA = "USERDATA: "
 MUDDATA = "MUDDATA: "
 LTDATA = "LTDATA: "
-TESTDATA = "TESTDATA: "
 
 """ Used for debugging purposes."""
 MESSAGETYPES = {ERROR: "ERROR: ",
                 USERDATA: "USERDATA: ",
                 MUDDATA: "MUDDATA: ",
-                LTDATA: "LTDATA: ",
-                TESTDATA: "TESTDATA: "}
+                LTDATA: "LTDATA: "}
 
 class Message:
   """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.5 2002/05/28 03:42:40 willhelm Exp $
+# $Id: manager.py,v 1.6 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the basic manager which handles various things
@@ -85,7 +85,7 @@ class Manager:
     Returns the state of something as a list of command strings
     without the command char (which is added by #write).
 
-    For example, getState on teh AliasManager might return:
+    For example, getState on the AliasManager might return:
 
       ["alias {t3k} {#ses a localhost 3000}",
       "alias {toch} {nwnnen;vortex}"]

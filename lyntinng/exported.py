@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.21 2002/06/18 04:01:12 willhelm Exp $
+# $Id: exported.py,v 1.22 2002/06/20 03:23:27 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -218,23 +218,6 @@ def write_ui(text):
   else:
     print text
 
-
-def write_test(text, session=None):
-  """ Calls engine.myengine.writeTest which writes TESTDATA message.
-
-  arguments:
-
-    'text' -- (string) the message to send
-
-    'session=None' -- (session.Session instance) the session the
-                      mud data is associated with
-
-  """
-  text = str(text)
-  if get_engine():
-    get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.TESTDATA, session))
-  else:
-    print "test:", text
 
 def write_message(text):
   """ Calls engine.myengine.writeMessage which writes LTDATA message.

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.19 2002/05/14 22:49:04 willhelm Exp $
+# $Id: textui.py,v 1.20 2002/06/07 23:43:31 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -94,9 +94,6 @@ class Textui(ui.BaseUI):
 
     elif message.type == ui.LTDATA:
       pretext = "lyntin: " + pretext
-
-    elif message.type == ui.TESTDATA:
-      pretext = "TEST: " + pretext
 
     elif message.type == ui.USERDATA:
       # we don't print user data in the textui

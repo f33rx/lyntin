@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: deed.py,v 1.6 2002/05/15 00:16:55 willhelm Exp $
+# $Id: deed.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the DeedManager which handles deeds (user events).
@@ -47,7 +47,7 @@ class DeedData:
       list of strings of removed deeds
     
     """
-    baddeeds = utils.expand(text, self._deeds)
+    baddeeds = utils.expand_text(text, self._deeds)
     for mem in baddeeds:
       self._deeds.remove(mem)
     return baddeeds

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
+# $Id: action.py,v 1.2 2002/06/21 02:27:17 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -92,7 +92,7 @@ class ActionData:
 
       'text' -- (string) all actions that match this text pattern
                 will be removed.  the text pattern is "expanded" by
-                'utils.expand'
+                'utils.expand_text'
 
     returns:
 
@@ -101,7 +101,7 @@ class ActionData:
       calling 'addAction'.
 
     """
-    badactions = utils.expand(text, self._actions.keys())
+    badactions = utils.expand_text(text, self._actions.keys())
 
     ret = []
     for mem in badactions:
@@ -166,21 +166,11 @@ class ActionData:
         varvals[actionvars[i]] = match.group(i+1)
 
       # add special variables
-      varvals['%a'] = line.replace(';','_')
+      varvals['a'] = line.replace(';', '_')
             
       # fill in response variables from those that
       # matched on the trigger
-      for var in varvals.keys():
-        # replace occurrences of '%i' with val
-        if response.find(var) > -1:
-          response = re.sub(var, varvals[var], response)
-
-        # replace occurrances of '$i' with val replacing ; with \;
-        if ("$" + var[1:]).find(response) != -1:
-          response = re.sub("$" + var[1:],
-                     varvals[var].replace(";", "\;"), 
-                     response, 
-                     1)
+      response = utils.expand_vars(response, varvals)
 
       event.InputEvent(response, internal=1).enqueue()
 
@@ -215,7 +205,7 @@ class ActionData:
     if text=='':
       list = self._actions.keys()
     else:
-      list = utils.expand(text, self._actions.keys())
+      list = utils.expand_text(text, self._actions.keys())
 
     data = []
     for mem in list:
@@ -234,7 +224,6 @@ class ActionData:
       (int) the number of aliases being managed.
     """
     return len(self._actions)
-
 
 
 class ActionManager(manager.Manager):
@@ -317,6 +306,7 @@ class ActionManager(manager.Manager):
       self.checkActions(ses, text)
     return text
 
+
 def compile_action(trigger):
   """
   Converts a trigger with pattern variables into a compiled
@@ -335,34 +325,27 @@ def compile_action(trigger):
   regexp = re.sub('%_[0-9]+', '(\S+?)', regexp)
   return re.compile(regexp)
 
-def get_ordered_vars(instr):
+
+def get_ordered_vars(text):
   """
   Takes in a string and removes any ordered variables
   from it.  Returns a list of the variables.
 
   arguments:
 
-    'instr' -- (string) the incoming string which may have
-               ordered variables in it.
+    'text' -- (string) the incoming string which may have
+              ordered variables in it.
 
   returns:
 
     list of strings of the form '%[0-9]+' for ordered variable
     substitution.
-
   """
-  str = instr[:]
   keylist = []
-  specialkeylist = []
-  match = VARREGEXP.search(str)
-  while match:
-    var = match.group(1)
-    keylist.append('%' + var)
+  matches = VARREGEXP.findall(text)
 
-    # this is not a gsub!
-    str = re.sub('%_?\d+', '', str, 1)
-
-    match = VARREGEXP.search(str)
+  for match in matches:
+    keylist.append(match)
 
   return keylist
 
@@ -395,6 +378,10 @@ def action_cmd(ses, args, input):
   Triggers get converted to regular expressions by converting
   placement variables %[0-9]+ to (.+?).  Feel free to use
   regular expression matching stuff.
+
+  Note: It should be noted that actions are matched via regular 
+  expressions.   %1 gets translated to (.+?) and %_1 gets translated
+  to (\S+?).
 
   ex:
      #action {^You are hungry} {get bread bag;eat bread}

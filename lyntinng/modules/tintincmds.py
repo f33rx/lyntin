@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.31 2002/06/18 04:01:12 willhelm Exp $
+# $Id: tintincmds.py,v 1.32 2002/06/20 03:56:30 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -538,8 +538,8 @@ def session_cmd(session, args, input):
     exported.get_engine().startthread("network", sock.run)
 
   except Exception, e:
-    import traceback
-    traceback.print_exc()
+    # import traceback
+    # traceback.print_exc()
     exported.write_error("session: unable to connect. %s" % e)
     exported.write_error("session: had problems creating the session.")
     try: 
@@ -554,7 +554,7 @@ def session_cmd(session, args, input):
 commands_dict["session"] = (session_cmd, "sessionname= host= port:int=-1")
 
 
-def showme_cmd(session, args, input):
+def showme_cmd(ses, args, input):
   """
   Will display {text} on your screen.  Doesn't get sent to the mud--
   just your screen.
@@ -567,8 +567,16 @@ def showme_cmd(session, args, input):
   input = args["input"]
   if not input:
     exported.write_error("syntax: requires a message.")
-  else:
-    exported.write_message(input)
+    return
+
+  # we have to do manual variable expansion here.
+  varman = exported.get_manager("variable")
+  if varman:
+    varexpansion = varman.expand(ses, input)
+    if varexpansion:
+      input = varexpansion
+
+  exported.write_message(input)
      
 commands_dict["showme"] = (showme_cmd, "input=", "limitparsing=0")
 

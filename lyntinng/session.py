@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.57 2002/06/18 04:01:12 willhelm Exp $
+# $Id: session.py,v 1.58 2002/06/20 01:20:10 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -250,7 +250,11 @@ class Session:
     we won't spam hooks and may at some point prevent
     output for internal stuff too.  1 if internal, 0 if not.
     """
-    if self._verbatim == 0 or (len(input) > 0 and input[0] == lyntin.commandchar):
+
+    # this is the point of much recursion--we don't recurse on
+    # lyntin commands however--commands handle their own variable
+    # expansion and such.
+    if self._verbatim == 0 and (len(input) == 0 or input[0] != lyntin.commandchar):
 
       spamtuple = self,internal,input,input
       spamtuple = hooks.user_filter_hook.spamhook(spamtuple)
@@ -259,6 +263,8 @@ class Session:
       else:
         input = spamtuple[-1]
 
+    # after this point we don't do any more recursion.  so it's
+    # safe to unescape things and such.
     input = input.replace("\\;", ";")
 
     # handle lyntin commands
@@ -282,59 +288,47 @@ class Session:
       commands = engine.myengine.getCommands()
       commands.sort()
       for mem in commands:
+        command = None
         if mem[0] == "^":
           if re.compile(mem).search(words[0]):
             command = engine.myengine.getCommand(mem)
-            argumentparser = engine.myengine.getArgParser(mem)
-            if argumentparser == None:
-              command(self, input.split(" "), input)
-            else:
-              try:
-                dict = argumentparser.parse(words[1])
-                dict["command"]=mem
-                command(self, dict, input)
-              except ValueError, e:
-                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                     (mem, e, lyntin.commandchar, mem,
-                                      argumentparser.syntaxline))
-              except argparser.ParserException, e:
-                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                     (mem, e, lyntin.commandchar, mem,
-                                      argumentparser.syntaxline))
-            if internal==0: self.prompt()
-            break
         else:
           if mem.find(words[0]) == 0:
             command = engine.myengine.getCommand(mem)
-            argumentparser = engine.myengine.getArgParser(mem)
-            if argumentparser == None:
-              command(self, input.split(" "), input)
-            else:
-              try:
-                dict = argumentparser.parse(words[1])
-                dict["command"]=mem
-                command(self, dict, input)
-              except ValueError, e:
-                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                     (mem, e, lyntin.commandchar, mem,
-                                      argumentparser.syntaxline))
-              except argparser.ParserException, e:
-                exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                     (mem, e, lyntin.commandchar, mem,
-                                      argumentparser.syntaxline))
-            if internal==0: self.prompt()
-            break
+
+        if command:
+          argumentparser = engine.myengine.getArgParser(mem)
+          if argumentparser == None:
+            command(self, input.split(" "), input)
+          else:
+            try:
+              dict = argumentparser.parse(words[1])
+              dict["command"]=mem
+              command(self, dict, input)
+            except ValueError, e:
+              exported.write_error("%s: %s\nsyntax: %s%s %s" % 
+                                   (mem, e, lyntin.commandchar, mem,
+                                    argumentparser.syntaxline))
+            except argparser.ParserException, e:
+              exported.write_error("%s: %s\nsyntax: %s%s %s" % 
+                                   (mem, e, lyntin.commandchar, mem,
+                                    argumentparser.syntaxline))
+          if internal == 0:
+            self.prompt()
+          break
 
       else:
         exported.write_error("Not a valid command: %s" % (words[0]))
-        if internal==0: self.prompt()
+        if internal == 0:
+          self.prompt()
       return
 
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
     if not self.isConnected():
-      exported.write_error("No connection.  Create a session.")
-      if internal==0: self.prompt()
+      exported.write_error("No connection.  Create a session.\n(See also: #help, #help session)")
+      if internal == 0:
+        self.prompt()
       return
 
     # just regular data to the mud
@@ -426,28 +420,3 @@ class Session:
       return self._logfile.name
     else:
       return "<none>"
-
-
-"""
-class ManagerFilterAdapter:
-  def __init__(self, managername, function=None):
-    self.managername=managername
-    self.function = function
-
-  def __call__(self, args):
-    ses = args[0]
-    if self.function:
-      return self.function(ses.getManager(self.managername),args)
-    else:
-      return ses.getManager(self.managername).filter(args)
-
-
-# hooks.user_filter_hook.register(ManagerFilterAdapter("variable"),0)
-# hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
-hooks.user_filter_hook.register(ManagerFilterAdapter("speedwalk"),80)
-# hooks.user_filter_hook.register(ManagerFilterAdapter("variable",variable.VariableManager.unescapeVariables),90)
-# hooks.mud_filter_hook.register(ManagerFilterAdapter("gag"),20)
-hooks.mud_filter_hook.register(ManagerFilterAdapter("substitute"),50)
-# hooks.mud_filter_hook.register(ManagerFilterAdapter("action"),75)
-hooks.mud_filter_hook.register(ManagerFilterAdapter("highlight"),90)
-"""

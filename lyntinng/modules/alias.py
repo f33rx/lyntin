@@ -4,14 +4,17 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
+# $Id: alias.py,v 1.2 2002/06/18 23:42:22 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
 compiling, and checking and such.
 """
 import string
-import manager, utils, lyntin, exported, hooks, modutils
+import manager, utils, lyntin, exported, hooks, modutils, re
+
+PVAR_REGEXP = re.compile(r'%+(-?(\d+):?-?(\d*)|:-?(\d+))')
+DVAR_REGEXP = re.compile(r'\$+(-?(\d+):?-?(\d*)|:-?(\d+))')
 
 class AliasData:
   """ Manages aliases."""
@@ -51,7 +54,7 @@ class AliasData:
       list of (name, expansion) tuples
     
     """
-    badaliases = utils.expand(text, self._aliases.keys())
+    badaliases = utils.expand_text(text, self._aliases.keys())
 
     ret = []
     for mem in badaliases:
@@ -100,7 +103,6 @@ class AliasData:
 
       the alias expansion for the given input if it's an
       alias, or None if it is not.
-
     """
     if len(input) > 0:
       # pull out the first word of the input
@@ -137,7 +139,7 @@ class AliasData:
     list = self._aliases.keys()
 
     if text:
-      list = utils.expand(text, list)
+      list = utils.expand_text(text, list)
 
     data = []
     for mem in list:
@@ -238,12 +240,12 @@ class AliasManager(manager.Manager):
 
     aliasexpansion = self._aliasdata[ses].expand(text)
 
-    if aliasexpansion:
-      aliasexpansion = utils.replace_vars(text,aliasexpansion)
+    if not aliasexpansion:
+      return text
+    else:
+      aliasexpansion = expand_placement_vars(text, aliasexpansion)
       exported.get_engine().handleUserData(aliasexpansion, 1, ses)
       return None
-    else:
-      return text
 
   def addSession(self, newsession, basesession=None):
     """ over-ridden from manager.Manager."""
@@ -259,6 +261,121 @@ class AliasManager(manager.Manager):
       del self._aliasdata[ses]
 
 
+def get_variable_value(inputsplit, var):
+  """
+  Takes a list and a var and figures out what the placement var
+  is based on the inputsplit list.
+
+  arguments:
+
+    'inputsplit' -- (list of strings) the input string list
+
+    'var' -- (string) the variable
+
+  returns:
+
+    (string) the variable expansion
+  """
+  # handles the 0 case
+  if var == "0":
+    start = 1
+    end = len(inputsplit)
+
+  # handles non splits
+  elif var.find(':') == -1:
+    start = int(var)
+    if start == -1:
+      end = len(inputsplit)
+    else:
+      end = start + 1
+
+  # handles splits
+  else:
+    startmem,endmem = var.split(':')
+    if startmem:
+      start = int(startmem)
+    else:
+      start = 0
+    if endmem:
+      end = int(endmem)
+    else:
+      end = max(len(inputsplit),start)
+
+  return ' '.join(inputsplit[start:end])
+
+
+def expand_placement_vars(input, expansion):
+  """
+  Takes an input and an expansion and expands placement variables 
+  with the components from the input.
+
+  Returns the finalized string.
+
+  arguments:
+
+    'input' -- (string) the user's input
+
+    'expansion' -- (string) the expansion of the alias in the 
+                   input
+
+  returns:
+
+    The expansion with all nested_vars replaced and placement
+    vars replaced.
+  """
+  inputsplit = input.split(' ')
+
+  # check to see if there are any % or $ in the expansion
+  if not ("%" in expansion or "$" in expansion):
+    i = input.find(' ')
+    if i != -1:
+      expansion = expansion + ' ' + input[i+1:]
+    return expansion
+
+  i = 0
+  count = 1
+
+  # we go through the expansion expanding things one at a
+  # time.
+  while (i < len(expansion)):
+    mem = expansion[i]
+    if i != 0:
+      memm1 = expansion[i-1]
+    else:
+      memm1 = None
+
+    if mem == "{" and memm1 != "\\":
+      count += 1
+
+    elif mem == "}" and memm1 != "\\":
+      count -= 1
+
+    elif (mem == "%" or mem == "$") and memm1 != "\\":
+      if mem == "%":
+        matchob = PVAR_REGEXP.match(expansion, i)
+      elif mem == "$":
+        matchob = DVAR_REGEXP.match(expansion, i)
+
+      if matchob:
+        (b, e) = matchob.span()
+        var = expansion[b:e]
+
+        # we check to see if this is in our expansion nesting
+        if var.count(mem) == count:
+          var = var.replace(mem, "")
+          var = get_variable_value(inputsplit, var)
+          expansion = expansion[:b] + var + expansion[e:]
+
+        else:
+          i += len(var) - 1
+
+      # FIXME - if it's not a matchob, should we gobble things up?
+
+    i += 1
+
+  return expansion
+
+
 commands_dict = {}
 
 def alias_cmd(ses, args, input):
@@ -268,20 +385,18 @@ def alias_cmd(ses, args, input):
   With multiple arguments, creates an alias.
 
   You can use pattern variables which look like % and a number.  
-  ex: %4   %0 is the alias name, %n (where n is a number)
-  is the nth item after the alias name.  
+
+  ex:
+    %4  - is the fourth argument passed in
+    %0  - is all the arguments passed in
 
   Ranges can be used by using python colon-syntax, specifying a
-  half-open slice of the input items, so %0:3 is the first, second and
-  third elements of the input
+  half-open slice of the input items, so %0:3 is the alias name, first,
+  and second arguments of the input.
 
   Negative numbers count back from the end of the list.  So %-1 is the
   last item in the list, %:-1 is everything but the last item in the
   list. 
-
-  Note: It should be noted that actions are matched via regular 
-  expressions.   %1 gets translated to (.+?) and %_1 gets translated
-  to (\S+?).
 
   category: commands
   """
@@ -308,6 +423,13 @@ def alias_cmd(ses, args, input):
 
     exported.write_message("aliases:\n" + data)
     return
+
+  # we have to do manual variable expansion here.
+  varman = exported.get_manager("variable")
+  if varman:
+    varexpansion = varman.expand(ses, name)
+    if varexpansion:
+      name = varexpansion
 
   try:
     am.addAlias(ses, name, command)
@@ -353,3 +475,5 @@ def unload():
   exported.remove_manager("alias")
   hooks.user_filter_hook.unregister(am.filter)
   hooks.write_hook.unregister(am.persist)
+
+
