@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.18 2002/05/09 00:10:41 willhelm Exp $
+# $Id: exported.py,v 1.19 2002/05/11 18:06:48 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
 very rarely even though we might change Lyntin's internals.  If
 it does change it'll be between major Lyntin versions.
 """
-import engine, ui.ui
+import engine, ui.ui, lyntin
 
 def lyntin_command(text, internal=0, session=None):
   """

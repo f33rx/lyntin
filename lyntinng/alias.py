@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.17 2002/05/31 00:01:47 willhelm Exp $
+# $Id: alias.py,v 1.18 2002/06/04 00:52:39 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -33,6 +33,8 @@ class AliasManager(manager.Manager):
 
       'expansion' -- (string) the alias expansion
     """
+    if name == expansion:
+      raise ValueError, "name cannot equal expansion."
     self._aliases[name] = expansion
 
   def clear(self):

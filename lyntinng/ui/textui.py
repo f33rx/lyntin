@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.18 2002/05/14 22:46:26 willhelm Exp $
+# $Id: textui.py,v 1.19 2002/05/14 22:49:04 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -74,10 +74,11 @@ class Textui(ui.BaseUI):
       event.ShutdownEvent().enqueue()
 
 
-  def write(self, message):
+  def write(self, args):
     """ Handles writing information from the mud and/or SB
     to the user.
     """
+    message = args[0]
     if type(message) == type(''):
       sys.stdout.write ("lyntin: " + message.replace("\n", "\nlyntin: ") + 
                         "\n")

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.35 2002/05/14 22:46:26 willhelm Exp $
+# $Id: tkui.py,v 1.1 2002/05/14 22:49:04 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -221,8 +221,9 @@ class Tkui(ui.BaseUI):
       self._entry.clearInput()
 
 
-  def echo(self, yesno):
+  def echo(self, args):
     """ This turns echo on and off on the CommandEntry widget."""
+    yesno = args[0]
     if yesno==1:
       self._do_i_echo = 1
       self._entry.configure(show='')
@@ -248,11 +249,12 @@ class Tkui(ui.BaseUI):
     if (int(temp) > 800):
       self._txt.delete ("1.0", "100.end")
 
-  def write(self, message):
+  def write(self, args):
     """ This writes text to the text buffer for viewing by the user.
 
     This is overridden from the 'ui.BaseUI'.
     """
+    message = args[0]
     if type(message) == type(''):
       message = ui.Message(message, ui.LTDATA)
 

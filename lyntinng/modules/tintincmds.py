@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.26 2002/06/04 03:47:23 willhelm Exp $
+# $Id: tintincmds.py,v 1.27 2002/06/05 18:56:13 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -86,8 +86,8 @@ def alias_cmd(session, args, input):
   With one argument, prints all aliases which match the arg.
   With multiple arguments, creates an alias.
 
-  You can use pattern variables which look like % and a number.
-  (ex: %4).   %0 is the alias name, %n (where n is a number)
+  You can use pattern variables which look like % and a number.  
+  ex: %4   %0 is the alias name, %n (where n is a number)
   is the nth item after the alias name.  
 
   Ranges can be used by using python colon-syntax, specifying a
@@ -98,9 +98,9 @@ def alias_cmd(session, args, input):
   last item in the list, %:-1 is everything but the last item in the
   list. 
 
-  Note: It should be noted that actions are matched via 
-  regular expressions and that %1 will get translated to (.*?)
-  for the regular expression match.
+  Note: It should be noted that actions are matched via regular 
+  expressions.   %1 gets translated to (.+?) and %_1 gets translated
+  to (\S+?).
 
   category: commands
   """
@@ -126,11 +126,11 @@ def alias_cmd(session, args, input):
     exported.write_message(data)
     return
 
-  if name == command:
-    exported.write_error("alias: name and command cannot be the same.")
-    return
+  try:
+    session.getManager("alias").addAlias(name, command)
+  except ValueError, e:
+    exported.write_error("alias: %s" % e)
 
-  session.getManager("alias").addAlias(name, command)
   if not quiet:
     exported.write_message("alias: {%s} {%s} added." % (name, command))
 
@@ -398,9 +398,9 @@ def if_cmd(session, args, input):
 
   try:
     if eval(expr):
-      exported.lyntin_command(action, internal=1)
+      exported.lyntin_command(action, 1, session)
     elif elseaction:
-      exported.lyntin_command(elseaction, internal=1)
+      exported.lyntin_command(elseaction, 1, session)
   except SyntaxError:
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
@@ -734,6 +734,8 @@ def session_cmd(session, args, input):
     ses = exported.get_engine().createSession()
     ses.setName(name)
     ses.setSocketCommunicator(sock)
+    ses._host = host
+    ses._port = port
     sock.setSession(ses)
     exported.get_engine().registerSession(ses, name)
     exported.get_engine().changeSession(name)
@@ -940,6 +942,11 @@ def ticksize_cmd(session, args, input):
   Sets and displays the number of seconds between ticks for this
   session.
 
+  examples:
+    #ticksize
+    #ticksize 6
+    #ticksize 1h2m30s
+
   see also: tick, tickon, tickoff
 
   category: commands
@@ -950,19 +957,42 @@ def ticksize_cmd(session, args, input):
 
   size = args["size"]
 
-  if size == 0:
+  if size[0] == "0":
     exported.write_message("ticksize: ticksize is %d seconds." % 
                            session.getTicker().getTickLen())
     return
 
-  if size < 0:
+  if size.isdigit():
+    size = int(size)
+
+  else:
+    i = 0
+    temp = ""
+    tempsize = 0
+    for i in range(0, len(size)):
+      if size[i].isdigit():
+        temp += size[i]
+      else:
+        if temp:
+          if size[i] == "m":
+            tempsize += int(temp) * 60
+          elif size[i] == "h":
+            tempsize += int(temp) * 60 * 60
+          else:
+            tempsize += int(temp)
+
+        temp = ""
+
+    size = tempsize
+
+  if size <= 0:
     exported.write_error("ticksize must be a positive number.")
     return
 
-  session.getTicker().setTickLen(int(size))
-  exported.write_message("ticksize: tick length set to %s." % repr(size))
+  session.getTicker().setTickLen(size)
+  exported.write_message("ticksize: tick length set to %s." % str(size))
 
-commands_dict["ticksize"] = (ticksize_cmd, "size:int=0")
+commands_dict["ticksize"] = (ticksize_cmd, "size=0")
 
 
 def togglesubs_cmd(session, args, input):

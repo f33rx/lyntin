@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.51 2002/06/02 21:34:12 willhelm Exp $
+# $Id: engine.py,v 1.52 2002/06/04 15:15:33 jmberne Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -24,7 +24,7 @@ To access the engine, access it by 'engine.myengine'.
 It also holds a series of helper functions for making common engine
 calls easier to deal with.
 """
-import Queue, traceback, copy, string, re, thread, inspect
+import Queue, traceback, copy, string, re, thread, inspect, sys
 
 import session, ui.ui, alias, lyntin, utils, event, argparser
 import action, alias, gag, highlight, history, substitute, variable, speedwalk
@@ -505,9 +505,9 @@ class Engine:
 
     If we see more than 20 errors, we shutdown.
     """
+    lyntin.errorcount = lyntin.errorcount + 1
     exported.write_error("WARNING: Unhandled error encountered (%d out of %d)." 
                          % (lyntin.errorcount, 20))
-    lyntin.errorcount = lyntin.errorcount + 1
     hooks.error_occurred_hook.spamhook(lyntin.errorcount)
     if lyntin.errorcount > 20:
       hooks.too_many_errors_hook.spamhook()
@@ -595,7 +595,7 @@ class Engine:
     """
     self._ui_lock.acquire(1)
     try:
-      hooks.to_user_hook.spamhook((text))
+      hooks.to_user_hook.spamhook((text,))
     finally:
       self._ui_lock.release()
 

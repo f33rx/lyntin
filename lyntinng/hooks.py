@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.13 2002/05/02 23:39:07 willhelm Exp $
+# $Id: hooks.py,v 1.14 2002/05/31 02:08:30 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -177,6 +177,13 @@ When a session connects to a mud.  arg tuple contains the session instance,
 the hostname of the mud it connected to, and the port.
 """
 connect_hook = Hook()
+
+"""
+When a session disconnects from a mud.  arg tuple contains the session
+instance, the hostname of the mud it connected to, and the port--just
+like the connect_hook.
+"""
+disconnect_hook = Hook()
 
 """
 Everything the user types gets sent on the from_user_hook.

@@ -1,20 +1,25 @@
-Commands in Lyntin are all located in the various modules
-in the modules directory.  
+* COMMANDS:
 
-To execute commands in the session you're currently in, just
-execute the command.  To execute commands in another session,
-type:
-   #<session_name> <command...>
+Commands in Lyntin are all located in the various modules in the 
+modules directory.  
+
+To execute commands in the session you're currently in, just execute 
+the command.  To execute commands in another session, type:
+
+	#<session_name> <command...>
 
 To execute a command in all the sessions, type:
-   #all <command...>
+
+	#all <command...>
 
 To execute a command a number of times:
-   #<number> <command...>
+
+	#<number> <command...>
 
 ex:
-   #5 say hello
-   #all say hello
-   #all #alias {sh} {say hello}
+
+	#5 say hello
+	#all say hello
+	#all #alias {sh} {say hello}
 
 category: manual

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.12 2002/05/29 23:58:03 willhelm Exp $
+# $Id: cursesui.py,v 1.13 2002/05/31 03:25:20 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -351,10 +351,11 @@ class Cursesui(ui.BaseUI):
     self._output.refresh()
 
   
-  def write(self, message):
+  def write(self, args):
     """
     Sends a message object to the display
     """
+    message = args[0]
     if type(message) == type(""):
       message = ui.Message(message, ui.LTDATA)
 

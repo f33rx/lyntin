@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.11 2002/04/08 21:53:05 willhelm Exp $
+# $Id: ui.py,v 1.12 2002/04/11 03:58:23 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -81,7 +81,7 @@ class BaseUI:
     """
     pass
 
-  def write(self, message):
+  def write(self, args):
     """ Writes output to the user.
 
     Output can come from the mud, lyntin, or even user
@@ -91,7 +91,7 @@ class BaseUI:
 
     arguments:
 
-      'message' -- a ui.ui.Message instance
+      'args' -- a tuple with one item: a ui.ui.Message instance
 
     """
     pass
