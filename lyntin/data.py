@@ -273,6 +273,7 @@ class session:
     def Clear(self):
         self.aliases = {}
         self.actions = {}
+	self.action_list = [] # -- JA Was not cleared before... oops :)
         self.subs = {}
         self.gags = []
         self.vars = {}
