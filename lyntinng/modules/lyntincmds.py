@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.3 2002/05/12 04:40:39 willhelm Exp $
+# $Id: lyntincmds.py,v 1.4 2002/06/01 15:49:05 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -145,31 +145,30 @@ def diagnostics_cmd(session, args, input):
   category: commands
   """
   import os, sys
-  message = "Diagnostics:\n"
-  message = message + exported.get_engine().getDiagnostics()
-
-  message = message + "Thread statii:\n"
+  message = []
+  message.append("Diagnostics:")
+  message.append(exported.get_engine().getDiagnostics()+"Thread statii")
 
   data = exported.get_engine().checkthreads()
   for mem in data:
-    message += mem + "\n"
+    message.append(mem)
       
-  message = message + "OS/Python information:\n"
+  message.append("OS/Python information:")
   try: 
-    message = message + "   sys.version: " + sys.version + "\n"
+    message.append("   sys.version: %s" % sys.version)
   except:
-    message = message + "   sys.version not available.\n"
+    message.append("   sys.version not available.")
 
   try: 
-    message = message + "   os.name: " + os.name + "\n"
+    message.append("   os.name: %s" % os.name)
   except:
-    message = message + "   os.name not available.\n"
+    message.append("   os.name not available.")
  
-  message = message + "Lyntin Options:\n"
+  message.append("Lyntin Options:")
   for mem in lyntin.options.keys():
-    message = message + "   " + mem + ": " + repr(lyntin.options[mem]) + "\n"
+    message.append("   %s: %s" % (mem, repr(lyntin.options[mem])))
 
-  exported.write_message(message)
+  exported.write_message(string.join(message, "\n"))
   exported.write_message("This information can be dumped to a "
         "file by doing:\n   #diagnostics dumpfile.txt")
 
@@ -178,8 +177,7 @@ def diagnostics_cmd(session, args, input):
     import time
     try:
       f = open(logfile, "w")
-      f.write("This file was created on: " + time.ctime(time.time()) + 
-              "\n\n")
+      f.write("This file was created on: %s\n\n" % time.ctime(time.time()))
       f.write(message)
       f.close()
       exported.wirte_message("diagnostics: written out to file %s." % logfile)

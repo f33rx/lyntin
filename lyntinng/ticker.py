@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.16 2002/04/03 03:14:15 willhelm Exp $
+# $Id: ticker.py,v 1.17 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -166,8 +166,7 @@ class Ticker:
       # if this is a tickwarn...
       if ((tick - self._tickstart) % self._ticklen == 
               (self._ticklen - self._tickwarn)):
-        exported.write_message("ticker: " +
-              repr(self._tickwarn) + " seconds to tick!")
+        exported.write_message("ticker: %d seconds to tick!" % self._tickwarn)
 
     else:
       # we kill this ticker because it belongs to a nonexistant 
@@ -188,8 +187,6 @@ class Ticker:
     string (if it's enabled).
     """
     if self._enabled == 1:
-      return ("(size = " + repr(self._ticklen) + ") " +
-              "(start = " + repr(self._tickstart) + ")")
-
+      return "(size = %d) (start = %d)" % (self._ticklen, self._tickstart)
     else:
       return "<none>"

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: threadmanager.py,v 1.4 2002/02/04 01:10:17 willhelm Exp $
+# $Id: threadmanager.py,v 1.5 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 The thread manager allows us to centralize the management of
@@ -52,7 +52,7 @@ class ThreadManager:
     """
     data = []
     for mem in self._threads:
-      data.append("   " + mem.getName() + " " + repr(mem.isAlive()))
+      data.append("   %s %d" % (mem.getName(), mem.isAlive()))
 
     return data
 
