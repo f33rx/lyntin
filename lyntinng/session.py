@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.12 2002/02/18 05:19:42 willhelm Exp $
+# $Id: session.py,v 1.13 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -245,7 +245,12 @@ class Session:
       input = input[1:]
 
       words = input.split(" ")
-      handled_command = 0
+
+      # this checks to see if it's a special #@ command.
+      if input[0] == "@":
+        engine.myengine.getCommand("@")(self, words, input)
+        if internal==0: self._prompt()
+        return
 
       # this finds the first matching command and ends there.
       commands = engine.myengine.getCommands()
@@ -255,13 +260,11 @@ class Session:
           if re.compile(mem).search(words[0]):
             engine.myengine.getCommand(mem)(self, words, input)
             if internal==0: self._prompt()
-            handled_command = 1
             break
         else:
           if mem.find(words[0]) == 0:
             engine.myengine.getCommand(mem)(self, words, input) 
             if internal==0: self._prompt()
-            handled_command = 1
             break
 
       else:

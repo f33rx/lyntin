@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.11 2002/02/07 02:35:04 willhelm Exp $
+# $Id: tkgui.py,v 1.12 2002/02/18 05:19:42 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -312,8 +312,11 @@ class TkGui(ui.BaseUI):
     then sets the current colors accordingly.
     """
     if text[0] == chr(27):
+      # we strip off the ESC and the [
       newcolor = text[2:]
 
+      # check to see if there's no actual color, or if
+      # it's ^[0m which resets the colors
       if newcolor == '' or newcolor == "0":
         self._currcolors[:] = self._regcolors[:]
         return
@@ -400,16 +403,6 @@ class CommandEntry(Tkinter.Entry):
       self.bind("<KeyPress-3>", self.callKP3)
       self.bind("<KeyPress-1>", self.callKP1)
 
-
-      """
-      try: 
-        self.bind("<KeyPress-/>", self.callKPSlash)
-        self.bind("<KeyPress-*>", self.callKPStar)
-        self.bind("<KeyPress-minus>", self.callKPMinus)
-        self.bind("<KeyPress-+>", self.callKPPlus)
-      except:
-        print "Some keys could not be bound."
-      """
     else:
       self.bind("<KeyPress-KP_Up>", self.callKP8)
       self.bind("<KeyPress-KP_Right>", self.callKP6)
@@ -420,16 +413,6 @@ class CommandEntry(Tkinter.Entry):
       self.bind("<KeyPress-KP_Begin>", self.callKP5)
       self.bind("<KeyPress-KP_Next>", self.callKP3)
       self.bind("<KeyPress-KP_End>", self.callKP1)
-      """
-      try: 
-        self.bind("<KeyPress-KP_Divide>", self.callKPSlash)
-        self.bind("<KeyPress-KP_Multiply>", self.callKPStar)
-        self.bind("<KeyPress-KP_Subtract>", self.callKPMinus)
-        self.bind("<KeyPress-KP_Add>", self.callKPPlus)
-      except:
-        print "Some keys could not be bound."
-      """
-
 
     self.hist_index = -1
     self._partk = partk
@@ -500,18 +483,6 @@ class CommandEntry(Tkinter.Entry):
     if tkevent.keycode == 123 and tkevent.keysym == "F12":
       if self._executeBinding("VK_F12") == 1:
         return "break"
-
-      """
-VK_F2 to VK_F12   - done
-VK_NUMPAD0 to VK_NUMPAD9  
-VK_MULTIPLY  
-VK_ADD  
-VK_SUBTRACT  
-VK_DECIMAL  
-VK_DIVIDE  
-VK_NUMLOCK  
-VK_SCROLL  
-      """
 
       # these two lines help in debugging stuff we bound
       # but don't know how to handle because I can't seem to

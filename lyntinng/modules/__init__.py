@@ -4,13 +4,17 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.2 2002/02/07 02:09:05 willhelm Exp $
+# $Id: __init__.py,v 1.3 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 
 import glob, os, sys, traceback
 import exported, modules.__init__
 
 def load_modules():
+  """
+  Magically dynamically loads all the modules in the modules
+  package.  This is truly a semi-magic function.
+  """
   index = modules.__init__.__file__.rfind(os.sep)
   if index == -1:
     path = "." + os.sep
@@ -36,3 +40,4 @@ def load_modules():
       except:
         exported.write_error("Module '" + name + "' refuses to load.")
         traceback.print_exc()
+

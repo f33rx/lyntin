@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.12 2002/02/18 05:19:42 willhelm Exp $
+# $Id: engine.py,v 1.13 2002/02/23 21:10:32 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -713,5 +713,10 @@ class Engine:
     """
     if self._command_list.has_key(name):
       return self._command_list[name]
-    else:
-      return None
+
+    # this is kind of a kluge to handle the #@ arbitrary
+    # python stuff so that it can be in its own module.
+    if name[0] == "@" and self._command_list.has_key("@"):
+      return self._command_list["@"]
+
+    return None
