@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.40 2003/04/12 17:38:27 willhelm Exp $
+# $Id: lyntin.py,v 1.41 2003/04/29 01:01:45 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -199,6 +199,12 @@ if __name__ == '__main__':
 
         if len(opt) > 0:
           if lyntin.options.has_key(opt):
+            if type(lyntin.options[opt]) == type(''):
+              print "Error: the '%s' switch is not appendable.  This probably means that you're not using the flags correctly." % opt
+              print
+              print HELPTEXT
+              sys.exit(0)
+
             lyntin.options[opt].append(mem[1])
           else:
             lyntin.options[opt] = [mem[1]]
