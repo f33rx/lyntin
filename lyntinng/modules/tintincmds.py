@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.73 2003/04/12 17:38:27 willhelm Exp $
+# $Id: tintincmds.py,v 1.74 2003/04/22 19:31:41 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -79,12 +79,27 @@ commands_dict["^end"] = (end_cmd, "")
 def help_cmd(ses, args, input):
   """
   With no arguments, shows all the help files available.
-  With an argument, shows that specific help file.
+  With an argument, shows that specific help file or lists the contents
+  of that category of help files.
 
   examples:
-    #help
-    #help help
-    #help commands.substitute
+    #help                      - lists all help files in the root
+    #help help                 - shows help for the help command
+    #help commands.substitute  - shows help for the substitute command
+    #help commands             - shows help for the commands category
+
+  Items that have a number in parentheses after them are a category.
+  The number is how many help topics are below that category.
+
+  example:
+    > #help
+    lyntin: ::Lyntin Help::
+    lyntin:
+    lyntin: category: root
+    lyntin:
+    lyntin:    commands(55)  readme(13)
+    lyntin:    textui
+    >
 
   category: commands
   """

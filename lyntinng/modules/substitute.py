@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.22 2003/03/28 00:06:47 willhelm Exp $
+# $Id: substitute.py,v 1.23 2003/03/28 21:26:08 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -367,6 +367,14 @@ def unsubstitute_cmd(ses, args, input):
 commands_dict["unsubstitute"] = (unsubstitute_cmd, "str= quiet:boolean=false")
 
 def antisubstitute_cmd(ses, args, input):
+  """
+  Allows you to create antisubstitutes.
+
+  For any line that contains an antisubstitute, we won't do substitutions
+  or gags on it.
+
+  category: commands
+  """
   item = args["item"]
   quiet = args["quiet"]
 
