@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.17 2002/04/11 00:21:12 willhelm Exp $
+# $Id: lyntin.py,v 1.18 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -121,45 +121,11 @@ lyntindir = "."
 # many indicating a "bigger problem".
 errorcount = 0
 
-def parse_args(args):
-  """
-  Takes in a list of args and parses it out into a hashmap
-  of arg-name to value(s).
-
-  arguments:
-
-    'args' -- The list of command-line arguments.
-
-  returns:
-
-    list of tuples of (arg, value) pairings
-  """
-  i = 0
-  optlist = []
-  while (i < len(args)):
-
-    if args[i][0] == "-":
-      if (i+1 < len(args)):
-        if args[i+1][0] != "-":
-          optlist.append((args[i], args[i+1]))
-          i = i + 1
-        else:
-          optlist.append((args[i], ""))
-      else:
-        optlist.append((args[i], ""))
-
-    else:
-      optlist.append(("", args[i]))
-
-    i = i + 1
-
-  return optlist
-
 
 if __name__ == '__main__':
   try:
     import sys, os
-    import lyntin, engine, event
+    import lyntin, engine, event, utils
 
     # figure out where the lyntin files are
     tmp = sys.argv[0]
@@ -168,7 +134,7 @@ if __name__ == '__main__':
     lyntin.lyntindir = tmp[:tmp.rfind("/")+1].replace("/", os.sep)
 
     # read through options and arguments
-    optlist = lyntin.parse_args(sys.argv[1:])
+    optlist = utils.parse_args(sys.argv[1:])
 
     for mem in optlist:
       if mem[0] == '--ui' or mem[0] == '-u':
@@ -190,6 +156,17 @@ if __name__ == '__main__':
       elif mem[0] == '--version':
         print VERSION
         sys.exit(0)
+
+      else:
+        opt = mem[0]
+        while len(opt) > 0 and opt[0] == "-":
+          opt = opt[1:]
+
+        if len(opt) > 0:
+          if lyntin.options.has_key(opt):
+            lyntin.options[opt].append(mem[1])
+          else:
+            lyntin.options[opt] = [mem[1]]
 
     # if they haven't set the datadir via the command line, then
     # we go see if they have a HOME in their environment variables....

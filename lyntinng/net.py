@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.13 2002/04/11 03:58:22 willhelm Exp $
+# $Id: net.py,v 1.14 2002/04/12 03:13:37 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -109,6 +109,7 @@ class SocketCommunicator:
       if self._shutdownflag == 0 and self._session:
         self._session.shutdown(())
 
+
   def write(self, data, convert=1):
     """ Writes data to the mud.
 
@@ -121,6 +122,7 @@ class SocketCommunicator:
     """
     try:
       if convert:
+        f.write(data.replace("\n", "\r\n"))
         self._sock.send(data.replace("\n", "\r\n"))
       else:
         self._sock.send(data)
@@ -147,8 +149,8 @@ class SocketCommunicator:
     """
     i = data.find(IAC)
 
-    while (i != -1):
-      try:
+    try:
+      while (i != -1):
         if data[i+1] in DDWW:
           if data[i+2] == ECHO:
             if data[i+1] == WILL:
@@ -165,14 +167,13 @@ class SocketCommunicator:
           data = data[:i] + data[end+1:]
 
         else:
-          pass
+          data = data[:i] + data[i+3:]
 
-      except IndexError:
-        self._nego_buffer = data[i:]
-        data = data[:i]
-        break
+        i = data.find(IAC, i)
 
-      i = data.find(IAC, i)
+    except IndexError:
+      self._nego_buffer = data[i:]
+      data = data[:i]
 
     return data
 

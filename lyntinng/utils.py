@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.14 2002/04/13 05:10:33 willhelm Exp $
+# $Id: utils.py,v 1.15 2002/04/14 03:58:18 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -210,6 +210,41 @@ def strip_braces(text):
   if text[0] == '{' and text[-1] == '}':
     return text[1:-1]
   return text
+
+
+def parse_args(args):
+  """
+  Takes in a list of args and parses it out into a hashmap
+  of arg-name to value(s).
+
+  arguments:
+
+    'args' -- The list of command-line arguments.
+
+  returns:
+
+    list of tuples of (arg, value) pairings
+  """
+  i = 0
+  optlist = []
+  while (i < len(args)):
+
+    if args[i][0] == "-":
+      if (i+1 < len(args)):
+        if args[i+1][0] != "-":
+          optlist.append((args[i], args[i+1]))
+          i = i + 1
+        else:
+          optlist.append((args[i], ""))
+      else:
+        optlist.append((args[i], ""))
+
+    else:
+      optlist.append(("", args[i]))
+
+    i = i + 1
+
+  return optlist
 
 
 def replace_nested_vars(text):
