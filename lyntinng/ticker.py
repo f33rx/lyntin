@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
+# $Id: ticker.py,v 1.4 2002/01/25 08:18:36 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -19,9 +19,6 @@ class Ticker:
 
     # how much before a tick we should warn
     self._tickwarn = 3
-
-    # action that runs at the tick
-    self._tickaction = ''
 
     # name of the session this ticker belongs to
     self._sessionname = ''
@@ -53,14 +50,6 @@ class Ticker:
   def getTickWarn(self):
     """ Returns the tick warning length."""
     return self._tickwarn
-
-  def setTickAction(self, action):
-    """ Sets the tick action."""
-    self._tickaction = action
-
-  def getTickAction(self):
-    """ Returns the tick action."""
-    return self._tickaction
 
   def setSessionName(self, name):
     """ Sets the session name."""
@@ -121,7 +110,6 @@ class Ticker:
     self.disableTicker()
     self._ticklen = 0
     self._tickwarn = 0
-    self._tickaction = ''
 
   def getTickerInfo(self):
     """
@@ -129,8 +117,7 @@ class Ticker:
     string (if it's enabled).
     """
     if self._enabled == 1:
-      return ("'" + self._tickaction + "' every " + 
-              repr(self._ticklen) + " seconds.")
+      return ("ticker enabled with ticksize at " + repr(self._ticklen) + " seconds.")
 
     else:
       return "ticker is disabled."
