@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.14 2002/02/03 04:32:37 willhelm Exp $
+# $Id: basic.py,v 1.15 2002/02/04 01:10:17 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -367,10 +367,10 @@ def log_cmd(session, words, input):
 
   else:
     try:
+      session.openLogfile(words[1])
       engine.write_message("log: starting logging to '" + 
                                    session.getLogfileName() + 
                                    "'.")
-      session.openLogfile(words[1])
     except:
       engine.write_error("log: logfile cannot be opened for apending.")
 

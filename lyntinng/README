@@ -3,7 +3,7 @@
 
 * VERSION
 
-$Id$
+$Id: README,v 1.2 2002/02/03 18:53:12 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -27,32 +27,24 @@ to forking a web spider.  Anything Python allows (which is a lot),
 Lyntin allows.  In addition, your code can interface with Lyntin's
 code.  
 
-Lyn once tried to write a mud agent in plain tintin, and while it
+Lyn once tried to write a mud agent in plain Tintin, and while it
 was kinda cool, a 'program' it was not.  Thus he created Lyntin.
-Will overhauled it for version 3.0 so that it's Tintin++ syntactically
-similar and a fundamentally nicer architecture.
+Will rewrote Lyntin for version 3.0 focusing on Tintin++ command
+compatibility and using a fundamentally nicer architecture.
 
-So if you want to try something like that, or even if you just think 
-a programmable mud client would be kinda cool, give Lyntin a try.  Oh 
-yeah, besides that, Lyntin has lots of cool features which make 
-mudding easier.
+If you're looking for a mudclient that's more of a framework for
+extending and building, then give Lyntin a try.
+
+If you're looking for a client that has a gui interface and a text 
+interface you can use over telnet, Lyntin is your client.
+
+If you're looking for a client that coddles you with fancy configuration
+windows and an auto cartographer and cute little bells and whistles,
+Lyntin probably isn't what you're looking for.
 
 Amongst which are multiple ui's so you can use the same client over
 telnet that you can use on your desktop.
 
-
-
-* INSTALLATION
-
-	- see the file INSTALL.
-
-	- _NOTE:_ you will need Python 2.0 or greater installed at 
-	  your site.
-
-	- _NOTE:_ Lyntin testing has been limited.  Should work fine 
-	  on Win98/NT and Linux in TkGUI and Text modes.  Curses has 
-	  been tested under Linux (briefly) as well but is still an 
-	  alpha ui.
 
 
 * BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
@@ -95,14 +87,14 @@ we'll happily work with them and credit you.
 
 * LYNTIN vs. TINTIN++
 
-Lyntin has many of the same features as TINTIN++ and the commands
-are based on TINTIN++.  However, there are a series of TINTIN++
+Lyntin has many of the same features as Tintin++ and the commands
+are based on Tintin++.  However, there are a series of Tintin++
 commands we do not currently support:
 
 ^<<
-  map           mark            path
-  pathdir       snoop           split
-  tickset       unsplit         unpath
+  map           mark          path
+  pathdir       snoop         split
+  tickset       unsplit       unpath
   suspend       system
 ^>>
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.8 2002/02/04 01:10:17 willhelm Exp $
+# $Id: tkgui.py,v 1.9 2002/02/04 01:14:10 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -216,9 +216,9 @@ class TkGui(ui.BaseUI):
 
   def _yadjust(self):
     """ Handles y scrolling after text insertion."""
-    self._txt.yview('moveto', '1')
-    if os.name != 'posix':
-      self._txt.yview('scroll', '20', 'units')
+    # self._txt.yview('moveto', '1')
+    # if os.name != 'posix':
+    self._txt.yview('scroll', '20', 'units')
 
   def _clipText(self):
     """
@@ -269,9 +269,7 @@ class TkGui(ui.BaseUI):
 
         if index == -1:
           self._unfinishedcolor = (1,
-                                   self._unfinishedcolor[1] + 
-                                   line[:index])
-
+                                   self._unfinishedcolor[1] + line[:index])
         else:
           self._colorChange(self._unfinishedcolor[1] + line[:index]) 
           self._unfinishedcolor = (0, "")
@@ -285,7 +283,7 @@ class TkGui(ui.BaseUI):
         cstart = index
 
         self._txt.insert('end', 
-                         line[start:index], 
+                         line[start:cstart], 
                          (self._currcolors[1], self._currcolors[2]))
 
         temp = line.find("m", index)
@@ -299,11 +297,7 @@ class TkGui(ui.BaseUI):
         index = line.find(chr(27), index+1)
 
 
-      if self._unfinishedcolor[0] == 1:
-        self._txt.insert('end', 
-                         line[start:cstart], 
-                         (self._currcolors[1], self._currcolors[2]))
-      else:
+      if self._unfinishedcolor[0] == 0:
         self._txt.insert('end', 
                          line[start:], 
                          (self._currcolors[1], self._currcolors[2]))
