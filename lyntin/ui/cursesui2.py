@@ -9,6 +9,8 @@
 ##################################################################
 
 import data, string, sys, mud, app, select, os, time, regsub
+import regsub
+import mud
 from basegui import BaseGUI
 
 import curses
@@ -45,15 +47,14 @@ class Cursesui(BaseGUI):
       self._main = curses.newwin(self._height, self._width, 0, 0)
 
       self._output = self._main.subwin(self._height - 3, self._width, 0, 0)
-      self._input = self._main.subwin(self._height - 1, 0)
+      self._input = self._main.subwin(self._height - 2, 0)
       # self._output.box()
       self._output.scrollok(1)
       # self._output.setscrreg(0, self._height - 1)
-      
+      self._output.nodelay(1)
+      self._input.nodelay(1) 
       self.refresh_all()
 
-      # import thread
-      # thread.start_new_thread(get_input_line, (self, ))
 
 
    def refresh_all(self):
@@ -75,11 +76,36 @@ class Cursesui(BaseGUI):
       curses.endwin()
 
 
+   def filter_crud(self,txt):
+      txt = regsub.gsub('\015\\|\r', '', txt)
+      txt = regsub.gsub('[[0-9;]*[mJ]', '', txt)
+      return txt
+
+
    def print_string(self,line,modifiers=None,ending='\n',target=None):
       if modifiers == 'client':
          line = string.replace(line, "\n", "\n## ")
+     
+      line = self.filter_crud(line)
+ 
+      ls = line.count("\n")
+      (y,x) = self._output.getyx()
+      (maxy,maxx) = self._output.getmaxyx()
       
-      self._output.addstr(line + ending)
+      if y + ls > maxy:
+         lines = line.splitlines()
+         for n in range(0, len(lines)):
+            (y,x) = self._output.getyx()
+            self._output.move(0,0)
+            self._output.deleteln()
+            self._output.move(y,0)
+            self._output.addstr(lines[n] + ending)
+
+         self._output.refresh()
+ 
+      else:
+         self._output.addstr(line + ending)
+
       self._output.refresh()
 
     
@@ -92,7 +118,9 @@ class Cursesui(BaseGUI):
             newchar = self._input.getch()
          except:
             break
-   
+         if newchar < 0:
+            break 
+
          if newchar == 10:
             if not newline:
                newline = "#cr"
@@ -102,11 +130,18 @@ class Cursesui(BaseGUI):
 
          elif newchar == 13:
             pass
+
          elif newchar == curses.KEY_DC or newchar == curses.KEY_BACKSPACE or newchar == 8 or newchar == 127:
             if newline:
                newline = newline[:-1]
-               self._input.delch(0, self._input.getyx()[1] - 1)
-         else:
+               (y,x) = self._input.getyx()
+               self._input.delch(y, x - 1)
+
+         elif newchar == 21:
+            self._input.erase()
+            newline = ''
+
+         elif newchar > 0 and newchar < 256:
             self._input.addch(newchar)
             newline = newline + chr(newchar)
 
