@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.77 2002/04/26 23:34:17 jmberne Exp $
+# $Id: basic.py,v 1.78 2002/04/27 20:58:20 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -208,7 +208,7 @@ commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
 
 
 def deed_cmd(session, args, input):
-  """#deed [deed|count]
+  """#deed [deed|count] quiet=[true|false]
   
   This adds a deed or prints all the deeds stored till now.
   """
@@ -219,6 +219,8 @@ def deed_cmd(session, args, input):
     return
 
   deedtext = args["text"]
+  quiet = args["quiet"]
+
   varexpansion = session.getManager("variable").expand(deedtext)
   if varexpansion:
     deedtext = varexpansion
@@ -241,9 +243,10 @@ def deed_cmd(session, args, input):
     return
   
   session.getManager("deed").addDeed(deedtext)
-  exported.write_message("deed: {%s} added." % deedtext)
+  if not quiet:
+    exported.write_message("deed: {%s} added." % deedtext)
 
-commands_dict["deed"] = (deed_cmd, "text=")
+commands_dict["deed"] = (deed_cmd, "text= quiet:boolean=false")
 
 
 def diagnostics_cmd(session, args, input):
