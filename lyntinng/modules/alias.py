@@ -1,0 +1,355 @@
+#######################################################################
+# This file is part of Lyntin.
+# copyright (c) Free Software Foundation 2001, 2002
+#
+# Lyntin is distributed under the GNU General Public License license.  See the
+# file LICENSE for distribution details.
+# $Id: alias.py,v 1.19 2002/06/07 23:43:30 willhelm Exp $
+#######################################################################
+"""
+This module defines the AliasManager which handles aliases,
+compiling, and checking and such.
+"""
+import string
+import manager, utils, lyntin, exported, hooks, modutils
+
+class AliasData:
+  """ Manages aliases."""
+  def __init__(self):
+    self._aliases = {}
+
+  def addAlias(self, name, expansion):
+    """ Adds an alias to the dict.
+
+    arguments:
+
+      'name' -- (string) the alias name
+
+      'expansion' -- (string) the alias expansion
+    """
+    if name == expansion:
+      raise ValueError, "name cannot equal expansion."
+    self._aliases[name] = expansion
+
+  def clear(self):
+    """ Removes all the aliases."""
+    self._aliases.clear()
+
+  def removeAliases(self, text):
+    """ Removes aliases from the list.
+
+    Returns a list of tuples of alias name/expansion that
+    were removed.
+
+    arguments:
+
+      'text' -- (string) the text which when run through
+                util.expand gives us the aliases to remove
+
+    returns:
+
+      list of (name, expansion) tuples
+    
+    """
+    badaliases = utils.expand(text, self._aliases.keys())
+
+    ret = []
+    for mem in badaliases:
+      ret.append((mem, self._aliases[mem]))
+      del self._aliases[mem]
+
+    return ret
+
+  def getAliases(self):
+    """ Returns the keys of the alias dict.
+
+    returns:
+
+      list of strings
+
+    """
+    list = self._aliases.keys()
+    list.sort()
+    return list
+
+  def getAlias(self, alias):
+    """ Does an alias lookup and returns the alias in question or
+    an empty string.
+
+    returns:
+
+      (string) empty string or the alias expansion
+
+    """
+    if self._aliases.has_key(alias):
+      return self._aliases[alias]
+    else:
+      return ""
+
+  def expand(self, input):
+    """ Looks at user input and expands any aliases involved.
+
+    It'll return the expansion if there is one.  Otherwise
+    it returns None.
+
+    arguments:
+
+      'input' -- the user input
+
+    returns:
+
+      the alias expansion for the given input if it's an
+      alias, or None if it is not.
+
+    """
+    if len(input) > 0:
+      # pull out the first word of the input
+      firstword = input.split(' ', 1)[0]
+
+      # if we match an alias, we return the expansion
+      if firstword in self._aliases.keys():
+        return self._aliases[firstword]            
+
+    return None
+
+  def getStatus(self):
+    return "%d alias(es)." % len(self._aliases)
+    
+  def getInfo(self, text=""):
+    """ Returns information about the aliases in here.
+
+    This is used by #alias to tell all the aliases involved
+    as well as #write which takes this information and dumps
+    it to the file.
+
+    arguments:
+
+      'text=""' -- (string) the text to match
+
+    arguments:
+
+      a string telling about all the aliases and expansions
+      in this manager.
+    """
+    if len(self._aliases) == 0:
+      return ''
+
+    list = self._aliases.keys()
+
+    if text:
+      list = utils.expand(text, list)
+
+    data = []
+    for mem in list:
+      data.append("%salias {%s} {%s}" %
+                  (lyntin.commandchar, mem, self._aliases[mem]))
+
+    return string.join(data, "\n")
+
+  def getCount(self):
+    """ Returns the alias count.
+
+    returns:
+
+      (int) the number of aliases managed
+    """
+    return len(self._aliases)
+
+
+class AliasManager(manager.Manager):
+  """
+  Extends the manager.Manager base class to implement alias
+  functionality.  The AliasManager holds session -> AliasData objects
+  which handle the alias functionality.
+  """
+  def __init__(self):
+    # session -> AliasData objects
+    self._aliasdata = {}
+
+  def addAlias(self, ses, name, expansion):
+    if not self._aliasdata.has_key(ses):
+      self._aliasdata[ses] = AliasData()
+    self._aliasdata[ses].addAlias(name, expansion)
+
+  def clear(self, ses):
+    if not self._aliasdata.has_key(ses):
+      return
+    self._aliasdata[ses].clear()
+
+  def removeAliases(self, ses, text):
+    if not self._aliasdata.has_key(ses):
+      return []
+    return self._aliasdata[ses].removeAliases(text)
+
+  def getAlias(self, ses, name):
+    if not self._aliasdata.has_key(ses):
+      return ""
+    return self._aliasdata[ses].getAlias(name)
+
+  def expand(self, ses, input):
+    if not self._aliasdata.has_key(ses):
+      return None
+    return self._aliasdata[ses].expand(input)
+
+  def getStatus(self, ses):
+    if not self._aliasdata.has_key(ses):
+      return "0 alias(es)."
+    return self._aliasdata[ses].getStatus()
+
+  def getInfo(self, ses, text=""):
+    if not self._aliasdata.has_key(ses):
+      return ""
+    return self._aliasdata[ses].getInfo(text)
+
+  def persist(self, args):
+    """
+    write_hook function for persisting the state of our session.
+    """
+    ses = args[0]
+    file = args[1]
+    data = self.getInfo(ses)
+    if data:
+      file.write(data + "\n")
+
+  def filter(self, args):
+    """ 
+    Handle the filtering of input through the current aliases.
+    If input gets changed then we pass it back to
+    exported.get_engine().HandleUserData and return None to stop
+    this chain of filtering.
+
+    arguments:
+
+      'args' -- (tuple) user_filter_hook arg tuple (session, internal,
+                input, filtered)
+
+    returns:
+
+      filtered text or None if any changes took place.
+    """
+    # we check for aliases here--and if we find some, we
+    # do the variable expansion and then recurse over the result
+    ses = args[0]
+    internal = args[1]
+    text = args[-1]
+  
+    if not self._aliasdata.has_key(ses):
+      return text
+
+    aliasexpansion = self._aliasdata[ses].expand(text)
+
+    if aliasexpansion:
+      aliasexpansion = utils.replace_vars(text,aliasexpansion)
+      exported.get_engine().handleUserData(aliasexpansion, 1, ses)
+      return None
+    else:
+      return text
+
+  def addSession(self, newsession, basesession=None):
+    """ over-ridden from manager.Manager."""
+    if basesession:
+      if self._aliasdata.has_key(basesession):
+        aldata = self._aliasdata[basesession]
+        for mem in aldata._aliases.keys():
+          self.addAlias(newsession, mem, aldata._aliases[mem])
+
+  def removeSession(self, ses):
+    """ over-ridden from manager.Manager."""
+    if self._aliasdata.has_key(ses):
+      del self._aliasdata[ses]
+
+
+commands_dict = {}
+
+def alias_cmd(ses, args, input):
+  """
+  With no arguments, prints all aliases.
+  With one argument, prints all aliases which match the arg.
+  With multiple arguments, creates an alias.
+
+  You can use pattern variables which look like % and a number.  
+  ex: %4   %0 is the alias name, %n (where n is a number)
+  is the nth item after the alias name.  
+
+  Ranges can be used by using python colon-syntax, specifying a
+  half-open slice of the input items, so %0:3 is the first, second and
+  third elements of the input
+
+  Negative numbers count back from the end of the list.  So %-1 is the
+  last item in the list, %:-1 is everything but the last item in the
+  list. 
+
+  Note: It should be noted that actions are matched via regular 
+  expressions.   %1 gets translated to (.+?) and %_1 gets translated
+  to (\S+?).
+
+  category: commands
+  """
+  name = args["alias"]
+  command = args["expansion"]
+  quiet = args["quiet"]
+
+  am = exported.get_manager("alias")
+
+  # they typed '#alias'--print out all current aliases
+  if not name and not command:
+    data = am.getInfo(ses)
+    if data == '':
+      data = "alias: no aliases defined."
+
+    exported.write_message(data)
+    return
+
+  # they typed '#alias dd*' and are looking for matching aliases
+  if not command:
+    data = am.getInfo(ses)
+    if data == '':
+      data = "alias: no aliases defined."
+
+    exported.write_message(data)
+    return
+
+  try:
+    am.addAlias(ses, name, command)
+  except ValueError, e:
+    exported.write_error("alias: %s" % e)
+
+  if not quiet:
+    exported.write_message("alias: {%s} {%s} added." % (name, command))
+
+commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false")
+
+
+def unalias_cmd(ses, args, input):
+  """
+  Allows you to remove aliases.
+
+  category: commands
+  """
+  func = exported.get_manager("alias").removeAliases
+  modutils.unsomething_helper(args, func, ses, "alias", "aliases")
+
+commands_dict["unalias"] = (unalias_cmd, "str= quiet:boolean=false")
+
+am = None
+
+def load():
+  """ Initializes the module by binding all the commands."""
+  global am
+  modutils.load_commands(commands_dict)
+  am = AliasManager()
+  exported.add_manager("alias", am)
+
+  # FIXME - the number controls the order this gets called in the grand
+  # scheme of things.  we should probably do something to make this
+  # more obvious.
+  hooks.user_filter_hook.register(am.filter, 20)
+  hooks.write_hook.register(am.persist)
+
+def unload():
+  """ Unloads the module by calling any unload/unbind functions."""
+  global am
+  modutils.unload_commands(commands_dict.keys())
+  exported.remove_manager("alias")
+  hooks.user_filter_hook.unregister(am.filter)
+  hooks.write_hook.unregister(am.persist)

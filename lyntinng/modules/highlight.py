@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.26 2002/06/01 15:51:44 willhelm Exp $
+# $Id: highlight.py,v 1.27 2002/06/04 03:47:23 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
 """
 import string
-import manager, utils, lyntin
+import manager, utils, lyntin, hooks, exported, modutils
 
 STYLEMAP = {
              "bold": "1",
@@ -42,8 +42,7 @@ STYLEMAP = {
              "b white": "47"
            }
 
-class HighlightManager(manager.Manager):
-  """ Manages highlights."""
+class HighlightData:
   def __init__(self):
     self._highlights = {}
     self._currcolor = [-1,-1,-1]
@@ -367,19 +366,166 @@ class HighlightManager(manager.Manager):
 
     return string.join(data, "\n")
 
-  def getCount(self):
-    """ Returns the total number of highlights we're managing.
+  def getStatus(self):
+    """ Returns a one-liner describing this data object
 
     returns:
       
-      (int) the number of highlights we're managing
+      (string) a one liner describing this object
     """
-    return len(self._highlights.keys())
+    return "%d highlight(s)." % len(self._highlights.keys())
 
+
+class HighlightManager(manager.Manager):
+  def __init__(self):
+    self._highlights = {}
+
+  def addHighlight(self, ses, style, text):
+    if not self._highlights.has_key(ses):
+      self._highlights[ses] = HighlightData()
+    self._highlights[ses].addHighlight(style, text)
+
+  def clear(self, ses):
+    if self._highlights.has_key(ses):
+      self._highlights[ses].clear()
+
+  def removeHighlights(self, ses, text):
+    if self._highlights.has_key(ses):
+      return self._highlights[ses].removeHighlights(text)
+    return []
+
+  def getHighlights(self, ses):
+    if self._highlights.has_key(ses):
+      return self._highlights[ses].getHighlights()
+    return []
+
+  def getInfo(self, ses, text=""):
+    if self._highlights.has_key(ses):
+      return self._highlights[ses].getInfo(text)
+    return ""
+
+  def getStatus(self, ses):
+    if self._highlights.has_key(ses):
+      return self._highlights[ses].getStatus()
+    return "0 highlight(s)."
+
+  def addSession(self, newsession, basesession=None):
+    """ over-ridden from manager.Manager."""
+    if basesession:
+      if self._highlights.has_key(basesession):
+        hdata = self._highlights[basesession]
+        for mem in hdata._highlights.keys():
+          self.addHighlight(newsession, hdata._highlights[mem][0], mem)
+
+  def removeSession(self, ses):
+    """ over-ridden from manager.Manager."""
+    if self._highlights.has_key(ses):
+      del self._highlights[ses]
+
+  def persist(self, args):
+    """
+    write_hook function for persisting the state of our session.
+    """
+    ses = args[0]
+    file = args[1]
+    data = self.getInfo(ses)
+    if data:
+      file.write(data + "\n")
 
   def filter(self, args):
+    ses = args[0]
     text = args[-1]
+
     if lyntin.ansicolor == 0:
       return utils.filter_ansi(text)
     else:
-      return self.expand(text)
+      if self._highlights.has_key(ses):
+        return self._highlights[ses].expand(text)
+
+
+commands_dict = {}
+
+def highlight_cmd(ses, args, input):
+  """
+  With no arguments, prints all highlights.
+  With one argument, prints all highlights which match the arg.
+  With multiple arguments, creates a highlight.
+
+  Highlights enable you to colorfully "tag" text that's of interest
+  to you with the given style.  This may not work or fully work in
+  all ui's.
+
+  Styles available are:
+     bold     black    grey           b black
+     blink    red      light red      b red
+     reverse  green    light green    b green
+              yellow   light yellow   b yellow
+              blue     light blue     b blue
+              magenta  light magenta  b magenta
+              cyan     light cyan     b cyan
+              white    light white    b white
+
+  Highlights also handle *.  So '*word*' will highlight an entire line
+  with "word" in it.  '*word' will highlight the line up to "word".  
+  'word*' will highlight the line from "word" to the end.
+
+  ex:
+     #highlight {green} {Sven arrives.}
+     #highlight {reverse,green} {Sven arrives.}
+
+  category: commands
+  """
+  style = args["style"]
+  text = args["text"]
+  quiet = args["quiet"]
+
+  if not text and not style:
+    data = exported.get_manager("highlight").getInfo(ses)
+    if data == '':
+      data = "highlight: no highlights defined."
+
+    exported.write_message(data)
+    return
+
+  if text and style:
+    exported.get_manager("highlight").addHighlight(ses, style, text)
+    if not quiet:
+      exported.write_message("highlight: {%s} {%s} added." % (style, text))
+
+commands_dict["highlight"] = (highlight_cmd, "style= text= quiet:boolean=false")
+
+
+def unhighlight_cmd(ses, args, input):
+  """
+  Allows you to remove highlights.
+
+  category: commands
+  """
+  func = exported.get_manager("highlight").removeHighlights
+  modutils.unsomething_helper(args, func, ses, "highlight", "highlights")
+
+commands_dict["unhighlight"] = (unhighlight_cmd, "str= quiet:boolean=false")
+
+
+hm = None
+
+def load():
+  """ Initializes the module by binding all the commands."""
+  global hm
+  modutils.load_commands(commands_dict)
+  hm = HighlightManager()
+  exported.add_manager("highlight", hm)
+
+  # FIXME - the number controls the order this gets called in the grand
+  # scheme of things.  we should probably do something to make this
+  # more obvious.
+  hooks.mud_filter_hook.register(hm.filter, 90)
+  hooks.write_hook.register(hm.persist)
+
+def unload():
+  """ Unloads the module by calling any unload/unbind functions."""
+  global hm
+  modutils.unload_commands(commands_dict.keys())
+  exported.remove_manager("highlight")
+  hooks.mud_filter_hook.unregister(hm.filter)
+  hooks.write_hook.unregister(hm.persist)

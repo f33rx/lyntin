@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.6 2002/05/12 04:51:23 willhelm Exp $
+# $Id: helpmanager.py,v 1.7 2002/05/25 18:42:08 jmberne Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -14,9 +14,9 @@ which then can be converted to a variety of other formats (probably
 either AFT or reStructuredText).
 """
 import string
-import utils, lyntin
+import utils, lyntin, manager
 
-class HelpManager:
+class HelpManager(manager.Manager):
   """ Manages the help text hierarchy.
 
   The HelpManager exists on the engine scoping--there is only one
@@ -27,8 +27,7 @@ class HelpManager:
     self._help_tree = {}
 
   def addHelp(self, fqn, helptext):
-    """
-    Adds a help text to the hierarchy.
+    """ Adds a help text to the hierarchy.
 
     arguments:
       
@@ -223,7 +222,7 @@ class HelpManager:
     return (error, breadcrumbs, tree)
     
   def printTree(self, tree=None, tab=""):
-    """ Prints out the hierarchy."""
+    """ Prints out the hierarchy--for debugging purposes."""
     if tree == None:
       tree = self._help_tree
       print tab + "Root:"
@@ -237,6 +236,8 @@ class HelpManager:
 
   def splitName(self, fqn):
     """ Splits an fqn into a category list and a help text name.
+
+    arguments:
 
       'fqn' -- (string) a . delimited string of categories
                and finally a helpname

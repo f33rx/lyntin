@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.29 2002/06/09 02:11:45 jmberne Exp $
+# $Id: tintincmds.py,v 1.30 2002/06/09 17:09:36 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -13,128 +13,6 @@ import net, utils, engine, lyntin, exported, hooks, modutils
 This module holds commands that are based on Tintin functionality.
 """
 commands_dict = {}
-
-def action_cmd(session, args, input):
-  """
-  With no arguments, prints all actions.
-  With one argument, prints all actions which match the arg.
-  With multiple arguments, creates an action.
-
-  When data from the mud matches the trigger clause, the response
-  will be executed.  Trigger clauses can use anchors (^ and $)
-  to anchor the text to the beginning and end of the line 
-  respectively.
-
-  Triggers can also contain Lyntin pattern-variables which start
-  with a % sign and have digits: %0, %1, %10...  When Lyntin sees 
-  a pattern-variable in an action trigger, it tries to match any 
-  pattern against it, and saves any match it finds so you can 
-  use it in the response.  See below for examples.
-
-  the onetime argument can be set to true to have the action remove
-  itself automatically if it is ever executed
-
-  The response can be any mud command or Lyntin command and can
-  contain placement-variables and the special variable %a which
-  means "the whole matched line".
-
-  Triggers get converted to regular expressions by converting
-  placement variables %[0-9]+ to (.+?).  Feel free to use
-  regular expression matching stuff.
-
-  ex:
-     #action {^You are hungry} {get bread bag;eat bread}
-     #action {EVISCERATES joey} {rescue joey}
-     #action {%0 gives you %5} {say thanks for the %5, %0!}
-     #action {^%1 tells you %2$} {say %1 just told me %2}
-
-  category: commands
-  """
-  trigger = args["trigger"]
-  action = args["action"]
-  onetime = args["onetime"]
-  quiet = args["quiet"]
-
-  # they typed '#action'--print out all the current actions
-  if not trigger and not action:
-    data = session.getManager("action").getInfo()
-    if data == '':
-      data = "action: no actions defined."
-
-    exported.write_message(data)
-    return
-
-  # they typed '#action dd*' and are looking for matching actions
-  if not action:
-    data = session.getManager("action").getInfo(trigger)
-    if data == '':
-      data = "action: no actions defined."
-
-    exported.write_message(data)
-    return
-
-  session.getManager("action").addAction(trigger, action, onetime)
-  if not quiet:
-    exported.write_message("action: {%s} {%s} added." % (trigger, action))
-
-commands_dict["action"] = (action_cmd, "trigger= action= onetime:boolean=false quiet:boolean=false")
-
-
-def alias_cmd(session, args, input):
-  """
-  With no arguments, prints all aliases.
-  With one argument, prints all aliases which match the arg.
-  With multiple arguments, creates an alias.
-
-  You can use pattern variables which look like % and a number.  
-  ex: %4   %0 is the alias name, %n (where n is a number)
-  is the nth item after the alias name.  
-
-  Ranges can be used by using python colon-syntax, specifying a
-  half-open slice of the input items, so %0:3 is the first, second and
-  third elements of the input
-
-  Negative numbers count back from the end of the list.  So %-1 is the
-  last item in the list, %:-1 is everything but the last item in the
-  list. 
-
-  Note: It should be noted that actions are matched via regular 
-  expressions.   %1 gets translated to (.+?) and %_1 gets translated
-  to (\S+?).
-
-  category: commands
-  """
-  name = args["alias"]
-  command = args["expansion"]
-  quiet = args["quiet"]
-
-  # they typed '#alias'--print out all current aliases
-  if not name and not command:
-    data = session.getManager("alias").getInfo()
-    if data == '':
-      data = "alias: no aliases defined."
-
-    exported.write_message(data)
-    return
-
-  # they typed '#alias dd*' and are looking for matching aliases
-  if not command:
-    data = session.getManager("alias").getInfo(name)
-    if data == '':
-      data = "alias: no aliases defined."
-
-    exported.write_message(data)
-    return
-
-  try:
-    session.getManager("alias").addAlias(name, command)
-  except ValueError, e:
-    exported.write_error("alias: %s" % e)
-
-  if not quiet:
-    exported.write_message("alias: {%s} {%s} added." % (name, command))
-
-commands_dict["alias"] = (alias_cmd, "alias= expansion= quiet:boolean=false")
 
 
 def boss_cmd(session, words, input):
@@ -186,8 +64,8 @@ def clear_cmd(session, words, input):
   try:
     session.clear()
     exported.write_message("clear: session %s cleared." % session.getName())
-  except:
-    exported.write_error("clear: error in clearing session.")
+  except Exception, e:
+    exported.write_error("clear: error in clearing session.  %s" % e)
 
 commands_dict["clear"] = (clear_cmd, "")
   
@@ -217,50 +95,6 @@ def end_cmd(session, args, input):
 commands_dict["^end"] = (end_cmd, "")
 
 
-def gag_cmd(session, args, input):
-  """
-  With no arguments, prints out all gags.
-  With arguments, creates a gag.
-
-  Incoming lines from the mud which contain gagged text will
-  be removed and not shown on the ui.
-
-  Gags get converted to regular expressions.  Feel free to use
-  regular expression matching syntax as you see fit.
-
-  As with all commands, braces get stripped off and each complete
-  argument creates a gag.  gag accepts multiple gags at once, and
-  accepts a quiet argument to supress reporting of what has been
-  gagged.  
-
-  ex:
-     #gag {has missed you.}    <-- will prevent any incoming line
-                                   with "has missed you" to be shown.
-  ex:
-     #gag has missed you       <-- will gag any text with "has",
-                                   "missed", or "you"
-
-  category: commands
-  """
-  gaggedtext = args["text"]
-  quiet = args["quiet"]
-
-  if not gaggedtext:
-    data = session.getManager("gag").getInfo()
-    if data == '':
-      data = "gag: no gags defined."
-
-    exported.write_message(data)
-    return
-
-  for togag in gaggedtext:
-    session.getManager("gag").addGag(togag)
-    if not quiet:
-      exported.write_message("gag: {%s} added." % togag)
-
-commands_dict["gag"] = (gag_cmd, "text* quiet:boolean=false")
-
-
 def help_cmd(session, args, input):
   """
   With no arguments, shows all the help files available.
@@ -284,56 +118,6 @@ def help_cmd(session, args, input):
   exported.write_message(data)
 
 commands_dict["help"] = (help_cmd, "item=")
-
-
-def highlight_cmd(session, args, input):
-  """
-  With no arguments, prints all highlights.
-  With one argument, prints all highlights which match the arg.
-  With multiple arguments, creates a highlight.
-
-  Highlights enable you to colorfully "tag" text that's of interest
-  to you with the given style.  This may not work or fully work in
-  all ui's.
-
-  Styles available are:
-     bold     black    grey           b black
-     blink    red      light red      b red
-     reverse  green    light green    b green
-              yellow   light yellow   b yellow
-              blue     light blue     b blue
-              magenta  light magenta  b magenta
-              cyan     light cyan     b cyan
-              white    light white    b white
-
-  Highlights also handle *.  So '*word*' will highlight an entire line
-  with "word" in it.  '*word' will highlight the line up to "word".  
-  'word*' will highlight the line from "word" to the end.
-
-  ex:
-     #highlight {green} {Sven arrives.}
-     #highlight {reverse,green} {Sven arrives.}
-
-  category: commands
-  """
-  style = args["style"]
-  text = args["text"]
-  quiet = args["quiet"]
-
-  if not text and not style:
-    data = session.getManager("highlight").getInfo()
-    if data == '':
-      data = "highlight: no highlights defined."
-
-    exported.write_message(data)
-    return
-
-  if text and style:
-    session.getManager("highlight").addHighlight(style, text)
-    if not quiet:
-      exported.write_message("highlight: {%s} {%s} added." % (style, text))
-
-commands_dict["highlight"] = (highlight_cmd, "style= text= quiet:boolean=false")
 
 
 def history_cmd(session, args, input):
@@ -389,9 +173,11 @@ def if_cmd(session, args, input):
   elseaction = args["elseaction"]
 
   # we have to do manual variable expansion here.
-  varexpansion = session.getManager("variable").expand(expr)
-  if varexpansion:
-    expr = varexpansion
+  varman = exported.get_manager("variable")
+  if varman:
+    varexpansion = varman.expand(session, expr)
+    if varexpansion:
+      expr = varexpansion
 
   expr = expr.replace("&&", " and ")
   expr = expr.replace("||", " or ")
@@ -440,7 +226,7 @@ def ignore_cmd(session, args, input):
 commands_dict["ignore"] = (ignore_cmd, "option:booleanornone=")
 
 
-def info_cmd(session, args, input):
+def info_cmd(ses, args, input):
   """
   Prints all the information about the active session: 
   actions, aliases, gags, highlights, variables, ticker, verbose, 
@@ -448,7 +234,9 @@ def info_cmd(session, args, input):
 
   category: commands
   """
-  exported.write_message(session.getInfo())
+  data = exported.get_engine().getStatus(ses)
+  data = string.join(data, "\n")
+  exported.write_message(data)
 
 commands_dict["info"] = (info_cmd, "")
 
@@ -585,9 +373,11 @@ def math_cmd(session, args, input):
   quiet = args["quiet"]
 
   # we have to do manual variable expansion here.
-  varexpansion = session.getManager("variable").expand(ops)
-  if varexpansion:
-    ops = varexpansion
+  varman = exported.get_manager("variable")
+  if varman:
+    varexpansion = varman.expand(session, ops)
+    if varexpansion:
+      ops = varexpansion
 
   try:
     rvalue = eval(ops)
@@ -730,31 +520,33 @@ def session_cmd(session, args, input):
     # create a SocketCommunicator
     sock = net.SocketCommunicator()
 
-    # create a session for it...
-    ses = exported.get_engine().createSession()
-    ses.setName(name)
+    # create and register a session for this connection....
+    ses = exported.get_engine().createSession(name)
     ses.setSocketCommunicator(sock)
     ses._host = host
     ses._port = port
     sock.setSession(ses)
-    exported.get_engine().registerSession(ses, name)
+
     exported.get_engine().changeSession(name)
 
     # connect to the mud...
+    # this might take a while--we block here until this is done.
     sock.connect(host, port, name)
 
     # start the network thread
     exported.get_engine().startthread("network", sock.run)
 
   except Exception, e:
+    import traceback
+    traceback.print_exc()
+    exported.write_error("session: unable to connect. %s" % e)
+    exported.write_error("session: had problems creating the session.")
     try: 
-      exported.get_engine().unregisterSession(name)
+      exported.get_engine().unregisterSession(ses)
       exported.get_engine().closeSession(name)
       sock.shutdown()
     except:
       pass
-    exported.write_error("session: unable to connect. %s" % e)
-    exported.write_error("session: had problems creating the session.")
 
   hooks.connect_hook.spamhook((ses, host, port))
 
@@ -801,41 +593,6 @@ def speedwalk_cmd(session, args, input):
       exported.write_message("speedwalk: disabled.")
 
 commands_dict["speedwalk"] = (speedwalk_cmd, "option:booleanornone=")
-
-
-def substitute_cmd(session, args, input):
-  """
-  With no arguments, prints all substitutes.
-  With one argument, prints all substitutes which match the argument.
-  Otherwise creates a substitution.
-
-  Braces are advised around both 'name' and 'substitution'.
-
-  category: commands
-  """
-  item = args["item"]
-  substitution = args["substitution"]
-
-  if not item and not substitution:
-    data = session.getManager("substitute").getInfo()
-    if data == '':
-      data = "substitute: no substitutes defined."
-
-    exported.write_message(data)
-    return
-
-  if not substitution:
-    data = session.getManager("substitute").getInfo(item)
-    if data == '':
-      data = "substitute: no substitutes defined."
-
-    exported.write_message(data)
-    return 
-
-  session.getManager("substitute").addSubstitute(item, substitution)
-  exported.write_message("substitute: {%s} {%s} added." % (item, substitution))
-
-commands_dict["substitute"] = (substitute_cmd, "item= substitution=")
 
 
 def textin_cmd(session, args, input):
@@ -1003,124 +760,6 @@ def togglesubs_cmd(session, args, input):
 commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
 
 
-def unaction_cmd(session, args, input):
-  """
-  Allows you to remove actions.
-
-  category: commands
-  """
-  func = session.getManager("action").removeActions
-  modutils.unsomething_helper(args, func, "action", "actions")
-
-commands_dict["unaction"] = (unaction_cmd, "str= quiet:boolean=false")
-
-
-def unalias_cmd(session, args, input):
-  """
-  Allows you to remove aliases.
-
-  category: commands
-  """
-  func = session.getManager("alias").removeAliases
-  modutils.unsomething_helper(args, func, "alias", "aliases")
-
-commands_dict["unalias"] = (unalias_cmd, "str= quiet:boolean=false")
-
-
-def ungag_cmd(session, args, input):
-  """
-  Allows you to remove gags.
-
-  category: commands
-  """
-  func = session.getManager("gag").removeGags
-  modutils.unsomething_helper(args, func, "gag", "gags")
-
-commands_dict["ungag"] = (ungag_cmd, "str= quiet:boolean=false")
-
-
-def unhighlight_cmd(session, args, input):
-  """
-  Allows you to remove highlights.
-
-  category: commands
-  """
-  func = session.getManager("highlight").removeHighlights
-  modutils.unsomething_helper(args, func, "highlight", "highlights")
-
-commands_dict["unhighlight"] = (unhighlight_cmd, "str= quiet:boolean=false")
-
-
-def unsubstitute_cmd(session, args, input):
-  """
-  Allows you to remove substitutes.
-
-  category: commands
-  """
-  func = session.getManager("substitute").removeSubstitutes
-  modutils.unsomething_helper(args, func, "substitute", "substitutes")
-
-commands_dict["unsubstitute"] = (unsubstitute_cmd, "str= quiet:boolean=false")
-
-
-def unvariable_cmd(session, args, input):
-  """
-  Allows you to remove variables.
-
-  category: commands
-  """
-  func = session.getManager("variable").removeVariables
-  modutils.unsomething_helper(args, func, "variable", "variables")
-
-commands_dict["unvariable"] = (unvariable_cmd, "str= quiet:boolean=false")
-
-
-def variable_cmd(session, args, input):
-  """
-  Creates a variable for that session of said name with said value.
-  Variables can then be used in #if commands and any predicates
-  of #alias or #action.
-
-  ex:
-     #variable {hps} {100}
-     #action {HP: %0/%1 } {#variable {hps} {%0}}
-
-  Variables can later be accessed via the variable character
-  (which defaults to $) and the variable name.  In the case of the
-  above, the variable name would be $hps.
-
-  category: commands
-  """
-  var = args["var"]
-  expansion = args["expansion"]
-  quiet = args["quiet"]
-
-  if not var and not expansion:
-    data = session.getManager("variable").getInfo()
-    if data == '':
-      data = "variable: no variables defined."
-
-    exported.write_message(data)
-    return
-
-  if not expansion:
-    data = session.getManager("variable").getInfo(var)
-    if data == '':
-      data = "variable: no variables defined."
-
-    exported.write_message(data)
-    return 
-
-  try:
-    session.getManager("variable").addVariable(var, expansion)
-    if not quiet:
-      exported.write_message("variable: {%s} {%s} added." % (var, expansion))
-  except Exception, e:
-    exported.write_error("variable: cannot be set. %s", e)
-
-commands_dict["variable"] = (variable_cmd, "var= expansion= quiet:boolean=false")
-
-
 def verbatim_cmd(session, args, input):
   """
   Toggles whether user data is parsed for speedwalking,
@@ -1187,7 +826,7 @@ def write_cmd(session, args, input):
   filename = args["file"]
   try:
     f = open(filename, "w")
-    f.write(session.getWriteFileInfo())
+    hooks.write_hook.spamhook((session, f))
     f.close()
     exported.write_message("write: file %s has been written." % filename)
   except Exception, e:

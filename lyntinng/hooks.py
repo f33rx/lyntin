@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.15 2002/06/07 23:43:30 willhelm Exp $
+# $Id: hooks.py,v 1.16 2002/06/08 15:57:19 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -12,7 +12,7 @@ Also contains the Hook class which encapsulates hook functionality.
 """
 
 import traceback
-import session, variable
+import session
 
 """
 These are priority constants.  They should rarely be used.
@@ -217,6 +217,17 @@ use this hook to figure out when to tick.
 arg tuple contains the current tick.
 """
 timer_hook = Hook()
+
+"""
+The write hook runs whenever someone does "#write <filename>".
+This is primarily for session persistence.  Everything registered
+to this hook gets the file object and writes stuff to the file
+object.  Do NOT save the file object or the session object
+for later use!  They may not be there!
+
+arg tuple is (session, file object).
+"""
+write_hook = Hook()
 
 """
 When an error is kicked up via the event loop.

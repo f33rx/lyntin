@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.2 2002/05/09 23:20:12 willhelm Exp $
+# $Id: modutils.py,v 1.3 2002/05/12 04:40:39 willhelm Exp $
 #######################################################################
 import string
 import exported
@@ -42,7 +42,7 @@ def unload_commands(commands_list):
     exported.remove_command(mem)
 
 
-def unsomething_helper(args, func, sing, plur):
+def unsomething_helper(args, func, ses, sing, plur):
   """
   Helps automate some of the un(something) commands.
 
@@ -54,6 +54,8 @@ def unsomething_helper(args, func, sing, plur):
     'func' -- (function instance) the function to call to unsomething
               things.  it should take a single string argument.
 
+    'ses' -- (session instance) the session to apply this to
+
     'sing' -- (string) the singular form of the unsomething--for
               output
 
@@ -63,7 +65,7 @@ def unsomething_helper(args, func, sing, plur):
   str = args["str"]
   quiet = args["quiet"]
 
-  removedthings = func(str)
+  removedthings = func(ses, str)
 
   if not quiet:
     if len(removedthings) == 0:

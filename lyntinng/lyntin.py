@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.23 2002/05/12 04:40:38 willhelm Exp $
+# $Id: lyntin.py,v 1.24 2002/06/01 15:08:56 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -16,7 +16,7 @@ as the main function which starts Lyntin off.
 LYNTINTITLE = "Lyntin -- The Hacker's Mudclient "
 
 # version information
-VERSION = """Lyntin version 3.0 beta 1
+VERSION = """Lyntin version 3.0 alpha 4
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 """

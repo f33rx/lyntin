@@ -4,15 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.9 2002/06/04 00:52:39 willhelm Exp $
+# $Id: history.py,v 1.10 2002/06/09 17:09:36 jmberne Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered
 by the user in Lyntin.  It is on a global scoping--we don't keep
 track of a history per session.
 """
+import manager
 
-class HistoryManager:
+class HistoryManager(manager.Manager):
   """ Manages user data history.
 
   The user enters commands--this is how they interact with Lyntin.

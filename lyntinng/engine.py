@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.52 2002/06/04 15:15:33 jmberne Exp $
+# $Id: engine.py,v 1.53 2002/06/07 23:43:30 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -26,9 +26,8 @@ calls easier to deal with.
 """
 import Queue, traceback, copy, string, re, thread, inspect, sys
 
-import session, ui.ui, alias, lyntin, utils, event, argparser
-import action, alias, gag, highlight, history, substitute, variable, speedwalk
-import exported, hooks, helpmanager, threadmanager
+import session, ui.ui, lyntin, utils, event, argparser
+import exported, hooks, helpmanager, history, threadmanager
 
 """
 myengine is a singleton.  so when it gets instantiated, this
@@ -61,16 +60,18 @@ class Engine:
     # this might change at some point....  we'll see.
     self._listeners = {}
 
+    self._managers = {}
+
     # the thread manager manages all the threads in the engine.
     # there is only one thread manager
-    self._threadmanager = threadmanager.ThreadManager()
+    self._managers["thread"] = threadmanager.ThreadManager()
 
     # the help manager manages all the help content in a hierarchical
     # structure.
-    self._helpmanager = helpmanager.HelpManager()
+    self._managers["help"] = helpmanager.HelpManager()
 
     # our history manager
-    self._historymanager = history.HistoryManager()
+    self._managers["history"] = history.HistoryManager()
 
     # there is only one ui in the system.
     self._ui = None
@@ -102,13 +103,18 @@ class Engine:
     commonsession = session.Session()
     commonsession.setName("common")
 
-    commonsession.setManager("action", action.ActionManager())
-    commonsession.setManager("alias", alias.AliasManager())
-    commonsession.setManager("gag", gag.GagManager())
-    commonsession.setManager("highlight", highlight.HighlightManager())
-    commonsession.setManager("substitute", substitute.SubstituteManager())
-    commonsession.setManager("variable", variable.VariableManager())
-    commonsession.setManager("speedwalk", speedwalk.SpeedwalkManager())
+    # commonsession.setManager("action", action.ActionManager())
+    # commonsession.setManager("alias", alias.AliasManager())
+    # commonsession.setManager("gag", gag.GagManager())
+    # commonsession.setManager("highlight", highlight.HighlightManager())
+    # commonsession.setManager("substitute", substitute.SubstituteManager())
+    # commonsession.setManager("variable", variable.VariableManager())
+    # commonsession.setManager("speedwalk", speedwalk.SpeedwalkManager())
+
+    # this creates a "common" entry in all the managers that manage
+    # session scoped data
+    for mem in self._managers.values():
+      mem.addSession(commonsession)
 
     self._sessions["common"] = commonsession
     self._current_session = commonsession
@@ -128,7 +134,7 @@ class Engine:
       'func' -- (function) the function to run in the thread
 
     """
-    self._threadmanager.startThread(name, func)
+    self.getManager("thread").startThread(name, func)
 
   def checkthreads(self):
     """
@@ -141,7 +147,7 @@ class Engine:
       (list of strings) of the thread status
 
     """
-    return self._threadmanager.checkThreadsStatus()
+    self.getManager("thread").checkThreadStatus()
 
 
   ### ------------------------------------------
@@ -228,7 +234,7 @@ class Engine:
         hooks.from_user_hook.spamhook((mem,))
 
       if mem[0] == "!":
-        memhistory = self.getHistoryManager().getHistoryItem(mem)
+        memhistory = self.getManager("history").getHistoryItem(mem)
         if memhistory != -1:
           self.handleUserData(memhistory, 1, session)
           historyitems.append(memhistory)
@@ -277,7 +283,7 @@ class Engine:
     # we don't record internal stuff or input that isn't supposed
     # to be echo'd
     if internal == 0 and lyntin.echo == 1:
-      exported.get_engine().getHistoryManager().recordHistory(";".join(historyitems))
+      self.getManager("history").recordHistory(";".join(historyitems))
 
 
   def handleMudData(self, session, text):
@@ -300,17 +306,21 @@ class Engine:
   ### session stuff
   ### ------------------------------------------
 
-  def createSession(self):
+  def createSession(self, name):
     """ Copies the common session and returns it.
 
-    This does not register the session.
+    arguments:
+
+      'name' -- (string) the name of the session
 
     returns:
 
       (session.Session)
 
     """
-    ses = copy.copy(self._sessions["common"])
+    ses = session.Session()
+    ses.setName(name)
+    self.registerSession(ses, name)
     return ses
 
   def isUniqueSessionName(self, name):
@@ -339,19 +349,30 @@ class Engine:
     """
     if self._sessions.has_key(name):
       raise ValueError, "Session of that name already exists."
+
+    commonsession = self.getSession("common")
+    for mem in self._managers.values():
+      mem.addSession(session, commonsession)
+
     self._sessions[name] = session
 
-  def unregisterSession(self, name=""):
+  def unregisterSession(self, ses):
     """ Unregisters a session from the engine.
 
     arguments:
 
-      'name=""' -- (string)
-
+      'ses' -- (session instance)
     """
-    if not self._sessions.has_key(name):
+    if not self._sessions.has_key(ses.getName()):
       raise ValueError, "No session of that name."
-    del self._sessions[name]
+
+    for mem in self._managers.values():
+      try:
+        mem.removeSession(ses)
+      except Exception, e:
+        exported.write_message("Exception with removing session %s." % e)
+
+    del self._sessions[ses.getName()]
     self.changeSession()
 
   def currentSession(self):
@@ -535,7 +556,7 @@ class Engine:
     data.append("   events processed: %d" % self._num_events_processed)
     data.append("   queue size: %d" % self._event_queue.qsize())
     data.append("   ui: %s" % repr(self._ui))
-    data.append("   thread manager: %s" % repr(self._threadmanager))
+    data.append("   thread manager: %s" % repr(self.getManager("thread")))
     data.append("   speedwalking: %d" % lyntin.speedwalk)
     data.append("   ansicolor: %d" % lyntin.ansicolor)
     data.append("   ticks: %d" % self._tick)
@@ -733,30 +754,70 @@ class Engine:
 
     return None
 
-  def getHistoryManager(self):
-    """ Retrieves the history manager.
+  
+  ### ------------------------------------------------
+  ### Manager functions
+  ### ------------------------------------------------
+
+  def addManager(self, name, mgr):
+    """ Adds a manager to our list.
+
+    arguments:
+
+      'name' -- (string) the name of the manager to add.
+
+      'manager' -- (instance) the manager to add.
+    """
+    self._managers[name] = mgr
+
+  def removeManager(self, name):
+    """ Removes a manager from our list.
+
+    arguments:
+
+      'name' -- (string) the name of the manager to remove.
+    """
+    if self._managers.has_key(name):
+      del self._managers[name]
+
+  def getManager(self, name):
+    """ Retrieves a manager by name.
+
+    arguments:
+
+      'name' -- (string) the name of the manager to retrieve.
 
     returns:
 
-      history.HistoryManager instance
-
+      the manager instance
     """
-    return self._historymanager
+    return self._managers[name]
 
-  def getHelpManager(self):
-    """ Retrieves the help manager.
+  ### ------------------------------------------------
+  ### Status stuff
+  ### ------------------------------------------------
+  def getStatus(self, ses):
+    """ Gets the status for a specific session.
 
-    returns:
+    arguments:
 
-      helpmanager.HelpManager instance
+      'ses' -- (session instance) the session to get status for.
     """
-    return self._helpmanager
+    data = []
+    # call session.getStatus() and get status from it too
+    temp = ses.getStatus()
 
-  def getThreadManager(self):
-    """ Retrieves the thread manager.
+    for mem in temp:
+      data.append(mem)
 
-    returns:
+    # loop through our managers and get status from them
+    managerkeys = self._managers.keys()
+    managerkeys.sort()
 
-      threadmanager.ThreadManager instance
-    """
-    return self._threadmanager
+    for mem in managerkeys:
+      temp = self.getManager(mem).getStatus(ses)
+      if temp:
+        data.append("   %s: %s" % (mem, temp))
+
+    # return the list of elements
+    return data

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.19 2002/05/11 18:06:48 willhelm Exp $
+# $Id: exported.py,v 1.20 2002/06/07 23:43:30 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -75,6 +75,35 @@ def get_commands():
   """
   return get_engine().getCommands()
 
+def add_manager(name, mgr):
+  """ Registers a manager with the engine.
+
+  arguments:
+
+    'name' -- (string) the name of the manager to register
+
+    'mgr' -- (manager instance) the manager instance to register
+  """
+  get_engine().addManager(name, mgr)
+
+def remove_manager(name):
+  """ Removes a manager from the engine.
+
+  argumnets:
+
+    'name' -- (string) the name of the manager to remove
+  """
+  get_engine().removeManager(name)
+
+def get_manager(name):
+  """ Retrieves a manager from the engine.
+
+  arguments:
+
+    'name' -- (string) the name of the manager to retrieve
+  """
+  return get_engine().getManager(name)
+
 def add_help(fqn, helptext):
   """ Adds a help topic to the structure.
 
@@ -88,7 +117,7 @@ def add_help(fqn, helptext):
     'helptext' -- (string) the help text
 
   """
-  get_engine().getHelpManager().addHelp(fqn, helptext)
+  get_engine().getManager("help").addHelp(fqn, helptext)
 
 def remove_help(fqn):
   """ Removes a help topic from Lyntin.
@@ -98,7 +127,7 @@ def remove_help(fqn):
     'fqn' -- (string) a . delmited string of categories ending
              with a help name.
   """
-  get_engine().getHelpManager().removeHelp(fqn)
+  get_engine().getManager("help").removeHelp(fqn)
 
 def get_help(fqn):
   """ Retrieves a help topic via a fully qualified name.
@@ -108,7 +137,7 @@ def get_help(fqn):
     'fqn' -- (string) a . delimited string of categories ending
              with a help name.
   """
-  return get_engine().getHelpManager().getHelp(fqn)
+  return get_engine().getManager("help").getHelp(fqn)
 
 def get_session(name):
   """
@@ -203,6 +232,7 @@ def write_test(text, session=None):
                       mud data is associated with
 
   """
+  text = str(text)
   if get_engine():
     get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.TESTDATA, session))
   else:
@@ -216,6 +246,7 @@ def write_message(text):
     'text' -- (string) the message to send
 
   """
+  text = str(text)
   if get_engine():
     get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.LTDATA))
   else:
@@ -232,6 +263,7 @@ def write_error(text, session=None):
                       mud data is associated with
 
   """
+  text = str(text)
   if get_engine():
     get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.ERROR, session))
   else:
@@ -248,6 +280,7 @@ def write_user_data(text, session=None):
                       mud data is associated with
 
   """
+  text = str(text)
   if get_engine():
     get_engine().writeUI(ui.ui.Message(text + "\n", ui.ui.USERDATA, session))
   else:
@@ -264,6 +297,7 @@ def write_mud_data(text, session=None):
                       mud data is associated with
 
   """
+  text = str(text)
   if get_engine():
     get_engine().writeUI(ui.ui.Message(text, ui.ui.MUDDATA, session))
   else:
@@ -277,7 +311,7 @@ def get_history(count=30):
     list of strings
 
   """
-  return get_engine().getHistoryManager().getHistory(count)
+  return get_engine().getManager("history").getHistory(count)
 
 def grep_databuffer(str, session):
   """ Not yet implemented."""

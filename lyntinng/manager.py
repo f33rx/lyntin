@@ -4,22 +4,20 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.4 2002/05/12 04:40:38 willhelm Exp $
+# $Id: manager.py,v 1.5 2002/05/28 03:42:40 willhelm Exp $
 #######################################################################
 """
 This module defines the basic manager which handles various things
-in the system.  All simple managers on a session scoping should extend 
-this class--this class is not meant to be instantiated on its own.
+in the system.
 
-To build a new manager on a session scoping, you need to 
+To build a new manager, you need to 
 
 1. extend the manager.Manager class below
 
-2. implement the manager's __copy__ to return a new instance of the
-   manager with the copied data
+2. create a load() method which adds the manager to the engine
+   via exported.add_manager(...)
 
-3. add a manager instantiation line to engine.initialize to instantiate
-   that manager
+3. implement all the methods herein that you need to implement
 
 """
 class Manager:
@@ -27,13 +25,18 @@ class Manager:
   def __init__(self):
     pass
 
-  def clear(self):
+  def clear(self, ses=None):
     """
     Removes everything the manager was managing--essentially reinitializes it.
+
+    arguments:
+
+      'ses' -- (session instance) the session this applies to.  None
+               if it's non applicable.
     """
     pass
 
-  def getInfo(self, text=''):
+  def getInfo(self, ses, text=''):
     """ Returns information managed by this class.
 
     This is mostly for display to the user--we shouldn't be using this
@@ -48,26 +51,67 @@ class Manager:
 
       a string of everything involved.
     """
-    pass
+    return ''
 
-  def getCount(self):
-    """ 
-    Similar to getInfo, except this just returns a count of how
-    many things we're managing in this manager.
+  def addSession(self, newsession, basesession=None):
     """
-    pass
-
-  def remove(self, str):
-    """
-    Removes things from this manager.
+    Tells the manager to create a new session based on another session.
+    For example, when we connected to the 3k mud, we would tell all
+    the managers to clone the common session to the new session created
+    thus populating the new session.
 
     arguments:
 
-      'str' -- (string) the string specifying the things to remove.
+      'newsession' -- (session instance) the new session just created.
+
+      'basesession=None' -- (session instance) the session to clone from.
+                            Use None if you don't want to clone from 
+                            anything.
+    """
+    pass
+
+  def removeSession(self, ses):
+    """
+    Tells the manager to remove information regarding the session.
+
+    arguments:
+
+      'ses' -- (session instance) the session to remove.
+    """
+    pass
+
+  def getState(self, ses):
+    """
+    Returns the state of something as a list of command strings
+    without the command char (which is added by #write).
+
+    For example, getState on teh AliasManager might return:
+
+      ["alias {t3k} {#ses a localhost 3000}",
+      "alias {toch} {nwnnen;vortex}"]
+      
+    arguments:
+
+      'ses' -- (session instance) the ses to persist
 
     returns:
 
-      a list of strings or a list of tuples of strings of the
-      things removed.
+      list of command strings
     """
-    pass
+    
+  def getStatus(self, ses):
+    """
+    Returns a one-liner status of the state of this manager for
+    a given session.  If this manager does not apply to sessions
+    (i.e. it's a global manager like ThreadManager), then it
+    should return an empty string.
+
+    arguments:
+
+      'ses' -- (session instance) the session to look at
+
+    returns:
+
+      a one-liner string of the status or an empty string
+    """
+    return ''

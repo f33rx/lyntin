@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.55 2002/05/31 00:01:48 willhelm Exp $
+# $Id: session.py,v 1.56 2002/06/07 23:43:30 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
 """
 import re, copy, string
-import deed, variable, data, exported, engine, hooks, utils, lyntin, event, ticker
+import data, exported, engine, hooks, utils, lyntin, event, ticker
 import argparser
 
 ESC = chr(27)
@@ -28,12 +28,9 @@ class Session:
     self._name = ""
     self._host = "none"
     self._port = 0
-    self._managers = {}
     self._logfile = None
     self._ticker = ticker.Ticker()
     self._colorbuffer = ''
-
-    self.setManager("deed", deed.DeedManager())
 
     self._databuffer = data.DataBuffer()
 
@@ -52,22 +49,10 @@ class Session:
 
     # register with the shutdown hook 
     hooks.shutdown_hook.register(self.shutdown)
+    hooks.write_hook.register(self.getWriteFileInfo)
 
-  def __copy__(self):
-    """ Copies the session and returns a new session with the same stuff.
-
-    We had problems using copy and deepcopy, so our method was
-    to implement our own version of copy.
-    """
-    ses = Session()
-    for mem in self._managers.keys():
-      ses._managers[mem] = copy.copy(self._managers[mem])
-    return ses
-      
   def __repr__(self):
     return "session.Session %s" % self._name
-     
-
 
   def getName(self):
     """ Returns the name of the session.
@@ -102,15 +87,17 @@ class Session:
     # unregister with the shutdown hook
     hooks.shutdown_hook.unregister(self.shutdown)
     if self.getName() != "common":
-      try: engine.myengine.unregisterSession(self.getName())
-      except: pass
+      try:
+        exported.get_engine().unregisterSession(self)
+      except Exception, e:
+        exported.write_message("Exception unregistering session %s." % e)
       if self._socket: self._socket.shutdown()
     event.OutputEvent("Session %s shutdown.\n" % self._name).enqueue()
     self._ticker.clear()
     hooks.disconnect_hook.spamhook((self, self._host, self._port))
 
-  def getInfo(self):
-    """ Returns information about the session.
+  def getStatus(self):
+    """ Returns status of the session.
 
     returns:
       
@@ -120,12 +107,6 @@ class Session:
     
     data.append("Session name: %s" % self._name)
     data.append("   socket: %s" % repr(self._socket))
-
-    managerkeys = self._managers.keys()
-    managerkeys.sort()
-
-    for mem in managerkeys:
-      data.append("   %s: %d" % (mem, self.getManager(mem).getCount()))
 
     data.append("   ticker: %s" % self.getTicker().getInfo())
     data.append("   logfile: %s" % self.getLogfileName())
@@ -150,34 +131,7 @@ class Session:
     else:
       data.append("   verbatim: imput is passed verbatim.")
 
-    return string.join(data, "\n")
-
-  def setManager(self, manager, object):
-    """ Sets a manager in the manager hash.
-
-    arguments:
-      
-      'manager' -- (string) the name of the manager
-
-      'object' -- (object instance) the manager instance itself
-    """
-    self._managers[manager] = object
-
-  def getManager(self, manager):
-    """ Retrieves a manager from the hash.
-
-    arguments:
-
-      'manager' -- (string) the name of the manager you want to retrieve
-
-    returns:
-      
-      None or the manager instance
-    """
-    if self._managers.has_key(manager):
-      return self._managers[manager]
-    else:
-      return None
+    return data
 
   def setTicker(self, ticker):
     """ Sets the ticker.
@@ -197,13 +151,15 @@ class Session:
     """
     return self._ticker
 
-  def getWriteFileInfo(self):
-    """ Pulls all the session information for #write command.
+  def getWriteFileInfo(self, args):
+    """ Implements the write_hook."""
+    ses = args[0]
 
-    returns:
+    if not ses == self:
+      return
 
-      (string)
-    """
+    file = args[1]
+
     data = []
 
     # saves speedwalking state
@@ -218,18 +174,14 @@ class Session:
     else: 
       data.append(lyntin.commandchar + "ansi off")
 
-    managerkeys = self._managers.keys()
-    managerkeys.sort()
-
-    for mem in managerkeys:
-      data.append(self._managers[mem].getInfo())
-
-    return string.join(data, "\n") + "\n"
+    file.write(string.join(data, "\n") + "\n")
 
   def clear(self):
     """ Clears the session (except for connections)."""
-    for mem in self._managers.values():
-      mem.clear()
+    engine = exported.get_engine()
+    for mem in engine._managers.values():
+      mem.clear(self)
+
     self._ticker.clear()
 
 
@@ -482,18 +434,20 @@ class ManagerFilterAdapter:
     self.function = function
 
   def __call__(self, args):
-    session = args[0]
+    ses = args[0]
     if self.function:
-      return self.function(session.getManager(self.managername),args)
+      return self.function(ses.getManager(self.managername),args)
     else:
-      return session.getManager(self.managername).filter(args)
+      return ses.getManager(self.managername).filter(args)
 
 
-hooks.user_filter_hook.register(ManagerFilterAdapter("variable"),0)
-hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
+"""
+# hooks.user_filter_hook.register(ManagerFilterAdapter("variable"),0)
+# hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
 hooks.user_filter_hook.register(ManagerFilterAdapter("speedwalk"),80)
-hooks.user_filter_hook.register(ManagerFilterAdapter("variable",variable.VariableManager.unescapeVariables),90)
-hooks.mud_filter_hook.register(ManagerFilterAdapter("gag"),20)
+# hooks.user_filter_hook.register(ManagerFilterAdapter("variable",variable.VariableManager.unescapeVariables),90)
+# hooks.mud_filter_hook.register(ManagerFilterAdapter("gag"),20)
 hooks.mud_filter_hook.register(ManagerFilterAdapter("substitute"),50)
-hooks.mud_filter_hook.register(ManagerFilterAdapter("action"),75)
+# hooks.mud_filter_hook.register(ManagerFilterAdapter("action"),75)
 hooks.mud_filter_hook.register(ManagerFilterAdapter("highlight"),90)
+"""

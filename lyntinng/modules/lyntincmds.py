@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.5 2002/06/01 18:02:34 willhelm Exp $
+# $Id: lyntincmds.py,v 1.6 2002/06/02 16:06:03 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -82,50 +82,6 @@ def datagreplines_cmd(session, args, input):
                          % (pattern, string.join(ret, "")))
 
 commands_dict["datagreplines"] = (datagreplines_cmd, "pattern size:int=300")
-
-
-def deed_cmd(session, args, input):
-  """
-  This adds a deed or prints all the deeds stored till now.
-
-  category: commands
-  """
-  # original deed_cmd code contributied by Sebastian John
-
-  if (session.getName() == "common"):
-    exported.write_error("deed cannot be applied to common session.")
-    return
-
-  deedtext = args["text"]
-  quiet = args["quiet"]
-
-  varexpansion = session.getManager("variable").expand(deedtext)
-  if varexpansion:
-    deedtext = varexpansion
-
-  if not deedtext:
-    data = session.getManager("deed").getInfo()
-    if data == "":
-      data = "deed: no deeds defined."
-    
-    exported.write_message(data)
-    return
-  
-  
-  if deedtext.isdigit():
-    data = session.getManager("deed").getInfo(deedtext)
-    if data == "":
-      data = "deed: no deeds defined."
-    
-    exported.write_message(data)
-    return
-  
-  session.getManager("deed").addDeed(deedtext)
-  if not quiet:
-    exported.write_message("deed: {%s} added." % deedtext)
-
-commands_dict["deed"] = (deed_cmd, "text= quiet:boolean=false")
-
 
 
 def diagnostics_cmd(session, args, input):
@@ -221,100 +177,6 @@ def raw_cmd(session, args, input):
   session.writeSocket(args["input"] + "\n")
   
 commands_dict["raw"] = (raw_cmd, "input=", "limitparsing=0")
-
-
-def swdir_cmd(session, args, input):
-  """
-  This adds speedwalking aliases and tells you the current speedwalking dirs
-  already registered.
-
-  category: commands
-  """
-  # originally written by Sebastian John
-  alias = args["alias"]
-  dir = args["dir"]
-  quiet = args["quiet"]
-
-  # they typed '#swdir'--print out all the current speedwalking dirs
-  if not alias and not dir:
-    data = session.getManager("speedwalk").getDirsInfo()
-    if data == '':
-      data = "swdir: no speedwalking dirs defined."
-
-    exported.write_message(data)
-    return
-
-  # they typed '#swdir dd*' and are looking for matching speedwalking dirs
-  if not dir:
-    data = session.getManager("speedwalk").getDirsInfo(alias)
-    if data == '':
-      data = "swdir: no speedwalking dirs defined."
-
-    exported.write_message(data)
-    return
-
-  try:
-    session.getManager("speedwalk").addDir(alias, dir)
-    if not quiet:
-      exported.write_message("swdir: {%s} {%s} added." % (alias, dir))
-  except ValueError, e:
-    exported.write_error("swdir: cannot add alias: %s." % e)
-
-commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
-
-
-def swexclude_cmd(session, args, input):
-  """
-  This adds speedwalking excludes and tells you the current excludes
-  already registered. Excludes are a bit like antisubstitutes, but for
-  speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
-  get speedwalk-parsing.
-
-  category: commands
-  """
-  # originally written by Sebastian John
-  excludes = args["exclude"]
-  quiet = args["quiet"]
-
-  # they typed '#swexclude'--print out all current speedwalking excludes
-  if len(excludes) == 0:
-    data = session.getManager("speedwalk").getExcludesInfo()
-    if data == '':
-      data = "swexcl: no speedwalking excludes defined."
-
-    exported.write_message(data)
-    return
-
-  for exclude in excludes:
-    session.getManager("speedwalk").addExclude(exclude)
-    if not quiet:
-      exported.write_message("swexclude: {%s} added." % exclude)
-
-commands_dict["swexclude"] = (swexclude_cmd, "exclude* quiet:boolean=false")
-
-
-def unswdir_cmd(session, args, input):
-  """
-  Allows you to remove swdirs.
-
-  category: commands
-  """
-  func = session.getManager("speedwalk").removeDirs
-  modutils.unsomething_helper(args, func, "swdir", "swdirs")
-
-commands_dict["unswdir"] = (unswdir_cmd, "str= quiet:boolean=false")
-
-
-def unswexclude_cmd(session, args, input):
-  """
-  Allows you to remove swexcludes.
-
-  category: commands
-  """
-  func = session.getManager("speedwalk").removeExcludes
-  modutils.unsomething_helper(args, func, "swexclude", "swexcludes")
-
-commands_dict["unswexclude"] = (unswexclude_cmd, "str= quiet:boolean=false")
 
 
 def load():

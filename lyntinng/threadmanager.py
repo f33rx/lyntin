@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: threadmanager.py,v 1.5 2002/04/11 03:58:22 willhelm Exp $
+# $Id: threadmanager.py,v 1.6 2002/06/01 18:02:34 willhelm Exp $
 #######################################################################
 """
 The thread manager allows us to centralize the management of
@@ -13,8 +13,9 @@ really _do_ anything other than make sure they're all initialized
 the same way.
 """
 from threading import Thread
+import manager
 
-class ThreadManager:
+class ThreadManager(manager.Manager):
   """ Manages threads.
 
   This centralizes thread creation so that we can keep track
