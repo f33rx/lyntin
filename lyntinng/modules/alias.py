@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.6 2002/07/11 04:11:19 willhelm Exp $
+# $Id: alias.py,v 1.7 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
 compiling, and checking and such.
 """
 import string
-import manager, utils, lyntin, exported, hooks, modutils, re
+import manager, utils, lyntin, exported, hooks, modutils
 
 class AliasData:
   """ Manages aliases."""

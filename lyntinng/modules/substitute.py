@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
+# $Id: substitute.py,v 1.6 2002/07/24 01:32:36 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -206,7 +206,7 @@ def substitute_cmd(ses, args, input):
     exported.write_message(data)
     return 
 
-  exported.sm.addSubstitute(ses, item, substitution)
+  sm.addSubstitute(ses, item, substitution)
   if not quiet:
     exported.write_message("substitute: {%s} {%s} added." % (item, substitution))
 

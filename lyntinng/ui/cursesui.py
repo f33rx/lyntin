@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.15 2002/07/07 04:53:45 willhelm Exp $
+# $Id: cursesui.py,v 1.16 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -19,8 +19,6 @@ def get_ui_instance():
     myui = Cursesui()
   return myui
 
-class MessageTypeUnknown(Exception): pass
-class IllegalTupleinstrtoDisplay(Exception): pass
 class Cursesui(ui.BaseUI):
   """
   Anyhow, this is a very un-fully-featured curses ui at the moment.
@@ -67,10 +65,6 @@ class Cursesui(ui.BaseUI):
                        curses.COLOR_MAGENTA,
                        curses.COLOR_CYAN,
                        curses.COLOR_WHITE]
-    #supported prompts
-    self._Prompts = { '' : '\nlyntin: ', ui.ERROR :'\nerror: ',
-                      ui.LTDATA : '\nlyntin: ', 
-                      ui.USERDATA : '', ui.MUDDATA : ''}
 
     #partial color code support
     self._isPartialLine = 0
@@ -163,17 +157,6 @@ class Cursesui(ui.BaseUI):
     curses.endwin()
 
 
-  def getPrompt(self, message_type):
-    """
-    returns the prompt as a string
-    """
-    userPrompt = ""
-    if self._Prompts.has_key(message_type):
-      return self._Prompts[message_type]
-    else:
-      return ""
-
-
   def getColor(self, ansi_code):
     """
     getColor string -> ansi code which is everything inbetween [ and m
@@ -228,10 +211,10 @@ class Cursesui(ui.BaseUI):
     if returnCode == 'X':
       return 'N 3740'
  
-    #------------> area below is to check to that a complete color code is returned ie X 3740
+    # rea below is to check to that a complete color code is returned ie X 3740
     #  forgBackColor[0] = attributes string
     #  forgBackColor[1] = forgroundBackground colors ie 3740
-    #---------------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
       
     findNumber = self._aNumber_re.search(returnCode)
     returnCode_len = len(returnCode)
@@ -362,12 +345,30 @@ class Cursesui(ui.BaseUI):
     if message.data == '':
       return
 
-    if message.type == ui.USERDATA and message.data[-1] == "\n":
-      message.data = message.data[:-1]
+    if message.type == ui.ERROR:
+      if message.data[-1] == "\n":
+        line = message.dataself._txt.insert('end', message.data[:-1], "44")
+        self._txt.insert('end', "\n")
+      else:
+        self._txt.insert('end', message.data, "44")
 
-    # set prompt
-    myPrompt = self.getPrompt(message.type)
-    
+    elif message.type == ui.USERDATA:
+      if lyntin.mudecho == 1:
+        if message.data[-1] == "\n":
+          self._txt.insert('end', message.data[:-1], "44")
+          self._txt.insert('end', "\n")
+        else:
+          self._txt.insert('end', message.data, "44")
+
+    elif message.type == ui.LTDATA:
+      if message.data[-1] == "\n":
+        message.data = "# " + message.data[:-1].replace("\n", "\n# ") + "\n"
+      else:
+        message.data = "# " + message.data.replace("\n", "\n# ")
+
+    elif message.type == ui.MUDDATA:
+      line = message.data
+
     # chop up message by color
     if message.data.find(self._colorEscape) == -1:
       newColorLines = [message.data]

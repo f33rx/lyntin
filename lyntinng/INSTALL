@@ -4,7 +4,7 @@
 VERSION
 =======
 
-$Id: INSTALL,v 1.10 2002/07/21 18:07:09 willhelm Exp $
+$Id: INSTALL,v 1.11 2002/07/22 22:33:04 willhelm Exp $
 
 For more up-to-date documentation, check out the web-site at:
 http://lyntin.sourceforge.net/
@@ -24,10 +24,9 @@ UNIX/LINUX
 
 Requirements:
 
-1. Python 2.2
+1. Python 2.2 (with Tkinter if you want to use the tkui) http://www.python.org/
 2. tar
 3. gzip
-4. Python 2.2 Tkinter stuff (if you plan on using the Tk ui)
 
 
 Steps:
@@ -51,7 +50,7 @@ WINDOWS
 
 Requirements:
 
-1. Python 2.2
+1. Python 2.2 http://www.python.org/
 2. Winzip or some other pkzip extracting program
 
 
@@ -69,3 +68,7 @@ Steps:
    Target:    {path_to_python}\pythonw.exe c:\lyntin\lyntin.py --ui tk
    Start in:  c:\lyntin
    Run:       Normal window
+
+Note: *{path_to_python}* needs to be replaced with the actual path to
+the ``pythonw.exe``.  So if ``pythonw.exe`` is in ``c:\python22\bin``
+use that.

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.22 2002/07/11 04:11:20 willhelm Exp $
+# $Id: textui.py,v 1.23 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -44,6 +44,7 @@ class Textui(ui.BaseUI):
     hooks.to_user_hook.register(self.write)
     exported.add_help("textui", HELP_TEXT)
     engine.myengine.startthread("ui", self.run)
+    exported.write_message("For textui help, type \"#help textui\".")
 
   def run(self):
     """ This is the poll loop for user input."""
