@@ -430,42 +430,6 @@ COMMANDS.NOP
 
 
 
-COMMANDS.POWERGAG
-
-   syntax: #powergag [<GAG>] [<QUIET:BOOLEAN=false>] 
-   
-   With no arguments, prints all powergags.
-   Otherwise creates a powergag.
-   
-   Braces are advised around 'gag'.
-
-
-
-COMMANDS.POWERGAGHIST
-
-   syntax: #powergaghist [<COUNT:INT=30>] 
-   
-   Retrieves history for this powergag session.  All the things that
-   have been gagged are in the history.
-
-
-
-COMMANDS.PPRINT
-
-   syntax: #pprint [MANAGER] [ITEM] 
-   
-   Pulls the variable/alias/action from the appropriate manager and
-   pretty-prints it making it easier to see.
-   
-   ex:
-   
-     #pprint {alias} {killall}
-   
-     will pretty print the killall alias from the alias manager for 
-     this session.
-
-
-
 COMMANDS.RAW
 
    syntax: #raw [<INPUT>] 
@@ -501,26 +465,6 @@ COMMANDS.READ
 
 
 
-COMMANDS.SCHEDULE
-
-   syntax: #schedule [TICK:TIMESPAN] [EVENT] [<QUIET:BOOLEAN=false>] 
-   
-   Very super basic scheduler.  It takes in a tick amount, an event
-   string and an optional boolean quiet argument.:
-   
-   examples:
-   
-     #schedule {5} {#showme blah}
-   
-   will kick off 5 ticks from now (a tick is approx one second) and
-   will execute "#showme blah".
-   
-     #schedule {1m30s} {#showme blah}
-   
-   will kick off in 1 minute and 30 seconds.
-
-
-
 COMMANDS.SESSION
 
    syntax: #session [<SESSIONNAME>] [<HOST>] [<PORT:INT=-1>] 
@@ -545,50 +489,6 @@ COMMANDS.SESSION
 
 
 
-COMMANDS.SETIDLE
-
-   syntax: #setidle [ONOFF:BOOLEAN] [<AMOUNT:INT=-1>] 
-   
-   This allows you to idle and when you're idling at the keyboard it
-   can automatically switch you into an idle mode.  When you come back
-   and enter in a command (like hitting the enter key), then it'll switch
-   you out of idle mode.
-   
-   Switching into the idle mode involves executing the alias for that
-   session called STARTIDLE.
-   
-   Switching out of idle mode involves executing the alis for that session
-   called ENDIDLE.
-   
-   arguments:
-   
-     onoff - sets the idle checker on and off
-   
-     amount - the amount of time that needs to pass before the STARTIDLE
-              alias is executed
-
-
-
-COMMANDS.SETSTATUS
-
-   syntax: #setstatus [NAME] [<VALUE>] [<SORTKEY>] 
-   
-   Allows you to set the title bar in xterms (gnome-terminal, putty, 
-   ...) for the textui and in the Tk title bar for the tkui with status 
-   text formed of a series of name/value pairs.
-   
-   examples:
-   
-     #setstatus hps 400
-   
-   adds "hps: 400" to the title bar.
-   
-     #setstatus hps
-   
-   removes the hps thing from the title bar.
-
-
-
 COMMANDS.SHOWME
 
    syntax: #showme [<INPUT>] 
@@ -598,30 +498,6 @@ COMMANDS.SHOWME
    
    examples:
      #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
-
-
-
-COMMANDS.SHOWME2
-
-   syntax: #showme2 [<INPUT>] 
-   
-   Will display text on your screen.  Doesn't get sent to the mud--
-   just your screen.
-   
-   examples:
-     #action {^%0 annihilates you!} {#showme {EJECT! EJECT! EJECT!}}
-
-
-
-COMMANDS.SNOOP
-
-   syntax: #snoop [SESSION] [<MODE:BOOLEANORNONE>] 
-   
-   Sets the session specified into or out of snooping mode.
-   
-   examples:
-     #snoop a          -- tells you whether a is in snoop mode
-     #snoop a on       -- sets snoop mode for a
 
 
 
@@ -769,14 +645,6 @@ COMMANDS.UNHIGHLIGHT
    examples:
      #highlight {hello}
      #highlight {blah*}
-
-
-
-COMMANDS.UNPOWERGAG
-
-   syntax: #unpowergag [<STR>] [<QUIET:BOOLEAN=false>] 
-   
-   Allows you to remove powergags.
 
 
 
