@@ -379,7 +379,7 @@ class UserSession(Session):
 
     # write something to our connection
     def WriteTo(self, data):
-        mud.log(data)
+        # mud.log(data)
         self.log(data)
         if not self.connected:
             player.PutError("data.WriteTo: ** Internal Error: not connected  **")
