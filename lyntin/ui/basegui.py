@@ -1,6 +1,20 @@
 #!/usr/local/bin/python1.4
 
 ####
+## The general style of the functions in this file is like the
+## following and is different from the former style to improve
+## readability and everyone's ability to not need a reference
+## as much.  As it is, it would be a problem for Scrollback
+## and ScrollBack... is it two words and even if it's one,
+## does it deserve two caps?  Quite the dilemna, I know.  I
+## would be up all night trying to decide so instead, the new
+## standard is word_word_word() and no caps.  The old
+## functions will be supported for a time but seeing that they
+## did not follow a standard anyway, I picked from the two
+## choices the one which I believed the most programmer
+## friendly.  -- James
+
+####
 ## import what you need here :)
 ## from Tkinter import *
 ## import tkhistentry, string, mud, sys, os, font, regex, data
@@ -20,6 +34,8 @@
 
 class Gui:
     def __init__(self):
+	self.support_hash = {'echo':0}
+	self.scrollback_in_use=0
 ####
 ## setup the entire display but do not enter a loop or anything yet
 ## this would include making widgets and setting the title bar
@@ -34,7 +50,7 @@ class Gui:
 ##         self.currcolors = (0, 37, 40)
 ##         self.regcolors = (0, 37, 40)
 ##         self.unfinishedcolor = (0, "")
-        
+	
         
 ##         if os.name != 'posix':
 ##             # require tcl/tk 8.0 on windows
@@ -81,6 +97,14 @@ class Gui:
         
 ##         self.InitColorTags()
 
+	def supports(self,str):
+	    answer=None
+	    try:
+		answer=self.support_hash[str]
+	    except:
+		return None
+	    return answer
+
 ####
 ## These should all be functions of some sort that are executed by bound keys
 ## not sure how these sorts of bindings would work but it's necessary that
@@ -122,6 +146,53 @@ class Gui:
 ##         else:
 ##             self.entry.clear_input()
 
+    def scrollback_open(self):
+	"""scrollback_open(self)->None
+
+	opens the scrollback for the client which is to be maintained
+	by the UI because... it's easier that way.  There may be a
+	module to handle this for the client which the client may use
+	in the future but for now, the way it's done in tkgui is just
+	to copy the stuff from the main window into another one and
+	display it taking half the screen.  This seems to work well
+	and I'm fine with using that method for others until there
+	actually is some sort of device separate from the engine but
+	also UI independant.
+	"""
+	self.scrollback_in_use=1
+	pass
+
+    def scrollback_backward(self):
+	"""scrollback_backward(self)->None
+
+	Scrolls back the scrollback.  If the scrollback is not open
+	yet, it should be opened by this.
+	"""
+	if self.scrollback_in_use==1:
+	    #scroll it back here.  not after the else
+	    pass
+	else:
+	    self.scrollback_open()
+	return None
+
+    def scrollback_forward(self):
+	"""scrollback_forward(self)->None
+
+	Scrolls the scrollback forward if it's open and does nothing
+	if it's not.
+	"""
+	if self.scrollback_in_use==1:
+	    #scroll it forward
+	    pass
+	return None
+
+    def scrollback_close(self):
+	"""ScrollbackClose(self)->None
+
+	Closes scrollback.
+	"""
+	return None
+
     def mainloop(self):
 #        self.tk.after(100, self.iterate)
 #        self.tk.mainloop()
@@ -145,8 +216,14 @@ class Gui:
 	Returns if the client has the ability to turn on and off echoing
 	for passwords and other stuff (the telnet echo option, mainly)
 	"""
-        return 0 #default is 0 because... this UI doesn't even have a display
+        return self.supports['echo'] #default is 0 because... this UI doesn't even have a display
     
+    def echo_on(self,yesno):
+	if yesno:
+	    self.OnEcho()
+	else:
+	    self.OffEcho()
+	
     # turn on echo
     def OnEcho(self):
 	"""OnEcho(self) -> None
@@ -168,6 +245,9 @@ class Gui:
 ##        self.entry.configure(show='*')
 
 
+    def close(self): #SFN This function name is more in the python style.
+	self.CloseUI()
+
     def CloseUI(self):
 	"""CloseUI(self) -> None
 
@@ -175,20 +255,28 @@ class Gui:
 	"""
         pass
 
-    def PrintLineFromClient(self,line):
-	self.PrintString(string.join(['\033[0;45m',line,'\n'],''))
-
-    def PrintLineFromUser(self,line):
-	self.PrintString(string.join(['\033[0;44m',line,'\n'],''))
-
-    def PrintLineFromMud(self,line):
-	self.PrintString(line)
-
-    def PrintString(self,line):
-	"""PrintString(self,line)->None
+    def print_string(self,line,modifiers=None,ending='\n'):
+	"""print_string(self,line)->None
 
 	Print a string to the UI after processing for escapes such
-	as ANSI colors.
+	as ANSI colors.  The variable 'ending' can be set to '' to
+	accomodate a line which already has a proper ending and
+	modifiers can be any of a set of options which will be set
+	in the future.  For now, use the strings 'client' or 'user'
+	to variate from the default behavior of absolutely nothing.
+	When a modifier is used, there will be an option for having
+	it change what the current modifiers in the UI are or not
+	or if it should simply be used temporarily to facilitate
+	strings sent from the client which need special processing
+	but should not have an effect on the text from the session.
+	The current idea is to have a few predefined standards and
+	then to use something like ansi:31;45 for that ANSI color
+	option.  Options will be split on comma to make things
+	simple (yeah, that's still a main point even though this
+	is somewhat involved.)  This is believed (by me, James) to
+	be the most all around useful solution.  This
+	documentation will obviously need to be trimmed before the
+	release because it will be wrong then.
 	"""
 	pass #because this isn't real
 
@@ -198,7 +286,7 @@ class Gui:
         Prints a message from the client to the player
         changing the background color to magenta.
         """
-	self.PrintLineFromClient(line)
+	self.Print(line,'client')
 ##        if line:
 ##            self.txt.configure(state='normal')
 ##            self.txt.insert('end', line, "50")
@@ -217,7 +305,7 @@ class Gui:
         color and a white foreground color.  Lets you immediately
         discern what's input vs. what's output.
         """
-	self.PrintLineFromUser(line)
+	self.Print(line,'user')
 ##        if line:
 ##            # FIXME?
 ##            line = line[:-1]
@@ -239,14 +327,14 @@ class Gui:
 ##        if line:
 ##            self.PutReallyUntouchedLine(line)
 ##            self.PutReallyUntouchedLine('\n')
-	self.PrintString(line+'\n')
+	self.Print(line)
 
     def PutReallyUntouchedLine(self, line):
 	"""PutReallyUntouchedLine(self, line) -> None
 
 	Prints a line for the user without any preprocessing
 	"""
-	self.PrintString(line)
+	self.Print(line,ending='')
 ##         if line:
 ##             mud.log('really untouched ' + line)
 ##             mud.log('last char: ' + line[-1])
@@ -350,6 +438,9 @@ class Gui:
 ##         for ck in colorKeys:
 ##             self.txt.tag_config(ck, background=codes[ck])
 
+    def get_input(self):
+	return None
+
 
     # check for stuff from input
     def GetUserInput(self):
@@ -357,7 +448,7 @@ class Gui:
 
     returns the user input once enter has been hit and None otherwise
     """
-	return None
+	return self.get_input
 ##         if self.entry.input:
 ##             retval = self.entry.input[0]
 ##             del self.entry.input[0]
