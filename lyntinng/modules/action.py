@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.22 2002/12/09 15:25:38 willhelm Exp $
+# $Id: action.py,v 1.23 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -133,7 +133,6 @@ class ActionData:
     @type  text: string
     """
     # FIXME - make sure this works even when lines are broken up.
-
     matched = []
 
     # go through all the lines in the data and see if we have
@@ -163,7 +162,11 @@ class ActionData:
         # matched on the trigger
         response = utils.expand_vars(response, varvals)
 
-        event.InputEvent(response, internal=1, ses=self._ses).enqueue()
+        # event.InputEvent(response, internal=1, ses=self._ses).enqueue()
+        try:
+          exported.lyntin_command(response, internal=1, session=self._ses)
+        except:
+          exported.write_traceback()
 
         if onetime:
           del self._actions[action]

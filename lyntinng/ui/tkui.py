@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.30 2003/01/01 21:16:35 willhelm Exp $
+# $Id: tkui.py,v 1.31 2003/01/11 04:48:38 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -195,8 +195,8 @@ class Tkui(ui.BaseUI):
     try:
       ev = self._event_queue.get_nowait()
       ev.execute(self)
-    except:
-      pass
+    except Exception, e:
+      print e
     self._tk.after(100, self.dequeue)
 
   def settitle(self, title=""):
@@ -1002,7 +1002,7 @@ def buffer_write(message, txtbuffer, currentcolor, unfinishedcolor):
           fg = str(color[ansi.PLACE_BG] - 10)
 
         if color[ansi.PLACE_FG] == -1:
-          bg = "37"
+          bg = "47"
         else:
           bg = str(color[ansi.PLACE_FG] + 10)
 

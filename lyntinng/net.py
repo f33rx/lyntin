@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.29 2002/12/24 00:48:19 willhelm Exp $
+# $Id: net.py,v 1.30 2002/12/31 00:03:59 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -27,6 +27,7 @@ CODES = {255: "IAC",
          250: "SB",
          249: "GA",
          240: "SE",
+         239: "TELOPT_EOR",
          0:   "<IS>",
          1:   "[<ECHO> or <SEND>]",
          3:   "<SGA>",
@@ -47,6 +48,7 @@ SB   = chr(250)
 GA   = chr(249)
 NOP  = chr(241)
 SE   = chr(240)
+TELOPT_EOR = chr(239)
 SEND = chr(1)
 IS   = chr(0)
 
@@ -302,7 +304,7 @@ class SocketCommunicator:
         i = i + 1
         self.logControl("receive: IAC IAC")
 
-      elif data[i+1] == EOR:
+      elif data[i+1] == TELOPT_EOR:
         # data = data[:i] + data[i+1:]
         data = data[:i] + data[i+2:]
         # FIXME - right now we're taking out the EOR because I don't
