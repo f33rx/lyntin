@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.5 2002/01/20 07:21:02 willhelm Exp $
+# $Id: tkgui.py,v 1.6 2002/01/23 01:28:15 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -207,7 +207,7 @@ class TkGui(ui.BaseUI):
     This is overridden from the baseui.
     """
     if type(message) == type(''):
-      message = ui.Message(message, ui.SBDATA)
+      message = ui.Message(message, ui.LTDATA)
 
     if message.data == '':
       return
@@ -220,7 +220,7 @@ class TkGui(ui.BaseUI):
       if os.name != 'posix':
         self._txt.yview('scroll', '20', 'units')
 
-    elif message.type == ui.SBDATA:
+    elif message.type == ui.LTDATA:
       message.data = "# " + string.replace(message.data, "\n", "\n# ")
       self._txt.insert('end', message.data)
       self._txt.insert('end', "\n")

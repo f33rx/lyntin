@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.3 2001/12/24 02:59:44 willhelm Exp $
+# $Id: event.py,v 1.4 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -81,14 +81,14 @@ class StartupEvent(Event):
       from ui.textui import Textui
       engine.myengine.setUI(Textui())
 
-    engine.myengine.writeMessage("UI started.")
+    engine.write_message("UI started.")
 
     # import modules listed in modulesinit
-    engine.myengine.writeMessage("Importing modules in modules directory.")
+    engine.write_message("Importing modules in modules directory.")
     try:
       import modules.modulesinit
     except:
-      engine.myengine.writeError("Modules did not load correctly.")
+      engine.write_error("Modules did not load correctly.")
       ShutdownEvent().enqueue()
       traceback.print_exc()
 
@@ -98,7 +98,7 @@ class StartupEvent(Event):
     # handle command files
     f = lyntin.options['readfile']
     if f != '':
-      engine.myengine.writeMessage("Reading in file " + f)
+      engine.write_message("Reading in file " + f)
       engine.myengine.getSession('common').handleUserData('#read ' + f)
 
     # start the timer thread
@@ -111,7 +111,7 @@ class StartupEvent(Event):
                "For help, type #help general.\n" +
                "------------------------------------\n")
 
-    engine.myengine.writeMessage(message)
+    engine.write_message(message)
     engine.myengine.writePrompt()
 
 
@@ -129,7 +129,7 @@ class ShutdownEvent(Event):
   def execute(self):
     """ Execute the shutdown."""
     import time
-    engine.myengine.writeMessage("shutting down...  goodbye.")
+    engine.write_message("shutting down...  goodbye.")
     engine.myengine.spamfreq(engine.SHUTDOWNFREQ)
     sys.exit(0)
 
@@ -183,7 +183,7 @@ class ReloadEvent(Event):
     except:
       message = "reload unsuccessful: " + self._name
 
-    engine.myengine.writeMessage(message)
+    engine.write_message(message)
  
 
 class MudEvent(Event):
@@ -223,7 +223,7 @@ class InputEvent(Event):
 
   def execute(self):
     """ Execute."""
-    engine.myengine.writeUserData(self._input)
+    engine.write_user_data(self._input)
     engine.myengine.handleUserData(self._input)
 
 
@@ -245,7 +245,7 @@ class OutputEvent(Event):
 
   def execute(self):
     """ Execute."""
-    engine.myengine.writeUI(self._message)
+    engine.write_ui(self._message)
 
 
 class SpamEvent(Event):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.3 2002/01/20 07:21:02 willhelm Exp $
+# $Id: net.py,v 1.4 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -47,7 +47,7 @@ class SocketCommunicator:
     self._shutdownflag = 1
     if self._sock:
       event.OutputEvent("Lost connection to: " + self._host).enqueue()
-      # engine.myengine.writeMessage("Lost connection to: " + self._host)
+      # engine.write_message("Lost connection to: " + self._host)
       self._sock.shutdown(2)
       self._sock.close()
       self._sock = None
@@ -68,7 +68,7 @@ class SocketCommunicator:
     if type(port) == type(''):
       port = int(port)
 
-    engine.myengine.writeMessage("Trying to connect to " + host + ".")
+    engine.write_message("Trying to connect to " + host + ".")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((host, port))
     sock.setblocking(1)
@@ -77,7 +77,7 @@ class SocketCommunicator:
     self._port = port
     self._sock = sock
     self._sessionname = sessionname
-    engine.myengine.writeMessage("Connection made.")
+    engine.write_message("Connection made.")
          
   def run(self):
     """ Polls a socket and returns any data sitting there."""

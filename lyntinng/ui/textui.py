@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: textui.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -56,8 +56,8 @@ class Textui(ui.BaseUI):
     to the user.
     """
     if type(message) == type(''):
-      sys.stdout.write ("sb: " + 
-           message.replace("\n", "\nsb: ") + "\n")
+      sys.stdout.write ("lyntin: " + 
+           message.replace("\n", "\nlyntin: ") + "\n")
       return
 
     if message.type == ui.MUDDATA:
@@ -68,9 +68,9 @@ class Textui(ui.BaseUI):
       sys.stdout.write ("error: " + 
             message.data.replace("\n", "\nerror: ") + "\n")
 
-    elif message.type == ui.SBDATA:
-      sys.stdout.write ("sb: " + 
-            message.data.replace("\n", "\nsb: ") + "\n")
+    elif message.type == ui.LTDATA:
+      sys.stdout.write ("lyntin: " + 
+            message.data.replace("\n", "\nlyntin: ") + "\n")
 
     elif message.type == ui.TESTDATA:
       sys.stdout.write ("\nTEST: " + 

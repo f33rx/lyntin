@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: cursesui.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -94,15 +94,15 @@ class Cursesui(ui.BaseUI):
     Overridden from the baseui.
     """
     if type(message) == type(''):
-      message = ui.Message(message, ui.SBDATA)
+      message = ui.Message(message, ui.LTDATA)
 
     message.data = utils.filter_cm(utils.filter_ansi(message.data))
 
     if message.type == ui.ERROR:
       message.data = message.data.replace("\n", "\nerror: ") + "\n"
 
-    elif message.type == ui.SBDATA:
-      message.data = message.data.replace("\n", "\nsb: ") + "\n"
+    elif message.type == ui.LTDATA:
+      message.data = message.data.replace("\n", "\nlyntin: ") + "\n"
 
     elif message.type == ui.TESTDATA:
       message.data = message.data.replace("\n", "\nTEST: ") + "\n"

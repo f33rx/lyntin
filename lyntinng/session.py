@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.6 2002/01/20 07:21:02 willhelm Exp $
+# $Id: session.py,v 1.7 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -268,7 +268,7 @@ class Session:
             break
 
       else:
-        engine.myengine.writeError("Not a valid command.")
+        engine.write_error("Not a valid command.")
         if internal==0: self._prompt()
       return
 
@@ -285,7 +285,7 @@ class Session:
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
     if self._socket == None:
-      engine.myengine.writeError("No connection.  Create a session.")
+      engine.write_error("No connection.  Create a session.")
       if internal==0: self._prompt()
       return
 
@@ -324,7 +324,7 @@ class Session:
       # handle highlights 
       input = self.getHighlightManager().expand(input)
 
-    engine.myengine.writeMudData(input)
+    engine.write_mud_data(input)
 
   def log(self, input):
     """ Logs text to a file instance in self._logfile."""
@@ -332,5 +332,5 @@ class Session:
       # FIXME - this assumes unix files
       self._logfile.write(utils.filter_ansi(utils.filter_cm(input)))
     except:
-      engine.myengine.writeError("Logfile cannot be written to.")
+      engine.write_error("Logfile cannot be written to.")
       self._logfile = None

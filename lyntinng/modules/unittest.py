@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: unittest.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: unittest.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 import string, traceback, sys
 import utils, engine
@@ -78,41 +78,41 @@ def test_cmd(session, words, input):
     else:
       data = "There are no tests registered."
 
-    engine.myengine.writeMessage(data)
+    engine.write_message(data)
     return
 
   if words[1] == 'all':
-    engine.myengine.writeTest("Running all tests.")
+    engine.write_test("Running all tests.")
     for mem in test_lookup.keys():
       run_test(test_lookup[mem])
     return
 
   if test_lookup.has_key(words[1]):
-    engine.myengine.writeTest("Running test: " + words[1])
+    engine.write_test("Running test: " + words[1])
     run_test(test_lookup[words[1]])
   else:
-    engine.myengine.writeError("There is no test for '" + words[1] + "'")
+    engine.write_error("There is no test for '" + words[1] + "'")
 
 
 def run_test(testsequence):
   """ Runs a test sequence."""
-  engine.myengine.writeTest("BEGINNING OF TEST.")
+  engine.write_test("BEGINNING OF TEST.")
   for mem in testsequence:
     # we use print to allow tests to tell the user what they
     # should be looking for
     if mem.find("print") == 0:
-      engine.myengine.writeTest(mem.split(' ', 1)[1])
+      engine.write_test(mem.split(' ', 1)[1])
       continue
 
-    engine.myengine.writeTest("test: '" + mem + "'")
+    engine.write_test("test: '" + mem + "'")
     # if it's not a print, then it's a lyntin command
     try:
       engine.myengine.handleUserData(input=mem, internal=1)
     except:
-      engine.myengine.writeTest("exception:\n" + 
+      engine.write_test("exception:\n" + 
          string.join(traceback.format_list(traceback.extract_tb()), '\n'))
 
-  engine.myengine.writeTest("END OF TEST.")
+  engine.write_test("END OF TEST.")
 
 
 engine.myengine.addCommand("^test", test_cmd)

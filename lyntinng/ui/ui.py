@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ui.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: ui.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 Holds the ui components in lyntin as well as the Message
@@ -15,23 +15,23 @@ will display the message differently depending on the type.
 import string, re, sys
 import engine, event, utils
 
-ERROR = 0
-USERDATA = 1
-MUDDATA = 2
-SBDATA = 3
-TESTDATA = 4
+ERROR = "ERROR: "
+USERDATA = "USERDATA: "
+MUDDATA = "MUDDATA: "
+LTDATA = "LTDATA: "
+TESTDATA = "TESTDATA: "
 
 MESSAGETYPES = {ERROR: "ERROR: ",
                 USERDATA: "USERDATA: ",
                 MUDDATA: "MUDDATA: ",
-                SBDATA: "SBDATA: ",
+                LTDATA: "LTDATA: ",
                 TESTDATA: "TESTDATA: "}
 
 class Message:
   """
   Encapsulates a message to be written to the user.
   """
-  def __init__(self, data, messagetype=SBDATA):
+  def __init__(self, data, messagetype=LTDATA):
     """ Initialize."""
     self.data = data
     self.type = messagetype

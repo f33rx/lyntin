@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: ticker.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -102,11 +102,11 @@ class Ticker:
           input = lyntin.commandchar + self._sessionname + " " + action
           event.InputEvent(input).enqueue()
         else:
-          engine.myengine.writeMessage("TICK!!!")
+          engine.write_message("TICK!!!")
 
       # if this is a tickwarn...
       if tick % self._ticklen == self._ticklen - self._tickwarn:
-        engine.myengine.writeMessage("ticker: " +
+        engine.write_message("ticker: " +
               repr(self._tickwarn) + " seconds to tick!")
 
     else:

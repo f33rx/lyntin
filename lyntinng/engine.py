@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.7 2001/12/24 03:45:48 willhelm Exp $
+# $Id: engine.py,v 1.8 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -21,6 +21,9 @@ interface without affecting the rest of lyntin at all.
 
 The engine module holds a variable which is a singleton: 'myengine'.
 To access the engine, access it by 'engine.myengine'.
+
+It also holds a series of helper functions for making common engine
+calls easier to deal with.
 """
 import Queue, traceback, copy, string, re
 import threadmanager, session, ui.ui, alias, lyntin, utils
@@ -41,6 +44,69 @@ TIMERFREQ = "timerfreq"
 
 FIRST = 0
 LAST = 99
+
+def write_ui(text):
+  """ Calls engine.myengine.writeUI which writes a message to the ui.
+
+  arguments:
+
+    'text' -- (string or ui.Message) the message to write 
+              to the ui
+
+  """
+  myengine.writeUI(text)
+
+
+def write_test(text):
+  """ Calls engine.myengine.writeTest which writes TESTDATA message.
+
+  arguments:
+
+    'text' -- (string) the message to send
+
+  """
+  myengine.writeTest(text)
+
+def write_message(text):
+  """ Calls engine.myengine.writeMessage which writes LYNTINDATA message.
+
+  arguments:
+
+    'text' -- (string) the message to send
+
+  """
+  myengine.writeMessage(text)
+
+def write_error(text):
+  """ Calls engine.myengine.writeError which writes ERROR message.
+
+  arguments:
+
+    'text' -- (string) the message to send
+
+  """
+  myengine.writeError(text)
+
+def write_user_data(text):
+  """ Calls engine.myengine.writeUserData which writes a USERDATA message.
+
+  arguments:
+
+    'text' -- (string) the message to send
+
+  """
+  myengine.writeUserData(text)
+
+def write_mud_data(text):
+  """ Calls engine.myengine.writeMudData which writes a MUDDATA message.
+
+  arguments:
+
+    'text' -- (string) the message to send
+
+  """
+  myengine.writeMudData(text)
+
 
 class Engine:
   """
@@ -643,14 +709,14 @@ class Engine:
     self._ui.write(ui.ui.Message(text, ui.ui.TESTDATA))
 
   def writeMessage(self, text):
-    """ Writes SBDATA message.
+    """ Writes LTDATA message.
 
     arguments:
 
       'text' -- (string) the message to send
 
     """
-    self._ui.write(ui.ui.Message(text, ui.ui.SBDATA))
+    self._ui.write(ui.ui.Message(text, ui.ui.LTDATA))
 
   def writeError(self, text):
     """ Writes ERROR message.
