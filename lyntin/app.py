@@ -26,6 +26,7 @@ class Client(dict_plus.c):
    """
 
    def __init__(self):
+       dict_plus.c.__init__(self)
        self.too_many_errors = 20
        self.numerrors = 0
        self.commands = {}  # holds command mappings above and beyond core
@@ -83,7 +84,6 @@ class Client(dict_plus.c):
                    ses.tickUpdate()
                if ses is data.currsession:
                    self.PreHandleUserInput(datato)
-                   break
            hooks.internal_tick_hook.run(())
        except KeyboardInterrupt:
            player.Quit(None,None,None)
