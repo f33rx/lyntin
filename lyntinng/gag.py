@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.9 2002/03/24 21:00:17 willhelm Exp $
+# $Id: gag.py,v 1.10 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the GagManager which handles gags in Lyntin.
@@ -110,3 +110,11 @@ class GagManager(manager.Manager):
   def getCount(self):
     """ Returns the number of gags we're managing."""
     return len(self._gags)
+
+
+  def filter(self, tuple):
+    """ mud_filger_hook function to remove gagged text that
+        comes from the mud
+    """
+    text = tuple[-1]
+    return self.removeGaggedText(text)

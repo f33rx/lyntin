@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.8 2002/03/24 21:00:18 willhelm Exp $
+# $Id: substitute.py,v 1.9 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -89,3 +89,10 @@ class SubstituteManager(manager.Manager):
   def getCount(self):
     """ Returns the number of substitutes we're managing."""
     return len(self._substitutes.keys())
+
+  def filter(self,tuple):
+    """ mud_filger_hook function to perform substitutions on data 
+        that comes from the mud
+    """
+    text = tuple[-1]
+    return self.expand(text)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.42 2002/04/27 20:58:19 jmberne Exp $
+# $Id: session.py,v 1.43 2002/04/29 00:31:42 jmberne Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -319,24 +319,10 @@ class Session:
       # call the pre-filter hook
       spamtuple = self,mem,mem
       spamtuple = hooks.mud_filter_hook.spamhook(spamtuple)
-      mem = spamtuple[2]
-
-      # handle gags
-      mem = self.getManager("gag").removeGaggedText(mem)
-
-      # handle substitutions
-      if self._ignoresubs == 0:
-        mem = self.getManager("substitute").expand(mem)
-
-      # handle actions
-      if self._ignoreactions == 0:
-        self.getManager("action").checkActions(mem)
-
-      if lyntin.ansicolor == 0:
-        mem = utils.filter_ansi(mem)
+      if spamtuple != None:
+        mem = spamtuple[-1]
       else:
-        # handle highlights 
-        mem = self.getManager("highlight").expand(mem)
+        mem = ""
 
       inputlines[i] = mem
 
@@ -384,7 +370,7 @@ class ManagerFilterAdapter:
     self.function = function
 
   def __call__(self, tuple):
-    session, internal, input, filtered = tuple
+    session = tuple[0]
     if self.function:
       return self.function(session.getManager(self.managername),tuple)
     else:
@@ -398,4 +384,12 @@ hooks.user_filter_hook.register(ManagerFilterAdapter("alias"),20)
 hooks.user_filter_hook.register(ManagerFilterAdapter("speedwalk"),80)
 
 hooks.user_filter_hook.register(ManagerFilterAdapter("variable",variable.VariableManager.unescapeVariables),90)
+
+hooks.mud_filter_hook.register(ManagerFilterAdapter("gag"),20)
+
+hooks.mud_filter_hook.register(ManagerFilterAdapter("substitute"),50)
+
+hooks.mud_filter_hook.register(ManagerFilterAdapter("action"),75)
+
+hooks.mud_filter_hook.register(ManagerFilterAdapter("highlight"),90)
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.14 2002/04/02 19:29:18 willhelm Exp $
+# $Id: highlight.py,v 1.15 2002/04/11 03:58:22 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -158,3 +158,11 @@ class HighlightManager(manager.Manager):
   def getCount(self):
     """ Returns the total number of highlights we're managing."""
     return len(self._highlights.keys())
+
+
+  def filter(self, tuple):
+    text = tuple[-1]
+    if lyntin.ansicolor == 0:
+      return utils.filter_ansi(text)
+    else:
+      return self.expand(text)
