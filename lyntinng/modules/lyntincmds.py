@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.28 2003/01/14 01:21:07 willhelm Exp $
+# $Id: lyntincmds.py,v 1.29 2003/01/28 22:38:06 willhelm Exp $
 #######################################################################
 import types, re
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -163,17 +163,30 @@ def grep_cmd(ses, args, input):
 
   pattern = args["pattern"]
   size = args["size"]
+  context = args["context"]
   buffer = ses.getDataBuffer()
 
   ret = []
   cpattern = re.compile(pattern)
-  for mem in buffer[-size:]:
+  for i in range(len(buffer)-size, len(buffer)):
+    mem = buffer[i]
     if cpattern.search(mem):
+      if context > 0:
+        mem = []
+        for j in range(i-context, i):
+          mem.append("  " + buffer[j])
+
+        mem.append("+ " + buffer[i])
+
+        for j in range(i+1, i+context+1):
+          mem.append("  " + buffer[j])
+        mem = "".join(mem)
+
       ret.append(mem)
 
-  exported.write_message("grep %s results:\n%s" % (pattern, "".join(ret)), ses)
+  exported.write_message("grep %s results:\n%s" % (pattern, "---\n".join(ret)), ses)
 
-commands_dict["grep"] = (grep_cmd, "pattern size:int=300")
+commands_dict["grep"] = (grep_cmd, "pattern size:int=300 context:int=0")
 
 
 def diagnostics_cmd(ses, args, input):
