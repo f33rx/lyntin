@@ -5,7 +5,7 @@
 VERSION
 =======
 
-$Id: HACKING,v 1.10 2002/05/09 00:10:41 willhelm Exp $
+$Id: HACKING,v 1.11 2002/06/24 01:19:47 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -46,9 +46,11 @@ There a a few different methods of hacking Lyntin to suit your needs.
 They are briefly outlined here and described in more detail in their 
 respective sections:
 
-   1. editing the source code
-   2. building modules
-   3. command line
+
+1. editing the source code
+2. building modules
+3. command line
+
 
 Before we continue, we should cover Lyntin's architecture first.
 
@@ -57,12 +59,13 @@ Before we continue, we should cover Lyntin's architecture first.
 DIRECTORIES
 ===========
 
+The Lyntin directory structure looks like this::
 
-   * lyntinng/
-      - ui/ -- *user interfaces*
-      - modules/ -- *Lyntin modules (dynamically loaded at runtime)*
-      - help/ -- *Lyntin help files*
-      - errata/ -- *random stuff for testing and other stuff*
+   lyntinng/
+      |-- ui/         -- user interfaces
+      |-- modules/    -- Lyntin modules (dynamically loaded at runtime)
+      |-- help/       -- Lyntin help files
+      |-  errata/     -- random stuff for testing and other stuff
 
 
 
@@ -83,22 +86,26 @@ accessing Lyntin internals without causing them to block.
 
 The engine holds:
 
-   * the HistoryManager
-   * the ThreadManager
-   * the HelpManager
-   * the list of Sessions
-   * the user interface
-   * a series of managers which manage aliases, actions,
-     gags, highlights, substitutes, variables and other such 
-     things
+
+* the HistoryManager
+* the ThreadManager
+* the HelpManager
+* the list of Sessions
+* the user interface
+* a series of managers which manage aliases, actions,
+  gags, highlights, substitutes, variables and other such 
+  things
+
 
 All these things exist on the *engine scoping*.
 
 Each session has:
 
-   * its own SocketCommunicator which abstracts socket
-     connections and network issues
-   * a Ticker which allows you to do things at intervals
+
+* its own SocketCommunicator which abstracts socket
+  connections and network issues
+* a Ticker which allows you to do things at intervals
+
 
 These things exist on a *session scoping* -- there are one of these
 for every session instance.
@@ -114,7 +121,7 @@ allows us to group them all and treat them all the same.  Adding
 new managers is much easier because of this.
 
 Also, managers register themselves with the engine via the
-``exported.register_manager`` function.  The engine will cycle
+``exported.add_manager`` function.  The engine will cycle
 through registered managers for things like status and persistence.
 In addition, registered managers get told when the user has created
 a new session and when the user has ended a session through the
@@ -137,8 +144,8 @@ SocketCommunicator and is encapsulated in an ``event.MudEvent``.
 
 
 
-UI
-==
+THE UI
+======
 
 All user interfaces extend the ui.BaseUI class in the ui module.
 It has a series of methods which need to be overridden to give
@@ -296,8 +303,8 @@ Now at the Lyntin command prompt I can do things like::
 
 
 
-END
-===
+THE END
+=======
 
 That about covers it.  If you have questions, sign onto the Lyntin
 developers list and ask them.  The list is low volume high signal.
