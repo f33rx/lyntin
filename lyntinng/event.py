@@ -1,0 +1,193 @@
+#######################################################################
+# This file is part of Lyntin.
+# copyright (c) Will Guaraldi 2001
+#
+# Lyntin is distributed under the GNU General Public License license.  See the
+# file LICENSE for distribution details.
+# $Id$
+#######################################################################
+"""
+Holds the event structures in lyntin.  All events inherit from 
+Event.  This is pretty standard, nothing really exciting here.
+Each event class implements the execute function which gets called
+by the event handler thread when it pulls the event object off the
+event queue.  You can use the __init__ function to initialize
+your event as it is not used in the base Event class.
+"""
+import string, os, traceback, sys, getopt
+import engine, ui.ui, lyntin
+
+class Event:
+   """ Base Event class.
+
+   This is the basic Event class.  It has an enqueue method
+   which enqueues the event in the event queue (in the engine
+   module).  It also has an execute method which is executed
+   when the event is dequeued and handled.  Override the
+   'execute' function for your functionality to get executed.
+   """
+   def __init__(self):
+      """ Initialize."""
+      pass
+
+   def __str__(self):
+      """ Allows us to print out event objects."""
+      ret = str(self.__class__)
+      return ret[string.find(ret, ".") + 1:]
+
+   def enqueue(self):
+      """ This enqueues this event into the event queue.  Don't
+      overload this unless you have to.
+      """
+      engine.myengine.enqueue(self)
+
+   def execute(self):
+      """ Override this.  This gets called by the event handler
+      to execute your event.
+      """
+      pass
+
+
+class StartupEvent(Event):
+   """ Starts up and initializes Lyntin.
+
+   When Lyntin is started, we try to do as much as we can
+   inside of the SstartupEvent and through the Startup frequency.
+   """
+   def __init__(self, args):
+      """ Initialize."""
+      self._args = args
+
+   def execute(self):
+      """ Execute."""
+
+      # instantiate a ui
+      # FIXME - do we want to handle arbitrary ui's?
+      if lyntin.options['ui'] == 'tk':
+         from ui.tkgui import TkGui
+         engine.myengine.setUI(TkGui())
+
+      elif lyntin.options['ui'] == 'curses':
+         from ui.cursesui import Cursesui
+         engine.myengine.setUI(Cursesui())
+
+      else:
+         from ui.textui import Textui
+         engine.myengine.setUI(Textui())
+
+      engine.myengine.writeMessage("UI started.")
+
+      # import modules listed in modulesinit
+      engine.myengine.writeMessage("Importing modules in modules directory.")
+      try:
+         import modules.modulesinit
+      except:
+         engine.myengine.writeError("Modules did not load correctly.")
+         ShutdownEvent().enqueue()
+         traceback.print_exc()
+
+      # spam the startup frequency
+      engine.myengine.spamfreq(engine.STARTUPFREQ, ())
+
+      # handle command files
+      f = lyntin.options['readfile']
+      if f != '':
+         engine.myengine.writeMessage("Reading in file " + f)
+         engine.myengine.getSession('common').handleUserData('#read ' + f)
+
+      # we're done initialization!
+      message = ("Initialization complete.\n" +
+                 "------------------------------------\n" + 
+                 "Welcome to Lyntin.\n" + 
+                 "For help, type #help general.\n" +
+                 "------------------------------------\n")
+
+      engine.myengine.writeMessage(message)
+      engine.myengine.writePrompt()
+
+
+class ShutdownEvent(Event):
+   """
+   When the user shuts down lyntin, it triggers a shutdown
+   event to close all network connections, close ui's, return the 
+   user's session to a normal state, and shuts down whatever modules
+   have registered with the shutdown frequency.
+   """
+   def __init__(self):
+      """ Initialize."""
+      pass
+
+   def execute(self):
+      """ Execute the shutdown."""
+      import time
+      engine.myengine.writeMessage("shutting down...  goodbye.")
+      engine.myengine.spamfreq(engine.SHUTDOWNFREQ)
+      sys.exit(0)
+
+
+class EchoEvent(Event):
+   """
+   Echo events get created when the connected server sends a Telnet
+   Echo request--either to tell us that the server is handling echo
+   (echo off) or that the server will not handle echo (echo on).
+   """
+   def __init__(self, onoff):
+      """ Initialize."""
+      self.state = onoff
+
+   def execute(self):
+      """ 1 means turn echo on, 0 means turn it off."""
+      engine.myengine.spamfreq(engine.ECHOFREQ, (self.state))
+
+
+class ReloadEvent(Event):
+   """
+   Reload events are kind of non-self-explanatory until you understand
+   that what is being reloaded is a module and it's being reloaded
+   by some kind of user direction.  i.e. the user types "reload modulex"
+   will kick of a reload event.
+   """
+   def __init__(self, name, mod):
+      """ Initialize."""
+      self.name = name
+      self.mod = mod
+
+   def execute(self):
+      """ Execute."""
+      try:
+         reload(self.mod)
+         message = "reload successful: " + self.name
+      except:
+         message = "reload unsuccessful: " + self.name
+
+      engine.myengine.writeMessage(message)
+ 
+
+class MudEvent(Event):
+   """
+   A mud event is when the connected mud sends data to us.  We
+   spam that data to the mud event frequency.
+   """
+   def __init__(self, input):
+      """ Initialize."""
+      self.input = input
+
+   def execute(self):
+      """ Execute."""
+      engine.myengine.handleMudData(self.input)
+
+
+class InputEvent(Event):
+   """
+   A user input event is created whenever the user types something
+   into their ui and it creates a user event from it.
+   """
+   def __init__(self, input):
+      """ Initialize."""
+      self.input = input
+
+   def execute(self):
+      """ Execute."""
+      engine.myengine.writeUserData(self.input)
+      engine.myengine.handleUserData(self.input)
+

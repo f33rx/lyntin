@@ -1,0 +1,118 @@
+--------------------
+README
+--------------------
+
+For more up-to-date information, please check the web-site:
+http://Lyntin.sourceforge.net/
+
+
+WHY SHOULD YOU USE LYNTIN?
+
+Lyntin is: 
+
+  1) a featureful and highly extensible mud client
+  2) a bot/agent development environment
+  3) based on Tintin++ functionality--tried and true
+
+Lyntin is written entirely in Python--a nicely written and very portable
+programming language.  Thusly Lyntin is very platform independent (minus
+a few issues here and there I'm sure).  This also means that your 
+actions (or triggers, or autos, or whatever you call them) are no longer
+restricted to simple 'if you see this then send this' kinds of things.
+They can be Python functions which do anything from setting a variable
+to forking a web spider.  Anything Python allows (which is a lot),
+Lyntin allows.  In addition, your code can interface with Lyntin's
+code.  
+
+Lyn once tried to write a mud agent in plain tintin, and while it
+was kinda cool, a 'program' it was not.  Thus he created Lyntin.
+Will overhauled it for version 3.0 so that it's Tintin++ syntactically
+similar and a fundamentally nicer architecture.
+
+So if you want to try something like that, or even if you just think 
+a programmable mud client would be kinda cool, give Lyntin a try.  Oh 
+yeah, besides that, Lyntin has lots of cool features which make 
+mudding easier.
+
+Amongst which are multiple ui's so you can use the same client over
+telnet that you can use on your desktop.
+
+
+
+INSTALLATION
+
+- see the file INSTALL.
+
+- NOTE: you will need Python 2.0 or greater installed at your site.
+
+- NOTE: Lyntin testing has been limited.  Should work fine on Win98/NT
+  and Linux in TkGUI and Text modes.  Curses has been tested under
+  Linux (briefly) as well but is still an alpha ui.
+
+
+
+BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
+
+Lyntin was originally written by Lyn Headley, laheadle@cs.uchicago.edu .
+Lyntin is currently being maintained by Will Guaraldi, 
+willhelm@users.sourceforge.net .  (as of 1.3.2)
+
+We appreciate ALL types of feedback.
+
+Hell, if you even USE this, drop us a line on the 
+lyntin-devl@lists.sourceforge.net .
+
+All bugs, feature-requests, and other things should be reported
+at http://sourceforge.net/projects/lyntin/ .
+
+If possible, when noting bugs, please do a "#diagnostics" and include
+the OS/Python information at the bottom as well as any stack traces
+and pertinent information.  The more information you inclue, the
+more we have to go by to use to understand what you're finding
+buggy.
+
+
+
+OTHER CONCERNS
+
+The latest release of Lyntin is always available from
+http://lyntin.sourceforge.net/
+
+Lyntin is still under development, and there aren't many testers, so
+we apologize profusely for any bugs you may encounter and such.
+
+In general, work on Lyntin progresses as time allows.  We do respond 
+to emails on the mailing list with a day or so.  All issues are tracked
+via the bug-tracker and task-tracker on our SourceForge project site.
+If you have problems and fix them, by all means send us patches and
+we'll happily work with them and credit you.
+
+
+
+DOCUMENTATION 
+
+Lyntin incorporates the 'look and feel' of Tintin++, so it should be
+pretty easy to make the transition.  It offers all the major features
+of Tintin++, including multiple sessions, but leaves a few minor things
+out.
+
+There are "in-game" help files covering all the commands and most 
+other things we could think of which can be accessed with the #help 
+command.
+
+If you find any bugs in the documentation or want to contribute
+documentation, please feel free to send such things to the mailing
+list.
+
+
+
+ERRATA
+
+That should be about it.  In-game help is accessed by typing #help.
+When you start Lyntin for the first time, type "#help general"
+and that'll get you started.  Read through the various help files
+at your leisure.
+
+Enjoy!
+
+the Lyntin development folks
