@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.56 2002/10/26 02:42:09 willhelm Exp $
+# $Id: utils.py,v 1.57 2002/10/26 02:47:59 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -68,6 +68,7 @@ def chomp(text):
   @returns: the text without CR or LF at the end.
   @rtype: string
   """
+  global CHOMP_EOL
   return CHOMP_EOL.sub('', text)
 
 

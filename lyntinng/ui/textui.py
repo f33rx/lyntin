@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.26 2002/10/24 23:07:04 willhelm Exp $
+# $Id: textui.py,v 1.27 2002/10/26 02:42:10 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -94,18 +94,10 @@ class Textui(ui.BaseUI):
     Handles writing information from the mud and/or Lyntin
     to the user.
     """
-    global DEFAULT, DEFAULT_ANSI
-
-    # FIXME - re-write this so it handles the pretext better
-    # without getting ANSI color bleed from the mud
     message = args[0]
 
     if type(message) == type(''):
-      message = "lyntin: " + utils.chomp(message).replace("\n", "\nlyntin: ")
-      if lyntin.ansicolor == 1:
-        message = DEFAULT_ANSI + message
-      sys.stdout.write(message + "\n")
-      return
+      message = ui.Message(message)
 
     line = message.data
     ses = message.session
@@ -132,10 +124,6 @@ class Textui(ui.BaseUI):
       # we don't print user data in the textui
       return
 
-
-    index = 0
-    start = 0
-
     if lyntin.ansicolor == 0:
       if pretext:
         if line[-1] == "\n":
@@ -149,16 +137,18 @@ class Textui(ui.BaseUI):
     # each session has a saved current color for mud data.  we grab
     # that current color--or user our default if we don't have one
     # for the session yet.
-    if self._currcolors.has_key(ses):
-      color = self._currcolors[ses]
+    if self._currcolors.has_key(ses.getName()):
+      color = self._currcolors[ses.getName()]
     else:
-      color = DEFAULT
+      # need a copy of the list and not a reference to the list itself.
+      color = DEFAULT[:]
+
 
     # some sessions have an unfinished color as well--in case we
     # got a part of an ansi color code in a mud message, and the other
     # part is in another message.
-    if self._unfinishedcolor.has_key(ses):
-      leftover = self._unfinishedcolor[ses]
+    if self._unfinishedcolor.has_key(ses.getName()):
+      leftover = self._unfinishedcolor[ses.getName()]
     else:
       leftover = ""
 
@@ -168,18 +158,18 @@ class Textui(ui.BaseUI):
         mem = lines[i]
         acolor = ansi.convert_tuple_to_ansi(color)
 
+        color, leftover = ansi.figure_color(mem, color, leftover)
+
         if pretext:
           lines[i] = DEFAULT_ANSI + pretext + acolor + mem
         else:
           lines[i] = DEFAULT_ANSI + acolor + mem
 
-        color, leftover = ansi.figure_color(mem, color, leftover)
-
-      self._currcolors[ses] = color
-      self._unfinishedcolor[ses] = leftover
-
-      sys.stdout.write("".join(lines))
+      sys.stdout.write("".join(lines) + DEFAULT_ANSI)
       sys.stdout.flush()
+
+    self._currcolors[ses.getName()] = color
+    self._unfinishedcolor[ses.getName()] = leftover
 
 
   def prompt(self):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.21 2002/10/25 23:44:29 willhelm Exp $
+# $Id: advanced.py,v 1.22 2002/10/26 03:33:02 jmberne Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -76,7 +76,6 @@ def import_cmd(session, args, input):
   import sys
 
   mod = args["modulename"]
-  modarray = mod.split(".")
 
   if sys.modules.has_key(mod):
     # if this module has previously been loaded, we try to reload it.
@@ -112,7 +111,6 @@ def import_cmd(session, args, input):
       _module = __import__( mod )
 
       _module = sys.modules[mod]
-
       if (_module.__dict__.has_key("load")):
         _module.load()
 
