@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.2 2001/12/09 06:31:15 willhelm Exp $
+# $Id: engine.py,v 1.3 2001/12/11 02:34:33 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -108,7 +108,7 @@ class Engine:
       through and checks the status of all the threads registered
       with the Thread Manager.
       """
-      return self._threadman.checkThreads()
+      return self._threadman.checkThreadsStatus()
 
    ### ------------------------------------------
    ### input/output stuff
@@ -201,6 +201,10 @@ class Engine:
    def currentSession(self):
       """ Returns the current session."""
       return self._current_session
+
+   def getSessions(self):
+      """ Returns a list of session."""
+      return self._sessions.keys()
 
    def getSession(self, name):
       """ Returns a named session."""

@@ -9,14 +9,15 @@ the distribution.
 
 TODO:
  - fix substitutes (they're not implemented right)
+ - get highlights to work in tkgui
  - implement ticker
- - implement highlights
  - stack traces, messages and error messages (all errors should be logged)
  - overhaul help files and write documentation
  - handle "#session" by itself
  - add file logging status to #info
 
-
+ - centralize all manager stuff into a Manager superclass and subclass 
+   it lots
  - default command file should be .lyntinrc
  - handle $HOME/.lyntinrc
  - add a #datadir command for setting the datadir
@@ -26,6 +27,7 @@ TODO:
  - overhaul everything for TinTin++
  - add autotyper to the tkgui (may want to overhaul the TkGui too)
  - first char in command file is the command char when using #read
+ - fix write_cmd so that it uses the correct command char
  - make sure all commands can handle braces for arguments
    probably by changing the breakup of a command into words to
    breaking it into components via braces
@@ -37,7 +39,7 @@ TODO:
 
      antisubstitute          bell
      echo
-     highlight               history                 if
+     history                 if
      ignore                  killall
      loop
      math                    message
@@ -48,7 +50,6 @@ TODO:
      tick                    tickoff                 tickon
      tickset                 ticksize                togglesubs
      unantisubstitute
-     unhighlight
      verbatim
      wildcard
      writesession

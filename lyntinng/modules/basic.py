@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.2 2001/12/02 18:35:22 willhelm Exp $
+# $Id: basic.py,v 1.3 2001/12/11 02:34:33 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -96,7 +96,7 @@ def ansi_cmd(session, words, input):
    With no arguments, tells you whether ansicolor is enabled.
    With arguments, sets the ansicolor global variable.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       if lyntin.ansicolor:
          engine.myengine.writeMessage("Ansi color is enabled.")
       else:
@@ -130,7 +130,7 @@ def char_cmd(session, words, input):
    is.  With arguments allows you to set the global command
    character.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       engine.myengine.writeMessage("Current command character is " + 
                                     lyntin.commandchar + ".")
       return
@@ -224,7 +224,7 @@ def gag_cmd(session, words, input):
    With no arguments, it tells you all the gags currently existing.
    With arguments, it sets up a new gag.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       data = session.getGagManager().getGagInfo()
       if data == '':
          data = "No gags defined."
@@ -380,7 +380,7 @@ def mudecho_cmd(session, words, input):
    and off on your own.  So this allows you to do that.
    """
    import event
-   if len(words) < 2:
+   if len(words) == 1:
       engine.myengine.writeError("syntax: #echo <on|off>")
       return
 
@@ -410,7 +410,7 @@ def read_cmd(session, words, input):
 
    Reads in a commands file and executes all the lines.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       engine.myengine.writeError("syntax: #read <filename>")
       return
 
@@ -434,7 +434,15 @@ def session_cmd(session, words, input):
    The second argument is the hostname/ip address to connect to.
    The third argument is the port number.
    """
-   if len(words) < 3:
+   if len(words) == 1:
+      data = "Sessions available:\n"
+      for mem in engine.myengine.getSessions():
+         s = engine.myengine.getSession(mem)
+         data = data + "   " + s.getName() + ": " + repr(s._socket) + "\n"
+      engine.myengine.writeMessage(data[:-1])
+      return
+
+   if len(words) < 4:
       engine.myengine.writeError("syntax: #session <sesname> <host> <port>")
       return
 
@@ -445,7 +453,11 @@ def session_cmd(session, words, input):
       return
 
    host = words[2]
-   port = int(words[3])
+   try:
+      port = int(words[3])
+   except:
+      engine.myengine.writeError("Port must be a number: " + words[3])
+      return
 
    # we do this to deal with non-unique session names
    # it's lame, but whatever
@@ -514,7 +526,7 @@ def speedwalk_cmd(session, words, input):
    With no arguments, tells you whether speedwalk is enabled.
    With arguments, sets the speedwalk global variable.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       if lyntin.speedwalk:
          engine.myengine.writeMessage("Speedwalk is enabled.")
       else:
@@ -573,7 +585,7 @@ def textin_cmd(session, words, input):
    Takes the contents of the file and outputs it directly to the mud
    without processing it (like #read does).
    """
-   if len(words) < 2:
+   if len(words) == 1:
       engine.myengine.writeError("syntax: #textin <filename>")
       return
    
@@ -598,7 +610,7 @@ def unsomething_cmd(session, words, input):
    from whatever manager is handling that thing.  This function
    handles all these commands.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       engine.myengine.writeError("syntax: #" + words[0] + " <text>")
       return
 
@@ -706,7 +718,7 @@ def write_cmd(session, words, input):
    Queries the sessions and the lyntin globals for stuff
    and writes it out to a file for persistence.
    """
-   if len(words) < 2:
+   if len(words) == 1:
       engine.myengine.writeMessage("syntax: #write <filename>")
       return
 
