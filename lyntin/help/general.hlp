@@ -1,0 +1,14 @@
+   Here's a quick tutorial.
+   First, to connect to a mud type:
+
+   #ses sessname hostname port
+
+   replacing hostname with the ip address or host name, and port with 
+   the port number of the mud you want to connect to.
+
+   When you're done, quit out of the mud, then type #quit
+   to get out of Lyntin.
+
+   See also: alias, action, gag, help, info, session, quit
+
+   If you want to get into hacking, see also: hackers, import

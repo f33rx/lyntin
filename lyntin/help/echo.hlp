@@ -1,0 +1,3 @@
+   syntax: #echo
+   Toggles echoing of action commands.  When echo is on, all actions 
+   triggered will echo to the screen.

@@ -1,0 +1,53 @@
+For a more up-to-date TODO, please check the web-site:
+http://lyntin.sourceforge.net/
+
+------------------------------------------------------------
+FOR 3.0 release?:
+
+refactor Lyntin?  threaded model?  event driven model?
+
+add ability to turn on command-checking and turn off command-checking
+(this would make it easier to write about lyntin using lyntin)
+
+re-organize modules?
+
+re-route Put* functions through the session so then
+we can turn quell them on a session by session basis--they're 
+really session oriented.
+
+fix all the files--
+ - consistent indentation 
+ - consistent naming
+
+build some kind of sleep command.  so you can sleep some arbitrary amount
+between alias commands.
+
+Replicate more of tintin's functionality.
+ - colors
+
+support grepping of _second_ part of actions, aliases?
+
+datagrep{lines} should print results in some order.
+datagrep{lines} should have option for case insensitivity
+
+add pattern variables to substitutes
+
+interpreter mode, in which everything typed is sent to a python interpreter.
+- avoids needing #@ all the time, also allow multiline stuff
+
+allow multiple actions with the same key (use a setaction method of session
+class, stupid)
+
+easy interpolation of python expressions
+
+standard aliases library, maybe actions too
+
+add scheduler as arg to ready_to_perform
+
+fix telnet client
+
+#log input too.
+
+alias/action groups
+
+put command_separator in user_custom

@@ -1,0 +1,2 @@
+   syntax: #ungag {<text>}
+   Will remove the gag.  Works just like unalias and unaction.

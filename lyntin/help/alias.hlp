@@ -1,0 +1,12 @@
+   syntax: #alias [{name}] [{expansion}]
+   With no arguments, #alias simply prints out all the aliases for the 
+   current session.  With one argument, it prints out the aliases which 
+   correspond to that pattern (wildcard * is supported).  Otherwise it 
+   creates an alias for 'name' which will expand to 'expansion'.  Braces 
+   are advised around both 'name' and 'expansion'.
+
+   You can use pattern variables which look like % and a number.
+   (ex: %4).  %0 is the entire text.  %n (where n is a number)
+   is the nth item after the alias name.
+   
+   See also: unalias

@@ -1,0 +1,6 @@
+   syntax: #verbose
+   Toggles verbose mode.  In verbose mode, everything Lyntin tells you
+   appears on your screen.  When verbose mode is shut off, the following
+   things will not be reported:
+
+      * variables being set

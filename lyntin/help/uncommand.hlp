@@ -1,0 +1,7 @@
+   syntax: #uncommand <command>
+   With one arguments it removes a command.
+
+   Be a little careful with this.  If you remove the wrong commands
+   you'll lose Lyntin functionality until you restart Lyntin.
+
+   see also: command

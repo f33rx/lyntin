@@ -1,0 +1,5 @@
+   syntax: #gag {<text>}
+   Gag will gag any line with <text> in it.
+
+   ex: #gag {has missed you.}    <-- will prevent any incoming line
+                                     with "has missed you" to be shown.

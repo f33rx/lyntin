@@ -1,0 +1,15 @@
+   syntax: #tickset {<arg>}
+   With no argument, it resets the ticker as if a tick had occurred.
+   With an argument of 'on', it turns on the ticker.
+   With an argument of 'off', it turns off the ticker.
+   With an argument of 'toggle', it toggles the ticker on/off.
+   With an argument of 'clear', it clears the tickaction and the time.
+   With an argument of 'status', it shows the complete status.
+   With a numeric argument, the tick amount is set to that number.
+   With any other argument, the tick action is set to that command.
+
+   ex:
+      #tickset on
+      #tickset 60
+      #tickset say hello
+      #tickset clear

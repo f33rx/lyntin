@@ -1,0 +1,24 @@
+Lyntin is a feature-rich mud client and agent development environment,
+with an emphasis on extensibility and automation.  Lyntin targets
+hacker types as users--this isn't the most user-friendly client.
+
+general features
+================
+
+ - Command-line, tk, and other interfaces
+ - Multiple sessions
+ - Actions, aliases, gags, substitutes,
+ - Grepping previous mud output,
+ - Variables and pattern matching
+ - History
+ - Logging
+ - Ticker
+
+features for hackers
+========================
+
+ - A standard library of Python modules including an event scheduler
+ - Dozens of emacs-style hooks for responding to internal events
+ - An init file for setting up your own python environment
+ - Easy integration of your code with Lyntin
+ - Module and UI extension hooks

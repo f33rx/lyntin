@@ -1,0 +1,3 @@
+   syntax: #databuffer {arg}
+   With no arguments, prints the databuffer length.  With one argument, 
+   it sets the length of the databuffer.

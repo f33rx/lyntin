@@ -1,0 +1,23 @@
+   #@ (for Python hackers)
+   This is the biggy.  Execute an _arbitrary_ python statement in
+   the context of user.py's global variables.  If you use the #import 
+   command or #@import, you can then do stuff like '#@mycode.func()', 
+   etc.
+   
+   Since you have access to all of Lyntin's global variables, you can
+   call any of Lyntin's functions too (although to use any of Lyntin's
+   names from a file of your own code your file must import the proper
+   Lyntin module).  A better method is to import the exported module
+   which has hooks and functions which call the more important
+   functions in the engine--such as 'lyntin_command'.
+
+   Thus lyntin_command('flee') will send the text 'flee' through the
+   Lyntin command interpreter.
+   
+   examples:
+     #@for c in 'hello': print c
+     #@PutMessage('this is Lyntin speaking')
+     #@myvars.dead = 'yep'
+     #@mycode.doit()
+
+   see also: modules for more on building modules

@@ -1,0 +1,107 @@
+import regex, string
+#
+# ANSI definitions
+#
+
+# begin = "["
+# regbegin = "\\["
+begin = chr(27) + "["
+regbegin = chr(27) + "\\["
+beginLength = len(begin)
+
+# end = "[m"
+regend = "\\[m"
+end = chr(27) + "[0m"
+regend = chr(27) + "\\[0m"
+endLength = len(end)
+
+anything = '\(\(.\|\n\)+\)' # . or newline
+
+pattern = regex.compile(regbegin + anything + regend)
+full_pattern = regex.compile(
+    # header
+    regbegin + \
+    "\([0-9]+\)?"   # numeric code
+    "\(;[0-9]+\)?"  # numeric code
+    # numeric code
+    "\(;[0-9]+m\)" + \
+    # text to highlight
+    anything + \
+    regend)         # footer
+
+txtAttribs = { } ## 0 -- all off. 1 -- bold  5 -- blinking
+                 ## 7 -- reverse 8 hidden
+
+fgColorCodes = { "30": "black", "31": "red", "32": "green",
+                 "33": "yellow", "34": "blue", "35": "magenta",
+                 "36": "cyan", "37": "white"}
+
+bgColorCodes = { "40": "black", "41": "red", "42": "green",
+                 "43": "yellow", "44": "blue", "45": "magenta",
+                 "46": "cyan", "47": "white" }
+
+ansiSubset = regex.compile(regbegin + "\([0-9;]+m\)")
+def CanHandle(ansiStuff):
+    return ansiSubset.match(ansiStuff) != -1
+
+##
+## arrange in the order attribs, fg, bg
+##
+def collate(numbers):
+    finalNums = [None] * 3
+    for num in numbers:
+        if num is None:
+            continue
+        num = string.atoi(num)
+        if 30 <= num < 40:
+            finalNums[1] = str(num) # fg
+        elif 40 <= num < 48:
+            finalNums[2] = str(num) # bg
+        elif num < 10:
+            finalNums[0] = str(num) # attrib
+        else:
+            raise "FIXME"
+    print finalNums
+    return finalNums
+
+##
+## input should look like begin + "32;5;42mblahblah" + end
+## returns [5, 32, 42, 'blahblah']
+##
+def splitAndCollate(str):
+    print "==splitandcollate\n" + str
+    if full_pattern.match(str, 0) != -1:
+        nums = [None] * 3
+        nums[0] = full_pattern.group(1)
+
+        match = full_pattern.group(2)
+        if match:
+            nums[1] = match[1:] # chop off ";"
+
+        match = full_pattern.group(3)
+        if match:
+            nums[2] = match[1:-1] # chop off ";" and "m"
+        
+        collated = collate(nums)
+        collated.append(full_pattern.group(4))
+        return collated
+    else:
+        raise "FIXME"
+
+
+
+##
+## get the ansi stuff from the beginning
+##
+def getAnsiBeginning(str, index):
+    if full_pattern.match(str, index) != -1:
+        retval = begin
+        for i in xrange(1,4):
+            g = full_pattern.group(i)
+            if g is None:
+                continue
+            else:
+                retval = retval + g
+        return retval
+    else:
+       raise "FIXME"

@@ -1,0 +1,22 @@
+   syntax: #history
+   Shows you the last bunch of commands that you've typed.  You can do 
+   history substitution with these:
+
+   !<# of line to repeat> <additional text>
+
+   ex: #history              <-- could show something like this:
+
+   8  say Hello there hon!
+   7  say eh?  no--i didn't take your sword--gogmagog did.
+   6  say i don't recall at this moment.
+   5  tell gogmagog i told her you did it!
+   4  n
+   3  e
+   2  open door
+   1  tell cylia gog did it!
+   0  #history
+
+   Then if she didn't believe us, we could repeat it:
+
+   ex: !1                   <-- will repeat history entry 1
+

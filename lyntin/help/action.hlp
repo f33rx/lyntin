@@ -1,0 +1,23 @@
+   syntax: #action [{trigger}] [{response}]
+   With no arguments, prints all actions.
+   With one argument, prints all actions which match the arg
+   (with wildcard expansion of '*' supported).
+   Otherwise, it defines an action.  Whenever lyntin sees anything incoming
+   which contains the text trigger, it evaluates the text response.
+   response can be any lyntin or plain text command.  When defining an
+   braces ( '{' and '}' ) are mandatory around _both_ the trigger and the
+   response. Actions can be 'anchored' to the beginning of a line by
+   prepending the trigger with '^'. Then, the action will not be triggered
+   unless it occurs at the beginning of a line.
+
+   Actions can contain lyntin pattern-variables, which look like
+   %[integer]  When lyntin sees a pattern-variable in an action trigger, it
+   tries to match any pattern against it, and saves any match it finds so
+   you can use it in the response. see below for examples.  response can
+   contain the special variable %a, which means "the whole matched line."
+
+   ex:
+   #ac {^You are hungry} {get bread bag;eat bread}
+   #ac {EVISCERATES joey} {rescue joey}
+   #ac {%0 gives you %5} {say thanks for the %5, %0!}
+   #ac {%1 tells you %2} {say %1 just told me %2}

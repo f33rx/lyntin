@@ -1,0 +1,148 @@
+For more up-to-date information, please check the web-site:
+http://Lyntin.sourceforge.net/
+
+
+WHY SHOULD YOU USE LYNTIN?
+
+Lyntin is: 
+
+1) a featureful and highly extensible mud client
+           
+2) A Bot/Agent development environment
+
+Lyntin is implemented and extensible in Python, an insanely easy and
+powerful very-high-level programming language invented by a guy named
+Guido (see http://www.python.org/).  This means that your actions (or
+triggers, or autos, or whatever you call them) are no longer
+restricted to simple 'if you see this then send this' kinds of things.
+They can be python functions which do anything from setting a variable
+to forking a web spider.  Anything Python allows (which is a lot),
+Lyntin allows.  In addition, your code can interface with Lyntin's
+code.  I once tried to write a mud agent in plain tintin, and while it
+was kinda cool, a 'program' it was not.  So if you want to try
+something like that, or even if you just think a programmable mud
+client would be kinda cool, give Lyntin a try.  Oh yeah, besides that,
+Lyntin has lots of cool features which make mudding easier.
+
+
+
+INSTALLATION
+
+- see the file INSTALL.
+
+- NOTE: you will need Python 2.0 or greater installed at your site.
+
+- NOTE: Lyntin testing has been limited.  Should work fine on Win98/NT
+  and Linux in TkGUI and Text modes.  Curses has been tested under
+  Linux (briefly) as well.
+
+
+
+BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
+
+Lyntin was originally written by Lyn Headley, laheadle@cs.uchicago.edu
+Lyntin is currently being maintained by Will Guaraldi, 
+willhelm@users.sourceforge.net .  (as of 1.3.2)
+
+I appreciate ALL of the above sources of feedback.
+
+Hell, if you even USE this, drop us a line on the 
+lyntin-devl@lists.sourceforge.net .
+
+All bugs, feature-requests, and other things should be reported
+at http://lyntin.sourceforge.net/ .
+
+
+
+OTHER CONCERNS
+
+The latest release of Lyntin is always available from
+http://lyntin.sourceforge.net/
+
+Lyntin is still under development, and there aren't many testers, so
+we apologize profusely for any bugs you may encounter and such.
+
+In general, I work on Lyntin as time allows.  I do respond to emails
+as quickly as I can.  Most things get tabled.  I try to track stuff
+with the Sourceforge trackers (bug-tracker and task tracker).  If
+you have problems and fix them, by all means send us patches and
+we'll happily work with them.
+
+
+
+DOCUMENTATION 
+
+Lyntin incorporates the 'look and feel' of tintin, so it should be
+pretty easy to make the transition.  It offers all the major features
+of Tintin, including multiple sessions, but leaves a few minor things
+out.  If you've never used Tintin, this document should be complete
+enough to get you up to speed.
+
+In addition, there are now "in-game" help files which can be
+accessed with the #help command.
+
+
+
+FILES
+
+- Any commands dealing with files are assumed to be located
+  in the directory specified by the environment variable 'LYNTINDIR',
+  unless they begin with '/'.  In this case they are interpreted as 
+  absolute pathnames.
+
+
+
+INIT FILE
+
+- when Lyntin starts up, it imports the file user.py
+- fill this file with python code you want to execute as soon
+  as Lyntin starts up.  you could e.g. initialize variables, set hooks,
+  define functions, send spam to the president, etc.
+
+
+
+SEQUENCING
+
+- All Lyntin commands can be sequenced with ';'. 
+
+EXAMPLES:
+  l n;l e;l s;l w  -- sends one command, then the next, etc.
+  #al jj jump;#al bb bounce
+
+
+
+HOOKS (for Python hackers)
+
+- A hook is a (possibly empty) list of user-defined functions, which
+  Lyntin calls at certain times to allow the user a chance to customize
+  Lyntin's behavior.
+
+- Lyntin is sprinkled with dozens of hooks, each of which is called
+  at a certain time.
+
+- a list of all hooks can be found in the file hooks.py
+
+- each hook may receive an argument tuple.  If so, this is specified 
+  via a comment above the relevant hook in hooks.py.
+
+- add a function to a hook by calling the hook's 'add' method with the
+  function as an argument
+
+- clear a hook of all functions by calling the hook's 'clear' method.
+
+
+EXAMPLE:
+  hooks.death_hook.add(my_death_function) -- adds the function
+  my_death_function to the list of functions in the hook death_hook.
+  remember, my_death_function must be a predeclared function which
+  accepts the right type of argument tuple.
+
+
+
+
+
+That should be about it.  In-game help is accessed by typing #help.
+Read through the various help files such as #general and that'll
+get you started.
+
+Enjoy!

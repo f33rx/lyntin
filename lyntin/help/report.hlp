@@ -1,0 +1,4 @@
+   syntax: #report <filename> <text>
+   With no args, it prints all reports.  Otherwise it creates
+   a report which prints the line that <text> appears in in
+   the mud output to the report file.

@@ -1,0 +1,27 @@
+For more up-to-date installation guide, please check the web-site:
+http://lyntin.sourceforge.net/
+
+Unix/Linux 
+1. make sure you have at least Python 2.0
+2. download the version you're looking for (below) 
+3. untar the client into ~/lyntin
+4. create a LYNTINDIR environment variable set to the lyntin directory 
+   or alternately start lyntin from the lyntin directory
+5. then run:
+      lyntin.py [file]
+      lyntin.py -tk [file]
+
+
+Windows 
+1. make sure you have at least Python 2.0
+2. download the version you're looking for (below) 
+3. unzip the client into c:\lyntin 
+4. create a shortcut on your desktop: 
+      Target: [path you put it in]\lyntin.py -tk 
+      Start in: [path you put it in] 
+5. double-click on the shortcut to run Lyntin
+
+
+After that, we have in-game help which you can access via #help.  If you
+are really new to Lyntin, read README then read #help general.
+
