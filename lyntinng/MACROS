@@ -1,0 +1,422 @@
+:Author: Will Guaraldi
+:Version: 1.0
+
+OVERVIEW
+========
+
+This document started out as a specification for how Tintin handles
+commands and variable expansion so that I could then emulate it in
+Lyntin.  However, outside of that original mission, it may also be
+a good guide to Tintin behavior and help in writing Tintin macros.
+
+User input is handled thusly:
+
+1. User input is checked to see if it's a command.  If it's a command
+   then it gets handled by the function that handles that command
+   per the behavior described above.  See `command handling`_.
+
+2. User input is passed through the alias filter.  If any
+   aliases are expanded, we recurse over the input and start the
+   process again.  If there are no aliases to expand, we move on
+   to the next step.  See `alias filter`_.
+
+3. User input is passed through the speedwalk filter.  If the
+   user input is expanded into speedwalk dirs, these dirs are
+   then recursed over.  See `speedwalk filter`_.
+
+4. User input is passed through the variable filter.  Here we
+   expand any variables and then recurse over the input and start
+   the process again.  If there are no variables to expand, we
+   move on to the next step.  See `variable filter`_.
+
+Each of these steps is detailed further.
+
+
+.. _`command handling`:
+
+COMMAND INPUT
+=============
+
+Lyntin handles commands before handling user input destined to the mud.
+The following details the behavior of the various Tintin commands.
+
+
+ACTION COMMAND
+--------------
+
+syntax: #action {trigger} {action}
+
+The action_cmd doesn't evaluate anything when the command is processed.
+The trigger is evaluated every time we're checking mud text to see if
+it triggered an action.  If the mud text did trigger an action, then
+we evaluate the action predicate by passing it through handleUserInput
+just like regular user input would be handled.
+
+::
+
+   > #action {test} {#showme test}
+
+creates "test" -> "#showme test".
+
+::
+
+   > #var {a} {a1}
+   > #var {b} {b1}
+   > #action {$a} {#showme $b}
+
+creates "$a" -> "#showme $b" where "$a" gets expanded every time we
+check for that action trigger and $b gets expanded by the showme_cmd.
+
+
+ALIAS COMMAND
+-------------
+
+syntax: #alias {name} {alias}
+
+Aliases get a little interesting because they add the placement variable
+issue.  The alias name is evaluated at the time the alias_cmd is being
+evaluated--prior to actually adding the alias to our list of aliases.
+The alias predicate is evaluated when the alias is expanded by user
+input.
+
+::
+
+   > #alias {test} {test2}
+
+creates "test" -> "test2".
+
+::
+
+   > #var {a} {a1}
+   > #var {b} {b1}
+   > #alias {test} {$a}
+
+creates "test" -> "$a" where $a will be expanded later when the user
+kicks off the alias by typing "test ...".
+
+::
+
+   > #var {a} {a1}
+   > #var {b} {b1}
+   > #alias {$a} {$b}
+
+creates "a1" -> "$b" where $b will be expanded later when the user
+kicks off the alias by typing "a1 ...".
+
+
+GAG COMMAND
+-----------
+
+#gag {text}
+
+#gag is actually just a shorthand for #sub {} {text}.  If the gagged
+text is found in an incoming line, the line is removed from the mud
+output and never displayed to the user.
+
+::
+
+   > #gag text
+   > #gag this is a gag
+   > #gag {oh my gagness}
+
+will gag all incoming lines that have "text", "this is a gag", and 
+"oh my gagness" in them.
+
+::
+
+   > #var {a} {b}
+   > #gag {$a}
+
+will now gag all incoming lines that have $a in them--where $a
+is expanded at the time of checking for gags.
+
+
+HIGHLIGHT COMMAND
+-----------------
+
+#highlight {style} {text}
+
+::
+
+   > #high {blue} {some text}
+   > #high {b red} {oh my highlight}
+
+will highlight "some text" with a blue foreground and "oh my highlight"
+with a red background.
+
+
+IF COMMAND
+----------
+
+#if {expr} {action} {elseaction}
+
+The if_cmd is pretty straight-forward.  It should be noted that Tintin
+cannot handle string matching.  So #if {"a" == "a"} will get all unhappy.
+
+Lyntin does some minor changes to the expression, but then passes it
+to Python to be evaluated.  So long as it comes back as something that
+we can infer true/false from, we can handle it.
+
+::
+
+   > #if {1=1} {#showme hello}
+
+will print "hello"
+
+::
+
+   > #var a 1
+   > #if {$a == 1} {#showme hello}
+
+will print "hello"
+
+::
+
+   > #var a 1
+   > #if {$a = 1} {$a}
+
+will run "1" through the command input to be evaluated.
+
+
+MATH COMMAND
+------------
+
+#math {var} {expr}
+
+::
+
+   > #math {myvar} {1+1}
+   > #math myvar2 {$myvar + 5}
+   > #math {myvar3} {$myvar * $myvar2}
+
+will create three variables.  myvar = 2, myvar2 = 7, myvar3 = 14.
+
+
+NOP COMMAND
+-----------
+
+#nop whatever
+
+It's a no operation.  Anything after #nop is ignored up to the next ;.
+
+
+SHOWME COMMAND
+--------------
+
+#showme {text...}
+
+::
+
+   > #showme text
+
+will print "text".
+
+::
+
+   > #var {a} {a1}
+   > #showme $a
+
+will print "a1".
+
+::
+
+   > #var {a} {a1}
+   > #action {$a} {test}
+   > #showme $a
+
+will print "a1" then will trigger the action which will do "test".
+
+
+SUBSTITUTE COMMAND
+------------------
+
+#substitute {item} {substitute}
+
+::
+
+   > #sub {test} {TEST}
+
+creates "test" -> "TEST".
+
+::
+
+   > #var {a} {b}
+   > #sub {$a} {TEST}
+   > #sub {oh my sub} {$a}
+
+$a in both cases is expanded at the time we're checking for substitutes in
+the incoming mud text.
+
+::
+
+   > #sub {hooplah} {.}
+   > #sub {hooplah2} {}
+
+Lines with hooplah are now removed and all instances of hooplah2 are
+removed (not the line--just the word hooplah2).
+
+In Lyntin, the following will work:
+
+::
+
+   > #sub {hooplah} {\.}
+
+The . is escaped, so all instances of "hooplah" will be replaced with . .
+
+
+VARIABLE COMMAND
+----------------
+
+#var {name} {value}
+
+::
+
+   > #var {a} {b}
+
+creates "$a" which expands to "b".
+
+::
+
+   > #var {c} {d}
+   > #var {$a} {test}
+
+creates "$b" which expands to "test"--the variables in name are
+expanded before creating the new variable.
+
+
+.. _`alias filter`:
+
+ALIAS FILTER
+============
+
+The alias filter looks at the first token and checks to see if it
+expands into an alias.  Placement variables are used by aliases to 
+let you to specify arguments to get expanded into the alias 
+predicate.
+
+::
+
+   > #ali {hsay} {house chat $0}
+   > hsay this is cool
+
+will result in "house chat this is cool" being sent to the mud.
+
+::
+
+   > #ali {gc} {give %1 to %2}
+   > gc pipe joe
+
+will result in "give pipe to joe" being sent to the mud.
+
+
+Placement variables get expanded depending on their nesting depth
+at the time the alias is expanded.
+
+::
+
+   > #ali {test} {#ali {tst2} {%1}}
+
+creates "test" -> "#ali {tst2} {%1}".
+
+::
+
+   > test hello
+
+creates "tst2" -> "%1".
+
+::
+
+   > #ali {test} {#ali {tst2} {%%1}}
+
+creates "test" -> "#ali {tst2} {%%1}".
+
+::
+
+   > test hello
+
+creates "tst2" -> "hello".
+
+
+In the first example, the %1 is in two nestings of brackets.  But it
+only has one %.  Thus it does not get expanded to "hello" and the
+alias "tst2" -> "%1".
+
+In the second example, the %%1 is in two nestings of brackets and
+has two % signs.  Thus it gets expanded to "hello" and the alias 
+"tst2" -> "hello".
+
+The number of % signs indicates the nesting depth at which the placement
+variable will be expanded.  If the nesting depth equals the number
+of % signs, then the variable will be expanded, otherwise it's left as
+is.
+
+Placement variables in the predicate can start with a % or a $.  The
+rules still apply to $.
+
+examples::
+
+   > #alias {test} {say %1 %2 %3}
+
+is the same as::
+
+   > #alias {test} {say $1 $2 $3}
+
+
+The way Tintin distinguishes between placement variables and regular 
+variables is by the name.  If the variable name is all digits, then 
+it's a placement variable.  Otherwise it's a regular variable.
+
+Lyntin adds to this a bit and allows Python-like splice syntax for 
+placement variables::
+
+   > #alias {test} {say $1:5}
+   > test 1 2 3 4 5
+
+will result in "say 1 2 3 4" being sent to the mud.
+
+::
+
+   > #alias {test} {say $1:3 to $4}
+   > test 1 2 3 4 5
+
+will result in "say 1 2 3 to 4" being sent to to the mud.
+
+
+Lyntin also allows negative references::
+
+   TODO
+
+
+.. _`speedwalk filter`:
+
+SPEEDWALK FILTER
+================
+
+This is totally new to Lyntin.  What happens is that the user input
+is checked to see if it's a speedwalk expression.  If it is, then it
+is expanded into speedwalk commands and then recursed over.
+
+Tintin implemented speedwalking, but it was pretty limited.  Lyntin
+implemented speedwalking that is very complex and allows you to do
+many many things including building speedwalk dirs that get expanded
+into Lyntin aliases.
+
+TODO
+
+
+.. _`variable filter`:
+
+VARIABLE FILTER
+===============
+
+The variable filter is last in the chain because it's the last thing
+we want to expand on.
+
+Variables are expanded like this:
+
+::
+
+   > #var a1 jerk
+   > say hi to the $a1.
+
+will expand to "say hi to the jerk." which will be sent to the mud.
