@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.6 2002/04/05 23:55:46 willhelm Exp $
+# $Id: exported.py,v 1.7 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -22,7 +22,7 @@ def lyntin_command(str):
 
     'str' -- the command to execute.  ex. "#help"
   """
-  get_engine().handleUserData(action)
+  get_engine().handleUserData(str)
 
 def add_command(str, func):
   """ The best way to add commands to Lyntin.
