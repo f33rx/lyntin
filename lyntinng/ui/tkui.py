@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.13 2002/07/27 03:03:34 willhelm Exp $
+# $Id: tkui.py,v 1.14 2002/08/15 01:26:11 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -28,6 +28,11 @@ above and beyond the textui:
  - ctrl-u removal of text
  - copy and paste from the screen
  - ctrl-t autotyper
+
+To bind function key and numpad bindings, create an alias for the
+symbol.  For example:
+
+#alias {VK_NUMPAD2} {south}
 """
 
 """
