@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.65 2002/04/21 23:48:29 willhelm Exp $
+# $Id: basic.py,v 1.66 2002/04/21 23:58:26 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -784,29 +784,25 @@ def showme_cmd(session, args, input):
     exported.write_message(input)
      
 
-def speedwalk_cmd(session, words, input):
+def speedwalk_cmd(session, args, input):
   """#speedwalk [on|off]
 
   With no arguments, tells you whether speedwalk is enabled.
   With arguments, sets the speedwalk global variable.
   """
-  if len(words) == 1:
+  option = args["option"]
+
+  if option == 1:
+    lyntin.speedwalk = 1
+    exported.write_message("speedwalk: now enabled.")
+  elif option == 0:
+    lyntin.speedwalk = 0
+    exported.write_message("speedwalk: now disabled.")
+  else:
     if lyntin.speedwalk:
       exported.write_message("speedwalk: enabled.")
     else:
       exported.write_message("speedwalk: disabled.")
-    return
-
-  option = utils.strip_braces(words[1])
-
-  if option == '1' or option == 'on':
-    lyntin.speedwalk = 1
-    exported.write_message("speedwalk: now enabled.")
-  elif option == '0' or option == 'off':
-    lyntin.speedwalk = 0
-    exported.write_message("speedwalk: now disabled.")
-  else:
-    exported.write_error("syntax: #speedwalk [on|off]")
 
 
 def substitute_cmd(session, words, input):
@@ -1167,7 +1163,7 @@ def load():
   exported.add_command("session", session_cmd)
   exported.add_command("showme", showme_cmd, "message*")
   # exported.add_command("snoop", snoop_cmd)
-  exported.add_command("speedwalk", speedwalk_cmd)
+  exported.add_command("speedwalk", speedwalk_cmd, "option:booleanornone=")
   exported.add_command("substitute", substitute_cmd)
   # exported.add_command("tabadd", tabadd_cmd)
   # exported.add_command("tabdelete", tabdelete_cmd)
