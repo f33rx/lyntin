@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.16 2002/08/13 02:30:12 willhelm Exp $
+# $Id: lyntincmds.py,v 1.17 2002/08/15 01:26:11 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -194,6 +194,8 @@ def diagnostics_cmd(session, args, input):
   except:
     message.append("   os.name not available.")
  
+  message.append("   lyntin: %s" % (lyntin.VERSION[:lyntin.VERSION.find("\n")]))
+
   message.append("Lyntin Options:")
   for mem in lyntin.options.keys():
     message.append("   %s: %s" % (mem, repr(lyntin.options[mem])))

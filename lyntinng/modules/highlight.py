@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.7 2002/09/04 05:36:36 willhelm Exp $
+# $Id: highlight.py,v 1.8 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -370,6 +370,7 @@ class HighlightManager(manager.Manager):
         file.write(data + " quiet={true}\n")
       else:
         file.write(data + "\n")
+      file.flush()
 
   def mudfilter(self, args):
     ses = args[0]

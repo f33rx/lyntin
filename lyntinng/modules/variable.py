@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.11 2002/09/04 05:36:37 willhelm Exp $
+# $Id: variable.py,v 1.12 2002/10/19 19:13:51 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -292,6 +292,7 @@ class VariableManager(manager.Manager):
         file.write(data + " quiet={true}\n")
       else:
         file.write(data + "\n")
+      file.flush()
 
   def denestVars(self, args):
     """ Handles denesting variables for Lyntin evaluation mode."""

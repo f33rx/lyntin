@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.30 2002/08/20 02:39:04 willhelm Exp $
+# $Id: lyntin.py,v 1.31 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -16,36 +16,46 @@ as the main function which starts Lyntin off.
 LYNTINTITLE = "Lyntin -- The Hacker's Mudclient "
 
 # version information
-VERSION = """Lyntin version 3.0 beta 2 (August 19, 2002)
+VERSION = """Lyntin version CVS DEV
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 """
 
-# help text which gets printed to stdout if you do 'Lyntin.py --help'
-HELPTEXT = """syntax: lyntin.py [--help] [--read <file>] [--datadir <dir>] [--ui <ui>] [--version]
+# help text which gets printed to stdout if you do 'lyntin.py --help'
+HELPTEXT = """syntax: lyntin.py [[OPTIONS] | [--help] | [--version]]
 
   --help
          displays this text and exits.
 
+  --version or -v
+         prints out the version information and exits.
+
+
+OPTIONS:
+
   --datadir or -d
          If you don't set your datadir, Lyntin will set the datadir to
          the HOME environment variable.  Using this option allows you to
-         set it manually.
+         set it manually.  You can specify only one --datadir flag.
+         Specifying additional ones will just overwrite the last one.
 
   --evalmode or -e
          Lyntin has two user input evaluation modes: lyntin and tintin.
          This allows you to set the mode at the command line.
 
+  --moduledir or -m
+         Lyntin dynamically loads everything in the lyntin/modules dir,
+         but will additionally dynamically load modules in dirs specified
+         by this flag.  You can specify multiple --moduledir flags.
+         
   --read or --readfile or -r
-         reads a file in at startup populating the common
-         session with aliases, actions, and whatnot.
+         Reads a file in at startup populating the common
+         session with aliases, actions, and whatnot.  You can specify
+         multiple files to read with multiple --read flags.
 
   --ui or -u
          launches a specific ui for Lyntin.  current options
          are 'text', 'tk', and 'curses'.
-
-  --version or -v
-         prints out the version information and exits.
 """
 
 # the wizlist of folks without whom Lyntin wouldn't exist.
@@ -113,9 +123,9 @@ ansicolor = 1
 # whether (1) or not (0) we're echoing user input to the ui
 mudecho = 1
 
-# this is the data directory.  if it isn't overriden, then this 
-# is the directory that everything will be pulled from.
-datadir = "./"
+# this holds a list of all the modules Lyntin has dynamically imported
+# or have been imported via the #import command.
+lyntinmodules = []
 
 # Lyntin counts the total number of errors it's encountered.
 # This enables us to shut ourselves down if we encounter too
@@ -128,7 +138,11 @@ LYNTIN = 1
 
 # holds the application options--these are adjusted by command-line 
 # arguments only
-options = {'ui': 'textui', 'readfile': [], 'datadir': '', 'evalmode': LYNTIN}
+options = {'datadir': '',
+           'evalmode': LYNTIN,
+           'moduledir': [],
+           'readfile': [],
+           'ui': 'textui'}
 
 # Lyntin has two modes for user input evaluation.  TINTIN mode
 # will evaluate user input just like TINTIN does.  LYNTIN mode
@@ -167,11 +181,17 @@ if __name__ == '__main__':
       elif mem[0] == '--readfile' or mem[0] == "--read" or mem[0] == '-r':
         lyntin.options['readfile'].append(mem[1])
 
+      elif mem[0] == '--moduledir' or mem[0] == '-m':
+        d = mem[1]
+        if d[-1] != os.sep:
+          d = mem[1] + "/"
+        lyntin.options['moduledir'].append(d)
+
       elif mem[0] == '--datadir' or mem[0] == '-d':
-        if mem[1][-1] != os.sep:
-          lyntin.options['datadir'] = mem[1] + "/"
-        else:
-          lyntin.options['datadir'] = mem[1]
+        d = mem[1]
+        if d[-1] != os.sep:
+          d = mem[1] + "/"
+        lyntin.options['datadir'] = d
 
       elif mem[0] == '--evalmode' or mem[0] == '-e':
         if mem[1] == 'tintin':
@@ -201,14 +221,14 @@ if __name__ == '__main__':
     # if they haven't set the datadir via the command line, then
     # we go see if they have a HOME in their environment variables....
     datadir = lyntin.options['datadir']
-    if datadir == '':
+    if not datadir:
       if os.environ.has_key("HOME"):
         datadir = os.environ["HOME"]
         if len(datadir) > 0:
           if datadir[-1] != os.sep: 
             datadir = datadir + os.sep
 
-    lyntin.options['datadir'] = datadir.replace("/", os.sep)
+      lyntin.options['datadir'] = datadir
 
     # set the lyntin evalmode
     lyntin.evalmode = lyntin.options['evalmode']

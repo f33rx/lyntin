@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.40 2002/10/12 22:14:47 willhelm Exp $
+# $Id: event.py,v 1.41 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -71,14 +71,27 @@ class StartupEvent(Event):
     """
     This does the following Lyntin startup things:
 
-    1. instantiates and binds the ui.
-    2. loads the dynamically loading Lyntin modules.
-    3. loads the help topics in the help subdir.
-    4. if there's a .lyntinrc adds that to the readfile list.
+    1. if there's a .lyntinrc adds that to the readfile list.
+    2. instantiates and binds the ui.
+    3. loads the dynamically loading Lyntin modules.
+    4. loads the help topics in the help subdir.
     5. reads in all the files in the readfile list.
     6. starts the timer thread.
     7. writes the startup message to the ui and the prompt.
     """
+    # adds the .lyntinrc file to the readfile list if it exists.
+    if lyntin.options['datadir']:
+      # FIXME - we look in the first datadir for the .lyntinrc file--
+      # should we look in all of them?
+      lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
+      try:
+        test = os.stat(lyntinrcfile)
+        # we want the .lyntinrc file read in first, so then other
+        # files can overwrite the contents therein
+        lyntin.options['readfile'].insert(0, lyntinrcfile)
+      except OSError, e:
+        pass
+
     try:
       # instantiate a ui
       uiname = lyntin.options['ui']
@@ -122,17 +135,6 @@ class StartupEvent(Event):
 
     # spam the startup hook 
     hooks.startup_hook.spamhook()
-
-    # adds the .lyntinrc file to the readfile list if it exists.
-    if lyntin.options['datadir'] != '':
-      lyntinrcfile = lyntin.options['datadir'] + ".lyntinrc"
-      try:
-        test = os.stat(lyntinrcfile)
-        # we want the .lyntinrc file read in first, so then other
-        # files can overwrite the contents therein
-        lyntin.options['readfile'].insert(0, lyntinrcfile)
-      except OSError, e:
-        pass
 
     # handle command files
     for mem in lyntin.options['readfile']:

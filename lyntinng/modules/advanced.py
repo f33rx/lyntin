@@ -4,18 +4,37 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.18 2002/06/20 01:20:11 willhelm Exp $
+# $Id: advanced.py,v 1.19 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
-import traceback, os, sys, string
-import exported, engine, ui.ui, utils
-
 """
 This module holds the magical python_cmd code.  It takes in code,
-and attempts to execute it in the user.py module.  If no such
+and attempts to execute it in the lyntinuser.py module.  If no such
 module exists, it executes it in this module.
 """
+import traceback, os, sys, string
+import exported, engine, ui.ui, utils, lyntin
 
 usermodule = None
+onetime = 0
+
+def _get_user_module():
+  """
+  Imports and returns the nicest user module it can find.
+  """
+  global usermodule
+  if usermodule:
+    return usermodule
+
+  # this probably isn't exactly right since it'll look for the
+  # first "lyntinuser" it finds and use that one.  i'm not sure how
+  # we could implement a priority.
+  for mem in sys.modules.keys():
+    if mem == "lyntinuser" or (len(mem) > 5 and mem[-5:] == ".lyntinuser"):
+      usermodule = sys.modules[mem]
+      return usermodule
+
+  return None
+
 
 def python_cmd(session, words, input):
   """
@@ -30,11 +49,15 @@ def python_cmd(session, words, input):
 
   category: commands
   """
+  global onetime
   # NOTE: if we ever get to handling multiple-lines, we'll need
   # to change this function completely.
   try:
-    if usermodule == None:
-      exported.write_error("modules.user is either bad or non-existent.  Executing in advanced.py..")
+    my_usermodule = _get_user_module() 
+    if my_usermodule == None:
+      if onetime == 0:
+        exported.write_error("No lyntinuser module imported--executing in advanced.py.")
+        onetime = 1
       exec input[1:].lstrip()
     else:
       exec input[1:].lstrip() in usermodule.__dict__
@@ -74,6 +97,10 @@ def import_cmd(session, args, input):
         _module = sys.modules[mod]
         _module.load()
       _module.__dict__["lyntin_import"] = 1
+
+      if mod not in lyntin.lyntinmodules:
+        lyntin.lyntinmodules.append(mod)
+
       exported.write_message("import: module %s reloaded." % mod)
     except Exception, e:
       exported.write_error("import: had problems with %s. %s" % (mod, e))
@@ -90,24 +117,17 @@ def import_cmd(session, args, input):
 
       _module.__dict__["lyntin_import"] = 1
       exported.write_message("import successful.")
+      if mod not in lyntin.lyntinmodules:
+        lyntin.lyntinmodules.append(mod)
+
     except Exception, e:
       exported.write_error("import: had problems with %s. %s" % (mod, e))
       exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
 
 
-def _import_user_module():
-  """ Imports and returns the modules.user module."""
-  try:
-    import modules.user
-    return modules.user
-  except:
-    return None
-
 
 def load():
   """ Initializes the module by binding all the commands."""
-  import modules.advanced
-  modules.advanced.usermodule = _import_user_module()
   exported.add_command("@", python_cmd)
   exported.add_command("^import", import_cmd, "modulename")
 

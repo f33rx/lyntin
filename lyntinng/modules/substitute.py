@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.12 2002/10/19 19:13:51 willhelm Exp $
+# $Id: substitute.py,v 1.13 2002/10/20 16:09:57 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -172,6 +172,7 @@ class SubstituteManager(manager.Manager):
         file.write(data + " quiet={true}\n")
       else:
         file.write(data + "\n")
+      file.flush()
 
   def mudfilter(self, args):
     """

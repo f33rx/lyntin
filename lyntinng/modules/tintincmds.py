@@ -4,9 +4,9 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.47 2002/10/05 22:29:06 willhelm Exp $
+# $Id: tintincmds.py,v 1.48 2002/10/21 04:02:34 willhelm Exp $
 #######################################################################
-import string, traceback
+import string, traceback, os
 import net, utils, engine, lyntin, exported, hooks, modutils
 
 """
@@ -386,9 +386,15 @@ def read_cmd(ses, args, input):
   command character.  If you use non Lyntin commands in your file,
   make sure the first one is a command char.  If not, use #nop .
 
+  If you don't specify a directory, Lyntin will look for the file
+  in your datadir.
+
   category: commands
   """
   filename = args["filename"]
+
+  if os.sep not in filename:
+    filename = lyntin.options['datadir'] + filename
 
   try:
     # http reading contributed by Sebastian John
@@ -547,6 +553,9 @@ def textin_cmd(session, args, input):
   Takes the contents of the file and outputs it directly to the mud
   without processing it (like #read does).
 
+  If you don't specify a directory, Lyntin will look for the file in
+  the datadir.
+
   category: commands
   """
   if (session.getName() == "common"):
@@ -555,9 +564,8 @@ def textin_cmd(session, args, input):
 
   filename = args["file"]
 
-  if not filename:
-    exported.write_error("syntax: #textin <filename>")
-    return
+  if os.sep not in filename:
+    filename = lyntin.options['datadir'] + filename
    
   try:
     file = open(filename, "r")
@@ -711,6 +719,8 @@ def write_cmd(ses, args, input):
   to be written to the file so that when you read it back in with #read,
   the commands are executed quietly.
 
+  If you don't specify a directory, it will be written to your datadir.
+
   Note: Windows users should either use two \\'s or use / to separate
   directory names.
 
@@ -719,6 +729,11 @@ def write_cmd(ses, args, input):
   filename = args["file"]
   quiet = args["quiet"]
 
+  f = None
+
+  if os.sep not in filename:
+    filename = lyntin.options['datadir'] + filename
+
   try:
     f = open(filename, "w")
     hooks.write_hook.spamhook((ses, f, quiet))
@@ -726,6 +741,10 @@ def write_cmd(ses, args, input):
     exported.write_message("write: file %s has been written for session %s." % 
                            (filename, ses.getName()))
   except Exception, e:
+    try:
+      f.close()
+    except:
+      pass
     exported.write_error("write: error writing to file %s. %s" % (filename, e))
 
 commands_dict["write"] = (write_cmd, "file quiet:boolean=false")

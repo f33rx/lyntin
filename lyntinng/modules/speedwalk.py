@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.11 2002/09/04 05:36:37 willhelm Exp $
+# $Id: speedwalk.py,v 1.12 2002/09/30 18:29:25 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -340,6 +340,7 @@ class SpeedwalkManager(manager.Manager):
         file.write(data + " quiet={true}\n")
       else:
         file.write(data + "\n")
+      file.flush()
 
   def userfilter(self, args):
     """

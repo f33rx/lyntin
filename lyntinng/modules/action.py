@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.12 2002/10/20 16:09:57 willhelm Exp $
+# $Id: action.py,v 1.13 2002/10/21 23:08:51 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -282,6 +282,7 @@ class ActionManager(manager.Manager):
         file.write(data + " quiet={true}\n")
       else:
         file.write(data + "\n")
+      file.flush()
 
   def variableChange(self, args):
     """
