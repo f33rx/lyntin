@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.1 2002/02/27 03:39:34 willhelm Exp $
+# $Id: advanced.py,v 1.2 2002/03/02 23:57:50 willhelm Exp $
 #######################################################################
 import traceback, sys, string
 import exported, engine
@@ -49,4 +49,4 @@ def load():
   """ Initializes the module by binding all the commands."""
   import modules.advanced
   modules.advanced.usermodule = _import_user_module()
-  engine.myengine.addCommand("@", python_cmd)
+  exported.add_command("@", python_cmd)

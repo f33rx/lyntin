@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.10 2002/03/09 00:32:22 willhelm Exp $
+# $Id: highlight.py,v 1.11 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -97,8 +97,17 @@ class HighlightManager(manager.Manager):
     """
     if len(input) > 0:
       for text in self._highlights.keys():
-        input = input.replace(text, self._highlights[text][1] +
-                                    text + chr(27) + "[0m")
+        if text[0] == "*" and text[-1] == "*":
+          input = self._highlights[text][1] + input + "[0m"
+        elif text[1] == "*":
+          input = input.replace(text, self._highlights[text][1] +
+                                      text + chr(27) + "[0m")
+        elif text[-1] == "*":
+          input = input.replace(text, self._highlights[text][1] +
+                                      text + chr(27) + "[0m")
+        else:
+          input = input.replace(text, self._highlights[text][1] +
+                                      text + chr(27) + "[0m")
 
     return input
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: unittest.py,v 1.7 2002/03/09 00:32:22 willhelm Exp $
+# $Id: unittest.py,v 1.8 2002/03/10 04:49:31 willhelm Exp $
 #######################################################################
 import string, traceback, sys
 import utils, engine, exported
@@ -140,4 +140,4 @@ def run_test(testsequence):
 
 def load():
   """ Initializes the module by binding the commands."""
-  engine.myengine.addCommand("^test", test_cmd)
+  exported.add_command("^test", test_cmd)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.18 2002/03/02 23:57:49 willhelm Exp $
+# $Id: engine.py,v 1.19 2002/03/10 04:49:31 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -501,6 +501,7 @@ class Engine:
     if lyntin.errorcount > 20:
       exported.write_error("Error count exceeded--shutting down.")
       event.ShutdownEvent().enqueue()
+
 
   def shutdown(self, args):
     """ Sets the shutdown status for the engine."""

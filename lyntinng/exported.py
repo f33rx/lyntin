@@ -4,11 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.2 2002/03/01 03:46:07 willhelm Exp $
+# $Id: exported.py,v 1.3 2002/03/02 23:57:49 willhelm Exp $
 #######################################################################
 """
-This is the easy module programmers interface and is guaranteed
-not to change even though we might change Lyntin's internals.
+This is the API for lyntin internals and is guaranteed to change 
+very rarely even though we might change Lyntin's internals.  If
+it does change it'll be between major Lyntin versions.
 """
 import engine, ui.ui
 
@@ -21,11 +22,10 @@ def lyntin_command(str):
 
     'str' -- the command to execute.  ex. "#help"
   """
-  pass
+  engine.myengine.handleUserData(action)
 
-def lyntin_add_command(str, func):
-  """
-  The best way to add commands to Lyntin.
+def add_command(str, func):
+  """ The best way to add commands to Lyntin.
 
   arguments:
 
@@ -33,31 +33,30 @@ def lyntin_add_command(str, func):
 
     'func' -- the function to call when that command is executed.
   """
-  pass
+  engine.myengine.addCommand(str, func)
 
-def lyntin_get_commands():
-  """
-  Returns a list of the commands currently bound.
+def get_commands():
+  """ Returns a list of the commands currently bound.
 
   returns:
 
     list of strings
   """
-  pass
+  return engine.myengine.getCommands()
 
-def get_session(sesname):
+def get_session(name):
   """
   Returns a named session.
 
   arguments:
 
-    'sesname' -- the name of the session to retrieve
+    'name' -- the name of the session to retrieve
 
   returns
 
     session.Session instance or None if it doesn't exist
   """
-  pass
+  return engine.myengine.getSession(name)
 
 def get_active_sessions():
   """
@@ -67,7 +66,7 @@ def get_active_sessions():
 
     list of session.Session instances
   """
-  pass
+  engine.myengine.getSessions()
 
 def get_current_session():
   """
@@ -77,7 +76,7 @@ def get_current_session():
 
     a session.Session instance
   """
-  pass
+  return engine.myengine.currentSession()
 
 def set_current_session(session):
   """
@@ -87,7 +86,9 @@ def set_current_session(session):
 
     'session' -- a session.Session instance
   """
-  pass
+  # FIXME - should do some data checking on this first
+  engine.myengine._current_session = session
+    
   
 def get_num_errors():
   """
@@ -97,7 +98,7 @@ def get_num_errors():
 
     int
   """
-  pass
+  return lyntin.errorcount
  
 def set_num_errors(num):
   """
@@ -108,7 +109,7 @@ def set_num_errors(num):
 
     'num' -- the number of errors to set
   """
-  pass
+  lyntin.errorcount = num
 
 def write_ui(text):
   """ Calls engine.myengine.writeUI which writes a message to the ui.
@@ -119,7 +120,10 @@ def write_ui(text):
               to the ui
 
   """
-  engine.myengine.writeUI(text)
+  if engine.myengine:
+    engine.myengine.writeUI(text)
+  else:
+    print text
 
 
 def write_test(text):
@@ -130,7 +134,10 @@ def write_test(text):
     'text' -- (string) the message to send
 
   """
-  engine.myengine.writeUI(ui.ui.Message(text, ui.ui.TESTDATA))
+  if engine.myengine:
+    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.TESTDATA))
+  else:
+    print "test:", text
 
 def write_message(text):
   """ Calls engine.myengine.writeMessage which writes LTDATA message.
@@ -140,7 +147,10 @@ def write_message(text):
     'text' -- (string) the message to send
 
   """
-  engine.myengine.writeUI(ui.ui.Message(text, ui.ui.LTDATA))
+  if engine.myengine:
+    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.LTDATA))
+  else:
+    print "message:", text
 
 def write_error(text):
   """ Calls engine.myengine.writeError which writes ERROR message.
@@ -149,7 +159,10 @@ def write_error(text):
 
     'text' -- (string) the message to send
   """
-  engine.myengine.writeUI(ui.ui.Message(text, ui.ui.ERROR))
+  if engine.myengine:
+    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.ERROR))
+  else:
+    print "error:", text
 
 def write_user_data(text):
   """ Calls engine.myengine.writeUserData which writes a USERDATA message.
@@ -158,7 +171,10 @@ def write_user_data(text):
 
     'text' -- (string) the message to send
   """
-  engine.myengine.writeUI(ui.ui.Message(text, ui.ui.USERDATA))
+  if engine.myengine:
+    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.USERDATA))
+  else:
+    print "userdata:", text
 
 def write_mud_data(text):
   """ Calls engine.myengine.writeMudData which writes a MUDDATA message.
@@ -168,18 +184,27 @@ def write_mud_data(text):
     'text' -- (string) the message to send
 
   """
-  engine.myengine.writeUI(ui.ui.Message(text, ui.ui.MUDDATA))
+  if engine.myengine:
+    engine.myengine.writeUI(ui.ui.Message(text, ui.ui.MUDDATA))
+  else:
+    print "muddata:", text
 
 def get_history():
-  pass
+  """ Retrieves the history as a oldest to youngest list of strings.
 
-def set_history(list):
-  pass
+  returns:
+
+    list of strings
+
+  """
+  return engine.myengine.getHistoryManager().getHistory()
 
 def grep_databuffer(str, session):
+  """ Not yet implemented."""
   pass
 
 def grep_databuffer_lines(str, session):
+  """ Not yet implemented."""
   pass
 
 def get_engine():
