@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.5 2001/12/24 02:59:44 willhelm Exp $
+# $Id: session.py,v 1.6 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -184,15 +184,15 @@ class Session:
     data += fixinfo(self._varmanager.getVariableInfo())
     return data
 
-  def clearSession(self):
+  def clear(self):
     """ Clears the session (except for connections)."""
-    self._aliasmanager.clearAliases()
-    self._actionmanager.clearActions()
-    self._gagmanager.clearGags()
-    self._hlmanager.clearHighlights()
-    self._submanager.clearSubstitutes()
-    self._varmanager.clearVariables()
-    self._ticker.clearTicker()
+    self._aliasmanager.clear()
+    self._actionmanager.clear()
+    self._gagmanager.clear()
+    self._hlmanager.clear()
+    self._submanager.clear()
+    self._varmanager.clear()
+    self._ticker.clear()
 
 
   ### ------------------------------------------------

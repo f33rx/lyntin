@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: alias.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
@@ -34,7 +34,7 @@ class AliasManager:
     self._aliases[name] = expansion
     return 1
 
-  def clearAliases(self):
+  def clear(self):
     """ Removes all the aliases."""
     for mem in self._aliases.keys():
       del self._aliases[mem]

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: substitute.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -21,7 +21,7 @@ class SubstituteManager:
     self._substitutes[item] = substitute 
     return 1
 
-  def clearSubstitutes(self):
+  def clear(self):
     """ Removes all the substitutes."""
     for mem in self._substitutes.keys():
       del self._substitutes[mem]

@@ -8,12 +8,16 @@ the distribution.
 
 
 TODO:
+ - fix ticker
+ - fix output to ui--all output to ui should follow the mud output
+   as well--somehow we format it and then send it on the same route
+   this should actually simplify a bunch of things including let
+   us synchronize on the write method of the ui
  - fix substitutes (they're not implemented right)
+ - overhaul tkgui color stuff
  - get highlights to work in tkgui
- - implement ticker
  - stack traces, messages and error messages (all errors should be logged)
  - overhaul help files and write documentation
- - handle "#session" by itself
  - add file logging status to #info
 
  - have lyntin generate the user.py module for users to edit (if it's 
@@ -84,6 +88,7 @@ TODO:
      pathdir
      snoop
      split
+     tickset - (it's silly)
      unsplit
      unpath
      suspend

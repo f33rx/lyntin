@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: action.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -37,7 +37,6 @@ class ActionManager:
 
     """
     regexp = re.sub('%[0-9]+', '(.*)', trigger)
-    print type(re.compile(regexp))
     return re.compile(regexp)
 
   def addAction(self, trigger, response):
@@ -61,7 +60,7 @@ class ActionManager:
     self._actions[trigger] = (trigger, compiled, response)
     return 1
 
-  def clearActions(self):
+  def clear(self):
     """
     Clears all the stored actions from the action manager.
     """

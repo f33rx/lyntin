@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.1 2001/12/24 03:45:48 willhelm Exp $
+# $Id: ticker.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -92,18 +92,29 @@ class Ticker:
     """
     tick = args[0]
 
-    # if this is a tick...
-    if (tick % self._ticklen) == 0:
-      input = lyntin.commandchar + self._sessionname + " " + self._tickaction
-      event.InputEvent(input).enqueue()
+    session = engine.myengine.getSession(self._sessionname)
+    if session:
 
-    # if this is a tickwarn...
-    if tick % self._ticklen == self._ticklen - self._tickwarn:
+      # if this is a tick...
+      if (tick % self._ticklen) == 0:
+        action = session.getAliasManager().getAlias("TICK!!!")
+        if action:
+          input = lyntin.commandchar + self._sessionname + " " + action
+          event.InputEvent(input).enqueue()
+        else:
+          engine.myengine.writeMessage("TICK!!!")
+
+      # if this is a tickwarn...
+      if tick % self._ticklen == self._ticklen - self._tickwarn:
+        engine.myengine.writeMessage("ticker: " +
+              repr(self._tickwarn) + " seconds to tick!")
+
+    else:
+      # FIXME - we need to kill this ticker because it belongs to
+      # a nonexistant session
       pass
-      engine.myengine.writeMessage("ticker: " +
-            repr(self._tickwarn) + " seconds to tick!")
 
-  def clearTicker(self):
+  def clear(self):
     """
     Disables the ticker and clears the variables.
     """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.2 2001/12/09 06:31:15 willhelm Exp $
+# $Id: net.py,v 1.3 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -32,9 +32,15 @@ class SocketCommunicator:
   def __repr__(self):
     return ("connection " + self._host + " " + repr(self._port))
 
-  def setSession(self, ses):
-    """ Sets the local session."""
-    self._session = ses
+  def setSession(self, newsession):
+    """ Sets the local session.
+
+    arguments:
+
+      'newsession' -- (session.Session) the session to set to
+
+    """
+    self._session = newsession
 
   def shutdown(self):
     """ Shuts down a socket connection and the thread polling it."""
@@ -48,7 +54,17 @@ class SocketCommunicator:
       self._session = None
 
   def connect(self, host, port, sessionname):
-    """ Takes in a host and a port and connects the socket."""
+    """ Takes in a host and a port and connects the socket.
+
+    arguments:
+
+      'host' -- (string) the host to connect to
+
+      'port' -- (int) the port to connect at
+
+      'sessionname' -- (string) the name of the session
+
+    """
     if type(port) == type(''):
       port = int(port)
 
@@ -88,7 +104,15 @@ class SocketCommunicator:
         self._session.shutdown(())
 
   def write(self, data, convert=1):
-    """ Writes data to the mud."""
+    """ Writes data to the mud.
+
+    arguments:
+
+      'data' -- (string) the data to write to the socket to the mud
+
+      'convert=1' -- (int) 1 if we should convert eol stuff, 0 if not
+
+    """
     try:
       if convert:
         self._sock.send(string.replace(data, "\n", "\r\n"))
@@ -104,6 +128,16 @@ class SocketCommunicator:
     """
     Removes telnet negotiation stuff from the stream and handles 
     it.
+
+    arguments:
+
+      'data' -- (string) incoming data that we need to parse
+                for telnet negotiation stuff
+
+    returns:
+
+      (string) the data without the telnet control codes
+
     """
     i = string.find(data, IAC)
 

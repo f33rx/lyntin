@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.8 2001/12/31 18:33:29 willhelm Exp $
+# $Id: basic.py,v 1.9 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -147,7 +147,7 @@ def clear_cmd(session, words, input):
   the actual connection).
   """
   try:
-    session.clearSession()
+    session.clear()
     engine.myengine.writeMessage("clear: session " + 
                                  session.getName() + " cleared.")
   except:
@@ -341,7 +341,7 @@ def killall_cmd(session, words, input):
   Wipes all the sessions of all information.
   """
   for mem in engine.myengine._sessions.values():
-    mem.clearSession()
+    mem.clear()
     engine.myengine.writeMessage("killall: session " + 
                                  mem.getName() + " cleared.")
 
@@ -639,23 +639,6 @@ def tickoff_cmd(session, words, input):
                                " ticker disabled.")
 
 
-def tickset_cmd(session, words, input):
-  """#tickset {some action}
-
-  Sets the tick action.
-  """
-  action = input.split(" ", 1)
-  if len(action) < 2:
-    engine.myengine.writeError("syntax: #tickset {action}")
-    return
-
-  action = utils.strip_braces(action[1])
-
-  session.getTicker().setTickAction(action)
-  engine.myengine.writeMessage("tickset: tick action set to '" + 
-                               action + "'.")
-
-
 def ticksize_cmd(session, words, input):
   """#ticksize {number}
 
@@ -871,7 +854,6 @@ engine.myengine.addCommand("textin", textin_cmd)
 engine.myengine.addCommand("tick", tick_cmd)
 engine.myengine.addCommand("tickon", tickon_cmd)
 engine.myengine.addCommand("tickoff", tickoff_cmd)
-engine.myengine.addCommand("tickset", tickset_cmd)
 engine.myengine.addCommand("ticksize", ticksize_cmd)
 # engine.myengine.addCommand("togglesub", togglesub_cmd)
 engine.myengine.addCommand("unaction", unsomething_cmd)
