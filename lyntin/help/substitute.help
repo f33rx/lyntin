@@ -1,0 +1,9 @@
+   syntax: #substitute [{name}] [{substitution}]
+   With no arguments, #substitute simply prints out all the substitutions
+   for the current session.  With one argument, it prints out the
+   substitutions which correspond to that pattern (wildcard * is supported).
+   Otherwise it creates a substitute for the 'name' which will be
+   substituted with 'substitution'.  Braces are advised around both
+   'name' and 'substitution'.
+
+   See also: unsubstitute

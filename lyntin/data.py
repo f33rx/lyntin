@@ -29,7 +29,12 @@ import mud, app, player, hooks, handler
 ##################################################################
 
 """this is the current lyntin version number and such."""
-version = "lyntin 2.0b3, copyright 2000, see http://lyntin.sourceforge.net/"
+version = """
+For bugs, suggestions, mailing list info, feature requests,
+architecture docs, et al, see http://lyntin.sourceforge.net/
+
+lyntin 2.0b3, (May 7, 2001) copyright 2000, 2001
+"""
 
 
 

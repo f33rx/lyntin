@@ -1,0 +1,8 @@
+   syntax: #unsubstitute pattern
+   Removes all substitutions that correspond to a given pattern.  Use
+   of the * as a wildcard is supported.
+   
+   ex: #unsubstitute ra*
+   This will remove all substitutions that start with ra.
+   
+   See also: substitute

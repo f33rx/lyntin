@@ -484,7 +484,7 @@ def Report(words, input, seslist):
         elif len(words) == 2:
             # reject it.
             PutError("report: not enough arguments.")
-            PutError("report [tofile] [text string]")
+            PutError("report <filename> <text string>")
         else:
             try:
                 # define a new report
@@ -492,7 +492,7 @@ def Report(words, input, seslist):
                 text = string.join(words[2:])
                 file = app.get_appropriate_file(filename, 'a')
                 eachses.reports.append((file, text))
-                PutMessage('ok, "%s" now reported to file %s'% (text, file))
+                PutMessage('ok, "%s" now reported to file %s'% (text, filename))
             except IOError:
                 PutError('report: unable to open file %s'%filename)
                     
