@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.68 2002/12/31 00:03:59 willhelm Exp $
+# $Id: utils.py,v 1.69 2003/02/15 03:35:05 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -663,6 +663,24 @@ def convert_boolean(text):
   else:
     return -1
 
+def escape(s):
+  r"""
+  Takes in a string and escapes all \ (single backslash) by one level 
+  (turning it into a double backslash) and all $ (single dollar sign) 
+  by one level (turning it into a single backslash and a single dollar
+  sign).
+
+  @param s: the string to escape
+  @type s: string
+
+  @returns: the escaped string
+  @rtype: string
+  """
+  s = s.replace("\\", "\\\\")
+  if lyntin.evalmode == lyntin.EVALMODE_LYNTIN:
+    s = s.replace("$", "\\$")
+  return s
+
 
 # --------------------------------------
 # variable expansion functions
@@ -1149,6 +1167,7 @@ def _lyntin_expand_placement_vars(input, expansion):
   expansion = _lyntin_denest_vars_worker("%", expansion)
 
   return expansion
+
 
 # Local variables:
 # mode:python

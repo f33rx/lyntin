@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.18 2002/12/22 23:07:20 willhelm Exp $
+# $Id: alias.py,v 1.19 2003/02/15 03:35:06 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which manages aliases, creating new
@@ -164,7 +164,7 @@ class AliasData:
     data = []
     for mem in listing:
       data.append("%salias {%s} {%s}" %
-                  (lyntin.commandchar, mem, self._aliases[mem]))
+          (lyntin.commandchar, mem, utils.escape(self._aliases[mem])))
 
     return string.join(data, "\n")
 
