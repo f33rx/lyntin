@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.61 2002/12/22 23:07:20 willhelm Exp $
+# $Id: tintincmds.py,v 1.62 2003/01/01 00:36:25 willhelm Exp $
 #######################################################################
 import string, os
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -564,6 +564,8 @@ def tick_cmd(ses, args, input):
 
   This allows you to perform an event every x number of seconds.
 
+  see also: tick, tickon, tickoff, ticksize, tickwarnsize
+
   category: commands
   """
   if (ses.getName() == "common"):
@@ -586,7 +588,7 @@ def tickon_cmd(ses, args, input):
   """
   Turns on the ticker for this session.
 
-  see also: tick, tickoff, ticksize
+  see also: tick, tickon, tickoff, ticksize, tickwarnsize
 
   category: commands
   """
@@ -605,7 +607,7 @@ def tickoff_cmd(ses, args, input):
   """
   Turns off the ticker for this session.
 
-  see also: tick, tickon, ticksize
+  see also: tick, tickon, tickoff, ticksize, tickwarnsize
 
   category: commands
   """
@@ -630,7 +632,7 @@ def ticksize_cmd(ses, args, input):
     #ticksize 6
     #ticksize 1h2m30s
 
-  see also: tick, tickon, tickoff
+  see also: tick, tickon, tickoff, ticksize, tickwarnsize
 
   category: commands
   """
@@ -655,12 +657,13 @@ def tickwarnsize_cmd(ses, args, input):
   """
   Sets and displays the number of seconds you get warned before a
   Tick actually happens.
-  Set tickwarnsize to 0 to disable the warnings.
 
   examples:
     #tickwarnsize
     #tickwarnsize 6
     #tickwarnsize 0
+
+  see also: tick, tickon, tickoff, ticksize, tickwarnsize
 
   category: commands
   """

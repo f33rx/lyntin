@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.32 2002/11/06 03:03:19 willhelm Exp $
+# $Id: argparser.py,v 1.33 2003/01/02 01:50:07 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses X{command argument}s
@@ -283,9 +283,9 @@ class ArgumentParser:
               parser = self.extranamedparser
             else:
               if len(matchedkeys) == 0:
-                raise ParseException, "Invalid named argument: %s=%s" % (key,val)
+                raise ParserException, "Invalid named argument: %s=%s" % (key,val)
               else:
-                raise ParseException, "Ambiguous named argument: %s=%s %s" % (key, val, matchedkeys)
+                raise ParserException, "Ambiguous named argument: %s=%s %s" % (key, val, matchedkeys)
             
           parser.parseInto(key,val,dict)
 

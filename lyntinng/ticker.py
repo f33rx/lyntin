@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.24 2002/11/18 02:43:54 willhelm Exp $
+# $Id: ticker.py,v 1.25 2003/01/01 00:36:25 willhelm Exp $
 #######################################################################
 """
 This module handles ticker stuff.  A session can have an associated
@@ -199,7 +199,7 @@ class Ticker:
     @rtype: string
     """
     if self._enabled == 1:
-      return "(size = %d) (start = %d)" % (self._ticklen, self._tickstart)
+      return "(size = %d) (warn = %d) (start = %d)" % (self._ticklen, self._tickwarn, self._tickstart)
     else:
       return "<none>"
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.36 2002/12/04 03:46:28 willhelm Exp $
+# $Id: exported.py,v 1.37 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -27,7 +27,7 @@ def lyntin_command(text, internal=0, session=None):
 
   @param session: the session instance to execute this command in
       (defaults to the current session)
-  @type  session: session.Session
+  @type  session: Session
   """
   if session != None:
     get_engine().handleUserData(text, internal, session)
@@ -35,12 +35,12 @@ def lyntin_command(text, internal=0, session=None):
     get_engine().handleUserData(text, internal)
 
 
-def add_command(command, func, arguments=None, argoptions=None, helptext=""):
+def add_command(cmd, func, arguments=None, argoptions=None, helptext=""):
   """
   The best way to add commands to Lyntin.
 
-  @param command: the command name to add.  ex. "help"
-  @type  command: string
+  @param cmd: the command name to add.  ex. "help"
+  @type  cmd: string
 
   @param func: the function to call to handle the command
   @type  func: function
@@ -56,20 +56,20 @@ def add_command(command, func, arguments=None, argoptions=None, helptext=""):
       the HelpManager
   @type  helptext: string
   """
-  get_manager("command").addCommand(command, func, arguments, argoptions, helptext)
+  get_manager("command").addCommand(cmd, func, arguments, argoptions, helptext)
 
-def remove_command(str):
+def remove_command(text):
   """
   Removes a command from Lyntin.
 
-  @param str: the name of the command to remove
-  @type  str: string
+  @param text: the name of the command to remove
+  @type  text: string
 
   @return: 0 if no command was found, 1 if the command was removed
       successfully
   @rtype: boolean
   """
-  return get_manager("command").removeCommand(str)
+  return get_manager("command").removeCommand(text)
 
 def get_commands():
   """
@@ -374,11 +374,11 @@ def get_history(count=30):
   """
   return get_manager("history").getHistory(count)
 
-def grep_databuffer(str, session):
+def grep_databuffer(text, ses):
   """ Not yet implemented."""
   pass
 
-def grep_databuffer_lines(str, session):
+def grep_databuffer_lines(text, ses):
   """ Not yet implemented."""
   pass
 
