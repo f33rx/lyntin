@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.14 2002/04/05 23:55:46 willhelm Exp $
+# $Id: lyntin.py,v 1.15 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -100,6 +100,9 @@ speedwalk = 1
 # whether or not we whack all the ansi stuff for incoming
 # mud data.
 ansicolor = 1
+
+# whether or not we're echoing user input to the ui
+echo = 1
 
 # this is the data directory.  if it isn't overriden,
 # then this is the directory that everything will be pulled

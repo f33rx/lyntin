@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.10 2002/03/24 21:00:18 willhelm Exp $
+# $Id: net.py,v 1.11 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -151,9 +151,9 @@ class SocketCommunicator:
         if data[i+1] in DDWW:
           if data[i+2] == ECHO:
             if data[i+1] == WILL:
-              event.EchoEvent(self._session, 0).enqueue()
+              event.EchoEvent(0).enqueue()
             elif data[i+1] == WONT:
-              event.EchoEvent(self._session, 1).enqueue()
+              event.EchoEvent(1).enqueue()
           elif data[i+1] in DD:
             self.write(IAC + WONT + data[i+2])
 

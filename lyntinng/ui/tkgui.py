@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.24 2002/04/03 03:14:15 willhelm Exp $
+# $Id: tkgui.py,v 1.25 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -207,11 +207,8 @@ class TkGui(ui.BaseUI):
       self._entry.clearInput()
 
 
-  def echo(self, session, yesno):
-    """ This turns echo on and off on the CommandEntry widget.
-
-    It's session-scoped--which makes things a bit dicey....
-    """
+  def echo(self, yesno):
+    """ This turns echo on and off on the CommandEntry widget."""
     if yesno==1:
       self._do_i_echo = 1
       self._entry.configure(show='')

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.18 2002/04/03 03:14:15 willhelm Exp $
+# $Id: event.py,v 1.19 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -149,23 +149,20 @@ class EchoEvent(Event):
   Echo request--either to tell us that the server is handling echo
   (echo off) or that the server will not handle echo (echo on).
   """
-  def __init__(self, session, onoff):
+  def __init__(self, onoff):
     """ Initialize.
 
     arguments:
 
-      'session' -- (session) the session handling this mud
-                   connection
-
       'onoff' -- (int) 1 if echo turns on, or 0 if echo turns off
 
     """
-    self._session = session
     self._state = onoff
 
   def execute(self):
     """ Runs the echo event through anything listening."""
-    hooks.echo_hook.spamhook((self._session, self._state))
+    hooks.echo_hook.spamhook((self._state))
+    lyntin.echo = self._state
 
 
 class ReloadEvent(Event):
@@ -252,7 +249,10 @@ class InputEvent(Event):
   def execute(self):
     """ Execute."""
     exported.write_user_data(self._input)
-    if self._internal == 0:
+
+    # we don't record internal stuff or input that isn't supposed
+    # to be echo'd
+    if self._internal == 0 and lyntin.echo == 1:
       exported.get_engine().getHistoryManager().recordHistory(self._input)
 
     engine.myengine.handleUserData(self._input, session=self._session)
