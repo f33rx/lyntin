@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.3 2002/05/05 17:17:41 willhelm Exp $
+# $Id: tintincmds.py,v 1.4 2002/05/05 17:29:31 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -279,14 +279,16 @@ With an argument, shows that specific help file.
       data += "syntax: %s %s\n" % (item, ap.syntaxline)
 
     command = exported.get_engine().getCommand(item)
-    if command:
-      data += command.__doc__
-    if not command:
+    if command and command.__doc__:
+      helptext = command.__doc__
+
+    if not helptext:
       helptext = exported.get_engine().getHelp(item)
-      if helptext:
-        data += helptext
-      else:
-        data += "\nThat command has no help text."
+
+    if helptext:
+      data += helptext
+    else:
+      data += "\nThat command has no help text."
 
     exported.write_message(data)
     return
