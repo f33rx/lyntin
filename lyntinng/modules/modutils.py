@@ -4,24 +4,31 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: modutils.py,v 1.5 2002/07/21 04:14:48 willhelm Exp $
+# $Id: modutils.py,v 1.6 2002/08/18 00:57:24 willhelm Exp $
 #######################################################################
 import string
 import exported
 
 """
 This module holds helper functions for building other Lyntin modules.
+This module will likely make things easier for you, however, it is not
+an API module and the contents herein are subject to change if we
+need to change them.  Having said that, I will note it doesn't change
+much.
 """
 
 def load_commands(commands_dict):
-  """ Takes in a dict and loads all the commands in that dict.
+  """
+  Takes in a dict and loads all the commands in that dict.
 
-  The dict is the same form as the exported.add_command function
-  signature.
+  The dict is a mapping of command name to arguments to be passed
+  to exported.add_command.  Pretty much we just turn around and
+  call exported.add_command with the arguments in the dict without
+  any transformation at all.
 
-  arguments:
-
-    'commands_dict' -- (map) of command name -> tuple
+  @param commands_dict: the map holding the command names and the
+      arguments we need to call exported.add_command repeatedly
+  @type  commands_dict: dict
   """
   for mem in commands_dict.keys(): 
     args = commands_dict[mem]
@@ -31,12 +38,12 @@ def load_commands(commands_dict):
       exported.add_command(mem, args)
 
 def unload_commands(commands_list):
-  """ Takes in a list of command names and unloads all the commands
-  in the list.
+  """
+  Takes in a list of command names and removes the commands from
+  Lyntin by calling exported.remove_command.
 
-  arguments:
-
-    'commands_list' -- (sequence) of command name strings
+  @param commands_list: the list of command names to remove
+  @type  commands_list: list of strings
   """
   for mem in commands_list:
     exported.remove_command(mem)
@@ -44,23 +51,30 @@ def unload_commands(commands_list):
 
 def unsomething_helper(args, func, ses, sing, plur):
   """
-  Helps automate some of the un(something) commands.
+  Helps automate some of the un(something) commands.  These are
+  commands that remove data from a given manager.  For example,
+  unalias, unaction....
 
-  arguments:
+  This method also handles printing out status information to
+  the user as to how many somethings were removed.
 
-    'args' -- (map) the map with the 'str' and 'quiet' arguments
-              in it.
+  @param args: the map with the str and quiet arguments in it
+  @type  args: dict
 
-    'func' -- (function instance) the function to call to unsomething
-              things.  it should take a single string argument.
+  @param func: the function to call to actually do the work.
+      it should take in a single string argument.
+  @type  func: function
 
-    'ses' -- (session instance) the session to apply this to
+  @param ses: the session to apply this to
+  @type  ses: Session
 
-    'sing' -- (string) the singular form of the unsomething--for
-              output
+  @param sing: the singular form of the unsomething--for output
+      (ex: "alias")
+  @type  sing: string
 
-    'plur' -- (string) the plural form of the unsomething--for
-              output
+  @param plur: the plural form of the unsomething--for output
+      (ex: "aliases")
+  @type  plur: string
   """
   str = args["str"]
   quiet = args["quiet"]
