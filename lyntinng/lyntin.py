@@ -1,0 +1,145 @@
+#!/usr/bin/env python
+#######################################################################
+# This file is part of Lyntin.
+# copyright (c) Will Guaraldi 2001
+#
+# Lyntin is distributed under the GNU General Public License license.  See the
+# file LICENSE for distribution details.
+# $Id$
+#######################################################################
+"""
+This module holds the Lyntin "global variables" and constants as well
+as the main function which starts Lyntin off.
+"""
+import sys, os, getopt
+
+# version information
+VERSION = """Lyntin version 3.0 alpha 1
+For bugs, suggestions, mailing list info, feature requests,
+architecture docs, et al, see http://lyntin.sourceforge.net/
+
+Lyntin is copyright 2001 Will Guaraldi
+"""
+
+# help text which gets printed to stdout if you do 'Lyntin.py --help'
+HELPTEXT = """syntax: Lyntin.py [--help] [--readfile <file>] [--ui <ui>]
+
+  --help
+         displays this text and exits.
+
+  --readfile
+         reads a file in at startup populating the common
+         session with aliases, actions, and whatnot.
+
+  --ui
+         launches a specific ui for Lyntin.  current options
+         are 'textui', 'tkgui', and 'cursesui'.
+"""
+
+# the wizlist of folks who have helped Lyntin out over the years.
+WIZLIST = """This is the wizlist--people who have worked to bring you Lyntin:
+Lyn Headley - he who wrote the first Lyntin
+Will Guaraldi - he who took it over, debugged a bit, and wrote Lyntin 3.0
+"""
+
+# bosstext - code derived from the original Lyntin
+BOSSTEXT = """
+      hooks.too_many_errors_hook.add(abort_due_to_errors)
+      sys.path.append(data.initdir + 'stdlib')
+
+        
+   def PreHandleUserInput(self, input):
+      \"""
+      Do stuff that we want to do one time for each command, like
+      registering the command in the history list.
+      We can't do this in HandleUserInput because it is recursive
+      \"""
+      if input == '\\n':
+          self.SendPlainInput('\\r')
+
+      elif input:
+          self.RecordHistory(input)
+
+          # run the received_user_input hook
+          newinput = strip_final_elt_if(input, ['\\r', '\\n'])
+          hooks.received_user_input_hook.run((newinput,))
+
+          # send it along to the recursive workhorse
+          self.HandleUserInput(input)
+
+
+   def HandleUserInput(self, input):
+      \"""
+      The main "eval" command for Lyntin.  This function is
+      recursive.
+      \"""
+      if not input:
+"""
+
+# holds the application options--these are adjusted
+# by command-line arguments only
+options = {'ui': 'textui', 'readfile': ''}
+
+# the character used to denote variables.
+variablechar = '$'
+
+# the character used to denote commands
+commandchar = '#'
+
+# whether or not we do speedwalking checks
+# 1 if yes, 0 if no
+speedwalk = 1
+
+# whether or not we whack all the ansi stuff for incoming
+# mud data.
+ansicolor = 1
+
+# this is the data directory.  if it isn't overriden,
+# then this is the directory that everything will be pulled
+# from.
+datadir = "./"
+
+
+if __name__ == '__main__':
+   try:
+      import engine, event, lyntin
+
+      # read through options and arguments
+      optlist, args = getopt.getopt(sys.argv[1:], 
+                                    'u:r:vh',
+                                    ['ui=', 'readfile=', 'help', 'version'])
+
+      for mem in optlist:
+         if mem[0] == '--ui' or mem[0] == '-u':
+            lyntin.options['ui'] = mem[1]
+
+         if mem[0] == '--readfile' or mem[0] == '-r':
+            lyntin.options['readfile'] = mem[1]
+
+         if mem[0] == '--help':
+            print HELPTEXT
+            sys.exit(0)
+
+         if mem[0] == '--version':
+            print VERSION
+            sys.exit(0)
+
+      # instantiate an engine
+      engine.myengine = engine.Engine()
+      engine.myengine.initialize()
+
+      # generate a startup event.
+      # StartupEvent handles all the rest of the initialization
+      # including parsing command-line arguments and such.
+      event.StartupEvent(sys.argv).enqueue()
+
+      # start the engine which will execute the startupevent
+      # and start executing.
+      engine.myengine.runengine()
+
+   except SystemExit:
+      pass
+   except:
+      import traceback
+      traceback.print_exc()
+      sys.exit(1)

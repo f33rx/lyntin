@@ -1,0 +1,90 @@
+--------------------
+TODO
+--------------------
+
+This file is a todo list that I'll maintain until the full Lyntin 3.0
+version is out.  At that time, this TODO file will be removed from
+the distribution.
+
+
+TODO:
+ - fix substitutes (they're not implemented right)
+ - implement ticker
+ - implement highlights
+ - stack traces, messages and error messages (all errors should be logged)
+ - overhaul help files and write documentation
+ - handle "#session" by itself
+ - add file logging status to #info
+
+
+ - default command file should be .lyntinrc
+ - handle $HOME/.lyntinrc
+ - add a #datadir command for setting the datadir
+ - add a #moduledir command for setting the moduledir (for additional
+   modules--it'd look for mymoduleinit....)
+ - add a #reload command
+ - overhaul everything for TinTin++
+ - add autotyper to the tkgui (may want to overhaul the TkGui too)
+ - first char in command file is the command char when using #read
+ - make sure all commands can handle braces for arguments
+   probably by changing the breakup of a command into words to
+   breaking it into components via braces
+ - understand the whole:
+   #alias {grimne} {#session {%%0} {129.241.36.229 4000}}
+ - deal with other speedwalking word issues (news, sense) better
+
+ - commands to implement:
+
+     antisubstitute          bell
+     echo
+     highlight               history                 if
+     ignore                  killall
+     loop
+     math                    message
+     presub                  redraw
+     retab                   savepath
+     tabadd
+     tabdelete               tablist
+     tick                    tickoff                 tickon
+     tickset                 ticksize                togglesubs
+     unantisubstitute
+     unhighlight
+     verbatim
+     wildcard
+     writesession
+
+ - aliases:
+     If there are no variables on the right-side of the alias
+     definition, any arguments following the aliases-command will be
+     appended to the unaliases-command. 
+
+     Example:
+     #alias {ff} {cast 'fireball'}
+     >ff mayor
+     evaluates to: cast 'fireball' mayor
+
+     ...
+
+     WARNING! LYNTIN doesn't check for recursive aliases! That is,
+     suppose you type something like: #alias {yo} {yo}
+     when do a: yo, then LYNTIN goes into an endless loop. 
+
+
+ - allow for command files to be retrieved via HTTP....  that'd be
+   waaaay cool.
+
+ - TinTin++ commands we will not support:
+     boss
+     map
+     mark
+     path
+     pathdir
+     snoop
+     split
+     unsplit
+     unpath
+     suspend
+     system
+
+ - an interesting thing is that Lyntin is a super tool for debugging HTTP
+   communications.  :)
