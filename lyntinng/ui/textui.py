@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.35 2002/12/07 00:23:33 willhelm Exp $
+# $Id: textui.py,v 1.36 2002/12/08 21:18:56 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -17,30 +17,17 @@ The textui is the most basic ui you can get.  It works great over
 telnet/ssh, but terrible in the Win32 command window.  At the same 
 time, because it's so basic, it tends to be a good testing ui.
 
-The textui has no special features.
+To enable GNU readline support (if it's available) use:
+
+   --readline on
+
+at the command line.
 """
 
-# termios is the module that allows us to change echo for a terminal
-# but only if the module is present
 try:
   import termios
-  print "imported termios"
 except ImportError:
-  tio = 0
-else:
-  tio = 1
-  stdinfd = sys.stdin.fileno()
-  echonew = termios.tcgetattr(stdinfd)
-  onecho_attr = echonew[3]
-  offecho_attr = echonew[3] & ~termios.ECHO
-
-try:
-  import readline
-  print "imported readline"
-except ImportError:
-  rline = 0
-else:
-  rline = 1
+  pass
 
 myui = None
 
@@ -70,13 +57,42 @@ class Textui(ui.BaseUI):
     self._currcolors = {}
     self._unfinishedcolor = {}
 
+    self._tio = 0
+    self._rline = 0
+
+
   def startui(self, args):
     """ Sets up the UI."""
-    global HELP_TEXT, tio
+    global HELP_TEXT
     exported.add_help("textui", HELP_TEXT)
     engine.myengine.startthread("ui", self.run)
     exported.write_message("For textui help, type \"#help textui\".")
-    if tio == 0:
+    import lyntin
+
+    # termios is the module that allows us to change echo for a terminal
+    # but only if the module is present
+    try:
+      import termios
+    except ImportError:
+      self._tio = 0
+    else:
+      self._tio = 1
+      stdinfd = sys.stdin.fileno()
+      echonew = termios.tcgetattr(stdinfd)
+      self._onecho_attr = echonew[3]
+      self._offecho_attr = echonew[3] & ~termios.ECHO
+
+    if lyntin.options.has_key("readline"):
+      try:
+        import readline
+      except ImportError:
+        self._rline = 0
+        exported.write_error("Readline not available for your system.")
+      else:
+        self._rline = 1
+        exported.write_error("Readline enabled.")
+
+    if self._tio == 0 or self._rline == 1:
       exported.write_error("Warming: echo off is unavailable.  " +
                            "Your password will be visible.")
       
@@ -86,12 +102,11 @@ class Textui(ui.BaseUI):
 
   def turnonecho(self):
     """ Turns on echo if termios module is present."""
-    if tio == 0:
+    if self._tio == 0 or self._rline == 1:
       return
-    global onecho_attr
     fd = sys.stdin.fileno()
     new = termios.tcgetattr(fd)
-    new[3] = onecho_attr
+    new[3] = self._onecho_attr
     try:
       termios.tcsetattr(fd, termios.TCSADRAIN, new)
     except Exception, e:
@@ -99,13 +114,12 @@ class Textui(ui.BaseUI):
 
   def turnoffecho(self):
     """ Turns off echo if termios module is present."""
-    if tio == 0:
+    if self._tio == 0 or self._rline == 1:
       return
-    global offecho_attr
 
     fd = sys.stdin.fileno()
     new = termios.tcgetattr(fd)
-    new[3] = offecho_attr
+    new[3] = self._offecho_attr
     try:
       termios.tcsetattr(fd, termios.TCSADRAIN, new)
     except Exception, e:
@@ -135,8 +149,6 @@ class Textui(ui.BaseUI):
     """
     If the os is posix and there is no readline module, then we
     use sys.stdin.readline().
-
-    FIXME - We might not actually need this one at all.
     """
     readers,w,e = select.select([sys.stdin], [], [])
     if readers:
@@ -154,11 +166,10 @@ class Textui(ui.BaseUI):
     try:
       while not self.shutdownflag:
         if os.name == 'posix':
-          if rline == 1:
+          if self._rline == 1:
             data = self._posix_readline_input()
           else:
-            # data = self._posix_input()
-            data = self._posix_readline_input()
+            data = self._posix_input()
         else:
           data = self._non_posix_input()
 

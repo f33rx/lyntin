@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.11 2002/11/09 04:21:59 willhelm Exp $
+# $Id: highlight.py,v 1.12 2002/12/06 00:33:32 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -148,7 +148,9 @@ class HighlightData:
     if text:
       faketext = ansi.filter_ansi(text)
       textlist = ansi.split_ansi_from_text(text)
-      for mem in self._highlights.keys():
+      hlist = self._highlights.keys()
+      hlist.sort()
+      for mem in hlist:
 
         # first we deal with those silly stars....
         hltext = mem
