@@ -63,6 +63,7 @@ class Textui(BaseGUI):
             
     """over-ridden from BaseGUI"""
     def close(self):
+        self.turnonecho()
         sys.stdout.write("closing text ui\n")
         self.closing = 1
          
@@ -71,7 +72,7 @@ class Textui(BaseGUI):
     def print_string(self,line,modifiers=None,ending='\n',target=None):
         if modifiers == 'client' or modifiers == 'error':
             line = string.replace(line, "\n", "\n## ")
-            line = line + "\n"
+            line = "## " + line + "\n"
 
         line = self.filter_crud(line)
         sys.stdout.write(line)

@@ -190,15 +190,19 @@ def PrintCommands(words, input, seslist):
     """
     the_list = data.theapp.ReturnCommandHash().keys()
     the_list.sort()
-    new_line = 'Commands:\n   '
+    PutMessage('Commands:')
     count = 1
+    new_line = '   '
     for mem in the_list:
-        new_line = new_line + string.ljust(mem, 16)
+        if mem[0] == "^":
+           new_line = new_line + string.ljust(mem[1:], 16)
+        else:
+           new_line = new_line + string.ljust(mem, 16)
         if (count % 3) == 0:
-            PutRaw(new_line)
+            PutMessage(new_line)
             new_line = '   '
         count = count + 1
-    PutRaw(new_line + "\n")
+    PutMessage(new_line)
     return
 
 def AddCommand(words, input, seslist):
@@ -389,7 +393,7 @@ def Char(words, input, seslist):
     hooks.char_command_hook.run((input, seslist))
     for ses in seslist:
         if len(words) == 1:
-            PutMessage("current lyntin character: '%s'\n"%data.ltchar)
+            PutMessage("current lyntin character: '%s'"%data.ltchar)
             if not data.currsession.connected:
                 prompt()
         elif len(words) == 2:
@@ -398,7 +402,7 @@ def Char(words, input, seslist):
                 PutError('char: %s is not a single character!'%c)
             else:
                 data.ltchar = c
-                PutMessage("ok, lyntin character set to '%s'\n"%c)
+                PutMessage("ok, lyntin character set to '%s'"%c)
                 if not data.currsession.connected:
                     prompt()
         else:
@@ -421,9 +425,9 @@ def DataGrep(words, input, seslist):
             continue
         pat = string.join(words[1:])
         got = ses.databuf.grep(pat)
-        for g in got:
-            PutRaw(g)
         PutMessage('datagrep: %d match(es) found.'%len(got))
+        for g in got:
+            PutMessage(g)
 
 def DataGrepLines(words, input, seslist):
     """DataGrepLines(words, seslist) -> None
@@ -440,9 +444,9 @@ def DataGrepLines(words, input, seslist):
             continue
         pat = string.join(words[1:])
         build = ses.databuf.greplines(pat)
-        for b in build:
-            PutRaw(b)
         PutMessage('datagreplines: %d match(es) found.'%len(build))
+        for b in build:
+            PutMessage(b)
 
 def Echo(words, input, seslist):
     """Echo(words, input, seslist) -> None
@@ -455,10 +459,10 @@ def Echo(words, input, seslist):
         return
 
     if (words[1] == "on"):
-        data.theapp.ui.OnEcho("no")
+        data.theapp.ui.OnEcho()
         PutMessage("echo on")
     else:
-        data.theapp.ui.OffEcho("no")
+        data.theapp.ui.OffEcho()
         PutMessage("echo off")
 
 def Report(words, input, seslist):
@@ -507,8 +511,7 @@ def Variable(words, input, seslist):
             else:
                 PutMessage('variable: defined variables:')
                 for var in ses.vars.keys():
-                    display = ses.GetVarDisplayString(var)
-                    PutRaw("  " + display + "\n")
+                    PutMessage("  " + ses.GetVarDisplayString(var))
             continue
         elif len(words) == 2:
             # display just the matching variables
@@ -518,8 +521,7 @@ def Variable(words, input, seslist):
                 PutError("variable: that variable is not defined")
             else:
                 for w in whichl:
-                    display = ses.GetVarDisplayString(w)
-                    PutRaw("  " + display + "\n")
+                    PutMessage("  " + ses.GetVarDisplayString(var))
         else:
             # more than one argument: define
             # a new variable for the current session
@@ -531,8 +533,7 @@ def Variable(words, input, seslist):
             ses.vars[name] = expansion
 	    if ses.verbose:
                 PutMessage('variable: variable defined:')
-                display = ses.GetVarDisplayString(name)
-                PutRaw("  " + display + "\n")
+                PutMessage("  " + ses.GetVarDisplayString(var))
 
 def WriteFile(words, input, seslist):
     """WriteFile(words, seslist) -> None
@@ -789,7 +790,7 @@ def Action(words, input, seslist):
             if expanded:
                 count = count + len(expanded)
                 for ac in expanded:
-                    PutMessage('#ac {%s}={%s}'%(ac, eachses.actions[ac]))
+                    PutMessage('action: {%s}={%s}'%(ac, eachses.actions[ac]))
 
             if not count:
                 PutMessage("action: That action is not defined")
@@ -797,7 +798,7 @@ def Action(words, input, seslist):
         else: # print all current actions
             for ac in eachses.actions.keys():
                 count = count + 1
-                PutMessage('#ac {%s}={%s}'%(ac, eachses.actions[ac]))
+                PutMessage('action {%s} = {%s}'%(ac, eachses.actions[ac]))
             if count == 0:
                 PutMessage("action: No actions defined.")
 
@@ -859,7 +860,7 @@ def Alias(words, input, seslist):
             if expanded:
                 count = count + len(expanded)
                 for al in expanded:
-                    PutMessage('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
+                    PutMessage('alias: {%s} = {%s}'%(al, ses.aliases[al]))
             if not count:
                 PutMessage("alias: that alias is not defined")
 
@@ -867,7 +868,7 @@ def Alias(words, input, seslist):
             # print all current aliases
             for al in ses.aliases.keys():
                 count = count + 1
-                PutMessage('#al {%s} = {%s}'%(al, ses.aliases[al]) + "\n")
+                PutMessage('alias: {%s} = {%s}'%(al, ses.aliases[al]))
             if count == 0:
                 PutMessage("alias: no aliases defined.")
 
@@ -943,7 +944,7 @@ def History(words, input, seslist):
             m = min([data.histsize, len(data.history)])
             PutMessage('History:')
             for i in range(m - 1, -1, -1):
-                PutRaw(str(i)+' '+str(data.history[i]))
+                PutMessage(str(i)+' '+ str(data.history[i])[:-1])
                 
 def Info(words,input,seslist):
     """Info(seslist) -> None
@@ -1237,42 +1238,40 @@ def TickerUpdate(seslist):
 
 def init_player():
     import player
-    data.theapp.AddCommand("version", player.Version)
-    data.theapp.AddCommand("alias", player.Alias)
-    data.theapp.AddCommand("unalias", player.UnAlias)
-    data.theapp.AddCommand("import", player.LynImport)
+    data.theapp.AddCommand("^char", player.Char)
     data.theapp.AddCommand("^clear", player.Clear)
     data.theapp.AddCommand("^cr", player.CR)
-    data.theapp.AddCommand("^char", player.Char)
-    data.theapp.AddCommand("help", player.Help)
     data.theapp.AddCommand("^quit", player.Quit)
-    data.theapp.AddCommand("uncommand", player.UnCommand)
-    data.theapp.AddCommand("command", player.AddCommand)
-    data.theapp.AddCommand("printcommands", player.PrintCommands)
     data.theapp.AddCommand("action", player.Action)
+    data.theapp.AddCommand("alias", player.Alias)
+    data.theapp.AddCommand("command", player.AddCommand)
     data.theapp.AddCommand("databuffer", player.DataBuffer)
+    data.theapp.AddCommand("datagrep", player.DataGrep)
     data.theapp.AddCommand("datagreplines", player.DataGrepLines)
+    data.theapp.AddCommand("echo", player.Echo)
     data.theapp.AddCommand("gag", player.Gag)
+    data.theapp.AddCommand("help", player.Help)
     data.theapp.AddCommand("history", player.History)
+    data.theapp.AddCommand("import", player.LynImport)
     data.theapp.AddCommand("info", player.Info)
     data.theapp.AddCommand("killall", player.KillAll)
     data.theapp.AddCommand("log", player.Log)
+    data.theapp.AddCommand("printcommands", player.PrintCommands)
     data.theapp.AddCommand("read", player.ParseFile)
     data.theapp.AddCommand("report", player.Report)
     data.theapp.AddCommand("session", player.Ses)
     data.theapp.AddCommand("showme", player.Showme)
-    data.theapp.AddCommand("substitute", player.Substitute)
     data.theapp.AddCommand("speedwalk", player.SpeedWalk)
-    data.theapp.AddCommand("unaction", player.UnAction)
+    data.theapp.AddCommand("substitute", player.Substitute)
     data.theapp.AddCommand("textin", player.Textin)
-    data.theapp.AddCommand("alias", player.Alias)
+    data.theapp.AddCommand("tick", player.Tick)
+    data.theapp.AddCommand("tickset", player.Tickset)
+    data.theapp.AddCommand("unaction", player.UnAction)
+    data.theapp.AddCommand("unalias", player.UnAlias)
+    data.theapp.AddCommand("uncommand", player.UnCommand)
     data.theapp.AddCommand("ungag", player.UnGag)
     data.theapp.AddCommand("unsubstitute", player.UnSubstitute)
     data.theapp.AddCommand("variable", player.Variable)
-    data.theapp.AddCommand("write", player.WriteFile)
-    data.theapp.AddCommand("tick", player.Tick)
-    data.theapp.AddCommand("tickset", player.Tickset)
     data.theapp.AddCommand("verbose", player.Verbose)
     data.theapp.AddCommand("version", player.Version)
-    data.theapp.AddCommand("read", player.ParseFile)
-    data.theapp.AddCommand("echo", player.Echo)
+    data.theapp.AddCommand("write", player.WriteFile)
