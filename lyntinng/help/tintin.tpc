@@ -1,4 +1,3 @@
-
 Lyntin has many of the same features as Tintin and the commands
 are based on Tintin.  However, there are a series of Tintin
 commands we do not currently support for various reasons:
@@ -10,30 +9,7 @@ commands we do not currently support for various reasons:
    * a paltry few because we haven't gotten around to it
 
 If you miss some Tintin things, it's pretty easy to implement your
-own commands in Lyntin.  See the ``HACKING`` document for more
+own commands in Lyntin.  See the "HACKING" document for more
 information.
-
-There are two user input evaluation modes in Lyntin: Lyntin mode and
-Tintin mode.  You can switch modes using the command-line argument::
-
-   --evalmode tintin
-   or
-   --evalmode lyntin
-
-or ingame with::
-
-   #config evalmode lyntin
-   or
-   #config evalmode tintin
-
-The evalmodes differ in how variables and placement variables are
-expanded as well as the time at which they're expanded.  Tintin mode
-emulates how Tintin works.  Lyntin mode is born from our own preferred
-user input evaluation.  There are probably good and bad points of 
-each which is beyond the scope of this document.
-
-Note: Lyntin defaults to lyntin mode--so if you're a Tintin user and 
-want to user your Tintin command files, you should make sure to start 
-Lyntin up in tintin mode.
 
 category: readme

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.30 2002/10/20 16:09:57 willhelm Exp $
+# $Id: exported.py,v 1.31 2002/10/26 15:17:23 willhelm Exp $
 #######################################################################
 """
 This is the X{API} for lyntin internals and is guaranteed to change 
@@ -348,7 +348,7 @@ def write_traceback(message=""):
       gets printed first
   @type  message: string
   """
-  exc = "\n".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
+  exc = "".join(traceback.format_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 
   if message:
     message = message + "\n" + exc
