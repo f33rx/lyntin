@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.9 2002/02/04 01:14:10 willhelm Exp $
+# $Id: tkgui.py,v 1.10 2002/02/05 03:39:22 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -216,7 +216,7 @@ class TkGui(ui.BaseUI):
 
   def _yadjust(self):
     """ Handles y scrolling after text insertion."""
-    # self._txt.yview('moveto', '1')
+    self._txt.yview('moveto', '1')
     # if os.name != 'posix':
     self._txt.yview('scroll', '20', 'units')
 
