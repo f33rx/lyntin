@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.12 2002/02/18 05:19:42 willhelm Exp $
+# $Id: tkgui.py,v 1.13 2002/02/24 00:32:26 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -12,7 +12,7 @@ Lyntin, but largely re-coded in various areas.
 """
 
 import string, os, Tkinter, tkFont
-import ui, event, engine
+import ui, event, engine, exported
 
 """
 0 -- all off
@@ -437,13 +437,12 @@ class CommandEntry(Tkinter.Entry):
   def _executeBinding(self, binding):
     """ Returns the alias for this keybinding."""
     session = engine.myengine.currentSession()
-    action = session.getAliasManager().getAlias(binding)
+    action = session.getManager("alias").getAlias(binding)
     if action:
       self._partk.handleinput(action)
       return 1
     else:
-      engine.myengine.writeError(binding + 
-                      " is currenly not bound to anything.")
+      exported.write_error(binding + " is currenly not bound to anything.")
       return 0
 
   def callBinding(self, tkevent):
