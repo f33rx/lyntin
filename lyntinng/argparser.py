@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.12 2002/05/05 17:01:45 willhelm Exp $
+# $Id: argparser.py,v 1.13 2002/05/08 01:22:09 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -40,11 +40,11 @@ class ArgumentParser:
     # we print it out whenever we have a ParserException in the user input.
     self.syntaxline = ""
 
-    self.typecheckers = { "string": stringChecker(),
-                          "int": intChecker(),
-                          "boolean": booleanChecker(),
-                          "booleanornone": booleanOrNoneChecker(),
-                          "eval": evalChecker() }
+    self.typecheckers = { "string": StringChecker(),
+                          "int": IntChecker(),
+                          "boolean": BooleanChecker(),
+                          "booleanornone": BooleanOrNoneChecker(),
+                          "eval": EvalChecker() }
 
     if argoptions:
       self.buildOptions(argoptions)
@@ -404,7 +404,7 @@ class Checker:
   def check(self, arg):
     return arg
 
-class stringChecker(Checker):
+class StringChecker(Checker):
   """
   Essentiallly the same as the trivial base class, but it's explicit
   that we just return the string we take in. 
@@ -415,7 +415,7 @@ class stringChecker(Checker):
   def check(self,arg):
     return arg
 
-class intChecker:
+class IntChecker:
   """
   Accept only integer values and return integer objects.
   """
@@ -425,7 +425,7 @@ class intChecker:
   def check(self,arg):
     return int(arg)
 
-class booleanChecker:
+class BooleanChecker:
   """
   Accept only boolean values
   True values are :  on, true, 1
@@ -443,7 +443,7 @@ class booleanChecker:
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
 
-class booleanOrNoneChecker:
+class BooleanOrNoneChecker:
   """
   Accept only boolean values or special "Not specified" values
   True values are :  on, true, 1
@@ -464,7 +464,7 @@ class booleanOrNoneChecker:
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
 
-class evalChecker:
+class EvalChecker:
   """
   Evaluate its input argument as python code and return the resulting object.
   """
