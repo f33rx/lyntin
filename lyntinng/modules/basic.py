@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.51 2002/04/01 18:54:07 willhelm Exp $
+# $Id: basic.py,v 1.52 2002/04/04 01:04:31 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -208,8 +208,11 @@ def deed_cmd(session, words, input):
   
   This adds a deed or prints all the deeds stored till now.
   """
-  
   # begin copyright 2002 Sebastian John
+  if (session.getName() == "common"):
+    exported.write_error("deed cannot be applied to common session.")
+    return
+
   if len(words) == 1:
     data = session.getManager("deed").getInfo()
     if data == "":
@@ -454,6 +457,10 @@ def ignore_cmd(session, words, input):
 
   Turns on and shuts off ignoring of actions for this session.
   """
+  if (session.getName() == "common"):
+    exported.write_error("ignore cannot be applied to common session.")
+    return
+
   if session._ignoreactions == 1:
     session._ignoreactions = 0
     exported.write_message("ignore: actions are active for session %s." 
@@ -818,6 +825,10 @@ def textin_cmd(session, words, input):
   Takes the contents of the file and outputs it directly to the mud
   without processing it (like #read does).
   """
+  if (session.getName() == "common"):
+    exported.write_error("textin cannot be applied to common session.")
+    return
+
   if len(words) == 1:
     exported.write_error("syntax: #textin <filename>")
     return
@@ -845,6 +856,10 @@ def tick_cmd(session, words, input):
   Displays the # of seconds left before the ticker for this
   session ticks.
   """
+  if (session.getName() == "common"):
+    exported.write_error("tick cannot be applied to common session.")
+    return
+
   if session.getTicker().isEnabled():
     currenttick = exported.get_engine().getCurrentTick()
     ticklen = session.getTicker().getTickLen()
@@ -860,6 +875,10 @@ def tickon_cmd(session, words, input):
 
   Turns on the ticker.
   """
+  if (session.getName() == "common"):
+    exported.write_error("tickon cannot be applied to common session.")
+    return
+
   session.getTicker().enableTicker()
   exported.write_message("tickon: session " + session.getName() + 
                                " ticker enabled.")
@@ -870,6 +889,10 @@ def tickoff_cmd(session, words, input):
 
   Turns off the ticker.
   """
+  if (session.getName() == "common"):
+    exported.write_error("tickoff cannot be applied to common session.")
+    return
+
   session.getTicker().disableTicker()
   exported.write_message("tickoff: session " + session.getName() + 
                                " ticker disabled.")
@@ -880,6 +903,10 @@ def ticksize_cmd(session, words, input):
 
   Sets and displays the tick length.
   """
+  if (session.getName() == "common"):
+    exported.write_error("ticksize cannot be applied to common session.")
+    return
+
   if len(words) < 2:
     exported.write_message("ticksize: ticksize is %d seconds." % 
                            session.getTicker().getTickLen())
@@ -900,6 +927,10 @@ def togglesubs_cmd(session, words, input):
 
   Turns on and shuts off ignoring of substitutions for this session.
   """
+  if (session.getName() == "common"):
+    exported.write_error("togglesubs cannot be applied to common session.")
+    return
+
   if session._ignoresubs == 1:
     session._ignoresubs = 0
     exported.write_message("togglesubs: substitutions are active for " +
@@ -1009,6 +1040,10 @@ def verbatim_cmd(session, words, input):
 
   Turns on and shuts off verbatim mode.
   """
+  if (session.getName() == "common"):
+    exported.write_error("verbatim cannot be applied to common session.")
+    return
+
   if session._verbatim == 1:
     session._verbatim = 0
     exported.write_message("verbatim: verbatim disabled for session %s." 
