@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.36 2002/07/07 04:53:45 willhelm Exp $
+# $Id: utils.py,v 1.37 2002/07/11 04:11:19 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -554,7 +554,7 @@ def parse_time(timearg):
   timespec = match.groupdict()
   currenttime = time.localtime()
 
-  print timespec
+  # print timespec
 
   hour=int(timespec.get("hour",None))
   ampm=timespec.get("ampm",None)
@@ -594,7 +594,7 @@ def parse_time(timearg):
   try:
     return time.mktime(timetuple)
   except Exception, e:
-    print e
+    # print e
     return None
 
 
@@ -804,6 +804,15 @@ def lyntin_denest_vars_worker(varchar, text):
 
   return text
 
+def sort_by_length(item1, item2):
+  li1 = len(item1)
+  li2 = len(item2)
+  if li1 < li2:
+    return -1
+  if li1 == li2:
+    return 0
+  return 1
+
 def tintin_expand_vars(text, varmap):
   """
   Do not call this directly.  Use 'expand_vars' instead.
@@ -825,6 +834,7 @@ def tintin_expand_vars(text, varmap):
     return text
 
   varmapkeys = varmap.keys()
+  varmapkeys.sort(sort_by_length)
   i = 0
   count = 1
 
