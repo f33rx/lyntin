@@ -939,8 +939,9 @@ def History(words, input, seslist):
                 Putline('history: no history yet...')
                 continue
             m = min([data.histsize, len(data.history)])
+            PutUntouchedLine('\nHistory:')
             for i in range(m - 1, -1, -1):
-                PutReallyUntouchedLine(str(i)+' '+str(data.history[i]))
+                PutUntouchedLine(str(i)+' '+str(data.history[i]))
                 
 def Info(words,input,seslist):
     """Info(seslist) -> None

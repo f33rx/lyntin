@@ -99,10 +99,12 @@ class Cursesui(BaseGUI):
             self._output.move(0,0)
             self._output.deleteln()
             self._output.move(y,0)
-            self._output.addstr(lines[n] + ending)
+            self._output.addstr(lines[n])
+
+         if line[-1] == "\n":
+            self._output.addstr("\n")
 
          self._output.refresh()
- 
       else:
          self._output.addstr(line + ending)
 
