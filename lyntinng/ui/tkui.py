@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.15 2002/08/18 00:30:26 willhelm Exp $
+# $Id: tkui.py,v 1.16 2002/08/23 02:34:25 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -46,41 +46,47 @@ txt_attribs = {"0": "off",
                "1": "bold"}
 
 
-fg_color_codes = {"30": "black",
-                  "31": "red",
-                  "32": "green",
-                  "33": "goldenrod",
+# the complete list of foreground color codes and what color they
+# map to in RGB.
+fg_color_codes = {"30": "#000000",
+                  "31": "#aa0000",
+                  "32": "#00dd00",
+                  "33": "#daa520",
                   "34": "#0000aa",
-                  "35": "magenta",
-                  "36": "cyan",
-                  "37": "#dddddd",
-                  "b30": "darkgrey",
-                  "b31": "salmon",
-                  "b32": "springgreen",
-                  "b33": "yellow",
+                  "35": "#bb00bb",
+                  "36": "#00dddd",
+                  "37": "#aaaaaa",
+                  "b30": "#666666",
+                  "b31": "#ff3333",
+                  "b32": "#00ff3f",
+                  "b33": "#ffff00",
                   "b34": "#2222ff",
-                  "b35": "violet",
-                  "b36": "lightcyan",
-                  "b37": "white" }
+                  "b35": "#ff33ff",
+                  "b36": "#90ffff",
+                  "b37": "#ffffff" }
 
+# the complete list of background color codes and what color they
+# map to in RGB.
 bg_color_codes = {"40": "#000000",
-                  "41": "#c00000",
-                  "42": "#008000",
-                  "43": "#808000",
-                  "44": "#0000c0",
-                  "45": "#c000c0",
-                  "46": "#008080",
-                  "47": "#c0c0c0",
-                  "b40": "#808080",
-                  "b41": "#ff6060",
-                  "b42": "#00ff00",
+                  "41": "#ff0000",
+                  "42": "#00ff00",
+                  "43": "#daa520",
+                  "44": "#0000aa",
+                  "45": "#ff00ff",
+                  "46": "#00dddd",
+                  "47": "#bbbbbb",
+                  "b40": "#777777",
+                  "b41": "#fa6072",
+                  "b42": "#00ff7f",
                   "b43": "#ffff00",
-                  "b44": "#8080ff",
-                  "b45": "#ff40ff",
-                  "b46": "#00ffff",
+                  "b44": "#2222ff",
+                  "b45": "#ee82ee",
+                  "b46": "#90ffff",
                   "b47": "#ffffff" }
 
-DEFAULT = [0, -1, -1]
+# this is the default color--it's what we use when the mud hasn't
+# specified a color yet.  this might get a little fishy.
+DEFAULT = [0, 37, -1]
 
 myui = None
 
@@ -98,9 +104,7 @@ class Tkui(ui.BaseUI):
     """ Initializes."""
     ui.BaseUI.__init__(self)
 
-    # (bold, foreground, background)
-    # self._currcolors = [0, "37", "40"]
-    # ses -> (bold, foreground, background) tuple
+    # map of session -> (bold, foreground, background)
     self._currcolors = {}
 
     # ses -> string
@@ -366,26 +370,23 @@ class Tkui(ui.BaseUI):
       for mem in tokens:
         if utils.is_color_token(mem):
           color, leftover = utils.figure_color([mem], color, leftover)
+
         else:
-          # if there's no color, we just insert it.
-          if color[1] == -1 and color[2] == -1:
-            self._txt.insert('end', mem)
+
+          if color[1] == -1:
+            fg = "37"
+          else:
+            fg = str(color[1])
+
+          if color[0] == 1:
+            fg = "b" + fg
+
+          if color[2] == -1:
+            self._txt.insert('end', mem, fg)
 
           else:
-            if color[1] == -1:
-              fg = "37"
-            else:
-              fg = str(color[1])
-
-            if color[0] == 1:
-              fg = "b" + fg
-
-            if color[2] == -1:
-              self._txt.insert('end', mem, fg)
-
-            else:
-              bg = str(color[2])
-              self._txt.insert('end', mem, (fg, bg))
+            bg = str(color[2])
+            self._txt.insert('end', mem, (fg, bg))
 
 
       self._unfinishedcolor[ses] = leftover
@@ -415,8 +416,10 @@ class Tkui(ui.BaseUI):
       return name
 
     rgb = self._tk._getints(self._tk.tk.call('winfo', 'rgb', self._txt, name))
+    rgb = "#%02x%02x%02x" % (rgb[0]/256, rgb[1]/256, rgb[2]/256) 
+    print name, "converted to: ", rgb
 
-    return "#%02x%02x%02x" % (rgb[0]/256, rgb[1]/256, rgb[2]/256)
+    return rgb
 
   def _initColorTags(self):
     """ Sets up Tk tags for the text widget (fg/bg)."""
@@ -432,15 +435,18 @@ class Tkui(ui.BaseUI):
   def colorCheck(self):
 
     fgkeys = ['30','31','32','33','34','35','36','37']
-
-    bgkeys = bg_color_codes.keys()
-    bgkeys.sort()
+    bgkeys = ['40','41','42','43','44','45','46','47']
 
     self._txt.insert('end', 'color check:\n')
     for bg in bgkeys:
       for fg in fgkeys:
         self._txt.insert('end', str(fg), (fg, bg))
         self._txt.insert('end', str("b" + fg), ("b" + fg, bg))
+      self._txt.insert('end', '\n')
+
+      for fg in fgkeys:
+        self._txt.insert('end', str(fg), (fg, "b" + bg))
+        self._txt.insert('end', str("b" + fg), ("b" + fg, "b" + bg))
       self._txt.insert('end', '\n')
 
     self._txt.insert('end', '\n')
