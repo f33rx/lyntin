@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.27 2002/11/06 01:56:51 willhelm Exp $
+# $Id: advanced.py,v 1.28 2002/12/18 04:47:59 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -13,11 +13,11 @@ module exists, it executes it in this module.
 
 It also holds import_cmd which does a lot of other magic stuff.
 """
-import os, sys, string
-import exported, engine, ui.ui, utils, lyntin
+import sys
+import exported, lyntin
 
 usermodule = None
-onetime = 0
+execdict = None
 
 def _get_user_module():
   """
@@ -58,16 +58,16 @@ def python_cmd(session, words, input):
 
   category: commands
   """
-  global onetime
+  global execdict
   # NOTE: if we ever get to handling multiple-lines, we'll need
   # to change this function completely.
   try:
     my_usermodule = _get_user_module() 
     if my_usermodule == None:
-      if onetime == 0:
+      if execdict == None:
+        execdict = {}
         exported.write_error("No lyntinuser module imported--executing in advanced.py.")
-        onetime = 1
-      exec input[1:].lstrip()
+      exec input[1:].lstrip() in execdict
     else:
       exec input[1:].lstrip() in usermodule.__dict__
   except:
@@ -104,8 +104,6 @@ def import_cmd(session, args, input):
 
   category: commands
   """
-  import sys
-
   mod = args["modulename"]
 
   if sys.modules.has_key(mod):
@@ -158,7 +156,8 @@ def load():
   exported.add_command("^import", import_cmd, "modulename")
 
 def unload():
-  pass
+  exported.remove_command("@")
+  exported.remove_command("^import")
 
 # Local variables:
 # mode:python
