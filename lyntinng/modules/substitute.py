@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.20 2003/02/15 03:35:06 willhelm Exp $
+# $Id: substitute.py,v 1.21 2003/03/12 22:04:37 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes and
@@ -16,6 +16,7 @@ import ansi, manager, utils, lyntin, hooks, exported, modutils
 class SubstituteData:
   def __init__(self):
     self._substitutes = {}
+    self._antisubs = []
 
   def addSubstitute(self, item, substitute):
     """
@@ -29,11 +30,16 @@ class SubstituteData:
     """
     self._substitutes[item] = substitute 
 
+  def addAntiSubstitute(self, item):
+    """ Adds an antisubstitute."""
+    self._antisubs.append(item)
+
   def clear(self):
     """
     Removes all the substitutes.
     """
     self._substitutes.clear()
+    self._antisubs = []
 
   def removeSubstitutes(self, text):
     """
@@ -57,6 +63,22 @@ class SubstituteData:
 
     return ret
 
+  def removeAntiSubstitutes(self, text):
+    """
+    Removes antisubstitutes from the list.
+
+    @returns: a list of antisubstitutes that were removed.
+    @rtype: list of strings
+    """
+    badsubs = utils.expand_text(text, self._antisubs)
+
+    ret = []
+    for mem in badsubs:
+      ret.append(mem)
+      self._antisubs.remove(mem)
+
+    return ret
+
   def getSubstitutes(self):
     """
     Returns the keys of the substitute dict.
@@ -67,6 +89,15 @@ class SubstituteData:
     listing = self._substitutes.keys()
     listing.sort()
     return listing
+
+  def getAntiSubstitutes(self):
+    """
+    Returns the list of antisubs that we have.
+
+    @returns: list of all antisubs
+    @rtype: list of strings
+    """
+    return self._antisubs
 
   def expand(self, text):
     """
@@ -82,6 +113,12 @@ class SubstituteData:
     """
     # FIXME -- this isn't done correctly.
     if len(text) > 0:
+      # check for antisubs first
+      for mem in self._antisubs:
+        if text.find(mem) != -1:
+          return text
+
+      # check for subs/gags
       for mem in self._substitutes.keys():
         if self._substitutes[mem] == ".":
           # handling gags
@@ -128,6 +165,33 @@ class SubstituteData:
 
     return string.join(listing, "\n")
 
+  def getAntiSubstitutesInfo(self, text):
+    """
+    Returns information about the antisubstitutes in here.
+
+    This is used by #antisubstitute to tell all the antisubstitutes involved
+    as well as #write which takes this information and dumps it to the file.
+
+    @param text: the text used to figure out which antisubstitutes to provide
+        information on
+    @type  text: string
+
+    @return: the string of the antisubstitute information
+    @rtype: string
+    """
+    if len(self._antisubs) == 0:
+      return ''
+
+    if text=='':
+      listing = self._antisubs
+    else:
+      listing = utils.expand_text(text, self._antisubs)
+
+    listing = ["%santisubstitute {%s}" % (lyntin.commandchar, mem) for mem in listing]
+
+    return string.join(listing, "\n")
+
+
   def getStatus(self):
     """
     Returns a one liner of number of substitutes we're managing.
@@ -143,7 +207,9 @@ class SubstituteData:
         gags += 1
       else:
         subs += 1
-    return "%d substitute(s). %d gag(s)." % (subs, gags)
+    antisubs = len(self._antisubs)
+
+    return "%d substitute(s). %d gag(s). %d antisub(s)" % (subs, gags, antisubs)
 
 
 class SubstituteManager(manager.Manager):
@@ -155,6 +221,11 @@ class SubstituteManager(manager.Manager):
       self._subs[ses] = SubstituteData()
     self._subs[ses].addSubstitute(item, sub)
 
+  def addAntiSubstitute(self, ses, item):
+    if not self._subs.has_key(ses):
+      self._subs[ses] = SubstituteData()
+    self._subs[ses].addAntiSubstitute(item)
+
   def clear(self, ses):
     if self._subs.has_key(ses):
       self._subs[ses].clear()
@@ -162,6 +233,11 @@ class SubstituteManager(manager.Manager):
   def removeSubstitutes(self, ses, text):
     if self._subs.has_key(ses):
       return self._subs[ses].removeSubstitutes(text)
+    return []
+
+  def removeAntiSubstitutes(self, ses, text):
+    if self._subs.has_key(ses):
+      return self._subs[ses].removeAntiSubstitutes(text)
     return []
 
   def getSubstitutes(self, ses):
@@ -177,7 +253,7 @@ class SubstituteManager(manager.Manager):
   def getStatus(self, ses):
     if self._subs.has_key(ses):
       return self._subs[ses].getStatus()
-    return "0 substitute(s). 0 gag(s)."
+    return "0 substitute(s). 0 gag(s). 0 antisub(s)."
 
   def addSession(self, newsession, basesession=None):
     if basesession:
@@ -204,6 +280,15 @@ class SubstituteManager(manager.Manager):
     quiet = args[2]
 
     data = self.getInfo(ses)
+    if data:
+      if quiet == 1:
+        data = data.replace("\n", " quiet={true}\n")
+        file.write(data + " quiet={true}\n")
+      else:
+        file.write(data + "\n")
+      file.flush()
+
+    data = self.getAntiSubstitutesInfo(ses)
     if data:
       if quiet == 1:
         data = data.replace("\n", " quiet={true}\n")
@@ -265,7 +350,6 @@ def substitute_cmd(ses, args, input):
 
 commands_dict["substitute"] = (substitute_cmd, "item= substitution= quiet:boolean=false")
 
-
 def unsubstitute_cmd(ses, args, input):
   """
   Allows you to remove substitutes.
@@ -276,6 +360,37 @@ def unsubstitute_cmd(ses, args, input):
   modutils.unsomething_helper(args, func, ses, "substitute", "substitutes")
 
 commands_dict["unsubstitute"] = (unsubstitute_cmd, "str= quiet:boolean=false")
+
+def antisubstitute_cmd(ses, args, input):
+  item = args["item"]
+  quiet = args["quiet"]
+
+  sm = exported.get_manager("substitute")
+
+  if not item:
+    data = sm.getAntiSubstitutesInfo(ses)
+    if data == '':
+      data = "antisubstitute: no antisubstitutes defined."
+
+    exported.write_message(data, ses)
+    return
+
+  sm.addAntiSubstitute(ses, item)
+  if not quiet:
+    exported.write_message("antisubstitute: {%s} added." % item, ses)
+
+commands_dict["antisubstitute"] = (antisubstitute_cmd, "item= quiet:boolean=false")
+
+def unantisubstitute_cmd(ses, args, input):
+  """
+  Allows you to remove antisubstitutes.
+
+  category: commands
+  """
+  func = exported.get_manager("substitute").removeAntiSubstitutes
+  modutils.unsomething_helper(args, func, ses, "antisubstitute", "antisubstitutes")
+
+commands_dict["unantisubstitute"] = (unantisubstitute_cmd, "str= quiet:boolean=false")
 
 def gag_cmd(ses, args, input):
   """
