@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: basic.py,v 1.2 2001/12/02 18:35:22 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -288,6 +288,42 @@ def help_cmd(session, words, input):
       data += (string.join(lines, "") + "\n")
 
    engine.myengine.writeMessage(data)
+
+
+def highlight_cmd(session, words, input):
+   """#highlight [<item> <color>]
+
+   With no arguments, lists all the highlights currently set.
+   With arguments, sets a new highlight.
+   """
+   if len(words) == 1:
+      data = session.getHighlightManager().getHighlightInfo()
+      if data == '':
+         data = "No highlights defined."
+
+      engine.myengine.writeMessage(data)
+      return
+
+   if len(words) == 2:
+      data = session.getHighlightManager().getHighlightInfo(words[1])
+      if data == '':
+         data = "No highlights defined."
+
+      engine.myengine.writeMessage(data)
+      return 
+
+   try:
+      # knock off the first word which is the command
+      inputadjusted = input.split(' ', 1)[1]
+
+      # split it into parts
+      (a, b) = utils.split_braced(inputadjusted)
+
+      session.getHighlightManager().addHighlight(a, b)
+      engine.myengine.writeMessage("highlight " + a + " -> '" + b + "'")
+   except:
+      engine.myengine.writeError("highlight cannot be set.")
+      traceback.print_exc()
 
 
 def info_cmd(session, words, input):
@@ -583,6 +619,10 @@ def unsomething_cmd(session, words, input):
       removedthings = session.getGagManager().removeGags(text)
       singular = "gag"
       plural = "gags"
+   elif "unhighlight".find(words[0]) == 0:
+      removedthings = session.getHighlightManager().removeHighlights(text)
+      singular = "highlight"
+      plural = "highlights"
    elif "unsubstitute".find(words[0]) == 0:
       removedthings = session.getSubstituteManager().removeSubstitutes(text)
       singular = "substitute"
@@ -710,7 +750,7 @@ engine.myengine.addCommand("diagnostics", diagnostics_cmd)
 engine.myengine.addCommand("^end", end_cmd)
 engine.myengine.addCommand("gag", gag_cmd)
 engine.myengine.addCommand("help", help_cmd)
-# engine.myengine.addCommand("highlight", highlight_cmd)
+engine.myengine.addCommand("highlight", highlight_cmd)
 # engine.myengine.addCommand("history", history_cmd)
 # engine.myengine.addCommand("ignore", ignore_cmd)
 # engine.myengine.addCommand("import", import_cmd)
@@ -750,7 +790,7 @@ engine.myengine.addCommand("unaction", unsomething_cmd)
 engine.myengine.addCommand("unalias", unsomething_cmd)
 # engine.myengine.addCommand("unantisubstitute", unsomething_cmd)
 engine.myengine.addCommand("ungag", unsomething_cmd)
-# engine.myengine.addCommand("unhighlight", unsomething_cmd)
+engine.myengine.addCommand("unhighlight", unsomething_cmd)
 # engine.myengine.addCommand("unpath", unpath_cmd)
 engine.myengine.addCommand("unsubstitute", unsomething_cmd)
 engine.myengine.addCommand("unvariable", unsomething_cmd)

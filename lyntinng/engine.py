@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: engine.py,v 1.2 2001/12/09 06:31:15 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -20,8 +20,8 @@ execute--this allows you to add functionality via the modules
 interface without affecting the rest of lyntin at all.
 """
 import Queue, traceback, copy, string, re
-import threadmanager, session, ui.ui, alias, gag, lyntin, variable, utils
-import action, substitute
+import threadmanager, session, ui.ui, alias, lyntin, utils
+import action, alias, gag, highlight, substitute, variable
 
 # myengine is a singleton.  so when it gets instantiated, this
 # variable can be used to retrieve the engine singleton.
@@ -86,6 +86,7 @@ class Engine:
       commonsession.setActionManager(action.ActionManager())
       commonsession.setAliasManager(alias.AliasManager())
       commonsession.setGagManager(gag.GagManager())
+      commonsession.setHighlightManager(highlight.HighlightManager())
       commonsession.setSubstituteManager(substitute.SubstituteManager())
       commonsession.setVariableManager(variable.VariableManager())
 

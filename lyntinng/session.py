@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.2 2001/12/04 01:07:19 willhelm Exp $
+# $Id: session.py,v 1.3 2001/12/09 06:31:15 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied deeply from the common
@@ -30,6 +30,7 @@ class Session:
       self._actionmanager = None
       self._aliasmanager = None
       self._gagmanager = None
+      self._hlmanager = None
       self._submanager = None
       self._varmanager = None
       self._logfile = None
@@ -48,6 +49,7 @@ class Session:
       ses._actionmanager = copy.copy(self._actionmanager)
       ses._aliasmanager = copy.copy(self._aliasmanager)
       ses._gagmanager = copy.copy(self._gagmanager)
+      ses._hlmanager = copy.copy(self._hlmanager)
       ses._submanager = copy.copy(self._submanager)
       ses._varmanager = copy.copy(self._varmanager)
       return ses
@@ -83,6 +85,8 @@ class Session:
               "   aliases: " + 
               repr(len(self.getAliasManager().getAliases())) + "\n" +
               "   gags: " + repr(len(self.getGagManager().getGags())) + "\n" +
+              "   highlights: " + 
+              repr(len(self.getHighlightManager().getHighlights())) + "\n" +
               "   substitutes: " + 
               repr(len(self.getSubstituteManager().getSubstitutes())) + "\n" +
               "   variables: " + 
@@ -112,6 +116,14 @@ class Session:
    def getGagManager(self):
       """ Returns the gag manager."""
       return self._gagmanager
+
+   def setHighlightManager(self, hm):
+      """ Sets the highlight manager."""
+      self._hlmanager = hm
+
+   def getHighlightManager(self):
+      """ Returns the highlight manager."""
+      return self._hlmanager
 
    def setSubstituteManager(self, sm):
       """ Sets the substitution manager."""
@@ -157,6 +169,7 @@ class Session:
       data += fixinfo(self._aliasmanager.getAliasInfo())
       data += fixinfo(self._actionmanager.getActionInfo())
       data += fixinfo(self._gagmanager.getGagInfo())
+      data += fixinfo(self._hlmanager.getHighlightInfo())
       data += fixinfo(self._submanager.getSubstituteInfo())
       data += fixinfo(self._varmanager.getVariableInfo())
       return data
@@ -166,6 +179,7 @@ class Session:
       self._aliasmanager.clearAliases()
       self._actionmanager.clearActions()
       self._gagmanager.clearGags()
+      self._hlmanager.clearHighlights()
       self._submanager.clearSubstitutes()
       self._varmanager.clearVariables()
 
@@ -314,8 +328,8 @@ class Session:
       if lyntin.ansicolor == 0:
          input = utils.filter_ansi(input)
       else:
-         # FIXME - handle highlight
-         pass
+         # handle highlights 
+         input = self.getHighlightManager().expand(input)
 
       engine.myengine.writeMudData(input)
 
