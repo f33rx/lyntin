@@ -1,6 +1,7 @@
-   syntax: #ungag {pattern}
+syntax: #ungag {pattern}
 
-   Removes gags matching {pattern}.
+Removes gags matching {pattern}.
 
-   ex: #ungag {kill}         <-- removes gag 'kill'
-   ex: #ungag {*kill*}       <-- removes gags with 'kill' in them.
+ex:
+   #ungag {kill}         <-- removes gag 'kill'
+   #ungag {*kill*}       <-- removes gags with 'kill' in them.

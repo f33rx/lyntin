@@ -1,5 +1,5 @@
-   syntax: #unalias {pattern}
+syntax: #unalias {pattern}
 
-   Removes aliases matching {pattern}.
+Removes aliases matching {pattern}.
    
-   ex: #unalias ra*          <-- removes aliases that start with 'ra'
+ex: #unalias ra*          <-- removes aliases that start with 'ra'

@@ -1,3 +1,3 @@
-   syntax: #clear
+syntax: #clear
 
-   Clears the current session of everything (gags/subs/actions/aliases...).
+Clears the current session of everything (gags/subs/actions/aliases...).

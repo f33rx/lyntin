@@ -1,3 +1,3 @@
-   syntax: #textin {filename}
+syntax: #textin {filename}
 
-   Sends the text to the mud from a file {filename}.
+Sends the text to the mud from a file {filename}.

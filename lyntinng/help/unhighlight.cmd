@@ -1,5 +1,6 @@
-   syntax: #unhighlight {pattern}
+syntax: #unhighlight {pattern}
 
-   Removes highlights matching {pattern}.
+Removes highlights matching {pattern}.
    
-   ex: #unhighlight ra*          <-- removes highlights that start with 'ra'
+ex:
+   #unhighlight ra*        <-- removes highlights that start with 'ra'

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.15 2002/03/14 22:33:31 willhelm Exp $
+# $Id: tkgui.py,v 1.16 2002/03/19 23:05:44 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -78,7 +78,7 @@ class TkGui(ui.BaseUI):
     self._do_i_echo = 1
     self._tk = Tkinter.Tk()
     self._tk.geometry("800x600")
-    self._tk.title("Lyntin -- The Hacker's Mudclient")
+    self.settitle()
 
     fnt = tkFont.Font(family="Fixedsys", size=12)
     self._entry = CommandEntry(self._tk, 
@@ -131,11 +131,17 @@ class TkGui(ui.BaseUI):
 
 
   def settitle(self, title = ''):
-    """ Sets the title bar."""
-    if title != '':
-      self._tk.title("Lyntin -- The Hacker's Mudclient " + title)
+    """ Sets the title bar.
+
+    arguments:
+
+      'title' -- (string) the title to set
+
+    """
+    if title:
+      self._tk.title(lyntin.LYNTINTITLE + title)
     else:
-      self._tk.title("Lyntin -- The Hacker's Mudclient")
+      self._tk.title(lyntin.LYNTINTITLE)
 
 
   def _ignoreThis(self, tkevent):
@@ -442,7 +448,7 @@ class CommandEntry(Tkinter.Entry):
       self._partk.handleinput(action)
       return 1
     else:
-      exported.write_error(binding + " is currenly not bound to anything.")
+      exported.write_error(binding + " is currently not bound to anything.")
       return 0
 
   def callBinding(self, tkevent):

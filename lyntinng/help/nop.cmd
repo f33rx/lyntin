@@ -1,4 +1,4 @@
-   syntax: #nop
+syntax: #nop
 
-   Allows you to comment macros.  A #nop command is completely
-   ignored (no operation).
+Allows you to comment macros.  A #nop command is completely
+ignored (no operation).
