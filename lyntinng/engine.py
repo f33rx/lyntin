@@ -4,26 +4,31 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.80 2003/01/22 03:09:28 willhelm Exp $
+# $Id: engine.py,v 1.81 2003/01/24 03:01:04 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
 that do work in Lyntin as well as encapsulates the event queue, event
 handling methods, and some of the other singleton managers such as
-the HelpManager, the ThreadManager, and the CommandManager.
+the HelpManager and the CommandManager.
 
 Engine also holds hooks to the various event types.  Events will call
 all appropriate hooks allowing you to add functionality via the modules
 interface without changing the Lyntin internals.
+
+The engine also holds a list of registered threads.  This helps in
+diagnostics.  Use the methods in exported to handle spinning off
+threads.
 
 The Engine class is a singleton and the reference to it is stored in
 "engine.myengine".  However, you should use the exported module
 to access the engine using the "get_engine()" function.
 """
 import Queue, thread, sys
+from threading import Thread
 
 import session, lyntin, utils, event, argparser
-import exported, hooks, helpmanager, history, threadmanager, commandmanager
+import exported, hooks, helpmanager, history, commandmanager
 
 # this is the singleton reference to the Engine instance.
 myengine = None
@@ -55,10 +60,6 @@ class Engine:
 
     self._managers = {}
 
-    # the thread manager manages all the threads in the engine.
-    # there is only one thread manager
-    self._managers["thread"] = threadmanager.ThreadManager()
-
     # the help manager manages all the help content in a hierarchical
     # structure.
     self._managers["help"] = helpmanager.HelpManager()
@@ -77,6 +78,9 @@ class Engine:
 
     # current tick count
     self._tick = 0
+
+    # list of registered threads
+    self._threads = []
 
     # counts the total number of events processed--for diagnostics
     self._num_events_processed = 0
@@ -124,7 +128,15 @@ class Engine:
     @param func: the function to run in the thread
     @type  func: function
     """
-    self.getManager("thread").startThread(name, func)
+    # clean up the list of threads that we maintain first
+    self._threadCleanup()
+
+    # create and initialize the new thread and stick it in our list
+    t = Thread(None, func)
+    t.setDaemon(1)
+    t.setName(name)
+    t.start()
+    self._threads.append(t)
 
   def checkthreads(self):
     """
@@ -135,7 +147,23 @@ class Engine:
     @return: one string for each thread indicating its status
     @rtype: list of strings
     """
-    return self.getManager("thread").checkThreadsStatus()
+    data = []
+    for mem in self._threads:
+      data.append("   %s %d" % (mem.getName(), mem.isAlive()))
+
+    return data
+
+  def _threadCleanup(self):
+    """
+    Removes threads which have ended.
+    """
+    removeme = []
+    for i in range(len(self._threads)):
+      if self._threads[i].isAlive() == 0:
+        removeme.append(self._threads[i])
+
+    for mem in removeme:
+      self._threads.remove(mem)
 
 
   ### ------------------------------------------
@@ -323,18 +351,6 @@ class Engine:
     ses.setName(name)
     self.registerSession(ses, name)
     return ses
-
-  def isUniqueSessionName(self, name):
-    """
-    Returns whether a session of that name already exists.
-
-    @param name: the session name to check
-    @type  name: string
-
-    @return: 1 if the name is unique; 0 if not
-    @rtype: boolean
-    """
-    return not self._sessions.has_key(name)
 
   def registerSession(self, session, name):
     """
@@ -644,7 +660,6 @@ class Engine:
     @return: 0 if nothing happened, 1 if the manager was removed
     @rtype: boolean
     """
-    # FIXME - this shouldn't silently fail
     if self._managers.has_key(name):
       del self._managers[name]
       return 1
@@ -677,12 +692,8 @@ class Engine:
     @return: the status of the session
     @rtype: list of strings
     """
-    data = []
     # call session.getStatus() and get status from it too
-    temp = ses.getStatus()
-
-    for mem in temp:
-      data.append(mem)
+    data = ses.getStatus()
 
     # loop through our managers and get status from them
     managerkeys = self._managers.keys()

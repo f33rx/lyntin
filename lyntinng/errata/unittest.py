@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.7 2002/10/25 23:44:29 willhelm Exp $
+# $Id: test.py,v 1.8 2002/12/05 01:04:53 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -12,9 +12,11 @@ Lyntin.  Don't mind it--it just hangs out here.
 """
 failures = 0
 
+import sys
+
 def _pass_fail(desc, testoutput, realoutput):
   """ Used for testing purposes."""
-  import test
+  global failures
 
   if testoutput == realoutput:
     # print "   pass:", testoutput
@@ -23,11 +25,13 @@ def _pass_fail(desc, testoutput, realoutput):
     print "   fail:", desc
     print "'" + str(testoutput) + "'"
     print "'" + str(realoutput) + "'"
-    test.failures += 1
+    failures += 1
 
 
 if __name__ == '__main__':
-  import test
+  import sys
+
+  sys.path.insert(0, "../")
 
   from utils import split_commands
   _pass_fail("split_commands 1", split_commands('test'), 
@@ -176,7 +180,7 @@ it to see if we can handle wrapping with it \33[1;37mtoo.\33[0m""")
   _pass_fail("expand_vars 3", 
             expand_vars(r"$var1 $$var2 \$var3", varmap), r"value1 $$var2 \$var3")
 
-  print "There were %d failures." % test.failures
+  print "There were %d failures." % failures
 
 # Local variables:
 # mode:python
