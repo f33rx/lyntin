@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: tintincmds.py,v 1.1 2002/05/05 15:20:16 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -696,7 +696,7 @@ You can change the active session, by typing #sessionname
   count = 0
   test = name
   while not exported.get_engine().isUniqueSessionName(test):
-    test = sessionname + repr(count)
+    test = name + repr(count)
     count = count + 1
 
   name = test
