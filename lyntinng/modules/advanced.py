@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.30 2003/02/03 05:08:04 willhelm Exp $
+# $Id: advanced.py,v 1.31 2003/02/04 00:15:00 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -17,7 +17,8 @@ import sys
 import exported, lyntin
 
 usermodule = None
-execdict = None
+execdictglobals = None
+execdictlocals = None
 
 def _get_user_module():
   """
@@ -58,18 +59,23 @@ def python_cmd(ses, words, input):
 
   category: commands
   """
-  global execdict
+  global execdictglobals, execdictlocals
   # NOTE: if we ever get to handling multiple-lines, we'll need
   # to change this function completely.
   try:
     my_usermodule = _get_user_module() 
+    if execdictlocals == None:
+      execdictlocals = {}
+      
+    execdictlocals["session"] = ses
+
     if my_usermodule == None:
-      if execdict == None:
-        execdict = {}
+      if execdictglobals == None:
+        execdictglobals = {}
         exported.write_error("No lyntinuser module loaded--executing in advanced.py.")
-      exec input[1:].lstrip() in execdict
+      exec input[1:].lstrip() in execdictglobals, execdictlocals
     else:
-      exec input[1:].lstrip() in usermodule.__dict__
+      exec input[1:].lstrip() in usermodule.__dict__, execdictlocals
   except:
     exported.write_traceback("@: error in raw python stuff.")
     exported.tally_error()
@@ -103,14 +109,19 @@ def load_cmd(ses, args, input):
   category: commands
   """
   mod = args["modulename"]
+  reload = args["reload"]
 
   if sys.modules.has_key(mod):
     # if this module has previously been loaded, we try to reload it.
 
     _module = sys.modules[mod]
+    _oldmodule = _module
     try:
       if ((_module.__dict__.has_key("unload") and 
           _module.__dict__.has_key("lyntin_import"))):
+        if not reload:
+          return
+        
         try:
           _module.unload()
         except:
@@ -121,11 +132,20 @@ def load_cmd(ses, args, input):
     except:
       exported.write_traceback("load: had problems unloading %s." % mod)
       return
+  else:
+    _oldmodule = None
 
   try:
     _module = __import__( mod )
 
     _module = sys.modules[mod]
+
+    if (_oldmodule and _oldmodule.__dict__.has_key("reload")):
+      try:
+        _oldmodule.reload()
+      except:
+        exported.write_traceback("load: had problems calling reload on %s." % mod)
+    
     if (_module.__dict__.has_key("load")):
       _module.load()
 
@@ -174,7 +194,7 @@ def unload_cmd(ses, args, input):
 
 def load():
   exported.add_command("@", python_cmd)
-  exported.add_command("^load", load_cmd, "modulename")
+  exported.add_command("^load", load_cmd, "modulename reload:boolean=true")
   exported.add_command("^unload", unload_cmd, "modulename")
 
 def unload():
