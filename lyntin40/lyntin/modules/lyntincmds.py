@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.8 2003/10/04 19:14:34 willhelm Exp $
+# $Id: lyntincmds.py,v 1.9 2003/11/12 23:23:00 willhelm Exp $
 #######################################################################
 """
 This module holds commands that are new and unique to Lyntin.
@@ -101,7 +101,7 @@ def config_cmd(ses, args, input):
   value = args["value"]
   quiet = args["quiet"]
 
-  c = exported.get_engine().getConfigManager()
+  c = exported.myengine.getConfigManager()
 
   # if they didn't specify a name, then we print out all the
   # configuration stuff for general and this session
@@ -236,16 +236,16 @@ def diagnostics_cmd(ses, args, input):
   import os, sys
   message = []
   message.append("Diagnostics:")
-  message.append(exported.get_engine().getDiagnostics())
+  message.append(exported.myengine.getDiagnostics())
 
   message.append("Hook statii:")
-  data = exported.get_engine()._hooks.keys()
+  data = exported.myengine.checkHooks()
   data.sort()
   for mem in data:
     message.append(mem)
 
   message.append("Thread statii:")
-  data = exported.get_engine().checkthreads()
+  data = exported.myengine.checkthreads()
   data.sort()
   for mem in data:
     message.append(mem)
