@@ -211,7 +211,7 @@ def DispatchCommand(input, seslist):
 
     # toggle verbose mode
     if string.find("verbose", words[0]) == 0:
-	Verbose(words, input, seslist)
+        Verbose(words, input, seslist)
         return
 
     # unrecognized command
