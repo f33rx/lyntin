@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.44 2002/08/20 02:39:04 willhelm Exp $
+# $Id: utils.py,v 1.45 2002/08/21 03:25:36 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -1106,7 +1106,10 @@ def lyntin_expand_placement_vars(input, expansion):
       varlookup[mem] = ' '.join(inputsplit[start:end])
 
     # run through the replacements
-    for mem in varlookup.keys():
+    vars = varlookup.keys()
+    vars.sort( lambda x,y: -1 * len(x).__cmp__(len(y)) )
+    
+    for mem in vars:
       expansion = re.sub("(?<!%)%" + mem, varlookup[mem], expansion)
 
   else:
