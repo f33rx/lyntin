@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.8 2002/12/02 05:24:19 willhelm Exp $
+# $Id: commandmanager.py,v 1.9 2003/02/01 01:26:29 jmberne Exp $
 #######################################################################
 """
 Lyntin comes with a series of X{command}s for manipulating aliases, 
@@ -117,10 +117,13 @@ class CommandManager(manager.Manager):
       except Exception, e:
         raise Exception, "Error with arguments for command %s, (%s)" % (name,e)
 
-    # add the command to the command list
     cd.setFunc(func)
 
-    # toss the command thing in the list
+    # removeCommand tests to see if the command exists already and will
+    # remove it if it does.
+    self.removeCommand(name)
+
+    # toss the command thing in the dict
     self._commands[name] = cd
 
     # deal with the help text

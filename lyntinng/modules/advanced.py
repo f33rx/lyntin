@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.29 2003/01/07 01:38:07 willhelm Exp $
+# $Id: advanced.py,v 1.30 2003/02/03 05:08:04 willhelm Exp $
 #######################################################################
 """
 This module holds the magical python_cmd code.  It takes in code,
@@ -165,8 +165,11 @@ def unload_cmd(ses, args, input):
       del sys.modules[mod]
       exported.write_message("unload: module %s unloaded." % mod)
       return
+    else:
+      exported.write_error("unload: module %s cannot be unloaded." % mod)
+      return
 
-  exported.write_error("unload: it doesn't look like module %s is loaded." % mod)
+  exported.write_error("unload: module %s is not loaded." % mod)
 
 
 def load():

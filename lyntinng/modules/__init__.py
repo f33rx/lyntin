@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.18 2002/11/06 01:56:51 willhelm Exp $
+# $Id: __init__.py,v 1.19 2002/11/06 03:03:20 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -48,35 +48,6 @@ def load_modules():
   Magically dynamically loads all the modules in the modules
   package.  This is truly a semi-magic function.
   """
-  # handle modules found in the moduledir
-  moduledirlist = lyntin.options["moduledir"]
-  if moduledirlist:
-    for moduledir in moduledirlist:
-      # grab the contents of the moduledir directory
-      _module_list = glob.glob( os.path.join( moduledir, "*.py"))
-
-      # toss the moduledir in the sys.path
-      sys.path.append(moduledir)
-
-      # and toss all the contents of the directory in our _module_list
-      for mem in _module_list:
-        mem2 = mem[mem.rfind(os.sep)+1:mem.rfind(".")]
-        if mem2[0] == "_":
-          continue
-
-        try:
-          _module = __import__(mem2)
-          if _module.__dict__.has_key("load"):
-            _module.load()
-
-          test_for_conflicts(mem, _module)
-
-          _module.__dict__["lyntin_import"] = 1
-          lyntin.lyntinmodules.append(mem)
-        except:
-          exported.write_traceback("Module '%s' refuses to load." % mem)
-
-
   # handle modules.*
   index = __file__.rfind(os.sep)
   if index == -1:
@@ -106,6 +77,35 @@ def load_modules():
       lyntin.lyntinmodules.append(mem)
     except:
       exported.write_traceback("Module '%s' refuses to load." % name)
+
+  # handle modules found in the moduledir
+  moduledirlist = lyntin.options["moduledir"]
+  if moduledirlist:
+    for moduledir in moduledirlist:
+      # grab the contents of the moduledir directory
+      _module_list = glob.glob( os.path.join( moduledir, "*.py"))
+
+      # toss the moduledir in the sys.path
+      sys.path.append(moduledir)
+
+      # and toss all the contents of the directory in our _module_list
+      for mem in _module_list:
+        mem2 = mem[mem.rfind(os.sep)+1:mem.rfind(".")]
+        if mem2[0] == "_":
+          continue
+
+        try:
+          _module = __import__(mem2)
+          if _module.__dict__.has_key("load"):
+            _module.load()
+
+          test_for_conflicts(mem, _module)
+
+          _module.__dict__["lyntin_import"] = 1
+          lyntin.lyntinmodules.append(mem)
+        except:
+          exported.write_traceback("Module '%s' refuses to load." % mem)
+
 
 # Local variables:
 # mode:python

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.49 2002/12/22 23:07:20 willhelm Exp $
+# $Id: event.py,v 1.50 2002/12/31 00:03:59 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -140,7 +140,7 @@ class StartupEvent(Event):
 
 
     # import modules listed in modulesinit
-    exported.write_message("Importing modules in modules directory.")
+    exported.write_message("Loading Lyntin modules.")
 
     try:
       import modules.__init__
