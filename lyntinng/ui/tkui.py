@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.34 2002/05/04 00:13:53 willhelm Exp $
+# $Id: tkgui.py,v 1.35 2002/05/14 22:46:26 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -64,10 +64,10 @@ myui = None
 def get_ui_instance():
   global myui
   if myui == None:
-    myui = TkGui()
+    myui = Tkui()
   return myui
 
-class TkGui(ui.BaseUI):
+class Tkui(ui.BaseUI):
   """
   This is a ui class which handles the complete Tk user interface.
   """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.17 2002/05/09 23:20:12 willhelm Exp $
+# $Id: textui.py,v 1.18 2002/05/14 22:46:26 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -23,7 +23,7 @@ def get_ui_instance():
 class Textui(ui.BaseUI):
   """
   This is the text ui.  It's super basic and should run almost
-  anywhere.  It lacks several useful functions that the TkGui
+  anywhere.  It lacks several useful functions that the Tkui
   and the Curses ui (eventually) will have.
   """
   def __init__(self):
