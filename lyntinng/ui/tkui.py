@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.6 2002/07/11 04:11:20 willhelm Exp $
+# $Id: tkui.py,v 1.7 2002/07/12 00:11:57 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -30,6 +30,7 @@ above and beyond the textui:
  - ctrl-t autotyper
 """
 
+"""
 0 -- all off
 1 -- bold
 5 -- blinking (which we don't support)
