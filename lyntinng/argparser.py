@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.9 2002/04/26 21:01:23 jmberne Exp $
+# $Id: argparser.py,v 1.10 2002/05/04 04:31:47 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -96,32 +96,22 @@ class ArgumentParser:
     Build up the set of parsers to be used for argument parsing.
 
     The argspec follows the following format
-    [argname[:argtype]]+ [:]
-    [argname[:argtype]=defaultval]+ [:]
-    [argname:argtype*] [:]
+    [argname[:argtype]]+ 
+    [argname[:argtype]=defaultval]+ 
+    [argname:argtype*] 
+    [argname[:argtype]]+ 
+    [argname[:argtype]=defaultval]+ 
     [argname:argtype**]
 
     Any of the arguments can be specified either by name or populated
-    by position.  A colon will cause arguments after it to only be
-    specifiable by name.
+    by position, except for arguments after the index collector
+    argument.  Those must be specified by name only.
 
     Once one default value is given all further arguments must have
     default values (except collector arguments, which have implicit
     default arguments of the empty list and the empty map)
 
-    Examples:
-    argspec  : arg1 arg2 arg3 : arg4 arg5 arg6*
-    arguments: a b c d e f g arg4=h arg5=i
-    dict     : {arg1:a, arg2:b, arg3:c, arg4:h, arg5:i, arg6:[d,e,f]
-
-    If the colon had been missing from the argspec then multiple
-    assignments (both d and e as the fourth and fifth arguments and
-    arg4=h and arg5-i as named arguments) to arg4 and arg5 would have
-    caused errors.
-
-    With the colon the only way to specify the value for arg4 and arg5
-    is by naming them explicitly.  Default values should probably be
-    supplied in this case.
+    Examples:  see the test code at the end of argparser.py
     """
     self.parsers = {}
     self.indexparsers = []
@@ -145,10 +135,6 @@ class ArgumentParser:
 
       self.syntaxline += "[%s] " % argname
 
-      if argname == ":":
-        doneWithIndices = 1
-        continue
-
       if len(argname) >= 1 and argname[-1:] == "*":
         if argdef != None:
           raise ParserException, "cannot specify a default value for a collection argument (%s=%s)" % (argname, argdef)
@@ -162,18 +148,10 @@ class ArgumentParser:
 
         else: #this is an index collection argument
           argname = argname[:-1]
-          # Must check to see that we are the last argument or that 
-          # the last argument is a named collector.
-          if i < len(parsedspec) - 2:
-            raise ParserException, "index collection argument must be last or second-to last argument (%s)" % (argname)
-          if i == len(parsedspec) -2:
-            # must check that the last arg is a named collector:
-            nextarg,nextdef = parsedspec[i+1]
-            if len(nextarg) < 2 or nextarg[-2:] != "**":
-              raise ParserException, "index collector can only be second-to-last argument when last argument is a named collector"
           parser = extraIndexParser(self,argname)
           indexCollector = 1
-
+          doneWithIndices = 1
+          
       else:
         parser = Parser(self,argname)
 
@@ -185,10 +163,10 @@ class ArgumentParser:
       parser.typechecker = typechecker
 
       if argdef != None:
-        parser.default = argdef
+        parser.setDefault(parser.parse(argdef))
         defaultSeen = 1
 
-      if defaultSeen and parser.default == None:
+      if defaultSeen and not parser.defaultset:
         raise ParserException, "Argument without default value (%s) seen after default values already specified" % (argname)
       
       if not namedCollector and not indexCollector:
@@ -199,8 +177,10 @@ class ArgumentParser:
         self.parsers[argname] = parser
       elif namedCollector:
         self.extranamedparser = parser
+        self.parsers[argname] = parser
       elif indexCollector:
         self.extraindexparser = parser
+        self.parsers[argname] = parser
     
   def parse(self, input):
     """
@@ -221,7 +201,7 @@ class ArgumentParser:
         key,val = arguments[i]
 
         if val == None:
-          if foundNamedArg:
+          if foundNamedArg and not self.extraindexparser:
             raise ParserException, "Non-named argument (%s) found after Named argument" % (key)
           if i < len(self.indexparsers):
             parser = self.indexparsers[i]
@@ -245,11 +225,10 @@ class ArgumentParser:
     for key in self.parsers.keys():
       if not dict.has_key(key):
         parser = self.parsers[key]
-        if parser.default == None:
+        if not parser.defaultset:
           raise ParserException, "Must specify a value for argument %s" % (key)
         else:
-          defval = parser.parse(parser.default)
-          dict[key] = defval
+          dict[key] = parser.default
           
     return dict
 
@@ -340,6 +319,7 @@ class Parser:
   def __init__(self, argparser, argname):    
     self.argname = argname
     self.default = None
+    self.defaultset = 0
     self.typechecker = None
     self.argparser = argparser
 
@@ -356,6 +336,10 @@ class Parser:
       return self.typechecker.check(val)
     else:
       return val
+
+  def setDefault(self,val):
+    self.default = val
+    self.defaultset = 1
       
 class extraIndexParser(Parser):
   """
@@ -366,6 +350,7 @@ class extraIndexParser(Parser):
   def __init__(self,argparser,argname):
     Parser.__init__(self,argparser,argname)
     self.default = []
+    self.defaultset = 1
     
   def parseInto(self, index, val, dict):
     val = self.parse(val)
@@ -383,6 +368,7 @@ class extraNamedParser(Parser):
   def __init__(self,argparser,argname):
     Parser.__init__(self,argparser,argname)
     self.default = {}
+    self.defaultset = 1
     
   def parseInto(self, key, val, dict):
     val=self.parse(val)
@@ -466,7 +452,11 @@ class booleanOrNoneChecker:
 
 
 if __name__ == '__main__':
-  testargs = {("arg1 arg2 arg3* arg4**",None):["test1 test3 test5 test7 help=wahoo woo=weewee"], ("mapname*",None):["3k mapper by notadragon","lalala"], ("mapname*","noparsing"):["3k mapper by notadragon"]} 
+  testargs = {
+    ("arg1 arg2 arg3* arg4**",None):["test1 test3 test5 test7 help=wahoo woo=weewee"],
+    ("mapname*",None):["3k mapper by notadragon","lalala"],
+    ("mapname*","noparsing"):["3k mapper by notadragon"],
+    ("option* quiet:boolean=true",None):["a b c quiet=false d","a b c quiet=true","x b c"]} 
 
   for argspec,argoptions in testargs.keys():
     argparser = ArgumentParser(argspec,argoptions)
