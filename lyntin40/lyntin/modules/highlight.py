@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.5 2003/08/28 01:46:48 willhelm Exp $
+# $Id: highlight.py,v 1.6 2003/09/25 15:35:41 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -372,7 +372,7 @@ def highlight_cmd(ses, args, input):
   stylelist = style.split(",")
   for mem in stylelist:
     if mem not in ansi.STYLEMAP:
-      exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (mem, config.commandchar))
+      exported.write_error("highlight: '%s' not a valid style.\nCheck out the highglight help file for more information." % mem)
       return
     
   exported.get_manager("highlight").addHighlight(ses, style, text)
