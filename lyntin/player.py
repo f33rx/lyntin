@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: player.py,v 1.44 2001/08/06 02:00:19 willhelm Exp $
+# $Id: player.py,v 1.45 2001/08/11 05:23:10 willhelm Exp $
 ##################################################################
 """
 defines lyntin's user-level commands
@@ -1010,7 +1010,7 @@ def Info(words,input,seslist):
       else:
          PutMessage('Ticker is off.')
 
-      if data.ansi_colors:
+      if ses.ansi_colors:
          PutMessage('Ansi is on (on the client).')
       else:
          PutMessage('Ansi is off (on the client).')
