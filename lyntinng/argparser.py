@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.20 2002/06/09 02:11:45 jmberne Exp $
+# $Id: argparser.py,v 1.21 2002/06/09 17:09:36 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -479,8 +479,8 @@ typecheckers["int"] = IntChecker
 class BooleanChecker(Checker):
   """
   Accept only boolean values
-  True values are :  on, true, 1
-  False Values are : off, false, 0
+  True values are :  on, yes, true, 1
+  False Values are : off, no, false, 0
   Any other values cause exceptions.
   """
   def __init__(self, typename, typeargs):
@@ -489,9 +489,9 @@ class BooleanChecker(Checker):
     return
 
   def check(self,arg):
-    if arg == "on" or arg == "true" or arg == "1":
+    if arg == "on" or arg == "yes" or arg == "true" or arg == "1":
       return 1
-    elif arg == "off" or arg == "false" or arg == "0":
+    elif arg == "off" or arg == "no" or arg == "false" or arg == "0":
       return 0
     else:
       raise ParserException, "Invalid boolean value specified: %s" % (arg)
