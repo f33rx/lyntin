@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.6 2002/10/20 16:09:57 willhelm Exp $
+# $Id: commandmanager.py,v 1.7 2002/11/18 02:43:53 willhelm Exp $
 #######################################################################
 """
 Lyntin comes with a series of X{command}s for manipulating aliases, 
@@ -253,17 +253,23 @@ class CommandManager(manager.Manager):
           if argumentparser == None:
             command(ses, input.split(" "), input)
           else:
+            # for printing out the error message, we remove the ^
+            # from the command name if it's there.
+            fixedmem = mem
+            if len(fixedmem) > 0 and fixedmem[0] == '^':
+              fixedmem = fixedmem[1:]
+
             try:
               dict = argumentparser.parse(words[1])
               dict["command"]=mem
               command(ses, dict, input)
             except ValueError, e:
               exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                   (mem, e, lyntin.commandchar, mem,
+                                   (fixedmem, e, lyntin.commandchar, fixedmem,
                                     argumentparser.syntaxline))
             except argparser.ParserException, e:
               exported.write_error("%s: %s\nsyntax: %s%s %s" % 
-                                   (mem, e, lyntin.commandchar, mem,
+                                   (fixedmem, e, lyntin.commandchar, fixedmem,
                                     argumentparser.syntaxline))
           if internal == 0:
             ses.prompt()
