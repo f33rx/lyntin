@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.8 2002/04/21 19:23:37 willhelm Exp $
+# $Id: hooks.py,v 1.9 2002/04/24 04:38:24 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.
@@ -27,15 +27,15 @@ class Hook:
   argument which is a tuple.  see the specific hooks below for
   more info.
   """
-  def __init__(self):
+  def __init__(self,mapper= lambda x,y:x):
     # this is the master priority list
     self.functionlist = {}
 
-    # this gets recomputered everytime someone registers or
+    # this gets recomputed everytime someone registers or
     # unregisters a hook
     self.orderedlist = []
 
-    self.defaultMapper = lambda x,y:x
+    self.mapper = mapper
 
   def createOrderedList(self):
     """
@@ -66,7 +66,7 @@ class Hook:
                            the previous arglist and the return from the 
                            previous function
     """
-    mappingFunction = mappingFunction or self.defaultMapper
+    mappingFunction = mappingFunction or self.mapper
 
     for mem in self.orderedlist:
       output = mem(arglist)
@@ -237,8 +237,7 @@ the mud.
 arg tuple will contain the session, the original text and the currently 
 filtered text.
 """
-mud_filter_hook = Hook()
-mud_filter_hook.defaultMapper=filter_mapper
+mud_filter_hook = Hook(lambda x,y:(x[0],x[1],y))
 
 """
 Whenever data comes from the user it will first be passed through
@@ -249,5 +248,4 @@ These should return the text that should be sent to the mud.
 arg tuple will contain the session, the original text and the currently 
 filtered text.
 """
-user_filter_hook = Hook()
-user_filter_hook.defaultMapper=filter_mapper
+user_filter_hook = Hook(lambda x,y:(x[0],x[1],y))
