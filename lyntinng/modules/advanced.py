@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.14 2002/05/05 15:20:16 willhelm Exp $
+# $Id: advanced.py,v 1.15 2002/05/09 23:20:12 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -47,6 +47,7 @@ def import_cmd(session, words, input):
 
   Imports/reloads a module.  In the case of a Lyntin module, it also
   executes the load and unload functions where appropriate.
+  category: commands
   """
   import sys
 

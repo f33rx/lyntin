@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.13 2002/05/09 23:20:12 willhelm Exp $
+# $Id: tintincmds.py,v 1.14 2002/05/12 04:40:39 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -857,8 +857,8 @@ def tick_cmd(session, args, input):
   it will print TICK!!! to the ui.
 
 
-  category: commands
   This allows you to perform an event every x number of seconds.
+  category: commands
   """
   if (session.getName() == "common"):
     exported.write_error("tick cannot be applied to common session.")
