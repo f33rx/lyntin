@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: logger.py,v 1.2 2002/12/06 00:33:32 willhelm Exp $
+# $Id: logger.py,v 1.3 2003/01/28 22:38:05 willhelm Exp $
 #######################################################################
 """
 This module defines the LoggerManager which handles logging.
@@ -148,6 +148,18 @@ class LoggerManager(manager.Manager):
 
     return text
 
+  def fromuser(self, args):  
+    """
+    from_user_hook function for logging user input.
+    """
+    ses = exported.get_current_session()
+    text = args[0]
+
+    if self._loggers.has_key(ses):
+      self._loggers[ses].log(ses, text+"\n")
+
+    return text
+
 
 commands_dict = {}
 
@@ -219,7 +231,7 @@ def load():
   modutils.load_commands(commands_dict)
   lm = LoggerManager()
   exported.add_manager("logger", lm)
-
+  hooks.from_user_hook.register(lm.fromuser, 30)
   hooks.mud_filter_hook.register(lm.mudfilter, 30)
 
 def unload():
@@ -227,6 +239,7 @@ def unload():
   global lm
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("logger")
+  hooks.from_user_hook.unregister(lm.fromuser)
   hooks.mud_filter_hook.unregister(lm.mudfilter)
 
 # Local variables:
