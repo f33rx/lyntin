@@ -1,11 +1,12 @@
-*Title: README
-*Author: Will
+:Title: README
+:Author: Will
 
 
 
-* VERSION
+VERSION
+=======
 
-$Id: README,v 1.7 2002/03/20 22:39:13 willhelm Exp $
+$Id: README,v 1.8 2002/03/25 02:11:10 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -13,7 +14,8 @@ http://Lyntin.sourceforge.net/
 This document is somewhat in flux.
 
 
-* WHY SHOULD YOU USE LYNTIN?
+WHY SHOULD YOU USE LYNTIN?
+==========================
 
 Lyntin is written entirely in Python--a nicely written and very portable
 programming language.  Thusly Lyntin is very platform independent 
@@ -25,22 +27,23 @@ In addition, your code can interface with Lyntin's code.
 
 Lyntin is great if:
 
-	1. you want a mud client that you can see the source code to
-	   and adjust it to suit your needs
-	2. you want a mud client that has a sophisticated API for 
-	   enhancing and building bots/agents/triggers more advanced than
-	   "if you see this then do this"
-	3. you want a mud client that works on all your machines,
-	   has a text ui, a tk gui, and can also work over ssh/telnet
+1. you want a mud client that you can see the source code to
+   and adjust it to suit your needs
+2. you want a mud client that has a sophisticated API for 
+   enhancing and building bots/agents/triggers more advanced than
+   "if you see this then do this"
+3. you want a mud client that works on all your machines,
+   has a text ui, a tk gui, and can also work over ssh/telnet
 
 Lyntin is not great if:
 
-	1. you prefer wizards and menus to the command line
-	2. you hate Python
+1. you prefer wizards and menus to the command line
+2. you hate Python
 
 
 
-* BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
+BUG REPORTS, QUESTIONS, COMMENTS, CURSES?
+=========================================
 
 Lyntin was originally written by Lyn Headley, laheadle@cs.uchicago.edu .
 Lyntin is currently being maintained by Will Guaraldi, 
@@ -50,21 +53,22 @@ We appreciate ALL types of feedback.
 
 Hell, if you even USE this, drop us a line on the mailing list:
 
-	lyntin-devl@lists.sourceforge.net
+   lyntin-devl@lists.sourceforge.net
 
 All bugs, feature-requests, and other things should be reported
 at: 
 
-	http://sourceforge.net/projects/lyntin/
+   http://sourceforge.net/projects/lyntin/
 
-If possible, when noting bugs, please do a "#diagnostics" and include
+If possible, when noting bugs, please do a ``#diagnostics`` and include
 the OS/Python information at the bottom as well as any stack traces
 and pertinent information.  The more information you include, the
 more we have to go by to understand what the problem is.
 
 
 
-* HOW TO CONTRIBUTE
+HOW TO CONTRIBUTE
+=================
 
 Development and maintenance is entirely done by the maintainer right now.
 If you're interested in sending in bug fixes, please feel welcome.  I'm
@@ -74,15 +78,16 @@ A diff -u output file is great for this sort of thing.
 
 All patches and such things should be sent to the mailing list at:
 
-	lyntin-devl@lists.sourceforge.net
+   lyntin-devl@lists.sourceforge.net
 
 
 
-* OTHER CONCERNS
+OTHER CONCERNS
+==============
 
 The latest release of Lyntin is always available from:
 
-	http://lyntin.sourceforge.net/
+   http://lyntin.sourceforge.net/
 
 Lyntin is still under development, and there aren't many testers, so
 we apologize profusely for any bugs you may encounter and such.
@@ -95,50 +100,49 @@ we'll happily work with them and credit you.
 
 
 
-* LYNTIN vs. TINTIN++
+LYNTIN vs. TINTIN
+=================
 
-Lyntin has many of the same features as Tintin++ and the commands
-are based on Tintin++.  However, there are a series of Tintin++
-commands we do not currently support:
+Lyntin has many of the same features as Tintin and the commands
+are based on Tintin.  However, there are a series of Tintin
+commands we do not currently support for various reasons:
 
-^<<
-  map           mark          path
-  pathdir       snoop         split
-  tickset       unsplit       unpath
-  suspend       system
-^>>
-
+   * some because Lyntin is written in Python and exposes the user to
+     the Python interpreter making a series of the commands kind
+     of silly
+   * a few because Lyntin has better ways to do things
+   * a paltry few because we haven't gotten around to it
 
 
-* DOCUMENTATION 
 
-Lyntin incorporates the 'look and feel' of Tintin++, so if you've used
-Tintin++ or a variant it should be pretty easy to make the transition.  
-It offers all the major features of Tintin++, including multiple 
+DOCUMENTATION 
+=============
+
+Lyntin incorporates the *look and feel* of Tintin, so if you've used
+Tintin or a variant it should be pretty easy to make the transition.  
+It offers all the major features of Tintin, including multiple 
 sessions, but leaves a few minor things out.
 
-There are "in-game" help files covering the commands and most 
-other things we could think of which can be accessed with the #help 
+There are *in-game* help files covering the commands and most 
+other things we could think of which can be accessed with the ``#help`` 
 command.
 
 All the documentation that comes with Lyntin and is also available on
 the Lyntin website in HTML form.  Lyntin documentation is written in
-AFT because it's an ASCII-based formatting markup that's easy to read
-(making the source files useful) and convert into formats like HTML,
-RTF, and other formats.
+reStructuredText because it's an ASCII-based formatting markup that's 
+easy to read (making the source files useful) as well as convert into 
+formats like HTML, RTF, and other formats.
 
 If you find problems with the documentation or have fixes for it, 
 let us know.
 
 
 
-* ERRATA
+ERRATA
+======
 
 That should be about it.  In-game help is accessed by typing #help.
-When you start Lyntin for the first time, type:
-
-	'#help general'
-
+When you start Lyntin for the first time, type ``#help general``
 and that'll get you started.  Read through the various help files
 at your leisure.
 
