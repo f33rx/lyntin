@@ -407,6 +407,9 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
   If the actual line is longer than the wraplength, then we'll break
   in the line at the wraplength--this will cut words in two.
 
+  Note: we don't expand tabs or backspaces.  Both count as one
+  character.
+
   @param textlist: either a string of text needing to be formatted and
       wrapped, or a textlist needing to be formatted and wrapped.
   @type  textlist: string or list of strings

@@ -16,4 +16,8 @@ top level of the help structure.
 To start, the "#session" command will allow you to start a 
 session.  When you're done, "#end" will close Lyntin.
 
+All documentation that comes with Lyntin is also available on the
+Lyntin web-site.  If you find problems with the documentation or
+have fixes for it, let us know on the lyntin-devl mailing list.
+
 category: readme

@@ -116,7 +116,7 @@ def help_cmd(ses, args, input):
     data += "category: %s\n\n" % breadcrumbs
 
   data += text
-  exported.write_message(utils.wrap_text(data, 68))
+  exported.write_message(data)
 
 commands_dict["help"] = (help_cmd, "item=")
 

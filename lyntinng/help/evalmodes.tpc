@@ -1,5 +1,6 @@
-There are two user input evaluation modes in Lyntin: Lyntin mode and
-Tintin mode.  You can switch modes using the command-line argument:
+There are two user input evaluation modes in Lyntin: Lyntin mode 
+and Tintin mode.  You can switch modes using the command-line 
+argument:
 
    --evalmode [mode]
 
@@ -11,15 +12,15 @@ it ingame using the #config command:
 with valid modes being "tintin" and "lyntin".
 
 The evalmodes differ in how variables, placement variables, and
-command arguments are expanded as well as the time at which they're 
-expanded.  Tintin mode emulates how Tintin works.  Lyntin mode is 
-born from our own preferred user input evaluation.
+command arguments are expanded as well as the time at which 
+they're expanded.  Tintin mode emulates how Tintin works.  Lyntin 
+mode is born from our own preferred user input evaluation.
 
 Lyntin defaults to lyntin mode--so if you're a Tintin user and 
-want to user your Tintin command files, you should make sure to start 
-Lyntin up in tintin mode.
+want to user your Tintin command files, you should make sure to 
+start Lyntin up in tintin mode.
 
-Note: Lyntin 4.0 will no longer have the tintin evalmode and the idea
-of evalmodes will go away.
+Note: Lyntin 4.0 will no longer have the tintin evalmode and the 
+idea of evalmodes will go away.
 
 category: readme

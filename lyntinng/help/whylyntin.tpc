@@ -1,9 +1,10 @@
-Lyntin is written entirely in Python--a nicely written and very portable
-programming language.  Thusly Lyntin is platform independent.  Lyntin is
-exposes the Python interpreter allow you more freedom than mere
-'if you see this then send this' aliases and triggers.  They can be 
-Python functions which do anything from setting a variable to forking 
-a web spider.  In addition, your code can interface with Lyntin's code.  
+Lyntin is written entirely in Python--a nicely written and very 
+portable programming language.  Thusly Lyntin is platform 
+independent.  Lyntin is exposes the Python interpreter allow you 
+more freedom than mere 'if you see this then send this' aliases 
+and triggers.  They can be Python functions which do anything 
+from setting a variable to forking a web spider.  In addition, 
+your code can interface with Lyntin's code.  
 
 Lyntin is great if:
 
@@ -19,5 +20,6 @@ Lyntin is not great if:
 
 1. you prefer wizards and menus to the command line
 2. you hate Python
+3. you want fancy bells and whistles in the ui
 
 category: readme
