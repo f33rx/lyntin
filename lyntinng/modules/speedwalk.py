@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: speedwalk.py,v 1.17 2002/06/04 00:52:39 willhelm Exp $
+# $Id: speedwalk.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the speedwalking code.
@@ -265,7 +265,7 @@ class SpeedwalkManager(manager.Manager):
 
   def removeDirs(self, ses, alias):
     if self._hashes.has_key(ses):
-      return self._hashes.removeDir(alias)
+      return self._hashes[ses].removeDir(alias)
     return []
 
   def getDirs(self, ses):
