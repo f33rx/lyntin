@@ -4,7 +4,7 @@
 VERSION
 =======
 
-$Id: INSTALL,v 1.9 2002/07/21 17:37:05 willhelm Exp $
+$Id: INSTALL,v 1.10 2002/07/21 18:07:09 willhelm Exp $
 
 For more up-to-date documentation, check out the web-site at:
 http://lyntin.sourceforge.net/
@@ -21,6 +21,16 @@ revisited and re-written at some point.
 
 UNIX/LINUX
 ==========
+
+Requirements:
+
+1. Python 2.2
+2. tar
+3. gzip
+4. Python 2.2 Tkinter stuff (if you plan on using the Tk ui)
+
+
+Steps:
 
 1. Make sure you have at least Python 2.2--you can do this by 
    running "python" and seeing what version it says it is.  If 
@@ -39,8 +49,16 @@ and explanations, run::
 WINDOWS
 =======
 
+Requirements:
+
+1. Python 2.2
+2. Winzip or some other pkzip extracting program
+
+
+Steps:
+
 1. Make sure you have at least Python 2.2
-2. Unzip the client into c:\lyntin
+2. Unzip the client into ``c:\lyntin``
 3. Right click on lyntin.py and select ``Create Shortcut``
 4. Then right click on the new shortcut and select ``Properties``
 5. There are many versions of Windows and I think shortcut properties

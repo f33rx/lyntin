@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.10 2002/07/17 03:56:38 willhelm Exp $
+# $Id: tkui.py,v 1.11 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -337,20 +337,25 @@ class Tkui(ui.BaseUI):
         if utils.is_color_token(mem):
           color, leftover = utils.figure_color([mem], color, leftover)
         else:
-          if color[1] == -1:
-            fg = "37"
+          if color[1] == -1 and color[2] == -1:
+            self._txt.insert('end', mem)
+
           else:
-            fg = str(color[1])
+            if color[1] == -1:
+              fg = "37"
+            else:
+              fg = str(color[1])
 
-          if color[2] == -1:
-            bg = "40"
-          else:
-            bg = str(color[2])
+            if color[0] == 1:
+              fg = "b" + fg
 
-          if color[0] == 1:
-            fg = "b" + fg
+            if color[2] != -1:
+              self._txt.insert('end', mem, fg)
 
-          self._txt.insert('end', mem, (fg, bg))
+            else:
+              bg = str(color[2])
+              self._txt.insert('end', mem, (fg, bg))
+
 
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
