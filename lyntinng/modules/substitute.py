@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.9 2002/08/20 02:39:04 willhelm Exp $
+# $Id: substitute.py,v 1.10 2002/09/04 05:36:37 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
@@ -95,7 +95,15 @@ class SubstituteData:
 
   def getStatus(self):
     """ Returns the number of substitutes we're managing."""
-    return "%d substitute(s)." % len(self._substitutes.keys())
+    gags = 0
+    subs = 0
+
+    for mem in self._substitutes.keys():
+      if self._substitutes[mem] == ".":
+        gags += 1
+      else:
+        subs += 1
+    return "%d substitute(s). %d gag(s)." % (subs, gags)
 
 
 class SubstituteManager(manager.Manager):
@@ -129,7 +137,7 @@ class SubstituteManager(manager.Manager):
   def getStatus(self, ses):
     if self._subs.has_key(ses):
       return self._subs[ses].getStatus()
-    return "0 substitute(s)."
+    return "0 substitute(s). 0 gag(s)."
 
   def addSession(self, newsession, basesession=None):
     """ over-ridden from manager.Manager."""

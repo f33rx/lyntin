@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.17 2002/07/21 04:14:48 willhelm Exp $
+# $Id: testserver.py,v 1.18 2002/07/31 01:30:49 willhelm Exp $
 #######################################################################
 """
 This new test-server is a patchwork of stuff from the existing test server
@@ -252,6 +252,15 @@ class MasterServer:
         pass
 
 
+def print_syntax(message=""):
+  print "testserver.py [--help] [options]"
+  print "    -h|--host <hostname> - sets the hostname to bind to"
+  print "    -p|--port <port>     - sets the port to bind to"
+  print "    --heartbeat <yes|no> - sets whether or not to execute heartbeats"
+  print
+  if message:
+    print message
+
 if __name__ == '__main__':
   import testserver, signal
 
@@ -283,21 +292,25 @@ if __name__ == '__main__':
       if mem[1]:
         options["host"] = mem[1]
       else:
-        print_syntax("Host was not specified.")
+        print_syntax("error: Host was not specified.")
         sys.exit(1)
+
+    elif mem[0] == "--help":
+      print_syntax()
+      sys.exit(1)
 
     elif mem[0] == "--port" or mem[0] == "-p":
       if mem[1] and mem[1].isdigit():
         options["port"] = mem[1]
       else:
-        print_syntax("Port needs to be a number.")
+        print_syntax("error: Port needs to be a number.")
         sys.exit(1)
 
     elif mem[0] == "--heartbeat":
       if mem[1].lower() == "yes" or mem[1].lower() == "no":
         options["heartbeat"] = mem[1].lower()
       else:
-        print_syntax("Hearbeat can be set to 'yes' or 'no'.")
+        print_syntax("error: Valid heartbeat settings are 'yes' or 'no'.")
         sys.exit(1)
 
   print "Host: %s" % options["host"]

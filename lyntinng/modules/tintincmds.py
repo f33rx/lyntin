@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.45 2002/08/31 16:36:17 jmberne Exp $
+# $Id: tintincmds.py,v 1.46 2002/09/30 18:29:25 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -464,18 +464,12 @@ def session_cmd(ses, args, input):
     return
 
   if name.isdigit():
-    exported.write_error("session: session names cannot be all numbers.")
+    exported.write_error("session: session name cannot be all numbers.")
     return
 
-  # we do this to deal with non-unique session names
-  # it's lame, but whatever
-  count = 0
-  test = name
-  while not exported.get_engine().isUniqueSessionName(test):
-    test = name + repr(count)
-    count = count + 1
+  if not exported.get_engine().isUniqueSessionName(name):
+    exported.write_error("session: session of that name already exists.")
 
-  name = test
   sock = None
   ses = None
 
@@ -504,12 +498,15 @@ def session_cmd(ses, args, input):
     # traceback.print_exc()
     exported.write_error("session: unable to connect. %s" % e)
     exported.write_error("session: had problems creating the session.")
-    try: 
-      exported.get_engine().unregisterSession(ses)
-      exported.get_engine().closeSession(name)
-      sock.shutdown()
-    except:
-      pass
+
+    try:    exported.get_engine().unregisterSession(ses)
+    except: pass
+
+    try:    exported.get_engine().closeSession(name)
+    except: pass
+
+    try:    ses.shutdown((1,))
+    except: pass
 
   hooks.connect_hook.spamhook((ses, host, port))
 
