@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.22 2003/03/15 01:22:32 willhelm Exp $
+# $Id: __init__.py,v 1.23 2003/04/19 17:34:17 willhelm Exp $
 #######################################################################
 """
 The modules package holds all of the dynamically loaded Lyntin modules.
@@ -114,6 +114,10 @@ def load_modules():
 
         try:
           _module = __import__(mem2)
+
+          if (_module.__dict__.has_key("lyntin_import")):
+            continue
+          
           if _module.__dict__.has_key("load"):
             _module.load()
 
