@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.38 2002/04/21 20:20:45 willhelm Exp $
+# $Id: session.py,v 1.39 2002/04/25 17:13:17 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -283,7 +283,7 @@ class Session:
             break
 
       else:
-        exported.write_error("Not a valid command.")
+        exported.write_error("Not a valid command: %s" % (words[0]))
         if internal==0: self._prompt()
       return
 
