@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.5 2002/07/07 17:44:42 willhelm Exp $
+# $Id: variable.py,v 1.6 2002/07/11 04:11:20 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -379,7 +379,7 @@ def evalmodechange(args):
   elif (old == lyntin.TINTIN or old == -1) and new == lyntin.LYNTIN:
     # lyntin's just starting up into LYNTIN mode or we just switched
     # into LYNTIN
-    hooks.user_filter_hook.register(vm.denestVars, 110)
+    hooks.user_filter_hook.register(vm.denestVars, 95)
 
   elif old == lyntin.LYNTIN and new == -1:
     # this module is being unloaded
