@@ -1,3 +1,4 @@
-   #log
-
-   I have no clue what this does yet.
+   syntax: #log <filename>
+   Given an argument, starts a log file at <filename> in append mode
+   (meaning it won't write over the log file).
+   Given no arguments, it stops logging for that session.

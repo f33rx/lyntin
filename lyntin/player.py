@@ -728,7 +728,7 @@ def Log(words, input, seslist):
             fullfile = data.datadir + words[1]
 
         try:
-            f = open(fullfile, 'w')
+            f = open(fullfile, 'a')
         except IOError:
             PutError('log: unable to open log file: ' + fullfile)
         else:
