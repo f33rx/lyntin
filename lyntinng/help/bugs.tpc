@@ -1,0 +1,14 @@
+Inevitably you will either run across a bug in Lyntin or the need for
+a feature to be implemented.  When this happens, we ask you to provide
+as much information as you can:
+
+  - operating system, version of Python and version of Lyntin
+    (from #diagnostics)
+  - stacktrace (if it's a bug and kicked up a stacktrace)
+  - explanation of what happened vs. what should be happening
+  - any other pertinent information
+
+Enter this in the bugs forum or send it to the mailing list.  Details for
+both are on the Lyntin web-site:
+
+   http://lyntin.sourceforge.net/
