@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.8 2002/01/25 08:18:36 willhelm Exp $
+# $Id: session.py,v 1.9 2002/02/02 22:43:47 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -92,7 +92,7 @@ class Session:
             repr(len(self.getSubstituteManager().getSubstitutes())) + "\n" +
             "   variables: " + 
             repr(len(self.getVariableManager().getVariables())) + "\n" +
-            "   ticker: " + self.getTicker().getTickerInfo() + "\n" +
+            "   ticker: " + self.getTicker().getInfo() + "\n" +
             "   logfile: " + self.getLogfileName())
     return data
 
@@ -156,33 +156,29 @@ class Session:
     """ Pulls all the session information for #write command."""
     data = ''
 
-    # save the command char (if it's not the default)
-    if lyntin.commandchar != '#':
-      data += "#char " + lyntin.commandchar + "\n"
-
     # saves speedwalking state
     if lyntin.speedwalk == 1:
-      data += "#speedwalk on\n"
+      data += lyntin.commandchar + "speedwalk on\n"
     else: 
-      data += "#speedwalk off\n"
+      data += lyntin.commandchar + "speedwalk off\n"
 
     # saves ansi state
     if lyntin.ansicolor == 1:
-      data += "#ansi on\n"
+      data += lyntin.commandchar + "ansi on\n"
     else: 
-      data += "#ansi off\n"
+      data += lyntin.commandchar + "ansi off\n"
 
     def fixinfo(item):
       if item:
         return item + "\n"
       return ""
 
-    data += fixinfo(self._aliasmanager.getAliasInfo())
-    data += fixinfo(self._actionmanager.getActionInfo())
-    data += fixinfo(self._gagmanager.getGagInfo())
-    data += fixinfo(self._hlmanager.getHighlightInfo())
-    data += fixinfo(self._submanager.getSubstituteInfo())
-    data += fixinfo(self._varmanager.getVariableInfo())
+    data += fixinfo(self._aliasmanager.getInfo())
+    data += fixinfo(self._actionmanager.getInfo())
+    data += fixinfo(self._gagmanager.getInfo())
+    data += fixinfo(self._hlmanager.getInfo())
+    data += fixinfo(self._submanager.getInfo())
+    data += fixinfo(self._varmanager.getInfo())
     return data
 
   def clear(self):

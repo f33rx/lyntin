@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.3 2002/01/20 07:21:02 willhelm Exp $
+# $Id: utils.py,v 1.4 2002/02/02 22:43:47 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -17,11 +17,21 @@ import string, re
 SEMI_REGEXP = re.compile('(?<!\\\\);')
 VAR_REGEXP = re.compile('%(\d+)')
 
-def chomp(data):
-  """ Removes \r and \n from the input string."""
-  data = data.replace("\n", "")
-  data = data.replace("\r", "")
-  return data
+def chomp(text):
+  """ Removes '\\r' and '\\n' from the input string.
+
+  arguments:
+
+    'text' -- (string) the text to chomp
+
+  returns:
+
+    (string) chomped text
+
+  """
+  text = text.replace("\n", "")
+  text = text.replace("\r", "")
+  return text
 
 
 def expand(str, list):
@@ -30,6 +40,17 @@ def expand(str, list):
   Takes a list and a string and returns a list of items
   in the original list that match the given string.  
   Handles * and anchors too.
+
+  arguments:
+
+    'str' -- (string) the string to match
+
+    'list' -- (list of strings) the list of strings to match on
+
+  returns:
+
+    (list of strings) the list of matches
+
   """
   ret = []
   wildcardcheck = string.find(str, '*')
@@ -64,9 +85,18 @@ def expand(str, list):
 def expand_speedwalk(input):
   """
   Expands speedwalk shorthand into the full-blown exciting
-  thrill of mud-input that ever could.
+  thrill of mud-input.
 
   FIXME - this might be better written
+
+  arguments:
+
+    'input' -- (string) the input string
+
+  returns:
+
+    (string) the expanded speedwalk input
+
   """
   output = ''
   c = ''

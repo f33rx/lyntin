@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.11 2002/01/25 08:18:36 willhelm Exp $
+# $Id: basic.py,v 1.12 2002/02/02 22:43:47 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin
@@ -22,7 +22,7 @@ def action_cmd(session, words, input):
   """
   # they typed '#action'--print out all the current actions
   if len(words) == 1:
-    data = session.getActionManager().getActionInfo()
+    data = session.getActionManager().getInfo()
     if data == '':
       data = "action: no actions defined."
 
@@ -31,7 +31,7 @@ def action_cmd(session, words, input):
 
   # they typed '#action dd*' and are looking for matching actions
   if len(words) == 2:
-    data = session.getActionManager().getActionInfo(words[1])
+    data = session.getActionManager().getInfo(words[1])
     if data == '':
       data = "action: no actions defined."
 
@@ -60,7 +60,7 @@ def alias_cmd(session, words, input):
   """
   # they typed '#alias'--print out all current aliases
   if len(words) == 1:
-    data = session.getAliasManager().getAliasInfo()
+    data = session.getAliasManager().getInfo()
     if data == '':
       data = "alias: no aliases defined."
 
@@ -69,7 +69,7 @@ def alias_cmd(session, words, input):
 
   # they typed '#alias dd*' and are looking for matching aliases
   if len(words) == 2:
-    data = session.getAliasManager().getAliasInfo(words[1])
+    data = session.getAliasManager().getInfo(words[1])
     if data == '':
       data = "alias: no aliases defined."
 
@@ -225,7 +225,7 @@ def gag_cmd(session, words, input):
   With arguments, it sets up a new gag.
   """
   if len(words) == 1:
-    data = session.getGagManager().getGagInfo()
+    data = session.getGagManager().getInfo()
     if data == '':
       data = "gag: no gags defined."
 
@@ -297,7 +297,7 @@ def highlight_cmd(session, words, input):
   With arguments, sets a new highlight.
   """
   if len(words) == 1:
-    data = session.getHighlightManager().getHighlightInfo()
+    data = session.getHighlightManager().getInfo()
     if data == '':
       data = "highlight: no highlights defined."
 
@@ -305,7 +305,7 @@ def highlight_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getHighlightManager().getHighlightInfo(words[1])
+    data = session.getHighlightManager().getInfo(words[1])
     if data == '':
       data = "highlight: no highlights defined."
 
@@ -553,7 +553,7 @@ def substitute_cmd(session, words, input):
   With arguments, sets a new substitution.
   """
   if len(words) == 1:
-    data = session.getSubstituteManager().getSubstituteInfo()
+    data = session.getSubstituteManager().getInfo()
     if data == '':
       data = "substitute: no substitutes defined."
 
@@ -561,7 +561,7 @@ def substitute_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getSubstituteManager().getSubstituteInfo(words[1])
+    data = session.getSubstituteManager().getInfo(words[1])
     if data == '':
       data = "substitute: no substitutes defined."
 
@@ -724,7 +724,7 @@ def variable_cmd(session, words, input):
   With arguments, sets a new variable.
   """
   if len(words) == 1:
-    data = session.getVariableManager().getVariableInfo()
+    data = session.getVariableManager().getInfo()
     if data == '':
       data = "variable: no variables defined."
 
@@ -732,7 +732,7 @@ def variable_cmd(session, words, input):
     return
 
   if len(words) == 2:
-    data = session.getVariableManager().getVariableInfo(words[1])
+    data = session.getVariableManager().getInfo(words[1])
     if data == '':
       data = "variable: no variables defined."
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.4 2002/01/25 08:18:36 willhelm Exp $
+# $Id: ticker.py,v 1.5 2002/01/25 22:04:21 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -111,13 +111,14 @@ class Ticker:
     self._ticklen = 0
     self._tickwarn = 0
 
-  def getTickerInfo(self):
+  def getInfo(self):
     """
     Pulls information about the ticker and returns a nice information
     string (if it's enabled).
     """
     if self._enabled == 1:
-      return ("ticker enabled with ticksize at " + repr(self._ticklen) + " seconds.")
+      return ("ticker enabled with ticksize at " + 
+              repr(self._ticklen) + " seconds.")
 
     else:
       return "ticker is disabled."

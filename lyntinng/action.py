@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
+# $Id: action.py,v 1.4 2002/01/25 20:18:13 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
 (triggers) and expansion of actions.
 """
 import re
-import utils, event
+import utils, event, lyntin
 
 # FIXME - should this be here?
 VARREGEXP = re.compile('%(\d+)')
@@ -200,7 +200,7 @@ class ActionManager:
       event.InputEvent(response).enqueue()
 
 
-  def getActionInfo(self, text=""):
+  def getInfo(self, text=""):
     """ Returns information about the actions in here.
 
     This is used by #action to tell all the actions involved
@@ -228,6 +228,7 @@ class ActionManager:
 
     data = ''
     for mem in list:
-      data = data + "#action {" + mem + "} {" + self._actions[mem][2] + "}\n"
+      data = (data + lyntin.commandchar + 
+              "action {" + mem + "} {" + self._actions[mem][2] + "}\n")
 
     return data[:-1]

@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: alias.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: alias.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 This module defines the AliasManager which handles aliases,
 compiling, and checking and such.
 """
-import utils
+import utils, lyntin
 
 class AliasManager:
   """ Manages aliases."""
@@ -106,7 +106,7 @@ class AliasManager:
 
     return None
 
-  def getAliasInfo(self, text=''):
+  def getInfo(self, text=''):
     """ Returns information about the aliases in here.
 
     This is used by #alias to tell all the aliases involved
@@ -124,6 +124,7 @@ class AliasManager:
 
     data = ''
     for mem in list:
-      data = data + "#alias {" + mem + "} {" + self._aliases[mem] + "}\n"
+      data = (data + lyntin.commandchar + 
+              "alias {" + mem + "} {" + self._aliases[mem] + "}\n")
 
     return data[:-1]

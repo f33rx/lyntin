@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: substitute.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: substitute.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 This module defines the SubstituteManager which handles substitutes.
 """
-import utils
+import utils, lyntin
 
 class SubstituteManager:
   """ Manages substitutes."""
@@ -59,7 +59,7 @@ class SubstituteManager:
 
     return input
 
-  def getSubstituteInfo(self, text=''):
+  def getInfo(self, text=''):
     """ Returns information about the substitutes in here.
 
     This is used by #substitute to tell all the substitutes involved
@@ -77,6 +77,7 @@ class SubstituteManager:
 
     data = ''
     for mem in list:
-      data = data + "#substitute {" + mem + "} {" + self._substitutes[mem] + "}\n"
+      data = (data + lyntin.commandchar + 
+              "substitute {" + mem + "} {" + self._substitutes[mem] + "}\n")
 
     return data[:-1]

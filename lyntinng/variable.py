@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
+# $Id: variable.py,v 1.3 2002/01/23 01:22:10 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -20,11 +20,24 @@ def _fixvariableregexp():
 
 class VariableManager:
   """ Manages variables."""
+
   def __init__(self):
     self._variables = {}
 
   def addVariable(self, var, expansion):
-    """ Adds a variable to the dict."""
+    """ Adds a variable to the dict.
+
+    arguments:
+
+      'var' -- the variable name
+
+      'expansion' -- the variable value
+
+    returns:
+
+      (int) we always return 1.  we might at some point return 
+      0 if we don't like the the value or something like that.
+    """
     self._variables[var] = expansion
     return 1
 
@@ -38,6 +51,15 @@ class VariableManager:
 
     Returns a list of tuples of variable var/expansion that
     were removed.
+
+    arguments:
+
+      'text' -- variables will be removed that match the text
+
+    returns:
+
+      list of (name, value) tuples of removed variables
+
     """
     badvariables = utils.expand(text, self._variables.keys())
 
@@ -49,7 +71,13 @@ class VariableManager:
     return ret
 
   def getVariables(self):
-    """ Returns the keys of the variables dict."""
+    """ Returns the keys of the variables dict.
+
+    returns:
+
+      list of strings of variable names
+
+    """
     list = self._variables.keys()
     list.sort()
     return list
@@ -95,16 +123,39 @@ class VariableManager:
       return text
 
   def unescapeVariables(self, text):
-    """ Changes \$ into $."""
+    """ Changes \$ into $.
+
+    Accounts for the fact that the user can change the variable
+    character.
+
+    aguments:
+
+      'text' -- (string) string to unescape variable characters
+
+    returns:
+
+      the unescaped string
+
+    """
     return text.replace("\\" + lyntin.variablechar, 
                         lyntin.variablechar)
 
-  def getVariableInfo(self, text=''):
+  def getInfo(self, text=""):
     """ Returns information about the variables in here.
 
     This is used by #variable to tell all the variables involved
     as well as #write which takes this information and dumps
     it to the file.
+
+    arguments:
+
+      'text=""' -- (string) variables matching this string will be 
+                   returned
+
+    returns:
+
+      (string) one big string with all the information in it
+
     """
     if self._variables.keys() == []:
       return ''
@@ -116,6 +167,7 @@ class VariableManager:
 
     data = ''
     for mem in list:
-      data = data + "#variable {" + mem + "} {" + self._variables[mem] + "}\n"
+      data = (data + lyntin.commandchar + 
+              "variable {" + mem + "} {" + self._variables[mem] + "}\n")
 
     return data[:-1]
