@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.27 2002/10/26 02:42:10 willhelm Exp $
+# $Id: textui.py,v 1.28 2002/10/26 04:32:40 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -137,8 +137,8 @@ class Textui(ui.BaseUI):
     # each session has a saved current color for mud data.  we grab
     # that current color--or user our default if we don't have one
     # for the session yet.
-    if self._currcolors.has_key(ses.getName()):
-      color = self._currcolors[ses.getName()]
+    if self._currcolors.has_key(ses):
+      color = self._currcolors[ses]
     else:
       # need a copy of the list and not a reference to the list itself.
       color = DEFAULT[:]
@@ -147,8 +147,8 @@ class Textui(ui.BaseUI):
     # some sessions have an unfinished color as well--in case we
     # got a part of an ansi color code in a mud message, and the other
     # part is in another message.
-    if self._unfinishedcolor.has_key(ses.getName()):
-      leftover = self._unfinishedcolor[ses.getName()]
+    if self._unfinishedcolor.has_key(ses):
+      leftover = self._unfinishedcolor[ses]
     else:
       leftover = ""
 
@@ -168,8 +168,8 @@ class Textui(ui.BaseUI):
       sys.stdout.write("".join(lines) + DEFAULT_ANSI)
       sys.stdout.flush()
 
-    self._currcolors[ses.getName()] = color
-    self._unfinishedcolor[ses.getName()] = leftover
+    self._currcolors[ses] = color
+    self._unfinishedcolor[ses] = leftover
 
 
   def prompt(self):
