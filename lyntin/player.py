@@ -86,9 +86,10 @@ def DispatchCommand(input, seslist):
     if regex.search("^quit", input) != -1:
         Quit(words, input, seslist)
 
-    # WBG - all commands below this line should be added via ses.AddCommand
+    if string.find("uncommand", words[0]) == 0:
+        UnCommand(words, input, seslist)
+        return
 
-    
     if string.find("command", words[0]) == 0:
         AddCommand(words, input, seslist)
         return
@@ -233,6 +234,63 @@ def DispatchCommand(input, seslist):
 
     return c(words, input, seslist)
 
+
+def AddCommand(words, input, seslist):
+    """AddCommand(words, input, seslist) -> None
+
+    Adds a command to the client.
+    This is a user command.
+    """
+    if len(words) > 2:
+        # FIXME - we actually have to go out and find the command
+        # mentioned.  should be in notation /path/module.function
+        # or something similar.
+        data.theapp.AddCommand(words[1], words[2])
+    else:
+        # raise error? or something because there aren't enough
+        # arguments.
+        pass
+
+# input a string and a list, return a list of all the elements
+# in the list that match the string
+def ExpandCommand(s, list):
+    str = s[:]
+    ret = []
+    wildcard = string.count(str, '*')
+    if wildcard:
+        # convert '*' to '.*'
+        str = regsub.gsub('\*', '.*', str)
+        # insert anchors
+        str = '^' + str + '$'
+    for s in list:
+        if wildcard:
+            if regex.match(str, s) != -1:
+                ret = ret + [s]
+        else:
+            if str == s:
+                ret = ret + [s]
+    return ret
+
+def UnCommand(words, input, seslist):
+    """UnCommand(words, input, seslist) -> None
+
+    Removes a command from the client.
+    This is a user command.
+    """
+    un = string.join(words[1:])
+    # remove braces if necessary
+    if un[0] == '{' and un[-1] == '}':
+        un = un[1:-1]
+
+    acs = ExpandCommand(un, data.theapp.commands)
+
+    if acs:
+        for ac in acs:
+            data.theapp.RemoveCommand(ac)
+
+        Putline('uncommand: ' + str(len(acs)) + ' commands removed')
+    else:
+        Putline('uncommand: that command is not defined')
 
 
 def LynImport(words, input, seslist):
