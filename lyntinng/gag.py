@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.5 2002/02/04 01:10:16 willhelm Exp $
+# $Id: gag.py,v 1.6 2002/02/27 02:25:21 willhelm Exp $
 #######################################################################
 """
 This module defines the GagManager which handles gags in Lyntin.
@@ -26,8 +26,9 @@ class GagManager(manager.Manager):
       'gag' -- (string) the gag pattern to add
 
     """
-    self._gags.append(gag)
-    self.compileGagRegexp()
+    if gag not in self._gags:
+      self._gags.append(gag)
+      self.compileGagRegexp()
     return 1
 
   def compileGagRegexp(self):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.11 2002/03/01 03:46:07 willhelm Exp $
+# $Id: event.py,v 1.12 2002/03/03 19:09:55 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 
@@ -220,27 +220,36 @@ class InputEvent(Event):
   A user input event is created whenever the user types something
   into their ui and it creates a user event from it.
   """
-  def __init__(self, input, internal=0):
+  def __init__(self, input, internal=0, session=None):
     """ Initialize.
 
     arguments:
 
       'input' -- (string) the data from the user
 
-      'internal' -- (int) whether (1) or not (0) this is an 
-                    internally generated user input.  if it 
-                    is internally generated, then we don't 
-                    record it in the history and such.
+      'internal=0' -- (int) whether (1) or not (0) this is an 
+                      internally generated user input.  if it 
+                      is internally generated, then we don't 
+                      record it in the history and such.
+
+      'session=None' -- (session.Session instance) which session
+                        to execute the input event in
+
     """
     self._input = input
     self._internal = internal
+    self._session = session
 
   def execute(self):
     """ Execute."""
     exported.write_user_data(self._input)
     if self._internal == 0:
       exported.get_engine().getHistoryManager().recordHistory(self._input)
-    engine.myengine.handleUserData(self._input)
+
+    if self._session == None:
+      engine.myengine.handleUserData(self._input)
+    else:
+      engine.myengine.handleUserData(self._input, session=self._session)
 
 
 class OutputEvent(Event):

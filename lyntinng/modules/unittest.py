@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: unittest.py,v 1.6 2002/02/23 21:10:32 willhelm Exp $
+# $Id: unittest.py,v 1.7 2002/03/09 00:32:22 willhelm Exp $
 #######################################################################
 import string, traceback, sys
 import utils, engine, exported
@@ -33,7 +33,8 @@ test_lookup = {
                          "#alias b*",
                          "print testing unaliasing",
                          "#unalias",
-                         "#unalias bb*"],
+                         "#unalias bb*",
+                         "#alias"],
                'gag': ["print testing bracketing",
                        "#gag this is good",
                        "#gag {this is bad",
@@ -42,8 +43,9 @@ test_lookup = {
                        "print testing printing of gags",
                        "#gag",
                        "print testing ungag",
+                       "#ungag",
                        "#ungag th*",
-                       "#ungag"],
+                       "#gag"],
                'substitute': ["print Requires being connected to a mud."
                               "print And see the word 'The'.",
                               "look",
@@ -54,7 +56,10 @@ test_lookup = {
                               "print Testing bracket handling.",
                               "#sub {The} **THE**",
                               "#sub The **THE**",
-                              "#sub {The **THE"],
+                              "#sub {The*",
+                              "#unsub",
+                              "#unsub The*",
+                              "#sub"],
                'variable': ["print This test requires a server connection.",
                             "print Use the testserver.py if you like.",
                             "#variable word hoobie",
@@ -62,14 +67,17 @@ test_lookup = {
                             "#alias {bb} {#showme $word}",
                             "bb",
                             "#variable",
-                            "#variable wo*"],
+                            "#variable wo*",
+                            "#unvariable",
+                            "#unvariable wo*",
+                            "#variable"],
                'history': ["print testing history",
                            "#showme one two three four",
                            "#history",
                            "!1 two=2"],
                'etc': ["print Testing loops....",
                        "#5 #showme LOOP",
-                       "#loop {1,3} {#showme $0 for the money!}"]
+                       "#loop {1,3} {#showme %0 for the money!}"]
               }
 
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.17 2002/03/02 18:10:39 willhelm Exp $
+# $Id: engine.py,v 1.18 2002/03/02 23:57:49 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -192,7 +192,7 @@ class Engine:
   ### input/output stuff
   ### ------------------------------------------
 
-  def handleUserData(self, input, internal=0):
+  def handleUserData(self, input, internal=0, session=None):
     """ This handles input lines from the user in a session-less context.
 
     The engine.handleUserInput deals with global stuff and then
@@ -210,8 +210,14 @@ class Engine:
       'internal=0' -- (int) 1 if we should spam the input hook 
                       0 if we shouldn't
 
+      'session=self._current_session' -- (session.Session instance)
+                                         allows you to execute this
+                                         and run all things in a
+                                         specific session
     """ 
     inputlist = utils.split_commands(input)
+    if session == None:
+      session = self._current_session
 
     for mem in inputlist:
       # chomp it, replace \; -> ;, and strip leading/trailing whitespace
@@ -229,7 +235,7 @@ class Engine:
         memhistory = self.getHistoryManager().getHistoryItem(mem)
         if memhistory != -1:
           self.handleUserData(memhistory)
-          return
+          continue
 
       # if it starts with a # it's a loop, session or command.
       if len(mem) > 0 and mem[0] == lyntin.commandchar:
@@ -242,7 +248,7 @@ class Engine:
           if mem.find(" ") != -1:
             for i in range(num):
               self.handleUserData(mem.split(" ", 1)[1], internal)
-          return
+          continue
 
         # is it a session?
         if self._sessions.has_key(ses):
@@ -253,16 +259,17 @@ class Engine:
           else:
             self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
                                                      internal)
-          return
+          continue
 
         # is it all sessions?
         if ses == "all":
           for mem in self._sessions.value():
             mem.handleUserData(mem.split(" ", 1)[1], internal)
-          return
+          continue
 
       # no command char, so we pass it on to the mud
-      self._current_session.handleUserData(mem, internal)
+      session.handleUserData(mem, internal)
+
 
   def handleMudData(self, text):
     """ Handle input coming from the mud.

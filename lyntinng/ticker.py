@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.11 2002/02/27 02:25:22 willhelm Exp $
+# $Id: ticker.py,v 1.12 2002/03/02 23:57:50 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -131,15 +131,14 @@ class Ticker:
     """
     tick = args[0]
 
-    session = engine.myengine.getSession(self._sessionname)
-    if session:
+    ticksession = engine.myengine.getSession(self._sessionname)
+    if ticksession:
 
       # if this is a tick...
       if ((tick - self._tickstart) % self._ticklen) == 0:
-        action = session.getManager("alias").getAlias("TICK!!!")
-        if action:
-          input = lyntin.commandchar + self._sessionname + " " + action
-          event.InputEvent(input).enqueue()
+        tickaction = ticksession.getManager("alias").getAlias("TICK!!!")
+        if tickaction:
+          event.InputEvent(tickaction, session=ticksession).enqueue()
         else:
           exported.write_message("TICK!!!")
 
@@ -150,9 +149,9 @@ class Ticker:
               repr(self._tickwarn) + " seconds to tick!")
 
     else:
-      # FIXME - we need to kill this ticker because it belongs to
-      # a nonexistant session
-      pass
+      # we kill this ticker because it belongs to a nonexistant 
+      # session
+      self.disableTicker()
 
   def clear(self):
     """
