@@ -1,0 +1,23 @@
+   #@ (for Python hackers) -- cont --
+   Another way to do things is use the #import command.  This imports
+   code as well, and it's a little cleaner than the #@import method.
+   If the module is already imported, #import will reload it.
+
+   In the module, import the exported module and use functions in 
+   there.  These functions call functions in the engine.  This allows
+   us to change the engine around without breaking your modules.
+
+   example:  file testme.py
+
+   from exported import *
+   import testme
+
+   amiupordown = "down"
+
+   def settriad(words, input, seslist):
+      global amiupordown
+
+      amiupordown = "up"
+      lyntin_command('#showme GOING UP')
+
+   lyntin_add_command("settriad", testme.settriad)

@@ -42,46 +42,46 @@ def handle_mud_output(output, ses):
    # the python distribution.
    iac = 0     # Interpret next char as command
    opt = ''    # Interpret next char as option
+
+   # FIXME - this doesn't buffer telnet control code issues....  ICK!
    # stuff each character in here -- a significant optimization
    charlist = [] 
    for c in output:
-      # First, we turn echo on by default
-      # why are we doing this?  ick!  (wbg)
-      # echo_on()
 
-         # see if we're negotiating an option
-         if opt:
-            if opt == WILL:
-               if c == '\001':
-                  data.theapp.ui.OffEcho()
-            elif opt == WONT:
-               if c == '\001':
-                  data.theapp.ui.OnEcho()
-            # we don't take orders
-            # FIXME
-            elif opt == DO:
-               data.currsession.WriteTo(IAC + WONT + c)
-               # data.theapp.SendPlainInput(IAC + WONT + c)
-            elif opt == DONT:
-               data.currsession.WriteTo(IAC + WONT + c)
-               # data.theapp.SendPlainInput(IAC + WONT + c)
-            opt = ''
-            iac = 0
+      # see if we're negotiating an option
+      if opt:
+         if opt == WILL:
+            if c == '\001':
+               data.theapp.ui.OffEcho()
+         elif opt == WONT:
+            if c == '\001':
+               data.theapp.ui.OnEcho()
+         # we don't take orders
+         # FIXME
+         elif opt == DO:
+            data.currsession.WriteTo(IAC + WONT + c)
+            # data.theapp.SendPlainInput(IAC + WONT + c)
+         elif opt == DONT:
+            data.currsession.WriteTo(IAC + WONT + c)
+            # data.theapp.SendPlainInput(IAC + WONT + c)
+         opt = ''
+         iac = 0
 
-         elif iac:
-            iac = 0
-            if c in (DO, DONT, WILL, WONT):
-               opt = c
-            else:
-               charlist.append(c)
-
-         elif c == IAC:
-            iac = 1
+      elif iac:
+         iac = 0
+         if c in (DO, DONT, WILL, WONT):
+            opt = c
          else:
-            if c == BEEP:
-               data.theapp.ui.Beep()
-            else:
-               charlist.append(c)
+            charlist.append(c)
+
+      elif c == IAC:
+         iac = 1
+
+      elif c == BEEP:
+         data.theapp.ui.Beep()
+
+      else:
+         charlist.append(c)
 
    cleandata = string.join(charlist, '')
    if cleandata:
