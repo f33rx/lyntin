@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: helpmanager.py,v 1.1 2002/05/09 00:10:41 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -51,11 +51,11 @@ class HelpManager:
       return
 
     if not categorylist:
-      lines = helptext.splitlines()
-      if lines[0].find("category: ") == 0:
-        categorylist = lines[0][lines[0].find(" ")+1:]
+      lines = helptext.strip().splitlines()
+      if lines[-1].find("category: ") == 0:
+        categorylist = lines[-1][lines[-1].find(" ")+1:]
         categorylist = categorylist.split(".")
-        helptext = string.join(lines[1:], "\n")
+        helptext = string.join(lines[:-1], "\n")
 
     place = self._help_tree
     for mem in categorylist:
@@ -103,9 +103,51 @@ class HelpManager:
       else:
         found = 0
         break
+    
+    if found == 0 and fqn != "": 
+      #first find all instances of keys[0] in the help tree.
+      potentialroots = []
+      start = keys[0]
 
-    if found == 0 and fqn != "":
-      error = "Cannot find '%s'.  We did find this:" % fqn
+      tosearch = [ ("root",self._help_tree) ]
+      while tosearch:
+        nextbreadcrumbs, nextnode = tosearch[0]
+        tosearch = tosearch[1:]
+        for key in nextnode.keys():
+          currentbreadcrumbs = nextbreadcrumbs + "." + key
+          if key == keys[0]:
+            potentialroots.append( (currentbreadcrumbs,nextnode[key]) )
+          if type(nextnode[key]) == type({}):
+            tosearch.append( (currentbreadcrumbs,nextnode[key]) )
+
+      foundnodes = []
+
+      #Now walk through all of the nodes named keys[0] and see if they
+      #have they have keys[1:] under them.
+      for bc,node in potentialroots:
+        for key in keys[1:]:
+          if type(node) != type({}) or not node.has_key(key):
+            bc=None
+            node=None
+          else:
+            bc = bc+"."+key
+            node = node[key]
+        if node:
+          foundnodes.append( (bc,node) )
+
+
+      # If we only found one thing then run the rest of the function
+      # as though that was what was entered.  Otherwise build the
+      # The error text to state the nodes that were found.
+      if len(foundnodes) == 1:
+        breadcrumbs,tree = foundnodes[0]
+        error = ""
+      elif len(foundnodes) == 0:
+        error = "Cannot find '%s'.  We did find this:" % fqn
+      else:
+        error = "Could not find exact match for '%s'.  We did find these matches:" % fqn
+        list = map(lambda x:x[0],foundnodes)
+        return (error, "", utils.columnize(textlist=list,indent=3))
     else:
       error = ""
 

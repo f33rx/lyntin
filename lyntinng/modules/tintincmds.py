@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.7 2002/05/08 02:07:04 jmberne Exp $
+# $Id: tintincmds.py,v 1.8 2002/05/09 00:10:41 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -241,11 +241,6 @@ With an argument, shows that specific help file.
     data += error + "\n\n"
   if breadcrumbs:
     data += "category: " + breadcrumbs + "\n\n"
-
-  if keys:
-    ap = exported.get_engine().getArgParser(keys[-1])
-    if ap:
-      data += "syntax: %s%s %s\n\n" % (lyntin.commandchar, keys[-1], ap.syntaxline)
 
   data += text
   exported.write_message(data)

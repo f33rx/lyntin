@@ -1,4 +1,3 @@
-category: general
 Commands in Lyntin are all located in the various modules
 in the modules directory.  
 
@@ -17,3 +16,5 @@ ex:
    #5 say hello
    #all say hello
    #all #alias {sh} {say hello}
+
+category: general

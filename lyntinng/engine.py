@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.41 2002/05/05 18:45:32 willhelm Exp $
+# $Id: engine.py,v 1.42 2002/05/09 00:10:41 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -623,7 +623,7 @@ class Engine:
     if not callable(func):
       raise ValueError, "%s is uncallable." % name
 
-    syntaxline = ""
+    syntaxline = None
 
     # first, try to figure out the arguments thing
     if arguments != None:
@@ -641,6 +641,9 @@ class Engine:
       helptext = func.__doc__
     else:
       helptext = "\nThis command has no help."
+
+    if syntaxline != None:
+      helptext = "syntax: %s%s %s\n" % (lyntin.commandchar, name, syntaxline) + helptext
 
     if name[0] == "^":
       exported.add_help(name[1:], helptext)

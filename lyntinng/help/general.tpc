@@ -1,4 +1,3 @@
-category: general
 Lyntin is not the most user-friendly mud client in the world in the
 sense that everything is oriented towards the command line interface.
 
@@ -11,3 +10,5 @@ interest to you.
    action               alias
    end                  gag
    highlight            session
+
+category: general
