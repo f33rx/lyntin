@@ -5,7 +5,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-$Id: HACKING,v 1.19 2002/10/16 23:59:06 willhelm Exp $
+$Id: HACKING,v 1.20 2002/10/20 16:09:57 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -393,7 +393,7 @@ COMMAND LINE HACKING
 ====================
 
 Lyntin allows you to execute arbitrary Python at the command line.
-If you have a "user" Lyntin module, then the code will be executed 
+If you have a "lyntinuser" Lyntin module, then the code will be executed 
 in there.  Otherwise the code is executed in the "advanced" Lyntin 
 module.
 
@@ -407,17 +407,20 @@ raw Python was executed in the "user" module.  It was encouraged that
 you add your own functions to the "user" module and then these would
 be available to you at the Lyntin command line.
 
-In 3.0, "user" is a Lyntin module in the modules directory.  It does 
-not come with Lyntin--it's something you can create if you want to 
+In 3.0, "lyntinuser" is a Lyntin module in the modules directory.  It 
+does not come with Lyntin--it's something you can create if you want to 
 build your own environment to execute Python commands in.
 
-If you don't have a "user" module, raw Python code gets executed in 
+If you don't have a "lyntinuser" module, raw Python code gets executed in 
 the "advanced" module where the #@ functionality exists.
 
-A basic "user" module could be as follows::
+A basic "lyntinuser" module could be as follows::
 
    """
-   This is my user.py module.  I can do whatever I want in here.
+   This is my lyntinuser.py module.  I can do whatever I want in here.
+   I can store this module in my Lyntin moduledir (set at the command line
+   using --moduledir <dir>) or in Lyntin's modules subdirectory along
+   with alias.py, action.py and the rest of the gang.
    """
    import exported
    myvar = "hello"
@@ -427,9 +430,19 @@ A basic "user" module could be as follows::
    
    def load():
      """
-     This is required for this module to dynamically load.
-     You can put startup bindings in this function.  Look
-     at the other Lyntin modules for examples.
+     You can put code here for initializing your module when it's 
+     loaded here.  Typically this is registering with Lyntin hooks
+     and adding Lyntin commands.  Look at the other Lyntin modules 
+     for examples.
+     """
+     pass
+
+   def unload():
+     """
+     Put code here for uninitializing your module when it's unloaded.
+     Typically this is the reverse of the load module: unregistering
+     functions with Lyntin hooks, remove Lyntin commands, removing
+     Lyntin help topics...  Look at other Lyntin modules for examples.
      """
      pass
 
@@ -448,9 +461,9 @@ THE END
 
 That about covers it.  Read through the API and the source code.  If you 
 have questions, subscribe to the lyntin-devl mailing list and ask us.  
-The list is low volume high signal.
 
    http://sourceforge.net/mail/?group_id=6730
+
 
 Happy hacking!
 
