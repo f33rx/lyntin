@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.25 2002/12/22 23:07:21 willhelm Exp $
+# $Id: tkui.py,v 1.26 2002/12/24 03:25:11 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -86,6 +86,7 @@ bg_color_codes = {"40": "#000000",
 
 # this is the default color--it's what we use when the mud hasn't
 # specified a color yet.  this might get a little fishy.
+# when using DEFAULT make sure you clone it first.
 DEFAULT = [0, 37, -1]
 
 myui = None
@@ -166,6 +167,8 @@ class Tkui(ui.BaseUI):
     exported.hook_register("startup_hook", self.startui)
     exported.hook_register("to_user_hook", self.write)
 
+    # holds a map of window names -> window references
+    self._windows = {}
 
   def startui(self, args):
     """ Starts up the main thread."""
@@ -174,7 +177,6 @@ class Tkui(ui.BaseUI):
     engine.myengine.startthread("ui", self._tk.mainloop)
     exported.write_message("For tk help type \"#help tkui\".")
     exported.add_command("colorcheck", colorcheck_cmd)
-
 
   def settitle(self, title = ''):
     """
@@ -188,6 +190,24 @@ class Tkui(ui.BaseUI):
     else:
       self._tk.title(lyntin.LYNTINTITLE)
 
+  def removeWindow(self, windowname):
+    if self._windows.has_key(windowname):
+      del self._windows[windowname]
+
+  def writeWindow(self, windowname, message):
+    """
+    This writes to the window named "windowname".  If the window
+    does not exist, we spin one off.
+
+    @param windowname: the name of the window to write to
+    @type  windowname: string
+
+    @param message: the message to write to the window
+    @type  message: string or Message instance
+    """
+    if not self._windows.has_key(windowname):
+      self._windows[windowname] = NamedWindow(windowname, self, self._tk)
+    self._windows[windowname].write(message)
 
   def _ignoreThis(self, tkevent):
     """ This catches keypresses from the history buffer."""
@@ -210,7 +230,6 @@ class Tkui(ui.BaseUI):
       self._tk.tk.call(args)
 
     return "break"
-
 
   def pageUp(self):
     """ Handles prior (Page-Up) events."""
@@ -247,13 +266,11 @@ class Tkui(ui.BaseUI):
       # yscroll up stuff
       self._txtbuffer.yview('scroll', '-15', 'units')
 
-
   def pageDown(self):
     """ Handles next (Page-Down) events."""
     if self._viewhistory == 1:
       # yscroll down stuff
       self._txtbuffer.yview('scroll', '15', 'units')
-
 
   def escape(self, tkevent):
     """ Handles escape (Escape) events."""
@@ -262,7 +279,6 @@ class Tkui(ui.BaseUI):
       self._viewhistory = 0
     else:
       self._entry.clearInput()
-
 
   def echo(self, args):
     """ This turns echo on and off on the CommandEntry widget."""
@@ -276,9 +292,8 @@ class Tkui(ui.BaseUI):
       self._do_i_echo = 0
       self._entry.configure(show='*')
 
-
   def _yadjust(self):
-    """ Handles y scrolling after text insertion."""
+    """Handles y scrolling after text insertion."""
     self._txt.yview('moveto', '1')
     # if os.name != 'posix':
     self._txt.yview('scroll', '20', 'units')
@@ -295,7 +310,8 @@ class Tkui(ui.BaseUI):
       self._txt.delete ("1.0", "100.end")
 
   def write(self, args):
-    """ This writes text to the text buffer for viewing by the user.
+    """
+    This writes text to the text buffer for viewing by the user.
 
     This is overridden from the 'ui.BaseUI'.
     """
@@ -405,13 +421,11 @@ class Tkui(ui.BaseUI):
     This method allows me to specify either an rgb or a color name
     and it converts the color names to rgb.
 
-    arguments:
+    @param name: either an rgb value or a name
+    @type  name: string
 
-      'name' -- (string) either an rgb (ex. #000000) or a name (ex. black)
-
-    returns:
-
-      (string) the rgb color value (ex. #000000)
+    @returns: the rgb color value
+    @rtype: string
     """
     if name[0] == "#":
       return name
@@ -564,7 +578,6 @@ class CommandEntry(Tkinter.Entry):
     # print repr(tkevent)
     # print repr(tkevent.__dict__)
 
-
   def callKP9(self, tkevent):
     if tkevent.keycode == 105 or os.name=='posix':
       if self._executeBinding("VK_NUMPAD9") == 1:
@@ -610,14 +623,12 @@ class CommandEntry(Tkinter.Entry):
       if self._executeBinding("VK_NUMPAD1") == 1:
         return "break"
 
-
   def startAutotyper(self, tkevent):
     """
     This will start the autotyper. It will be called if you type <Ctrl>+<t>.
     There can be only one autotyper at a time. The autotyper cannot be started
     for the common session.
     """
-    
     if self._autotyper != None:
       exported.write_error("cannot start autotyper: already started.")
       return
@@ -638,13 +649,10 @@ class CommandEntry(Tkinter.Entry):
     This is a callback for the autotyper. It will be called when the autotyper
     is finished.
     
-    arguments:
-    
-      'data' -- (string or None) the autotyper data. None if the user clicked
-                on the "Cancel" button or closed the autotyper window.
-    
+    @param data: the autotyper data--None if the user clicked on "Cancel"
+        or closed the autotyper window
+    @type  data: string or None
     """
-    
     if data != None:
       self._autotyper_ses.writeSocket(data)
     
@@ -716,20 +724,234 @@ class CommandEntry(Tkinter.Entry):
       self.delete(0, 'end')
       self.insert(0, hist[self.hist_index])
 
+class NamedWindow:
+  """
+  This creates a window for the Tkui which you can then write to 
+  programmatically.  This allows modules to spin off new named windows
+  and write to them.
+  """
+  def __init__(self, windowname, master, partk):
+    """
+    Initializes the window
+
+    @param windowname: the name of the new window
+    @type  windowname: string
+
+    @param master: the main tk window
+    @type  master: Tkinter.Tk
+    """
+    self._parent = master
+    self._tk = Tkinter.Toplevel(partk)
+    self._windowname = windowname
+    
+    # map of session -> (bold, foreground, background)
+    self._currcolors = {}
+
+    # ses -> string
+    self._unfinishedcolor = {}
+
+    self._do_i_echo = 1
+
+    self._tk.geometry("500x300")
+    self._tk.title("Lyntin -- " + self._windowname)
+    
+    self._tk.protocol("WM_DELETE_WINDOW", self.close)
+    
+    if os.name == "posix":
+      fontname = "Courier"
+    else:
+      fontname = "Fixedsys"
+    fnt = tkFont.Font(family=fontname, size=12)
+    
+    self._txt = ScrolledText.ScrolledText(self._tk, fg="white", bg="black", font=fnt, height=20)
+    self._txt.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+    
+    # handles improper keypresses
+    self._txt.bind("<KeyPress>", self._ignoreThis)
+
+    # initialize color tags
+    self._initColorTags()
+
+  def convertColor(self, name):
+    """
+    Tk has this really weird color palatte.  So I switched to using
+    color names in most cases and rgb values in cases where I couldn't
+    find a good color name.
+
+    This method allows me to specify either an rgb or a color name
+    and it converts the color names to rgb.
+
+    @param name: either an rgb value or a name
+    @type  name: string
+
+    @returns: the rgb color value
+    @rtype: string
+    """
+    if name[0] == "#":
+      return name
+
+    rgb = self._tk._getints(self._tk.tk.call('winfo', 'rgb', self._txt, name))
+    rgb = "#%02x%02x%02x" % (rgb[0]/256, rgb[1]/256, rgb[2]/256) 
+    print name, "converted to: ", rgb
+
+    return rgb
+
+  def _initColorTags(self):
+    """ Sets up Tk tags for the text widget (fg/bg)."""
+    for ck in fg_color_codes.keys():
+      color = self.convertColor(fg_color_codes[ck])
+      self._txt.tag_config(ck, foreground=color)
+
+    for ck in bg_color_codes.keys():
+      self._txt.tag_config(ck, background=bg_color_codes[ck])
+
+  def _ignoreThis(self, tkevent):
+    """
+    This catches keypresses to this window.
+    """
+    return "break"
+
+  def close(self):
+    """
+    Closes and destroys references to this window.
+    """
+    self._parent.removeWindow(self._windowname)
+    self._tk.destroy()
+
+  def _yadjust(self):
+    """Handles y scrolling after text insertion."""
+    self._txt.yview('moveto', '1')
+    # if os.name != 'posix':
+    self._txt.yview('scroll', '20', 'units')
+
+  def _clipText(self):
+    """
+    Scrolls the text buffer up so that the new text written at
+    the bottom of the text buffer can be seen.
+    """
+    temp = self._txt.index("end")
+    ind = temp.find(".")
+    temp = temp[:ind]
+    if (temp.isdigit() and int(temp) > 800):
+      self._txt.delete ("1.0", "100.end")
+
+  def write(self, message):
+    """
+    This writes text to the text buffer for viewing by the user.
+
+    This is overridden from the 'ui.BaseUI'.
+    """
+    if type(message) == types.TupleType:
+      message = message[0]
+
+    if type(message) == types.StringType:
+      message = ui.Message(message, ui.LTDATA)
+
+    line = message.data
+    ses = message.session
+
+    if line == '':
+      return
+
+    if message.type == ui.ERROR:
+      if line[-1] == "\n":
+        self._txt.insert('end', line[:-1], "44")
+        self._txt.insert('end', "\n")
+      else:
+        self._txt.insert('end', line, "44")
+
+    elif message.type == ui.USERDATA:
+      if lyntin.mudecho == 1:
+        if line[-1] == "\n":
+          self._txt.insert('end', line[:-1], "44")
+          self._txt.insert('end', "\n")
+        else:
+          self._txt.insert('end', line, "44")
+
+    elif message.type == ui.LTDATA:
+      if line[-1] == "\n":
+        line = "# " + line[:-1].replace("\n", "\n# ") + "\n"
+      else:
+        line = "# " + line.replace("\n", "\n# ")
+
+      self._txt.insert('end', line)
+
+    elif message.type == ui.MUDDATA:
+      index = 0
+      start = 0
+
+      # we prepend the session name to the text if this is not the 
+      # current session sending text.
+      if (ses != None and ses != exported.get_current_session()):
+        pretext = "[%s]" % ses.getName()
+
+        if line[-1] == "\n":
+          line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
+        else:
+          line = pretext + line.replace("\n", "\n" + pretext)
+
+      # we remove all \\r stuff because it's icky.
+      line = line.replace("\r", "")
+
+      tokens = ansi.split_ansi_from_text(line)
+
+      # each session has a saved current color for mud data.  we grab
+      # that current color--or user our default if we don't have one
+      # for the session yet.
+      if self._currcolors.has_key(ses):
+        color = self._currcolors[ses]
+      else:
+        color = copy.copy(DEFAULT)
+
+      # some sessions have an unfinished color as well--in case we
+      # got a part of an ansi color code in a mud message, and the other
+      # part is in another message.
+      if self._unfinishedcolor.has_key(ses):
+        leftover = self._unfinishedcolor[ses]
+      else:
+        leftover = ""
+
+      for mem in tokens:
+        if ansi.is_color_token(mem):
+          color, leftover = ansi.figure_color([mem], color, leftover)
+
+        else:
+          if color[1] == -1:
+            fg = "37"
+          else:
+            fg = str(color[1])
+
+          if color[0] == 1:
+            fg = "b" + fg
+
+          if color[2] == -1:
+            self._txt.insert('end', mem, fg)
+
+          else:
+            bg = str(color[2])
+            self._txt.insert('end', mem, (fg, bg))
+
+      self._unfinishedcolor[ses] = leftover
+      self._currcolors[ses] = color
+
+    self._clipText()
+    self._yadjust()
+
+ 
 class Autotyper:
   """
   Autotyper class, it generates the autotyper window, waits for entering text
   and then calls a function to work with the text.
   """
-  
   def __init__(self, master, sendfunc):
     """
     Initializes the autotyper.
     
-    arguments:
-    
-      'master' -- (Tkinter.Tk instance) the main tk window
-      'sendfunc' -- (function) the callback function
+    @param master: the main tk window
+    @type  master: Tkinter.Tk
+
+    @param sendfunc: the callback function
+    @type  sendfunc: function
     """
     self._sendfunc = sendfunc
     
