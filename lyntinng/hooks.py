@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.29 2002/11/18 02:43:53 willhelm Exp $
+# $Id: hooks.py,v 1.30 2002/11/21 02:04:19 willhelm Exp $
 ##################################################################
 """
 The engine is augmented by a series of X{hooks} which allow modules to
@@ -317,6 +317,12 @@ shutdown_hook = get_hook_manager().getHook("shutdown_hook")
 # arg tuple: (int)
 #  - new echo state: 1 if on, 0 if off
 mudecho_hook = get_hook_manager().getHook("mudecho_hook")
+
+# When the mud sends a ^G character, we kick off a BellEvent
+# which spams the bell_hook.
+#
+# no arg tuple
+bell_hook = get_hook_manager().getHook("bell_hook")
 
 # Whenever we switch evalmodes, we call everything on this hook.
 # 

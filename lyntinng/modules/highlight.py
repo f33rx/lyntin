@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.16 2002/12/27 02:10:47 willhelm Exp $
+# $Id: highlight.py,v 1.17 2002/12/27 02:27:43 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
@@ -21,6 +21,7 @@ import ansi, manager, utils, lyntin, hooks, exported, modutils
 
 STYLEMAP = {
              "bold": "1",
+             "underline": "4",
              "blink": "5",
              "reverse": "7",
              "black": "30",
@@ -52,7 +53,7 @@ STYLEMAP = {
 class HighlightData:
   def __init__(self):
     self._highlights = {}
-    self._currcolor = [-1,-1,-1]
+    self._currcolor = list(ansi.DEFAULT_COLOR)
     self._colorleftover = ''
 
   def __copy__(self):
@@ -373,21 +374,21 @@ def highlight_cmd(ses, args, input):
   to you with the given style.
 
   Styles available are:
-     styles    foreground colors        background colors
-     bold      black    grey            b black
-     blink     red      light red       b red
-     reverse   green    light green     b green
-               yellow   light yellow    b yellow
-               blue     light blue      b blue
-               magenta  light magenta   b magenta
-               cyan     light cyan      b cyan
-               white    light white     b white
+     styles     foreground colors        background colors
+     bold       black    grey            b black
+     blink      red      light red       b red
+     reverse    green    light green     b green
+     underline  yellow   light yellow    b yellow
+                blue     light blue      b blue
+                magenta  light magenta   b magenta
+                cyan     light cyan      b cyan
+                white    light white     b white
 
   Highlights handle * at the beginning and end of non-regular expression
   texts.  Highlights will handle regular expression texts as well.  See
   "#help regexp" for more details.
 
-  Note: blink and reverse may not be available in all ui's.
+  Note: blink, underline, and reverse may not be available in all ui's.
 
   examples:
     #highlight {green} {Sven arrives.}
@@ -422,9 +423,11 @@ def highlight_cmd(ses, args, input):
     return
     
   style = style.lower()
-  if style not in STYLEMAP:
-    exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (style, lyntin.commandchar))
-    return
+  stylelist = style.split(",")
+  for mem in stylelist:
+    if mem not in STYLEMAP:
+      exported.write_error("highlight: '%s' not a valid style.\n%shelp highlight for more information." % (mem, lyntin.commandchar))
+      return
     
   exported.get_manager("highlight").addHighlight(ses, style, text)
   if not quiet:

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.38 2002/12/18 04:47:59 willhelm Exp $
+# $Id: textui.py,v 1.39 2002/12/24 03:25:10 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
@@ -37,7 +37,7 @@ except ImportError:
 
 myui = None
 
-DEFAULT = [-1, -1, -1]
+DEFAULT_COLOR = list(ansi.DEFAULT_COLOR)
 DEFAULT_ANSI = chr(27) + "[0m"
 
 def get_ui_instance():
@@ -259,7 +259,7 @@ class Textui(ui.BaseUI):
       color = self._currcolors[ses]
     else:
       # need a copy of the list and not a reference to the list itself.
-      color = DEFAULT[:]
+      color = list(DEFAULT_COLOR)
 
 
     # some sessions have an unfinished color as well--in case we

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ansi.py,v 1.8 2002/11/09 01:06:17 willhelm Exp $
+# $Id: ansi.py,v 1.9 2002/12/24 00:48:19 willhelm Exp $
 #######################################################################
 """
 This holds a series of classes and functions for helping to manipulate
@@ -21,13 +21,21 @@ import re
 # for finding ANSI color sequences
 ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[m]')
 
-# these are bits for bitmasks
-NORMAL = 0
-BOLD = 1
-UNDERLINE = 2
-BLINK = 4
-REVERSE = 8
-NONDISPLAYED = 16
+STYLE_NORMAL = 0
+STYLE_BOLD = 1
+STYLE_UNDERLINE = 4
+STYLE_BLINK = 5
+STYLE_REVERSE = 7
+
+# enums for placement in the color list
+PLACE_BOLD = 0
+PLACE_UNDERLINE = 1
+PLACE_BLINK = 2
+PLACE_REVERSE = 3
+PLACE_FG = 4
+PLACE_BG = 5
+
+DEFAULT_COLOR = [0, 0, 0, 0, -1, -1]
 
 
 def filter_ansi(text):
@@ -146,6 +154,8 @@ def figure_color(textlist, currentcolor, leftover=""):
   @return: the new currentcolor and leftover as a tuple
   @rtype: ((int, int, int), string)
   """
+  global ANSI_COLOR_REGEXP, DEFAULT_COLOR
+
   if type(textlist) == type(''):
     textlist = split_ansi_from_text(textlist)
 
@@ -162,9 +172,9 @@ def figure_color(textlist, currentcolor, leftover=""):
     if is_color_token(color):
       color = color[2:-1]
 
-      # handles the case where it's ESC[m
+      # handles the case where it's ESC[m which is short-hand for ESC[0m
       if color == "":
-        currentcolor = [-1, -1, -1]
+        currentcolor = list(DEFAULT_COLOR)
 
       # handles other cases!
       else:
@@ -177,27 +187,45 @@ def figure_color(textlist, currentcolor, leftover=""):
 
           if i == 0:
             # 0 is a reset
-            currentcolor = [-1, -1, -1]
+            currentcolor = list(DEFAULT_COLOR)
       
-          elif 0 < i and i < 10:
-            # these are ansi color attributes
-            currentcolor[0] = i
+          elif i == 1:
+            currentcolor[PLACE_BOLD] = 1
+
+          elif i == 4:
+            currentcolor[PLACE_UNDERLINE] = 1
+
+          elif i == 5:
+            currentcolor[PLACE_BLINK] = 1
+
+          elif i == 7:
+            currentcolor[PLACE_REVERSE] = 1
+
 
           elif i == 22:
-            # shuts off bold
-            currentcolor[0] = 0
+            currentcolor[PLACE_BOLD] = 0
+
+          elif i == 24:
+            currentcolor[PLACE_UNDERLINE] = 0
+
+          elif i == 25:
+            currentcolor[PLACE_BLINK] = 0
+
+          elif i == 27:
+            currentcolor[PLACE_REVERSE] = 0
+
 
           elif i == 39:
             # sets default foreground
-            currentcolor[1] = -1
+            currentcolor[PLACE_FG] = -1
 
           elif 30 <= i and i < 40:
             # these are foreground attributes
-            currentcolor[1] = i
+            currentcolor[PLACE_FG] = i
 
           elif 40 <= i and i < 50:
             # these are background attributes
-            currentcolor[2] = i
+            currentcolor[PLACE_BG] = i
 
   # we're looking for leftover pieces here
   if len(textlist) > 0:
@@ -223,26 +251,31 @@ def convert_tuple_to_ansi(token):
   Takes in a color tuple like what figure_color creates
   and converts it into an ANSI color sequence.
 
-  @param token: the color tuple (option, fg, bg)
-  @type  token: (int, int, int)
+  @param token: the color tuple
+  @type  token: tuple of ints
 
   @return: the ANSI color string
   @rtype: string
   """
-  options = token[0]
-  fg = token[1]
-  bg = token[2]
-
   color = []
 
-  if options == 1:
+  if token[PLACE_BOLD] == 1:
     color.append("1")
 
-  if fg != -1:
-    color.append(str(fg))
+  if token[PLACE_UNDERLINE] == 1:
+    color.append("4")
 
-  if bg != -1:
-    color.append(str(bg))
+  if token[PLACE_BLINK] == 1:
+    color.append("5")
+
+  if token[PLACE_REVERSE] == 1:
+    color.append("7")
+
+  if token[PLACE_FG] != -1:
+    color.append(str(token[PLACE_FG]))
+
+  if token[PLACE_BG] != -1:
+    color.append(str(token[PLACE_BG]))
 
   if len(color) == 0:
     return chr(27) + "[0m"

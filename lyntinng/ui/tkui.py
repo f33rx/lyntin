@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.26 2002/12/24 03:25:11 willhelm Exp $
+# $Id: tkui.py,v 1.27 2002/12/29 19:00:22 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
 Lyntin, but largely re-coded in various areas.
 """
 
-import os, Tkinter, tkFont, ScrolledText, copy, types
+import os, Tkinter, tkFont, ScrolledText, types
 import ansi, ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
@@ -34,17 +34,6 @@ symbol.  For example:
 
    #alias {VK_NUMPAD2} {south}
 """
-
-"""
-0 -- all off
-1 -- bold
-5 -- blinking (which we don't support)
-7 -- reverse  (which we don't support)
-8 -- hidden   (which we don't support)
-"""
-txt_attribs = {"0": "off",
-               "1": "bold"}
-
 
 # the complete list of foreground color codes and what color they
 # map to in RGB.
@@ -87,7 +76,8 @@ bg_color_codes = {"40": "#000000",
 # this is the default color--it's what we use when the mud hasn't
 # specified a color yet.  this might get a little fishy.
 # when using DEFAULT make sure you clone it first.
-DEFAULT = [0, 37, -1]
+DEFAULT_COLOR = list(ansi.DEFAULT_COLOR)
+DEFAULT_COLOR[ansi.PLACE_FG] = 37
 
 myui = None
 
@@ -221,6 +211,8 @@ class Tkui(ui.BaseUI):
       # we do this little song and dance so as to pass events
       # we don't want to deal with to the entry widget essentially
       # by creating a new event and tossing it in the event list.
+      # it only sort of works--but it's the best code we've got
+      # so far.
       args = ('event', 'generate', self._entry, "<KeyPress>")
       args = args + ('-rootx', tkevent.x_root)
       args = args + ('-rooty', tkevent.y_root)
@@ -374,7 +366,7 @@ class Tkui(ui.BaseUI):
       if self._currcolors.has_key(ses):
         color = self._currcolors[ses]
       else:
-        color = copy.copy(DEFAULT)
+        color = list(DEFAULT_COLOR)
 
       # some sessions have an unfinished color as well--in case we
       # got a part of an ansi color code in a mud message, and the other
@@ -389,22 +381,45 @@ class Tkui(ui.BaseUI):
           color, leftover = ansi.figure_color([mem], color, leftover)
 
         else:
+          format = []
+          fg = ""
+          bg = ""
 
-          if color[1] == -1:
-            fg = "37"
+          # handle reverse
+          if color[ansi.PLACE_REVERSE] == 0:
+            if color[ansi.PLACE_FG] == -1:
+              fg = "37"
+            else:
+              fg = str(color[ansi.PLACE_FG])
+
+            if color[ansi.PLACE_BG] != -1:
+              bg = str(color[ansi.PLACE_BG])
+
           else:
-            fg = str(color[1])
+            if color[ansi.PLACE_BG] == -1:
+              fg = "30"
+            else:
+              fg = str(color[ansi.PLACE_BG] - 10)
 
-          if color[0] == 1:
+            if color[ansi.PLACE_FG] == -1:
+              bg = "37"
+            else:
+              bg = str(color[ansi.PLACE_FG] + 10)
+
+          # handle bold
+          if color[ansi.PLACE_BOLD] == 1:
             fg = "b" + fg
 
-          if color[2] == -1:
-            self._txt.insert('end', mem, fg)
+          # handle underline
+          if color[ansi.PLACE_UNDERLINE] == 1:
+            format.append("u")
 
-          else:
-            bg = str(color[2])
-            self._txt.insert('end', mem, (fg, bg))
+          format.append(fg)
+          if bg:
+            format.append(bg)
 
+          # insert the text using the formatting tuple we just generated
+          self._txt.insert('end', mem, tuple(format))
 
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color
@@ -446,6 +461,9 @@ class Tkui(ui.BaseUI):
     for ck in bg_color_codes.keys():
       self._txt.tag_config(ck, background=bg_color_codes[ck])
       self._txtbuffer.tag_config(ck, background=bg_color_codes[ck])
+
+    self._txt.tag_config("u", underline=1)
+    self._txtbuffer.tag_config("u", underline=1)
 
   def colorCheck(self):
 
@@ -805,6 +823,8 @@ class NamedWindow:
     for ck in bg_color_codes.keys():
       self._txt.tag_config(ck, background=bg_color_codes[ck])
 
+    self._txt.tag_config("u", underline=1)
+
   def _ignoreThis(self, tkevent):
     """
     This catches keypresses to this window.
@@ -901,7 +921,7 @@ class NamedWindow:
       if self._currcolors.has_key(ses):
         color = self._currcolors[ses]
       else:
-        color = copy.copy(DEFAULT)
+        color = list(DEFAULT_COLOR)
 
       # some sessions have an unfinished color as well--in case we
       # got a part of an ansi color code in a mud message, and the other
@@ -916,20 +936,45 @@ class NamedWindow:
           color, leftover = ansi.figure_color([mem], color, leftover)
 
         else:
-          if color[1] == -1:
-            fg = "37"
-          else:
-            fg = str(color[1])
+          format = []
+          fg = ""
+          bg = ""
 
-          if color[0] == 1:
+          # handle reverse
+          if color[ansi.PLACE_REVERSE] == 0:
+            if color[ansi.PLACE_FG] == -1:
+              fg = "37"
+            else:
+              fg = str(color[ansi.PLACE_FG])
+
+            if color[ansi.PLACE_BG] != -1:
+              bg = str(color[ansi.PLACE_BG])
+
+          else:
+            if color[ansi.PLACE_BG] == -1:
+              fg = "30"
+            else:
+              fg = str(color[ansi.PLACE_BG] - 10)
+
+            if color[ansi.PLACE_FG] == -1:
+              bg = "37"
+            else:
+              bg = str(color[ansi.PLACE_FG] + 10)
+
+          # handle bold
+          if color[ansi.PLACE_BOLD] == 1:
             fg = "b" + fg
 
-          if color[2] == -1:
-            self._txt.insert('end', mem, fg)
+          # handle underline
+          if color[ansi.PLACE_UNDERLINE] == 1:
+            format.append("u")
 
-          else:
-            bg = str(color[2])
-            self._txt.insert('end', mem, (fg, bg))
+          format.append(fg)
+          if bg:
+            format.append(bg)
+
+          # insert the text using the formatting tuple we just generated
+          self._txt.insert('end', mem, tuple(format))
 
       self._unfinishedcolor[ses] = leftover
       self._currcolors[ses] = color

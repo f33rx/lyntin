@@ -4,14 +4,14 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.28 2002/12/22 23:07:20 willhelm Exp $
+# $Id: net.py,v 1.29 2002/12/24 00:48:19 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
 connections with a mud and polling the connection for data.
 """
-import socket, string, select
-import event, ui.ui, lyntin, os
+import socket, select
+import event, ui.ui, lyntin, os, exported
 
 ### --------------------------------------------
 ### CONSTANTS
@@ -65,6 +65,8 @@ NAWS     = chr(31)
 ENV      = chr(39)
 
 
+# the BELL character
+BELL = chr(7)
 
 class SocketCommunicator:
   """
@@ -81,6 +83,8 @@ class SocketCommunicator:
     self._shutdownflag = 0
     self._session = None
 
+    self._debug = 0
+
     # handle termtype issues
     if lyntin.options.has_key("term"):
       self._termtype = lyntin.options["term"][0]
@@ -89,8 +93,15 @@ class SocketCommunicator:
     else:
       self._termtype = "lyntin"
 
+    # we keep track of all the telnet stuff we're doing here
+    # so we can look at it and dump it or whatever
+    self._controllog = []
+
   def __repr__(self):
     return "connection %s %d" % (self._host, self._port)
+
+  def logControl(self, str):
+    self._controllog.append(str)
 
   def setSessionName(self, name):
     """
@@ -191,10 +202,10 @@ class SocketCommunicator:
       if self._session:
         self._session.shutdown(())
 
-    except Exception, e:
+    except:
+      exported.write_traceback("socket exception")
       if self._session:
         self._session.shutdown(())
-      print e
 
     # if we hit this point, we want to shut down the socket
     try:    self._sock.shutdown(2)
@@ -216,7 +227,7 @@ class SocketCommunicator:
     @type  data: string
 
     @param convert: whether (1) or not (0) we should convert eol stuff to 
-        CRLF
+        CRLF and IAC to IAC IAC.
     @type  convert: boolean
 
     @raises Exception: if we have problems sending the data over the
@@ -248,8 +259,14 @@ class SocketCommunicator:
     @param data: the incoming data from the mud
     @type  data: string
     """
-    event.MudEvent(self._session, data).enqueue()
+    global BELL
 
+    count = data.count(BELL)
+    for i in range(count):
+      event.BellEvent(self._session).enqueue()
+    data = data.replace(BELL, "")
+
+    event.MudEvent(self._session, data).enqueue()
 
   def handleNego(self, data):
     """
@@ -271,20 +288,26 @@ class SocketCommunicator:
         break
 
       if data[i+1] == GA:
+        # FIXME - right now we're taking out the GA because I don't
+        # know what we should do with it yet
         data = data[:i] + data[i+2:]
+        self.logControl("receive: IAC GA")
         
       elif data[i+1] == NOP:
         data = data[:i] + data[i+2:]
+        self.logControl("receive: IAC NOP")
 
       elif data[i+1] == IAC:
         data = data[:i] + data[i+1:]
         i = i + 1
+        self.logControl("receive: IAC IAC")
 
       elif data[i+1] == EOR:
         # data = data[:i] + data[i+1:]
         data = data[:i] + data[i+2:]
         # FIXME - right now we're taking out the EOR because I don't
         # know what we should do with it yet
+        self.logControl("receive: IAC EOR")
 
       else:
         if i + 2 >= len(data):
@@ -294,20 +317,28 @@ class SocketCommunicator:
         # handles DO/DONT/WILL/WONT stuff
         if data[i+1] in DDWW:
           if data[i+2] == ECHO:
+            self.logControl("receive: IAC " + CODES[ord(data[i+1])]+" ECHO")
             self.handleECHO(data[i+1])
 
           elif data[i+2] == TERMTYPE:
+            self.logControl("receive: IAC " + CODES[ord(data[i+1])]+" TERMTYPE")
             if data[i+1] == DO:
               self.write(IAC + WILL + data[i+2], 0)
+              self.logControl("send: IAC WILL TERMTYPE")
             else:
               self.write(IAC + WONT + data[i+2], 0)
+              self.logControl("send: IAC WONT TERMTYPE")
 
           elif data[i+2] == EOR:
+            self.logControl("receive: IAC " + CODES[ord(data[i+1])] + " EOR")
             if data[i+1] == WILL:
               self.write(IAC + DO + data[i+2], 0)
+              self.logControl("send: IAC DO EOR")
 
           elif data[i+1] in DD:
+            self.logControl("receive: IAC "+CODES[ord(data[i+1])]+" "+CODES[ord(data[i+2])])
             self.write(IAC + WONT + data[i+2], 0)
+            self.logControl("send: IAC WONT " + CODES[ord(data[i+2])])
 
           data = data[:i] + data[i+3:]
 
@@ -319,8 +350,8 @@ class SocketCommunicator:
             marker = i
             break
 
-          if data[i+2] == TERMTYPE:
-            self.write(IAC + SB + TERMTYPE + self._termtype + IAC + SE, 0)
+          if data[i+2] == TERMTYPE and data[i+3] == SEND:
+            self.write(IAC + SB + TERMTYPE + IS + self._termtype + IAC + SE, 0)
 
           data = data[:i] + data[end+1:]
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.66 2002/12/26 22:26:46 willhelm Exp $
+# $Id: utils.py,v 1.67 2002/12/27 02:08:40 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
@@ -436,11 +436,12 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
     textlist = ansi.split_ansi_from_text(textlist)
 
   for i in range(0, len(textlist)):
-    # COLOR TOKEN
+    # if this is a color token, we gloss over it
     if ansi.is_color_token(textlist[i]):
       continue
 
-    # TEXT TOKEN
+    # if this is a text token, then we need to factor it into the word
+    # wrapping
     marker = 0
 
     # this handles the offset for not indenting the first line (if that's
@@ -468,7 +469,7 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
     wrapcount = len(textlist[i]) - marker + wrapcount
 
 
-  # this next line joins the list with no separator (GASP!)
+  # this next line joins the list with no separator
   if firstline:
     return (indent * " ") + ''.join(textlist)
   else:
@@ -505,7 +506,7 @@ def columnize(textlist, screenwidth=72, indent=0):
   numrows = (len(textlist) + numcols - 1) / numcols
 
   rows = []
-  ## We can't just do "rows = ([],) * rows" -- need distinct lists
+  # We can't just do "rows = ([],) * rows" -- need distinct lists
   for i in range(numrows): 
     rows.append([])
 
