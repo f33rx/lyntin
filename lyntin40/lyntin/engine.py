@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.19 2003/10/04 23:40:20 willhelm Exp $
+# $Id: engine.py,v 1.20 2003/10/05 15:43:41 willhelm Exp $
 #######################################################################
 """
 This holds the X{engine} which both contains most of the other objects
@@ -905,11 +905,11 @@ def main(defaultoptions={}):
 
     for mem in optlist:
       if mem[0] == '--help':
-        print HELPTEXT
+        print constants.HELPTEXT
         sys.exit(0)
 
       elif mem[0] == '--version':
-        print VERSION
+        print constants.VERSION
         sys.exit(0)
 
       elif mem[0] in ["--configuration", "-c"]:
