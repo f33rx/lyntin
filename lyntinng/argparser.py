@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.3 2002/04/21 22:37:58 willhelm Exp $
+# $Id: argparser.py,v 1.4 2002/04/22 00:38:26 jmberne Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -29,7 +29,7 @@ class ArgumentParser:
   noparsing (default=off) - puts input into dict["input"] and does no parsing.
   """
   
-  def __init__(self,argspec,argoptions):
+  def __init__(self,argspec,argoptions=None):
     self.typecheckers = { "string":stringChecker(), "int":intChecker() , "boolean":booleanChecker(), "booleanornone":booleanOrNoneChecker()}
     if argoptions:
       self.buildOptions(argoptions)
@@ -57,10 +57,11 @@ class ArgumentParser:
               self.options={"lalala":1,"wewewewe"="hahaha"
 
     """
+    global optionParser
     self.argoptions=argoptions
     self.options=defaultOptions.copy()
     if optionParser == None:
-      optionParser = ArgumentParser("otherOptions* otherValuedOptions*")
+      optionParser = ArgumentParser("otherOptions* otherValuedOptions**")
     dict = optionParser.parse(argoptions)
 
     for key in dict.keys():
@@ -447,11 +448,12 @@ class booleanOrNoneChecker:
 
 
 if __name__ == '__main__':
-  testargs = {"arg1 arg2 arg3* arg4**":["test1 test3 test5 test7 help=wahoo woo=weewee"], "mapname*":["3k mapper by notadragon","lalala"]}
+  testargs = {("arg1 arg2 arg3* arg4**",None):["test1 test3 test5 test7 help=wahoo woo=weewee"], ("mapname*",None):["3k mapper by notadragon","lalala"], ("mapname*","noparsing"):["3k mapper by notadragon"]} 
 
-  for argspec in testargs.keys():
-    argparser = ArgumentParser(argspec)
+  for argspec,argoptions in testargs.keys():
+    argparser = ArgumentParser(argspec,argoptions)
     print "Argspec: %s" % (argspec)
-    for args in testargs[argspec]:
+    if argoptions: print "Argopts: %s" % (argoptions)
+    for args in testargs[(argspec,argoptions)]:
       print "Args   : %s" % (args)
       print "Dict   : %s" % (`argparser.parse(args)`)
