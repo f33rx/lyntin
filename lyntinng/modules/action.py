@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.31 2002/05/31 00:01:47 willhelm Exp $
+# $Id: action.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -13,12 +13,20 @@ This module defines the ActionManager which handles managing actions
 import re, string, copy
 import manager, utils, event, lyntin, hooks, exported, modutils
 
+var_module = None
+try:
+  import modules.variable
+  var_module = modules.variable
+except:
+  pass
+
 # the placement variable regular expression
 VARREGEXP = re.compile('%_?(\d+)')
 
 class ActionData:
-  def __init__(self):
+  def __init__(self, ses):
     self._actions = {}
+    self._ses = ses
 
   def addAction(self, trigger, response, onetime=0):
     """
@@ -39,11 +47,34 @@ class ActionData:
       (int) always returns a 1
 
     """
-    # Note: if you change the tuple, you need to change the __copy__
-    # method as well!
-    compiled = compile_action(trigger)
+    # first we expand variables in the action trigger then compile
+    # it into a regular expression
+    vm = exported.get_manager("variable")
+    expansion = trigger
+    if vm:
+      expansion = vm.expand(self._ses, trigger)
+      if not expansion:
+        expansion = trigger
+
+    compiled = compile_action(expansion)
     self._actions[trigger] = (trigger, compiled, response, onetime)
     return 1
+
+  def recompileRegexps(self):
+    """
+    When a variable changes, we go through and recompile all the
+    regular expressions for the actions in this session.
+    """
+    vm = exported.get_manager("variable")
+    if vm:
+      for mem in self._actions.keys():
+        (trigger, compiled, response, onetime) = self._actions[mem]
+        expansion = vm.expand(self._ses, trigger)
+        if not expansion:
+          expansion = trigger
+        compiled = compile_action(expansion)
+
+        self._actions[trigger] = (trigger, compiled, response, onetime)
 
   def clear(self):
     """
@@ -212,7 +243,7 @@ class ActionManager(manager.Manager):
 
   def addAction(self, ses, trigger, response, onetime=0):
     if not self._actions.has_key(ses):
-      self._actions[ses] = ActionData()
+      self._actions[ses] = ActionData(ses)
     return self._actions[ses].addAction(trigger, response, onetime)
     
   def clear(self, ses):
@@ -264,6 +295,15 @@ class ActionManager(manager.Manager):
     data = self.getInfo(ses)
     if data:
       file.write(data + "\n")
+
+  def variableChange(self, args):
+    """
+    When a variable changes, we need to recompile the regular
+    expressions involved.  This facilitates that.
+    """
+    ses = args[0]
+    if self._actions.has_key(ses):
+      self._actions[ses].recompileRegexps()
 
   def filter(self, args):
     """
@@ -412,21 +452,24 @@ am = None
 
 def load():
   """ Initializes the module by binding all the commands."""
-  global am
+  global am, var_module
   modutils.load_commands(commands_dict)
   am = ActionManager()
   exported.add_manager("action", am)
 
-  # FIXME - the number controls the order this gets called in the grand
-  # scheme of things.  we should probably do something to make this
-  # more obvious.
   hooks.mud_filter_hook.register(am.filter, 75)
   hooks.write_hook.register(am.persist)
 
+  if var_module:
+    var_module.variable_change_hook.register(am.variableChange)
+
 def unload():
   """ Unloads the module by calling any unload/unbind functions."""
-  global am
+  global am, var_module
   modutils.unload_commands(commands_dict.keys())
   exported.remove_manager("alias")
   hooks.mud_filter_hook.unregister(am.filter)
   hooks.write_hook.unregister(am.persist)
+
+  if var_module:
+    var_module.variable_change_hook.unregister(am.variableChange)

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.1 2002/06/18 04:01:12 willhelm Exp $
+# $Id: variable.py,v 1.2 2002/06/18 23:42:22 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -18,6 +18,12 @@ VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
 
 def _fixvariableregexp():
   VARIABLE_REGEXP = re.compile("\\" + lyntin.variablechar)
+
+"""
+This hook will get called every time a variable is changed.  arg tuple
+is (session, varname, varoldvalue, varnewvalue).
+"""
+variable_change_hook = hooks.Hook()
 
 class TimeStampBuiltin:
   """
@@ -56,6 +62,7 @@ class VariableData:
     self._variables[var] = expansion
     if builtin == 1 and var not in self._builtins:
       self._builtins.append(var)
+
 
   def clear(self):
     """ Removes all the variables."""
@@ -215,16 +222,28 @@ class VariableManager(manager.Manager):
   def addVariable(self, ses, var, expansion):
     if not self._variables.has_key(ses):
       self._variables[ses] = VariableData()
+
+    # save the old value (if any)
+    vdata = self._variables[ses]
+    oldvalue = vdata.getVariable(var)
+
+    # set the variable
     self._variables[ses].addVariable(var, expansion)
+
+    # spam the hook
+    variable_change_hook.spamhook((ses, var, oldvalue, expansion))
 
   def clear(self, ses):
     if self._variables.has_key(ses):
       self._variables[ses].clear()
 
   def removeVariables(self, ses, text):
+    vars = []
     if self._variables.has_key(ses):
-      return self._variables[ses].removeVariables(text)
-    return []
+      vars = self._variables[ses].removeVariables(text)
+      for mem in vars:
+        variable_change_hook.spamhook((ses, mem[0], mem[1], None))
+    return vars
 
   def getVariables(self, ses):
     if self._variables.has_key(ses):
