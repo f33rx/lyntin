@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.18 2002/04/21 03:49:31 willhelm Exp $
+# $Id: net.py,v 1.19 2002/05/04 04:31:48 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -12,6 +12,47 @@ connections with a mud and polling the connection for data.
 """
 import socket, string, select
 import exported, event
+
+### --------------------------------------------
+### CONSTANTS
+### --------------------------------------------
+
+CODES = {255: "IAC",
+         254: "DON'T",
+         253: "DO",
+         252: "WON'T",
+         251: "WILL",
+         250: "SB",
+         240: "SE",
+         0:   "<IS>",
+         1:   "[<ECHO> or <SEND>]",
+         3:   "<SGA>",
+         24:  "<TERMTYPE>",
+         31:  "<NegoWindoSize>",
+         32:  "<TERMSPEED>",
+         35:  "<XDISPLAY>",
+         39:  "<ENV>"}
+
+IAC  = chr(255)
+DONT = chr(254)
+DO   = chr(253)
+WONT = chr(252)
+WILL = chr(251)
+SB   = chr(250)
+SE   = chr(240)
+SEND = chr(1)
+IS   = chr(0)
+
+DD       = DO + DONT
+WW       = WILL + WONT
+DDWW     = DD + WW
+
+ECHO     = chr(1)
+SGA      = chr(3)
+TERMTYPE = chr(24)
+NAWS     = chr(31)
+ENV      = chr(39)
+
 
 
 class SocketCommunicator:
@@ -95,9 +136,9 @@ class SocketCommunicator:
             return
 
           if IAC in data or self._nego_buffer != '':
-            data = self._handlenego(self._nego_buffer + data)
+            data = self.handleNego(self._nego_buffer + data)
 
-          event.MudEvent(self._session, data).enqueue()
+          self.handleData(data)
 
     except SystemExit:
       if self._shutdownflag == 0 and self._session:
@@ -130,7 +171,19 @@ class SocketCommunicator:
         self._session.shutdown(())
 
 
-  def _handlenego(self, data):
+  def handleData(self, data):
+    """
+    Handles incoming data from the mud.
+
+    arguments:
+
+      'data' -- (string) incoming data
+
+    """
+    event.MudEvent(self._session, data).enqueue()
+
+
+  def handleNego(self, data):
     """
     Removes telnet negotiation stuff from the stream and handles 
     it.
@@ -181,44 +234,3 @@ class SocketCommunicator:
       i = data.find(IAC, i)
 
     return data
-
-
-### --------------------------------------------
-### CONSTANTS
-### --------------------------------------------
-
-CODES = {255: "IAC",
-         254: "DON'T",
-         253: "DO",
-         252: "WON'T",
-         251: "WILL",
-         250: "SB",
-         240: "SE",
-         0:   "<IS>",
-         1:   "[<ECHO> or <SEND>]",
-         3:   "<SGA>",
-         24:  "<TERMTYPE>",
-         31:  "<NegoWindoSize>",
-         32:  "<TERMSPEED>",
-         35:  "<XDISPLAY>",
-         39:  "<ENV>"}
-
-IAC  = chr(255)
-DONT = chr(254)
-DO   = chr(253)
-WONT = chr(252)
-WILL = chr(251)
-SB   = chr(250)
-SE   = chr(240)
-SEND = chr(1)
-IS   = chr(0)
-
-DD       = DO + DONT
-WW       = WILL + WONT
-DDWW     = DD + WW
-
-ECHO     = chr(1)
-SGA      = chr(3)
-TERMTYPE = chr(24)
-NAWS     = chr(31)
-ENV      = chr(39)

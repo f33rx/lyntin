@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.50 2002/05/17 03:43:27 jmberne Exp $
+# $Id: session.py,v 1.51 2002/05/18 03:45:59 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -13,7 +13,7 @@ import re, copy, string
 import deed, variable, data, exported, engine, hooks, utils, lyntin, event, ticker
 import argparser
 
-# this is the regular expression that matches speedwalking stuff
+ESC = chr(27)
 
 class Session:
   """ A session is a nice container of all the stuff that
@@ -29,6 +29,7 @@ class Session:
     self._managers = {}
     self._logfile = None
     self._ticker = ticker.Ticker()
+    self._colorbuffer = ''
 
     self.setManager("deed", deed.DeedManager())
 
@@ -51,8 +52,7 @@ class Session:
     hooks.shutdown_hook.register(self.shutdown)
 
   def __copy__(self):
-    """ Copies the session and returns a new session with the same 
-    stuff.
+    """ Copies the session and returns a new session with the same stuff.
 
     We had problems using copy and deepcopy, so our method was
     to implement our own version of copy.
@@ -65,19 +65,34 @@ class Session:
   def __repr__(self):
     return "session.Session " + self._name
      
-  # SESSION STUFF
+
 
   def getName(self):
-    """ Returns the name of the session."""
+    """ Returns the name of the session.
+
+    returns:
+
+      (string)
+    """
     return self._name
 
   def setName(self, name):
-    """ Sets the name of the session."""
+    """ Sets the name of the session.
+
+    arguments:
+      
+      'name' -- (string)
+    """
     self._name = name
     self.getTicker().setSessionName(name)
 
   def getDataBuffer(self):
-    """ Returns the DataBuffer instance."""
+    """ Returns the DataBuffer instance.
+
+    returns:
+      
+      data.DataBuffer instance
+    """
     return self._databuffer
 
   def shutdown(self, args):
@@ -92,7 +107,12 @@ class Session:
     self._ticker.clear()
 
   def getInfo(self):
-    """ Returns information about the session."""
+    """ Returns information about the session.
+
+    returns:
+      
+      (string)
+    """
     data = ("Session name: " + self._name + "\n" +
             "   socket: " + repr(self._socket) + "\n")
 
@@ -128,26 +148,57 @@ class Session:
     return data
 
   def setManager(self, manager, object):
-    """ Sets a manager in the manager hash."""
+    """ Sets a manager in the manager hash.
+
+    arguments:
+      
+      'manager' -- (string) the name of the manager
+
+      'object' -- (object instance) the manager instance itself
+    """
     self._managers[manager] = object
 
   def getManager(self, manager):
-    """ Retrieves a manager from the hash."""
+    """ Retrieves a manager from the hash.
+
+    arguments:
+
+      'manager' -- (string) the name of the manager you want to retrieve
+
+    returns:
+      
+      None or the manager instance
+    """
     if self._managers.has_key(manager):
       return self._managers[manager]
     else:
       return None
 
   def setTicker(self, ticker):
-    """ Sets the ticker."""
+    """ Sets the ticker.
+
+    arguments:
+      
+      'ticker' -- (ticker.Ticker instance)
+    """
     self._ticker = ticker
 
   def getTicker(self):
-    """ Returns the ticker."""
+    """ Returns the ticker.
+
+    returns:
+      
+      (ticker.Ticker instance)
+    """
     return self._ticker
 
   def getWriteFileInfo(self):
-    """ Pulls all the session information for #write command."""
+    """ Pulls all the session information for #write command.
+
+    returns:
+
+      (string)
+    """
     data = ''
 
     # saves speedwalking state
@@ -187,19 +238,41 @@ class Session:
   ### ------------------------------------------------
 
   def setSocketCommunicator(self, sc):
-    """ Sets the socket communicator."""
+    """ Sets the socket communicator.
+
+    arguments:
+      
+      'sc' -- (net.SocketCommunicator instance)
+    """
     self._socket = sc
 
   def getSocketCommunicator(self):
-    """ Returns the socket communicator."""
+    """ Returns the socket communicator.
+
+    returns:
+      
+      net.SocketCommunicator instance
+    """
     return self._socket
 
   def isConnected(self):
-    """ Tells you whether or not a session has a connection."""
+    """ Tells you whether or not a session has a connection.
+
+    returns:
+      
+      1 if connected, 0 if not
+    """
     return self._socket != None
 
   def writeSocket(self, message, tag = None):
-    """ Writes data to the socket."""
+    """ Writes data to the socket.
+
+    arguments:
+      
+      'message' -- (string)
+
+      'tag=None' -- ...  i have no clue what this is
+    """
     for line in message.strip().split("\n"):
       hooks.to_mud_hook.spamhook((self, line, tag))
     if self._socket:
@@ -210,7 +283,7 @@ class Session:
   ### User input functions
   ### ------------------------------------------------
 
-  def _prompt(self):
+  def prompt(self):
     """ Deals with printint a prompt if this is the common session."""
     if self.getName() == "common":
       engine.myengine.writePrompt()
@@ -245,7 +318,7 @@ class Session:
       # this checks to see if it's a special #@ command.
       if input[0] == "@":
         engine.myengine.getCommand("@")(self, input.split(" "), input)
-        if internal==0: self._prompt()
+        if internal==0: self.prompt()
         return
 
       # this finds the first matching command and ends there.
@@ -271,7 +344,7 @@ class Session:
                 exported.write_error("%s: %s\nsyntax: %s%s %s" % 
                                      (mem, e, lyntin.commandchar, mem,
                                       argumentparser.syntaxline))
-            if internal==0: self._prompt()
+            if internal==0: self.prompt()
             break
         else:
           if mem.find(words[0]) == 0:
@@ -292,19 +365,19 @@ class Session:
                 exported.write_error("%s: %s\nsyntax: %s%s %s" % 
                                      (mem, e, lyntin.commandchar, mem,
                                       argumentparser.syntaxline))
-            if internal==0: self._prompt()
+            if internal==0: self.prompt()
             break
 
       else:
         exported.write_error("Not a valid command: %s" % (words[0]))
-        if internal==0: self._prompt()
+        if internal==0: self.prompt()
       return
 
     # if we don't have a socket then we can't do any non-lyntin-command
     # stuff.
     if not self.isConnected():
       exported.write_error("No connection.  Create a session.")
-      if internal==0: self._prompt()
+      if internal==0: self.prompt()
       return
 
     # just regular data to the mud
@@ -316,12 +389,32 @@ class Session:
   ### ------------------------------------------------
 
   def handleMudData(self, input):
-    """ Handles input coming from the mud."""
+    """ Handles input coming from the mud.
+
+    arguments:
+      
+      'input' -- (string) the data from the mud
+    """
+    # this sort of handles ansi color codes that get broken 
+    # mid-transmission when mud data is chunked and sent across
+    # the network.
+    if self._colorbuffer:
+      input = self._colorbuffer + input
+      self._colorbuffer = ''
+
+    index = input.rfind(ESC)
+    if index != -1 and input.find("m", index) == -1:
+      self._colorbuffer = input[index:]
+      input = input[:index]
+
     if self._logfile:
       self.log(input)
 
+    # we add the new input to the databuffer
     self._databuffer.addData(input)
 
+    # we split the input into a series of lines and operate on
+    # those
     inputlines = input.splitlines(1)
 
     for i in range(0, len(inputlines)):
