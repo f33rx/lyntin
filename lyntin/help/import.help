@@ -2,3 +2,18 @@
    Where filename is something like testme.  Don't include the py
    extension, though.
    This will import/reload the module <filename>.
+   You can build your own commands this way.  Example:
+   ---------------------myfile.py--------------------
+   from exported import *
+   import myfile
+
+   def mycommand(words, input, seslist):
+      lyntin_command('#showme hey dude--this is my function!')
+
+      lyntin_command('say I have this sudden urge to kill ' + words[1])
+
+
+
+   # lyntin_add_command is from the exported module.
+   lyntin_add_command("mykill", myfile.mycommand)
+   --------------------------------------------------

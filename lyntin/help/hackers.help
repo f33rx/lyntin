@@ -1,25 +1,25 @@
-#@ (for Python hackers)
-- this is the biggy.  Execute an _arbitrary_ python statement in
-  the context of user.py's global variables.  I suggest you write your
-  own files of python code, then define an alias called 'loadcode' or
-  something, which consists of the command '#@import mycode' or whatever
-  the name of your file is. Then you can do stuff like
-  '#@mycode.func()', etc
-
-- since you have access to all of lyntin's global variables, you can
-  call any of lyntin's functions too (although to use any of lyntin's
-  names from a file of your own code your file must import the proper
-  lyntin module.)  A handy one is the function SendPlainInput, which
-  resides in the module 'app.' Thus, app.SendPlainInput('flee') causes
-  the active session to send 'flee' to the mud.  Many other functions
-  can be found in the voluminously commented sourcecode. See the file
-  'data.py' for the global variables.  NOTE: your code is evaluated from
-  the module 'player', so when calling any functions from that module,
-  do NOT preface the call with the module name (i.e. player).  doing so
-  results in a name error.
-
-examples:
-  #@for c in 'hello': print c
-  #@PutMessage('this is lyntin speaking')
-  #@myvars.dead = 'yep'
-  #@mycode.doit()
+   #@ (for Python hackers)
+   This is the biggy.  Execute an _arbitrary_ python statement in
+   the context of user.py's global variables.  I suggest you write your
+   own files of python code, then define an alias called 'loadcode' or
+   something, which consists of the command '#@import mycode' or whatever
+   the name of your file is. Then you can do stuff like
+   '#@mycode.func()', etc
+   
+   Since you have access to all of Lyntin's global variables, you can
+   call any of Lyntin's functions too (although to use any of Lyntin's
+   names from a file of your own code your file must import the proper
+   Lyntin module.)  A handy one is the function SendPlainInput, which
+   resides in the module 'app.' Thus, app.SendPlainInput('flee') causes
+   the active session to send 'flee' to the mud.  Many other functions
+   can be found in the voluminously commented sourcecode. See the file
+   'data.py' for the global variables.  NOTE: your code is evaluated from
+   the module 'player', so when calling any functions from that module,
+   do NOT preface the call with the module name (i.e. player).  doing so
+   results in a name error.
+   
+   examples:
+     #@for c in 'hello': print c
+     #@PutMessage('this is Lyntin speaking')
+     #@myvars.dead = 'yep'
+     #@mycode.doit()
