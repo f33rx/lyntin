@@ -4,13 +4,13 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: highlight.py,v 1.6 2002/08/23 02:34:24 willhelm Exp $
+# $Id: highlight.py,v 1.7 2002/09/04 05:36:36 willhelm Exp $
 #######################################################################
 """
 This module defines the HighlightManager which handles highlights.
 """
 import string
-import manager, utils, lyntin, hooks, exported, modutils
+import ansi, manager, utils, lyntin, hooks, exported, modutils
 
 STYLEMAP = {
              "bold": "1",
@@ -140,8 +140,8 @@ class HighlightData:
       (string) the finalized text
     """
     if text:
-      faketext = utils.filter_ansi(text)
-      textlist = utils.split_ansi_from_text(text)
+      faketext = ansi.filter_ansi(text)
+      textlist = ansi.split_ansi_from_text(text)
       for mem in self._highlights.keys():
 
         # first we deal with those silly stars....
@@ -168,7 +168,7 @@ class HighlightData:
 
       # here we sweep through the text string to update our current
       # color and leftover color attributes
-      self._currcolor, self._colorleftover = utils.figure_color(textlist, self._currcolor, self._colorleftover)
+      self._currcolor, self._colorleftover = ansi.figure_color(textlist, self._currcolor, self._colorleftover)
 
       text = string.join(textlist, "")
 
@@ -199,7 +199,7 @@ class HighlightData:
     # first we find the place to stick the highlight thingy.
     i = 0
     for i in range(0, len(textlist)):
-      if not utils.is_color_token(textlist[i]):
+      if not ansi.is_color_token(textlist[i]):
         if place > len(textlist[i]):
           place -= len(textlist[i])
         else:
@@ -209,7 +209,7 @@ class HighlightData:
     for mem in textlist[:i]:
       newlist.append(mem)
     newlist.append(textlist[i][:place])
-    newcolor = utils.figure_color(newlist, self._currcolor)[0]
+    newcolor = ansi.figure_color(newlist, self._currcolor)[0]
     newlist.append(hl)
 
     # if the string to highlight begins and ends in the
@@ -233,14 +233,14 @@ class HighlightData:
     memlength -= len(textlist[i][place:])
     j = i+1
     for j in range(i+1, len(textlist)):
-      if not utils.is_color_token(textlist[j]):
+      if not ansi.is_color_token(textlist[j]):
         if memlength > len(textlist[j]):
           memlength -= len(textlist[j])
           newlist.append(textlist[j])
         else:
           break
       else:
-        newcolor = utils.figure_color([textlist[j]], newcolor, '')[0]
+        newcolor = ansi.figure_color([textlist[j]], newcolor, '')[0]
 
     newlist.append(textlist[j][:memlength])
     newlist.append(chr(27) + "[0m")
@@ -376,7 +376,7 @@ class HighlightManager(manager.Manager):
     text = args[-1]
 
     if lyntin.ansicolor == 0:
-      return utils.filter_ansi(text)
+      return ansi.filter_ansi(text)
     else:
       if self._highlights.has_key(ses):
         return self._highlights[ses].expand(text)

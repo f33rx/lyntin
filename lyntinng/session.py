@@ -4,13 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.66 2002/10/05 22:29:05 willhelm Exp $
+# $Id: session.py,v 1.67 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-Holds the session class.  Sessions are copied from the common session.
+Holds the functionality involved in X{session}s.  Sessions are copied 
+from the common session.  Each session encapsulates a socket connection
+to a mud--though it should be noted that sessions could also connect
+to any other TCP/IP service.
 """
 import re, copy, string
-import data, exported, engine, hooks, utils, lyntin, event, ticker
+import data, exported, engine, hooks, utils, ansi, lyntin, event, ticker
 import argparser
 
 ESC = chr(27)
@@ -366,7 +369,7 @@ class Session:
     """
     try:
       # FIXME - this assumes unix files
-      self._logfile.write(utils.filter_ansi(utils.filter_cm(input)))
+      self._logfile.write(ansi.filter_ansi(utils.filter_cm(input)))
       self._logfile.flush()
     except:
       exported.write_error("Logfile cannot be written to.")

@@ -5,7 +5,7 @@ Author: Will Guaraldi
 VERSION
 =======
 
-$Id: HACKING,v 1.18 2002/10/12 22:14:47 willhelm Exp $
+$Id: HACKING,v 1.19 2002/10/16 23:59:06 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -146,6 +146,23 @@ for every session instance.
 
 
 
+API
+---
+
+The API for accessing Lyntin's internals is in the "exported" module.
+This module contains interfaces to Lyntin's internals with the 
+additional social contract that we Lyntin developers will not change
+the API between minor versions of Lyntin.  Lyntin's internals actually
+use the exported module for accessing its own internals.  The reasons
+for this being that it gives us a centralized place for fixing behavior
+bugs.
+
+If you plan on building Lyntin modules, do use the exported API--it
+will save you much consternation when dealing with multiple Lyntin
+releases.
+
+
+
 MANAGERS
 --------
 
@@ -186,7 +203,9 @@ the session object for the session they were executed in, an argument
 dictionary from the argument parser, and the exact input the user
 typed.
 
-tbd.
+Look at the modules/lyntincmds.py and modules/tintincmds.py modules for 
+command examples.  Additionally, check out the Lyntin module repository
+on http://lyntin.sourceforge.net/ for more examples.
 
 
 

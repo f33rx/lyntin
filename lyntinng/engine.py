@@ -4,11 +4,11 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.69 2002/10/12 22:14:47 willhelm Exp $
+# $Id: engine.py,v 1.70 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
 """
-This holds the Engine which both contains most of the other objects
-that do work in lyntin as well as encapsulates event queue, the event
+This holds the X{engine} which both contains most of the other objects
+that do work in Lyntin as well as encapsulates event queue, the event
 handling methods, and some of the other singleton managers such as
 the HelpManager, the ThreadManager, and the CommandManager.
 

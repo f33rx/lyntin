@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: test.py,v 1.4 2002/08/20 02:39:04 willhelm Exp $
+# $Id: test.py,v 1.5 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
 This module has its own main method.  It's used to unit test functions in
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
   print 
 
-  from utils import split_ansi_from_text
+  from ansi import split_ansi_from_text
   _pass_fail("split_ansi_from_text 1",
             split_ansi_from_text("This is some text."),
             ["This is some text."])

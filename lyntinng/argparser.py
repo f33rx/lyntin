@@ -5,10 +5,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.29 2002/10/12 22:14:47 willhelm Exp $
+# $Id: argparser.py,v 1.30 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
 """
-This provides the ArgumentParser class which parses command arguments
+This provides the ArgumentParser class which parses X{command argument}s
 automatically into a dictionary as well as a series of Parser classes
 which handle single arguments and TypeCheckers which handle validating
 user input values and converting them into other types (string -> int...).

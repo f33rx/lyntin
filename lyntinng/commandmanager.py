@@ -4,18 +4,31 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: commandmanager.py,v 1.4 2002/07/21 04:14:48 willhelm Exp $
+# $Id: commandmanager.py,v 1.5 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-Handles managing commands and also holds the filter for handling commands.
+Lyntin comes with a series of X{command}s for manipulating aliases, 
+actions, highlights, and various other things.  Both the commands and 
+the managers that hold the data are all defined in various Lyntin 
+modules in the "modules/" subdirectory and are loaded up at Lyntin 
+startup.
 
-All commands in Lyntin are in Lyntin modules and added the same way
-with the exception of #@ which has some special handling.
+Lyntin has an extremely powerful argument parser that allows Lyntin
+module writers to worry about the functionality of their command without
+having to deal with parsing out the arguments, type-checking, 
+raising exceptions with command syntax help, and data conversion.
 
-Commands are global to Lyntin.  Adding a command to Lyntin makes that
-command available to all sessions.  When creating commands use the
-functions in the exported module.  Look at the modules.lyntincmds
-and modules.tintincmds modules for command examples.
+Commands are stored internally in the "CommandManager".  They are
+global to Lyntin--there are no commands that only exist in the session
+they were declared in.  Commands, however, are executed in a specific
+session.  When they are executed, they are given three arguments:
+the session object for the session they were executed in, an argument
+dictionary from the argument parser, and the exact input the user
+typed.
+
+Look at the modules/lyntincmds.py and modules/tintincmds.py modules for 
+command examples.  Additionally, check out the Lyntin module repository
+on http://lyntin.sourceforge.net/ for more examples.
 """
 import inspect, re
 import manager, lyntin, exported, argparser

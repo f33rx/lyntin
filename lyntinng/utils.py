@@ -4,21 +4,18 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.51 2002/10/13 03:56:45 jmberne Exp $
+# $Id: utils.py,v 1.53 2002/10/19 19:19:43 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to classes 
 in the application, but are useful in a variety of places.  They're 
-not dependent on application things, so they're highly unit tested.
+not dependent on application things, so it's easier to test them.
 """
 import string, re, time
-import lyntin
+import ansi, lyntin
 
 # for finding non-escaped semi-colons in user input
 SEMI_REGEXP = re.compile(r'(?<!\\);')
-
-# for finding ANSI color sequences
-ANSI_COLOR_REGEXP = re.compile(chr(27) + '\[[0-9;]*[mJ]')
 
 TIMESPAN_REGEXP = re.compile(r"^(?P<days>\d+d)?(?P<hours>\d+h)?(?P<minutes>\d+m)?(?P<seconds>\d+s?)?$")
 TIME_REGEXP1=re.compile(r"^(?P<hour>[1-9]|1[0-2])(?P<ampm>a|p)$")
@@ -30,16 +27,6 @@ PVAR_REGEXP = re.compile(r'%+(-?(\d+):?-?(\d*)|:-?(\d+))')
 
 # for finding $... variables
 DVAR_REGEXP = re.compile(r'\$+(-?(\d+):?-?(\d*)|:-?(\d+))')
-
-
-def filter_ansi(text):
-  """
-  Takes in text and filters out the ANSI color codes.
-
-  @returns: text without ANSI color codes
-  @rtype: string
-  """
-  return re.sub(chr(27) + '\[[0-9;]*[mJ]', '', text)
 
 
 def filter_cm(text):
@@ -176,90 +163,6 @@ def compile_regexp(str):
     pieces.append(re.escape(str[i:]))
 
   return re.compile("".join(pieces), flags_bitmask)
-
-def is_color_token(token):
-  """
-  Returns whether or not this is a color token.
-
-  @param token: the token in question
-  @type  token: string
-
-  @return: 1 if it's color, 0 if not
-  @rtype: boolean
-  """
-  if len(token) == 0:
-    return 0
-
-  return token[0:2] == chr(27) + "[" and token[-1] == "m"
-
-
-def fix_color(color):
-  """
-  Helper function for debugging--it'll fix a color token
-  so it's readable in ascii.
-
-  @param color: the color token
-  @type  color: string
-
-  @return: the pretty string
-  @rtype: string
-  """
-  return color.replace(chr(27), "ESC")
-
-
-def split_ansi_from_text(text):
-  """
-  Takes in a string and returns a list of text and ansi tokens.
-
-  @param text: the full string to split up
-  @type  text: string
-
-  @return: list of text and ansi color tokens
-  @rtype: list of strings
-  """
-  global ANSI_COLOR_REGEXP
-
-  matchob = ANSI_COLOR_REGEXP.search(text)
-  if matchob:
-    textlist = []
-    marker = 0
-    while matchob:
-      (b, e) = matchob.span()
-
-      if marker == b:
-        textlist.append(text[b:e])
-      else:
-        textlist.append(text[marker:b])
-        textlist.append(text[b:e])
-
-      marker = e
-      matchob = ANSI_COLOR_REGEXP.search(text, marker)
-
-    # we do this to handle ansi color sequences which are broken
-    # between two network chunks
-    if marker < len(text):
-      esc = text.find('\33', marker)
-      if esc != -1:
-        for i in range(esc, len(text)):
-          c = text[i]
-          if esc != -1:
-            if c == '\33':
-              esc = i
-          else:
-            if c.isdigit() or c == ";" or c == "[":
-              continue
-            else:
-              esc = -1
-
-      if esc == -1:
-        textlist.append(text[marker:])
-      else:
-        textlist.append(text[marker:esc])
-        textlist.append(text[esc:])
-
-    return textlist
-
-  return [text]
 
 
 def expand_text(filter, fulllist):
@@ -456,11 +359,11 @@ def wrap_text(textlist, wraplength=50, indent=0, firstline=0):
 
   # split the formatting from the text
   if type(textlist) == type(''):
-    textlist = split_ansi_from_text(textlist)
+    textlist = ansi.split_ansi_from_text(textlist)
 
   for i in range(0, len(textlist)):
     # COLOR TOKEN
-    if is_color_token(textlist[i]):
+    if ansi.is_color_token(textlist[i]):
       continue
 
     # TEXT TOKEN
@@ -660,76 +563,6 @@ def parse_time(timearg):
     return time.mktime(timetuple)
   except Exception, e:
     raise ValueError, "Invalid time string: %s" % e
-
-
-def figure_color(textlist, currentcolor, leftover=""):
-  """ 
-  Takes a textlist of text and color tokens and figures out
-  the latest current color.
-
-  @param textlist: the list of string and ansi color code tokens
-  @type  textlist: list of strings
-
-  @param currentcolor: a tuple of (options, foreground, background) 
-      that represent the current color
-  @type  currentcolor: (int, int, int)
-
-  @param leftover: if we encounter a half done color code, we throw
-      it in the leftover string.  the leftover gets prepended
-      to the textlist element on the next run of figure_color
-  @type  leftover: string
-
-  @return: the new currentcolor and leftover as a tuple
-  @rtype: ((int, int, int), string)
-  """
-  if leftover:
-    ind = textlist[0].find("m")
-    if ind > -1:
-      leftover += textlist[0][:ind]
-      textlist[0] = textlist[0][ind+1:]
-    textlist.insert(0, leftover)
-    leftover = ''
-
-  for mem in textlist:
-    if is_color_token(mem):
-      color = mem[2:-1]
-
-      # handles the case where it's ESC[m
-      if color == "":
-        currentcolor = [-1, -1, -1]
-
-      # handles other cases!
-      else:
-        color = color.split(";")
-        for i in color:
-          if not i.isdigit():
-            continue
-
-          i = int(i)
-
-          if i == 0:
-            # 0 is a reset
-            currentcolor = [-1, -1, -1]
-      
-          elif 0 < i and i < 10:
-            # these are ansi color attributes
-            currentcolor[0] = i
-
-          elif 30 <= i and i < 40:
-            # these are foreground attributes
-            currentcolor[1] = i
-
-          elif 40 <= i and i < 50:
-            # these are background attributes
-            currentcolor[2] = i
-
-  # we're looking for leftover pieces here
-  if len(textlist) > 0:
-    mem = textlist[-1]
-    if len(mem) > 0 and mem[0] == chr(27) and mem[-1] != "m":
-      leftover = mem
-      
-  return currentcolor, leftover
 
 
 TRUE_VALUES = ["yes", "true", "1", "on"]

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.17 2002/08/27 01:19:05 willhelm Exp $
+# $Id: tkui.py,v 1.18 2002/09/30 18:27:09 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -12,7 +12,7 @@ Lyntin, but largely re-coded in various areas.
 """
 
 import string, os, Tkinter, tkFont, ScrolledText
-import ui, hooks, event, engine, exported, lyntin, utils
+import ansi, ui, hooks, event, engine, exported, lyntin, utils
 
 UNICODE_ENCODING = "latin-1"
 
@@ -349,7 +349,7 @@ class Tkui(ui.BaseUI):
       # we remove all \\r stuff because it's icky.
       line = line.replace("\r", "")
 
-      tokens = utils.split_ansi_from_text(line)
+      tokens = ansi.split_ansi_from_text(line)
 
       # each session has a saved current color for mud data.  we grab
       # that current color--or user our default if we don't have one
@@ -368,8 +368,8 @@ class Tkui(ui.BaseUI):
         leftover = ""
 
       for mem in tokens:
-        if utils.is_color_token(mem):
-          color, leftover = utils.figure_color([mem], color, leftover)
+        if ansi.is_color_token(mem):
+          color, leftover = ansi.figure_color([mem], color, leftover)
 
         else:
 

@@ -4,33 +4,44 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.8 2002/07/21 04:14:48 willhelm Exp $
+# $Id: manager.py,v 1.9 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-This module defines the Manager superclass.  Subclasses of Manager handle
-managing the various data things in the system such as History, Threads,
-Aliases....
+Managers manage things.  Most X{manager}s subclass the "manager.Manager"
+class.  It doesn't really provide a lot of functionality, but it 
+allows us to group them all and treat them all the same.  Adding 
+new managers is much easier because of this.
+
+Also, managers register themselves with the engine via the
+"exported.add_manager" function.  The engine will cycle
+through registered managers for things like status and persistence.
+In addition, registered managers get told when the user has created
+a new session and when the user has ended a session through the
+"addSession" and "removeSession" methods.
 
 To build a new manager, you need to:
 
 1. extend the manager.Manager class
 
-2. create a 'load()' method which adds the manager to the engine
-   via exported.add_manager(...)
-
-3. implement all the methods of manager.Manager that are marked as needing
+2. implement all the methods of manager.Manager that are marked as needing
    to be overridden
 
+3. implement the additional methods that your manager needs
 
-Then to instantiate your new Manager subclass you can do one of two things:
+3. create a "load()" function in the module your manager is defined in
+   which adds the manager to the engine via "exported.add_manager(...)"
+
+
+Then to dynamically load your new module and instantiate your new manager
+you can do one of two things:
 
 1. put the .py file in the modules/ subdirectory where it will be loaded
    automatcially
 
 2. execute an "#import modulenamehere" inside of Lyntin which will import
    the module
-
 """
+
 class Manager:
   """
   Base manager class for managing things in Lyntin.  The Manager class

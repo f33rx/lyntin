@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.12 2002/07/21 04:14:48 willhelm Exp $
+# $Id: history.py,v 1.13 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-The HistoryManager keeps track of the last 1000 history lines.  This
+The HistoryManager keeps track of the last 1000 X{history} lines.  This
 is often lines entered by the user, but also may include some other
 things.  The HistoryManager is a singleton and it's on an engine scoping
 thus we don't keep track of history per session.

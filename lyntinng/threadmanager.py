@@ -4,13 +4,16 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: threadmanager.py,v 1.8 2002/07/21 04:14:48 willhelm Exp $
+# $Id: threadmanager.py,v 1.9 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-The thread manager allows us to centralize the management of
+The X{thread} manager allows us to centralize the management of
 all the threads in one place.  Just keeps track of them all--doesn't
 really _do_ anything other than make sure they're all initialized
 the same way.
+
+In this way Lyntin's engine can give you status on the threads when
+you're in-game.
 """
 from threading import Thread
 import manager

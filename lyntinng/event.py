@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.39 2002/08/13 02:26:08 willhelm Exp $
+# $Id: event.py,v 1.40 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-Holds the event structures in lyntin.  All events inherit from 
+Holds the X{event} structures in Lyntin.  All events inherit from 
 Event.  This is pretty standard, nothing really exciting here.
 Each event class implements the execute function which gets called
 by the event handler thread when it pulls the event object off the

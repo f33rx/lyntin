@@ -4,10 +4,10 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.28 2002/10/12 22:14:47 willhelm Exp $
+# $Id: exported.py,v 1.29 2002/10/13 03:16:22 willhelm Exp $
 #######################################################################
 """
-This is the API for lyntin internals and is guaranteed to change 
+This is the X{API} for lyntin internals and is guaranteed to change 
 very rarely even though we might change Lyntin's internals.  If
 it does change it'll be between major Lyntin versions.
 """

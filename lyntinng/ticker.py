@@ -4,10 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.21 2002/07/21 04:14:48 willhelm Exp $
+# $Id: ticker.py,v 1.22 2002/10/12 22:14:47 willhelm Exp $
 #######################################################################
 """
-This module handles ticker data.
+This module handles ticker stuff.  A session can have an associated
+ticker which kicks off a ticker event every x seconds.  The ticker
+works off of the "timer_hook".
 """
 import hooks, lyntin, event, engine, exported
 

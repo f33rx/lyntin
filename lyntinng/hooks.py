@@ -4,11 +4,23 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: hooks.py,v 1.23 2002/10/12 22:14:47 willhelm Exp $
+# $Id: hooks.py,v 1.24 2002/10/13 03:16:22 willhelm Exp $
 ##################################################################
 """
-Holds all the hook constants for all the hooks that Lyntin has.
-Also contains the Hook class which encapsulates hook functionality.
+The engine is augmented by a series of X{hooks} which allow modules to
+execute functions without having to change Lyntin's internals.  
+Examples of this would be the "startup_hook" and "shutdown_hook".  
+Any functions that hook into these hooks will be executed upon 
+startup or shutdown of Lyntin.  Lyntin also uses these hooks to 
+implement its functionality.
+
+For example, the Tk ui uses the "startup_hook" to register with
+the "to_user_hook", add the tkui help topic, and start the ui
+user listener thread.
+
+Hooks and the Hook class are defined in the "hooks" module as is
+a whole lot of documentation on which hooks exist, and what is
+passed to them.
 """
 
 import traceback
@@ -26,8 +38,11 @@ class Hook:
   Represents a (possibly empty) sequence of user-defined
   functions.  Provides users with the opportunity of reacting
   to events internal to Lyntin.  All functions take a single
-  argument which is a tuple.  see the specific hooks below for
-  more info.
+  argument which is a tuple.
+
+  Read through the hooks.py file for more information on the 
+  hooks that come with Lyntin as well as which arguments they 
+  take in the arg tuple.
   """
   def __init__(self,mapper= lambda x,y:x):
     """
