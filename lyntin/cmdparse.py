@@ -13,7 +13,7 @@ This should be re-written to use commands that make sense to
 normal human beings.
 """
 
-import string, regex, regsub
+import string, re
 import data, app
 
 var_char = '$'
@@ -85,7 +85,7 @@ def substitute_vars(input):
 
 """regex for history substitutions
 looks like '!4 joe=john' or '! I like=I hate'"""
-sub_regex = regex.compile('^![0-9]* \(.*\)=\(.*\)')
+sub_regex = re.compile('^![0-9]* (.*)=(.*)')
 
 
 def do_history_subs(hist, input):
@@ -96,11 +96,12 @@ def do_history_subs(hist, input):
     command, along the lines of !3 jay=joe.
     here's where we do that.
     """
-    if sub_regex.search(hist) != -1:
+    match = sub_regex.search(hist)
+    if match:
         # user wants to substitute something in this command
-        pat = sub_regex.group(1)
-        repl = sub_regex.group(2)
-        input = regsub.gsub(pat,repl, input)
+        pat = match.group(1)
+        repl = match.group(2)
+        input = re.sub(pat, repl, input)
     return input
 
 
@@ -157,7 +158,7 @@ def work_over(input, ses):
                 # the player typed for the variables %1...%n
                 for var in vars.keys():
                     pat = '%' + var
-                    ret = regsub.gsub(pat, vars[var], ret)
+                    ret = re.sub(pat, vars[var], ret)
 
     # check for a speedwalking string, like 3n5wsse
     # we do this so here so that aliases will always
@@ -165,7 +166,9 @@ def work_over(input, ses):
     # note: wbg 12/6/1999 -- added second regex check to make sure that 
     # plain numbers don't kick off the speedwalk code.  there's prob a 
     # better way to do it though.
-    if regex.search('^[udnswe0-9][udnswe0-9]+$', input) != -1 and regex.search('[udnswe]', input) != -1:
+    match1 = re.compile('^[udnswe0-9][udnswe0-9]+$').search(input)
+    match2 = re.compile('[udnswe]').search(input)
+    if match1 and match2:
         if not whether:
             whether = 'speed'
             ret = input
@@ -184,11 +187,11 @@ def split_action(ac):
     ac_response = ''
     
     # regex to match an action command
-    action_regex = regex.compile(string.split(ac)[0] + ' {\(.*\)} {\(.*\)}')
-    # I wrote this part before I knew how to do backreferences in python
-    if action_regex.match(ac) != -1:
-        ac_trigger = ac[action_regex.regs[1][0]:action_regex.regs[1][1]]
-        ac_response = ac[action_regex.regs[2][0]:action_regex.regs[2][1]]
+    action_regex = re.compile(string.split(ac)[0] + ' \{(.*)\} \{(.*)\}')
+    match = action_regex.match(ac)
+    if match:
+        ac_trigger = match.group(1)
+        ac_response = match.group(2)
         return (ac_trigger, ac_response)
 
     # not defining an action, must be querying

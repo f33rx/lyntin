@@ -10,8 +10,8 @@ The main script that figures out the args, and instantiates everything.
 
 ##################################################################
 # do these imports now to minimize perceived startup time
-import socket, select, sys, regex, time
-import os, regsub, string, types, traceback
+import socket, select, sys, re, time
+import os, string, types, traceback
 
 if os.name != 'posix':
     os.environ['LYNTINDIR'] = os.getcwd() + os.sep

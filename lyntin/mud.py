@@ -13,7 +13,7 @@ interpret and display the output
 """
 
 
-import regsub, string, regex, sys
+import re, string, sys
 import data, player
 
 """telnet protocol constants"""
@@ -127,12 +127,12 @@ def handle_mud_output(output, ses):
 
         # handle substitutes
         for sub in ses.subs.keys():
-            if regex.search(sub, cleandata) != -1:
-                oldcleandata = regsub.gsub(sub, ses.subs[sub], oldcleandata)
+            if re.compile(sub).search(cleandata):
+                oldcleandata = re.sub(sub, ses.subs[sub], oldcleandata)
 
         # handle reports
         for (file, text) in ses.reports:
-            if regex.search(text, cleandata) != -1:
+            if re.compile(text).search(cleandata):
                 file.write(cleandata)
                 file.write('\n\n')
 

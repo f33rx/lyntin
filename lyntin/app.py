@@ -11,7 +11,7 @@ contains the client class, which represents lyntin the process,
 some utility functions are at the end of the file.
 """
 
-import socket, select, sys, re, regex, time, regsub
+import socket, select, sys, re, time
 import os, string, types, traceback
 import data, player, mud, hooks, cmdparse
 import dict_plus
@@ -649,7 +649,7 @@ def is_sequence(input):
    """
    if not input:
       return 0, ''
-   ind = regex.search(';', input)
+   match = re.compile(';').search(input)
    # are we dealing with a lyntin command?
    # if not, then syntax errors don't matter
    if input[0] == data.ltchar:
@@ -659,7 +659,7 @@ def is_sequence(input):
    whether = 0 # whether it's a sequence
    seq = [] # a list of strings to return as the sequence
    parsed = ''
-   if ind != -1:
+   if match:
       nesting = 0
       for c in input:
          if nesting < 0 and is_command:
@@ -704,7 +704,7 @@ def is_history(input):
 
    Returns whether this is a history command.
    """
-   return regex.search('^![0-9]*', input) == 0
+   return re.compile('^!\d*').search(input)
 
 def history_number(input):
    """history_number(input) -> int
@@ -713,10 +713,10 @@ def history_number(input):
    is referencing.
    e.g. !4 returns 4
    """
-   rx = regex.compile('!\([0-9]+\)')
-   if rx.search(input) == -1:
-      return 0
-   return string.atoi(rx.group(1))
+   match = re.compile('!(\d+)').search(input)
+   if not match:
+       return 0
+   return string.atoi(match.group(1))
 
 def get_user_custom(var):
    """get_user_custom(var) -> depends
