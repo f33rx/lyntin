@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.41 2002/03/28 01:03:41 willhelm Exp $
+# $Id: basic.py,v 1.42 2002/03/29 06:23:29 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -47,9 +47,8 @@ def action_cmd(session, words, input):
 
     session.getManager("action").addAction(a, b)
     exported.write_message("action: {%s} -> {%s} added." % (a, b))
-  except:
-    exported.write_error("action: cannot be added.")
-    traceback.print_exc()
+  except Exception, e:
+    exported.write_error("action: cannot be added: %s." % e)
 
 
 def alias_cmd(session, words, input):

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkgui.py,v 1.18 2002/03/27 04:59:09 willhelm Exp $
+# $Id: tkgui.py,v 1.19 2002/03/29 06:23:29 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -368,6 +368,8 @@ class CommandEntry(Tkinter.Entry):
   def __init__(self, master, partk, **kw):
     """ Initializes and sets the key-bindings."""
     self._partk = partk
+    self._inputstack = []
+
     apply(Tkinter.Entry.__init__, (self, master), kw)
 
     self.bind("<KeyPress-Return>", self.createInputEvent)
@@ -429,9 +431,9 @@ class CommandEntry(Tkinter.Entry):
     val = self.get()
     self._partk.handleinput(val)
 
-    # self.inputstack.insert(0, val)
-    # if len(self.inputstack) > 30:
-    #   self.inputstack = self.inputstack[:-1]
+    # self._inputstack.insert(0, val)
+    # if len(self._inputstack) > 30:
+    #   self._inputstack = self._inputstack[:-1]
 
     if self.saveinputhighlight == 1:
       self.selection_range(0, 'end')
@@ -568,14 +570,14 @@ class CommandEntry(Tkinter.Entry):
 
   def callPushInputStack(self, tkevent):
     """ Handles the <Control-KeyPress-Up> event."""
-    self.inputstack.append((self.index('insert'),self.get()))
+    self._inputstack.append((self.index('insert'),self.get()))
     self.delete(0,'end')
 
   def callPopInputStack(self,tkevent):
     """ Handles the <Control-KeyPress-Down> event."""
-    if len(self.inputstack) < 1:
+    if len(self._inputstack) < 1:
       return
-    poppage = self.inputstack.pop()
+    poppage = self._inputstack.pop()
     self.delete(0,'end')
     self.insert(0,poppage[1])
     self.icursor(poppage[0])
