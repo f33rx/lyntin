@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntincmds.py,v 1.13 2002/07/12 00:11:56 willhelm Exp $
+# $Id: lyntincmds.py,v 1.14 2002/07/21 04:14:48 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -101,6 +101,8 @@ def config_cmd(ses, args, input):
     else:
       exported.write_error("config: '%s' is not a valid value." % (value))
     return
+
+  exported.write_error("config: did not recognize '%s' as an attribute." % name)
       
 commands_dict["config"] = (config_cmd, "name= value=")
   
