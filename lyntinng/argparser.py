@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: argparser.py,v 1.14 2002/05/08 01:44:59 willhelm Exp $
+# $Id: argparser.py,v 1.15 2002/05/31 00:01:47 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -263,10 +263,17 @@ class ArgumentParser:
           if arg!="":
             arguments.append( (arg,val) )
             if buildsyntaxline:
+              synarg = arg.upper()
+              if synarg[-1] == "*":
+                synarg = synarg[:-1] + "..."
+
+              if val and len(val) > 0:
+                synarg = synarg + "=" + val
+
               if equalsign == 1:
-                self.syntaxline += "[<%s>] " % arg
+                self.syntaxline += "[<%s>] " % synarg
               else:
-                self.syntaxline += "[%s] " % arg
+                self.syntaxline += "[%s] " % synarg
 
           arg = ""
           val = None
@@ -315,10 +322,17 @@ class ArgumentParser:
     if arg != "":
       arguments.append( (arg, val) )
       if buildsyntaxline:
+        synarg = arg.upper()
+        if synarg[-1] == "*":
+          synarg = synarg[:-1] + "..."
+
+        if val and len(val) > 0:
+          synarg = synarg + "=" + val
+
         if equalsign == 1:
-          self.syntaxline += "<%s> " % arg
+          self.syntaxline += "[<%s>] " % synarg
         else:
-          self.syntaxline += "[%s] " % arg
+          self.syntaxline += "[%s] " % synarg
 
       arg = ""
       val = ""
