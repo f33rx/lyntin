@@ -255,6 +255,7 @@ class client:
       """
       Handle commands to the client (as opposed to the mud).
       """
+
       if input and input[0] == data.ltchar:
          if input[-1] == '\n':
             # remove data.ltchar at beginning and '\n' at end
@@ -446,6 +447,7 @@ def Run():
    try:
       import user
       player.ImportUser()
+      player.InitPlayer()
    except ImportError:
       player.Putline('Unable to load user customizations')
     

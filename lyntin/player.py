@@ -56,204 +56,32 @@ def DispatchCommand(input, seslist):
         return
 
     
-
-    # import module?
-    if string.find("import", words[0]) == 0:
-        LynImport(words, input, seslist)
-        return
-
-    # clear session?
-    if regex.search("^clear", input) != -1:
-        Clear(words, input, seslist)
-        return
-
-    # send a carriage return?
-    if string.find("cr", words[0]) == 0:
-        CR(words, input, seslist)
-        return
-
-    # set/query the lyntin character?
-    if string.find("char", words[0]) == 0:
-        Char(words, input, seslist)
-        return
-
-    # help?
-    if string.find("help", words[0]) == 0:
-        Help(words, input, seslist)
-        return
-
-    # quit? (this can't be abbreviated)
-    if regex.search("^quit", input) != -1:
-        Quit(words, input, seslist)
-
-    if string.find("uncommand", words[0]) == 0:
-        UnCommand(words, input, seslist)
-        return
-
-    if string.find("command", words[0]) == 0:
-        AddCommand(words, input, seslist)
-        return
-
-    # define/query an action?
-    if string.find("action", words[0]) == 0:
-        Action(words, input, seslist)
-        return
-
-    # define/query an alias?
-    if string.find("alias", words[0]) == 0:
-        Alias(words, input, seslist)
-        return
-
-    # resize the databuffer?
-    if string.find("databuffer", words[0]) == 0:
-        DataBuffer(words, seslist)
-        return
-    
-    # grep the databuffer?
-    if string.find("datagrep", words[0]) == 0:
-        DataGrep(words, input, seslist)
-        return
-    
-    # linegrep the databuffer?
-    if string.find("datagreplines", words[0]) == 0:
-        DataGrepLines(words, input, seslist)
-        return
-    
-    # gag some poor fool?
-    if string.find("gag", words[0]) == 0:
-        Gag(words, input, seslist)
-        return
-    
-    # do the history thing?
-    if string.find("history", words[0]) == 0:
-        History(words, input, seslist)
-        return
-    
-    # info command
-    if string.find("info", words[0]) == 0:
-        Info(words, input, seslist)
-        return
-
-    # clear all sessions?
-    if string.find("killall", words[0]) == 0:
-        KillAll(words, input, seslist,)
-        return
-
-    # start logging?
-    if string.find("log", words[0]) == 0:
-        Log(words, input, seslist)
-        return
-
-    # load aliases?
-    if string.find("read", words[0]) == 0:
-        ParseFile(words, input, seslist)
-        return
-
-    # set up a report trigger?
-    if string.find("report", words[0]) == 0:
-        Report(words, input, seslist)
-        return
-    
-    # connect to a mud?
-    if string.find("session", words[0]) == 0:
-        Ses(words, input, seslist)
-        return
-
-    # display something?
-    if string.find("showme", words[0]) == 0:
-        Showme(words, input, seslist)
-        return
-
-    # define a substitute?
-    if string.find("substitute", words[0]) == 0:
-        Substitute(words, input, seslist)
-        return
-
-    # toggle speedwalk?
-    if string.find("speedwalk", words[0]) == 0:
-        SpeedWalk(words, input, seslist)
-        return
-
-    # delete an action?
-    if string.find('unaction', words[0]) == 0:
-        UnAction(words, input, seslist)
-        return
-
-    # send text from a file to the mud?
-    if string.find('textin', words[0]) == 0:
-        Textin(words, input, seslist)
-        return
-
-    # delete an alias?
-    if string.find('unalias', words[0]) == 0:
-        UnAlias(words, input, seslist)
-        return
-
-    # ungag said poor fool?
-    if string.find("ungag", words[0]) == 0:
-        UnGag(words, input, seslist)
-        return
-
-    # remove a substitute?
-    if string.find("unsubstitute", words[0]) == 0:
-        UnSubstitute(words, input, seslist)
-        return
-
-    # define/query variables?
-    if string.find("variable", words[0]) == 0:
-        Variable(words, input, seslist)
-        return
-
-    # save aliases?
-    if string.find("write", words[0]) == 0:
-        WriteFile(words, input, seslist)
-        return
-
-    # report time remaining to tick
-    if string.find("tick", words[0]) == 0:
-        Tick(words, input, seslist)
-        return
-
-    #  reset the ticker (synchronize) or set ticklength
-    if string.find("tickset", words[0]) == 0:
-        Tickset(words, input, seslist)
-        return
-
-
-    # toggle verbose mode
-    if string.find("verbose", words[0]) == 0:
-        Verbose(words, input, seslist)
-        return
-
     # for commands in data.theapp.commands listing
-    try:    c = data.theapp.commands[words[0]]
-    except: 
-        # unrecognized command
-        Putline('error: command is not defined --%s--'%words[0])
-        return
+    clist = data.theapp.commands.keys()
+    for mem in clist:
+        # this means it has to be matched exactly
+        if mem[0] == "^":
+            # FIXME - this might fix that bug that that dude talked about
+            if regex.search(mem, words[0]) != -1:
+                return data.theapp.commands[mem](words, input, seslist)
+        else:
+            if string.find(mem, words[0]) == 0:
+                return data.theapp.commands[mem](words, input, seslist)
 
-    return c(words, input, seslist)
+    # unrecognized command
+    Putline('error: command is not defined --%s--'%words[0])
+    return
 
+###
+### Player library functions
+###
 
-def AddCommand(words, input, seslist):
-    """AddCommand(words, input, seslist) -> None
-
-    Adds a command to the client.
-    This is a user command.
-    """
-    if len(words) > 2:
-        # FIXME - we actually have to go out and find the command
-        # mentioned.  should be in notation /path/module.function
-        # or something similar.
-        data.theapp.AddCommand(words[1], words[2])
-    else:
-        # raise error? or something because there aren't enough
-        # arguments.
-        pass
-
-# input a string and a list, return a list of all the elements
-# in the list that match the string
 def ExpandCommand(s, list):
+    """ExpandCommand(s, list) -> string
+
+    Inputs a string and a list and returns a list of all the elements
+    in the list that match the string.
+    """
     str = s[:]
     ret = []
     wildcard = string.count(str, '*')
@@ -270,6 +98,93 @@ def ExpandCommand(s, list):
             if str == s:
                 ret = ret + [s]
     return ret
+
+def SetSes(ses):
+    """SetSes(ses) -> None
+
+    Sets the active session.  Run set_session hook *before*
+    the actual switch
+    """
+    # pass old and new sessions to the set_session hook
+    hooks.set_session_hook.run((data.currsession, ses))
+    data.currsession = ses
+    ans = 'ok, session "' + ses.name + '" activated.'
+    Putline(ans)
+
+def Prompt():
+    """Prompt() -> None
+
+    Prints a prompt.
+    """
+    data.theapp.ui.Prompt()
+
+def TimeUpdate(seslist):
+    """TimeUpdate(seslist) -> None
+
+    Checks the current time and does time-related stuff (via the ticker).
+    """
+    for ses in seslist:
+        click = time.time()
+        ses.lastclockdelta = click - ses.lastclock
+        if ses.ticker:
+            TickerUpdate((ses,))
+        ses.lastclock = click
+
+def ImportUser():
+    """ImportUser() -> None
+
+    Want to delay this.
+    (i have no clue what this means.)
+    """
+    global user
+    user = GetUserModule()
+
+def GetUserModule():
+    """GetUserModule() -> None
+
+    Imports the user module and returns it.
+    """
+    import user
+    return user
+
+def Putline(line):
+    """Putline(line) -> None
+
+    Prints a message from the client to the player prepending
+    a "#".  This is Lyntin output.
+    """
+    data.theapp.ui.Putline(line)
+
+def PutUntouchedLine(line):
+    """PutUntouchedLine(line) -> None
+    """
+    data.theapp.ui.PutUntouchedLine(line)
+    
+def PutReallyUntouchedLine(line):
+    """PutReallyUntouchedLine(line) -> None
+    """
+    data.theapp.ui.PutReallyUntouchedLine(line)
+
+
+###
+### User standard commands
+###
+
+def AddCommand(words, input, seslist):
+    """AddCommand(words, input, seslist) -> None
+
+    Adds a command to the client.
+    This is a user command.
+    """
+    if len(words) > 2:
+        # FIXME - we actually have to go out and find the command
+        # mentioned.  should be in notation /path/module.function
+        # or something similar.
+        data.theapp.AddCommand(words[1], words[2])
+    else:
+        # raise error? or something because there aren't enough
+        # arguments.
+        pass
 
 def UnCommand(words, input, seslist):
     """UnCommand(words, input, seslist) -> None
@@ -314,7 +229,6 @@ def LynImport(words, input, seslist):
         Putline('import failed.')
     return
 
-
 def Showme(words, input, seslist):
     """Showme(words, seslist) -> None
 
@@ -329,20 +243,6 @@ def Showme(words, input, seslist):
         # only display if this is the current session
         if ses is data.currsession:
             PutUntouchedLine(string.join(words[1:]))
-
-
-def SetSes(ses):
-    """SetSes(ses) -> None
-
-    Sets the active session.  Run set_session hook *before*
-    the actual switch
-    """
-    # pass old and new sessions to the set_session hook
-    hooks.set_session_hook.run((data.currsession, ses))
-    data.currsession = ses
-    ans = 'ok, session "' + ses.name + '" activated.'
-    Putline(ans)
-
 
 def Ses(words, input, seslist):
     """Ses(words, input, seslist) -> None
@@ -571,8 +471,6 @@ def Variable(words, input, seslist):
                 display = ses.GetVarDisplayString(name)
                 PutUntouchedLine(display)
 
-# write aliases/actions, etc to a file
-# this saves the local session and the global session in one fell swoop
 def WriteFile(words, input, seslist):
     """WriteFile(words, seslist) -> None
     
@@ -652,7 +550,6 @@ def Textin(words, input, seslist):
 
     data.currsession = oldses
     
-# read in aliases/actions/gags/substitutes from a file
 def ParseFile(ofile, input, seslist):
     """ParseFile(ofile, seslist) -> None
 
@@ -810,13 +707,6 @@ def KillAll(words,input,seslist):
         Putline('killall: session "'+ses.name+'" cleared.')
 
 
-def Prompt():
-    """Prompt() -> None
-
-    Prints a prompt.
-    """
-    data.theapp.ui.Prompt()
-
 def Action(words, input, seslist):
     """Action(input, seslist) -> None
 
@@ -922,8 +812,6 @@ def Alias(words, input, seslist):
             if count == 0:
                 Putline("alias: no aliases defined.")
 
-
-
 def Help(words, input, seslist):
     """Help(words, seslist) -> None
 
@@ -962,7 +850,6 @@ def Help(words, input, seslist):
         else:
             PutUntouchedLine(mem + " is not a valid help topic.")
 
-    
 def History(words, input, seslist):
     """History(words, seslist) -> None
 
@@ -1218,6 +1105,15 @@ def Tick(words, input, seslist):
     else:
         Putline('command accepts no arguments')
 
+def Version(words, input, seslist):
+    """Version(words, input, seslist) -> None
+
+    Prints out the version.
+    """
+    import data
+    PutUntouchedLine(data.version)
+
+
 def Verbose(words, input, seslist):
     """Verbose(seslist) -> None
 
@@ -1228,18 +1124,6 @@ def Verbose(words, input, seslist):
         ses.verbose = not ses.verbose
         if ses.verbose:
 	    Putline('Verbose mode now on.')
-
-def TimeUpdate(seslist):
-    """TimeUpdate(seslist) -> None
-
-    Checks the current time and does time-related stuff (via the ticker).
-    """
-    for ses in seslist:
-        click = time.time()
-        ses.lastclockdelta = click - ses.lastclock
-        if ses.ticker:
-            TickerUpdate((ses,))
-        ses.lastclock = click
 
 def TickerUpdate(words, input, seslist):
     """TickerUpdate(seslist) -> None
@@ -1264,41 +1148,45 @@ def TickerUpdate(words, input, seslist):
             ses.lasttickclock=0
             ses.warnedtick=0
 
+###
+### This function adds all the standard commands to data.theapp.commands
+###
 
-# want to delay this
-def ImportUser():
-    """ImportUser() -> None
-
-    Want to delay this.
-    (i have no clue what this means.)
-    """
-    global user
-    user = GetUserModule()
-
-def GetUserModule():
-    """GetUserModule() -> None
-
-    Imports the user module and returns it.
-    """
-    import user
-    return user
-
-# print a message from the client to the player
-# prepend a '#', and capitalize everything
-def Putline(line):
-    """Putline(line) -> None
-
-    Prints a message from teh client to the player prepending
-    a "#".  This is Lyntin output.
-    """
-    data.theapp.ui.Putline(line)
-
-def PutUntouchedLine(line):
-    """PutUntouchedLine(line) -> None
-    """
-    data.theapp.ui.PutUntouchedLine(line)
-    
-def PutReallyUntouchedLine(line):
-    """PutReallyUntouchedLine(line) -> None
-    """
-    data.theapp.ui.PutReallyUntouchedLine(line)
+def InitPlayer():
+    import player
+    data.theapp.AddCommand("version", player.Version)
+    data.theapp.AddCommand("alias", player.Alias)
+    data.theapp.AddCommand("unalias", player.UnAlias)
+    data.theapp.AddCommand("import", player.LynImport)
+    data.theapp.AddCommand("^clear", player.Clear)
+    data.theapp.AddCommand("^cr", player.CR)
+    data.theapp.AddCommand("^char", player.Char)
+    data.theapp.AddCommand("help", player.Help)
+    data.theapp.AddCommand("^quit", player.Quit)
+    data.theapp.AddCommand("uncommand", player.UnCommand)
+    data.theapp.AddCommand("command", player.AddCommand)
+    data.theapp.AddCommand("action", player.Action)
+    data.theapp.AddCommand("databuffer", player.DataBuffer)
+    data.theapp.AddCommand("datagreplines", player.DataGrepLines)
+    data.theapp.AddCommand("gag", player.Gag)
+    data.theapp.AddCommand("history", player.History)
+    data.theapp.AddCommand("info", player.Info)
+    data.theapp.AddCommand("killall", player.KillAll)
+    data.theapp.AddCommand("log", player.Log)
+    data.theapp.AddCommand("read", player.ParseFile)
+    data.theapp.AddCommand("report", player.Report)
+    data.theapp.AddCommand("session", player.Ses)
+    data.theapp.AddCommand("showme", player.Showme)
+    data.theapp.AddCommand("substitute", player.Substitute)
+    data.theapp.AddCommand("speedwalk", player.SpeedWalk)
+    data.theapp.AddCommand("unaction", player.UnAction)
+    data.theapp.AddCommand("textin", player.Textin)
+    data.theapp.AddCommand("alias", player.Alias)
+    data.theapp.AddCommand("ungag", player.UnGag)
+    data.theapp.AddCommand("unsubstitute", player.UnSubstitute)
+    data.theapp.AddCommand("variable", player.Variable)
+    data.theapp.AddCommand("write", player.WriteFile)
+    data.theapp.AddCommand("tick", player.Tick)
+    data.theapp.AddCommand("tickset", player.Tickset)
+    data.theapp.AddCommand("verbose", player.Verbose)
+    data.theapp.AddCommand("version", player.Version)
