@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.14 2002/02/24 00:32:26 willhelm Exp $
+# $Id: session.py,v 1.15 2002/02/27 02:25:22 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -79,7 +79,13 @@ class Session:
       data += "   " + mem + ": " +  repr(self.getManager(mem).getCount()) + "\n"
 
     data += ("   ticker: " + self.getTicker().getInfo() + "\n" +
-            "   logfile: " + self.getLogfileName())
+             "   logfile: " + self.getLogfileName() + "\n")
+
+    if lyntin.speedwalk == 1:
+      data += "   speedwalk: on"
+    else: 
+      data += "   speedwalk: off"
+
     return data
 
   def setManager(self, manager, object):

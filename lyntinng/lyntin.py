@@ -5,16 +5,15 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.7 2002/02/26 15:16:13 willhelm Exp $
+# $Id: lyntin.py,v 1.8 2002/02/27 02:25:22 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
 as the main function which starts Lyntin off.
 """
-import sys, os, getopt
 
 # version information
-VERSION = """Lyntin version 3.0 alpha 2
+VERSION = """Lyntin version 3.0 beta 1
 For bugs, suggestions, mailing list info, feature requests,
 architecture docs, et al, see http://lyntin.sourceforge.net/
 
@@ -111,7 +110,8 @@ lyntindir = "."
 
 if __name__ == '__main__':
   try:
-    import engine, event, lyntin
+    import sys, os, getopt
+    import lyntin, engine, event
 
     # figure out where the lyntin files are
     tmp = sys.argv[0]
@@ -174,8 +174,9 @@ if __name__ == '__main__':
     engine.myengine.runengine()
 
   except SystemExit:
-    event.ShutdownEvent().enqueue()
-    engine.myengine.runengine()
+    if engine.myengine != None:
+      event.ShutdownEvent().enqueue()
+      engine.myengine.runengine()
     
   except:
     import traceback
