@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.31 2002/04/21 03:49:31 willhelm Exp $
+# $Id: engine.py,v 1.32 2002/04/21 19:23:36 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -616,7 +616,7 @@ class Engine:
     """
     return self._command_list.keys()
 
-  def addCommand(self, name, func, arguments=None):
+  def addCommand(self, name, func, arguments=None, argoptions=None):
     """
     Registers a command.
 
@@ -629,11 +629,13 @@ class Engine:
       'arguments=None' -- (string) argument specification to create 
                           the argparser
 
+      'argoptions=None' -- (string) options for how the argument spec
+                           should be parsed
     """
     if callable(func):
       self._command_list[name] = func
       if arguments != None:
-        self._command_arguments[name] = argparser.ArgumentParser("command:string " + arguments)
+        self._command_arguments[name] = argparser.ArgumentParser("command:string " + arguments, argoptions)
       return 1
 
     self.writeError(name + ' is uncallable.')

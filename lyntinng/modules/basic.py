@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.62 2002/04/21 19:23:37 willhelm Exp $
+# $Id: basic.py,v 1.63 2002/04/21 20:20:45 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -429,9 +429,9 @@ def if_cmd(session, dict, input):
   """
   # original if_cmd code contributed by Sebastian John
 
-  expr = utils.strip_braces(dict["expr"])
-  action = utils.strip_braces(dict["action"])
-  elseaction = utils.strip_braces(dict["elseaction"])
+  expr = dict["expr"]
+  action = dict["action"]
+  elseaction = dict["elseaction"]
 
   # we have to do manual variable expansion here.
   varexpansion = session.getManager("variable").expand(expr)
@@ -778,15 +778,16 @@ def session_cmd(session, words, input):
   hooks.connect_hook.spamhook((ses, host, port))
 
 
-def showme_cmd(session, words, input):
+def showme_cmd(session, args, input):
   """#showme <message>
 
   Prints stuff to the user display.
   """
-  if len(words) > 1:
-    exported.write_message(string.join(words[1:]))
-  else:
+  if input.find(" ") == -1:
     exported.write_error("syntax: #showme <message>")
+  else:
+    input = input[input.find(" "):]
+    exported.write_message(input)
      
 
 def speedwalk_cmd(session, words, input):
@@ -1023,13 +1024,16 @@ def unsomething_cmd(session, words, input):
   exported.write_message(data[:-1])
 
 
-def variable_cmd(session, words, input):
+def variable_cmd(session, args, input):
   """#variable [<var> <expansion>]
 
   With no arguments, lists all the variables currently set.
   With arguments, sets a new variable.
   """
-  if len(words) == 1:
+  var = args["var"]
+  expansion = args["expansion"]
+
+  if not var and not expansion:
     data = session.getManager("variable").getInfo()
     if data == '':
       data = "variable: no variables defined."
@@ -1037,9 +1041,8 @@ def variable_cmd(session, words, input):
     exported.write_message(data)
     return
 
-  if len(words) == 2:
-    filter = utils.strip_braces(words[1])
-    data = session.getManager("variable").getInfo(filter)
+  if not expansion:
+    data = session.getManager("variable").getInfo(var)
     if data == '':
       data = "variable: no variables defined."
 
@@ -1047,19 +1050,13 @@ def variable_cmd(session, words, input):
     return 
 
   try:
-    # knock off the first word which is the command
-    inputadjusted = input.split(' ', 1)[1]
-
-    # split it into parts
-    (a, b) = utils.split_braced(inputadjusted)
-
-    session.getManager("variable").addVariable(a, b)
-    exported.write_message("variable: %s -> '%s'." % (a, b))
+    session.getManager("variable").addVariable(var, expansion)
+    exported.write_message("variable: %s -> '%s'." % (var, expansion))
   except Exception, e:
     exported.write_error("variable: cannot be set. %s", e)
 
 
-def verbatim_cmd(session, words, input):
+def verbatim_cmd(session, args, input):
   """#verbatim
 
   Turns on and shuts off verbatim mode.
@@ -1068,17 +1065,25 @@ def verbatim_cmd(session, words, input):
     exported.write_error("verbatim cannot be applied to common session.")
     return
 
-  if session._verbatim == 1:
+  option = args["option"]
+  if option == 1:
+    session._verbatim = 1
+    exported.write_message("verbatim: verbatim enabled for session %s." 
+                           % session.getName())
+  elif option == 0: 
     session._verbatim = 0
     exported.write_message("verbatim: verbatim disabled for session %s." 
                            % session.getName())
   else:
-    session._verbatim = 1
-    exported.write_message("verbatim: verbatim enabled for session %s." 
+    if session._verbatim:
+      exported.write_message("verbatim: verbatim is enabled for session %s."
+                           % session.getName())
+    else:
+      exported.write_message("verbatim: verbatim is disabled for session %s."
                            % session.getName())
 
 
-def version_cmd(session, words, input):
+def version_cmd(session, args, input):
   """#version
 
   Prints out the version number, date, copyright info, and
@@ -1087,7 +1092,7 @@ def version_cmd(session, words, input):
   exported.write_message(lyntin.VERSION)
 
 
-def wizlist_cmd(session, words, input):
+def wizlist_cmd(session, args, input):
   """#wizlist
 
   List of people without whom Lyntin wouldn't exist.
@@ -1095,18 +1100,14 @@ def wizlist_cmd(session, words, input):
   exported.write_message(lyntin.WIZLIST)
 
 
-def write_cmd(session, words, input):
+def write_cmd(session, args, input):
   """#write <filename>
 
   Queries the sessions and the lyntin globals for stuff
   and writes it out to a file for persistence.
   """
-  if len(words) == 1:
-    exported.write_message("syntax: #write <filename>")
-    return
-
+  filename = args["file"]
   try:
-    filename = utils.strip_braces(words[1])
     f = open(filename, "w")
     f.write(session.getWriteFileInfo())
     f.close()
@@ -1115,7 +1116,7 @@ def write_cmd(session, words, input):
     exported.write_error("write: error writing to file %s. %s" % (filename, e))
 
 
-def zap_cmd(session, words, input):
+def zap_cmd(session, args, input):
   """#zap
 
   This closes a session and should close the socket and cause
@@ -1129,13 +1130,13 @@ def zap_cmd(session, words, input):
 
 def load():
   """ Initializes the module by binding all the commands."""
-  exported.add_command("^clear", clear_cmd)
+  exported.add_command("^clear", clear_cmd, "")
   exported.add_command("ansi", ansi_cmd, "option:booleanornone=")
   exported.add_command("action", action_cmd)
   exported.add_command("alias", alias_cmd)
   # exported.add_command("antisubstitute", antisubstitute_cmd)
   # exported.add_command("bell", bell_cmd)
-  exported.add_command("boss", boss_cmd)
+  exported.add_command("boss", boss_cmd, "")
   exported.add_command("^char", char_cmd)
   exported.add_command("^cr", cr_cmd)
   exported.add_command("datagrep", datagrep_cmd)
@@ -1170,7 +1171,7 @@ def load():
   # exported.add_command("report", report_cmd)
   # exported.add_command("savepath", savepath_cmd)
   exported.add_command("session", session_cmd)
-  exported.add_command("showme", showme_cmd)
+  exported.add_command("showme", showme_cmd, "showstuff*")
   # exported.add_command("snoop", snoop_cmd)
   exported.add_command("speedwalk", speedwalk_cmd)
   exported.add_command("substitute", substitute_cmd)
@@ -1191,12 +1192,12 @@ def load():
   # exported.add_command("unpath", unpath_cmd)
   exported.add_command("unsubstitute", unsomething_cmd)
   exported.add_command("unvariable", unsomething_cmd)
-  exported.add_command("variable", variable_cmd)
-  exported.add_command("version", version_cmd)
-  exported.add_command("verbatim", verbatim_cmd)
-  exported.add_command("wizlist", wizlist_cmd)
-  exported.add_command("write", write_cmd)
-  exported.add_command("zap", zap_cmd)
+  exported.add_command("variable", variable_cmd, "var= expansion=")
+  exported.add_command("verbatim", verbatim_cmd, "option:booleanornone=")
+  exported.add_command("version", version_cmd, "")
+  exported.add_command("wizlist", wizlist_cmd, "")
+  exported.add_command("write", write_cmd, "file")
+  exported.add_command("zap", zap_cmd, "")
 
 def unload():
   pass

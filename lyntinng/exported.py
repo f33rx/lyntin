@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.11 2002/04/11 03:58:22 willhelm Exp $
+# $Id: exported.py,v 1.12 2002/04/21 19:23:37 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -24,7 +24,7 @@ def lyntin_command(text):
   """
   get_engine().handleUserData(text)
 
-def add_command(str, func, arguments = None):
+def add_command(str, func, arguments=None, argoptions=None):
   """ The best way to add commands to Lyntin.
 
   arguments:
@@ -32,8 +32,13 @@ def add_command(str, func, arguments = None):
     'str' -- the command name.  ex. "help"
 
     'func' -- the function to call when that command is executed.
+
+    'arguments=None' -- the argument stuff for the argument parser.
+
+    'argoptions=None' -- options for how to parse the argument stuff.
+
   """
-  get_engine().addCommand(str, func, arguments)
+  get_engine().addCommand(str, func, arguments, argoptions)
 
 def remove_command(str):
   """ Removes a command from Lyntin.

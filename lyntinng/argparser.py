@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.16 2002/04/16 03:44:37 willhelm Exp $
+# $Id: argparser.py,v 1.2 2002/04/21 20:20:45 willhelm Exp $
 #######################################################################
 """
 This provides the ArgumentParser class which parses command arguments
@@ -14,15 +14,60 @@ automatically into a dictionary.
 import string, re
 import utils
 
+defaultOptions={"stripBraces":1}
+optionParser = None
+
 class ArgumentParser:
   """
   This is the actual argumentparser class
   """
   
-  def __init__(self,argspec):
+  def __init__(self,argspec,argoptions):
     self.typecheckers = { "string":stringChecker(), "int":intChecker() , "boolean":booleanChecker(), "booleanornone":booleanOrNoneChecker()}
+    if argoptions:
+      self.buildOptions(argoptions)
+    else:
+      self.options = defaultOptions.copy()
     self.buildParsers(argspec)
     return
+
+  def getOption(self, optionname):
+    if self.options.has_key(optionname):
+      return self.options[optionname]
+    else:
+      return None
+
+  
+
+  def buildOptions(self,argoptions):
+    """
+    Set the options for this ArgumentParser
+    key=value values in argoptions get put directly into self.options
+    other values in argoptions get set to 1 in self.options.
+
+    example:  argoptions="ignorall loud:boolean=true"
+              self.options={"ignorall":1,"loud":1}
+
+              argoptions="lalala wewewewe=hahaha"
+              self.options={"lalala":1,"wewewewe"="hahaha"
+
+    """
+    self.argoptions=argoptions
+    self.options=defaultOptions.copy()
+    if optionParser == None:
+      optionParser = ArgumentParser("otherOptions* otherValuedOptions*")
+    dict = optionParser.parse(argoptions)
+
+    for key in dict.keys():
+      if key=="otherOptions":
+        for otherOption in dict[key]:
+          self.options[otherOption] = 1
+      elif key=="otherValuedOptions":
+        for otherKey in dict[key].keys():
+          self.options[otherkey] = dict[key][otherkey]
+      else:
+        self.options[key] = dict[key]
+    
 
   def buildParsers(self, argspec):
     """
@@ -88,7 +133,7 @@ class ArgumentParser:
           argname = argname[:-2]
           if i < len(parsedspec) -1:
             raise Exception, "named collection argument must be the last argument (%s)" % (argname)
-          parser = extraNamedParser(argname)
+          parser = extraNamedParser(self,argname)
           namedCollector = 1
         else: #this is an index collection argument
           argname = argname[:-1]
@@ -101,10 +146,10 @@ class ArgumentParser:
             nextarg,nextdef = parsedspec[i+1]
             if len(nextarg) < 2 or nextarg[-2:] != "**":
               raise Exception, "index collector can only be second-to-last argument when last argument is a named collector"
-          parser = extraIndexParser(argname)
+          parser = extraIndexParser(self,argname)
           indexCollector = 1
       else:
-        parser = Parser(argname)
+        parser = Parser(self,argname)
 
       if self.typecheckers.has_key(typespec):
         typechecker = self.typecheckers[typespec]
@@ -167,7 +212,7 @@ class ArgumentParser:
           raise Exception, "Invalid named argument: %s=%s" % (key,val)
         parser.parseInto(key,val,dict)
 
-    # no check that everything ahs been specified, puttingin defaults 
+    # now check that everything ahs been specified, puttingin defaults 
     # where available
     for key in self.parsers.keys():
       if not dict.has_key(key):
@@ -205,7 +250,7 @@ class ArgumentParser:
       nextchar = input[0:1]
       input = input[1:]
 
-      if nextchar == " ":
+      if nextchar == " " or nextchar == "\t":
         if not bracketdepth:
           # We've completed a full argument
           if arg!="":
@@ -264,10 +309,11 @@ class Parser:
   This is the base class for the parsers that argumentparser uses to
   actually populate the dictionary with each argument.
   """
-  def __init__(self,argname):
+  def __init__(self, argparser, argname):    
     self.argname = argname
     self.default = None
     self.typechecker = None
+    self.argparser = argparser
 
   def parseInto(self, key, val, dict):
     if dict.has_key(self.argname):
@@ -276,7 +322,8 @@ class Parser:
       dict[self.argname] = self.parse(val)
 
   def parse(self, val):
-    val = utils.strip_braces(val)
+    if self.argparser.options["stripBraces"]:
+      val = utils.strip_braces(val)
     if self.typechecker:
       return self.typechecker.check(val)
     else:
@@ -288,8 +335,8 @@ class extraIndexParser(Parser):
   for each call to parseInto an entry is put into the list value in
   the argument dictionary.
   """
-  def __init__(self,argname):
-    Parser.__init__(self,argname)
+  def __init__(self,argparser,argname):
+    Parser.__init__(self,argparser,argname)
     self.default = []
     
   def parseInto(self, index, val, dict):
@@ -305,15 +352,15 @@ class extraNamedParser(Parser):
   for each call to parseInto a new key=value pair is put into a map
   in the argument dictionary.
   """
-  def __init__(self,argname):
-    Parser.__init__(self,argname)
+  def __init__(self,argparser,argname):
+    Parser.__init__(self,argparser,argname)
     self.default = {}
     
   def parseInto(self, key, val, dict):
     val=self.parse(val)
     if dict.has_key(self.argname):
-      if dict[self.argname].has_key(key):
-        raise Exception, "multiple values given for extra argument %s" % (key)
+      if dict.has_key(key) or dict[self.argname].has_key(key):
+        raise Exception, "multiple values given for argument %s" % (key)
       dict[self.argname][key] = (val)
     else:
       dict[self.argname] = {key:val}
