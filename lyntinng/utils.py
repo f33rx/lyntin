@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: utils.py,v 1.16 2002/04/16 03:44:37 willhelm Exp $
+# $Id: utils.py,v 1.17 2002/04/21 20:20:45 willhelm Exp $
 #######################################################################
 """
 This has a series of utility functions that aren't related to
@@ -33,6 +33,31 @@ def chomp(text):
   text = text.replace("\n", "")
   text = text.replace("\r", "")
   return text
+
+
+def http_get(url):
+  import httplib
+  if url.find("http://") == -1:
+    raise ValueError, "This is not a valid url."
+
+  filename = url[7:]
+
+  if filename.find("/") == -1:
+    filename += "/"
+  host, resource = filename.split("/", 1)
+
+  resource = "/" + resource
+  print host, resource
+  sock = httplib.HTTP()
+  sock.connect(host)
+  sock.putrequest("GET", resource)
+  sock.endheaders()
+  status, reason, headers = sock.getreply()
+
+  if status != 200:
+    raise ValueError, "HTTP error: %d %s" % (status, reason)
+
+  return sock.getfile()
 
 
 def expand(str, list):

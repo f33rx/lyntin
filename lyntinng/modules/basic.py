@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.78 2002/04/27 20:58:20 jmberne Exp $
+# $Id: basic.py,v 1.79 2002/04/28 02:47:57 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -667,41 +667,15 @@ def read_cmd(session, args, input):
   """
   filename = args["filename"]
 
-  # http reading contributed by Sebastian John
-  if filename.find("http://") == 0:
-    url = filename[7:]
-    if url.find("/") == -1:
-      exported.write_error("read: malformed url.")
-      return
-
-    try:
-      import httplib
-    except:
-      exported.write_error("read: httplib (required for http command files) " +
-                           "cannot be imported.")
-      return
-       
-    host, resource = url.split("/", 1)
-    resource = "/" + resource
-      
-    sock = httplib.HTTP()
-    sock.connect(host)   
-    sock.putrequest("GET", resource)
-    sock.endheaders()
-    status, reason, headers = sock.getreply()
-     
-    if status != 200:
-      exported.write_error("read: http error: %d %s" % (status, reason))
-      return
-      
-    file = sock.getfile()
-    
-  else:
-    try:
+  try:
+    # http reading contributed by Sebastian John
+    if filename.find("http://") == 0:
+      file = utils.http_get(filename)
+    else:
       file = open(filename, "r")
-    except:
-      exported.write_error("read: file %s cannot be opened." % filename)
-      return
+  except Exception, e:
+    exported.write_error("read: file %s cannot be opened.\n%s" % (filename, e))
+    return
     
   contents = file.readlines()
 
