@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: __init__.py,v 1.3 2002/02/23 21:10:32 willhelm Exp $
+# $Id: __init__.py,v 1.4 2002/02/24 00:32:26 willhelm Exp $
 #######################################################################
 
 import glob, os, sys, traceback

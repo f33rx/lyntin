@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.9 2002/04/11 00:21:12 willhelm Exp $
+# $Id: exported.py,v 1.10 2002/04/11 01:50:07 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 

@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: history.py,v 1.3 2002/03/22 01:27:24 willhelm Exp $
+# $Id: history.py,v 1.4 2002/04/05 23:55:46 willhelm Exp $
 #######################################################################
 """
 The history manager keeps track of the last 30 commands entered

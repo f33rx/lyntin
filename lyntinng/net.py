@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.11 2002/04/08 21:53:05 willhelm Exp $
+# $Id: net.py,v 1.12 2002/04/09 22:11:59 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket

@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.20 2002/04/09 22:11:59 willhelm Exp $
+# $Id: event.py,v 1.21 2002/04/11 00:21:12 willhelm Exp $
 #######################################################################
 """
 Holds the event structures in lyntin.  All events inherit from 

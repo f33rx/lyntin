@@ -1,9 +1,9 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: __init__.py,v 1.2 2002/02/08 04:05:42 willhelm Exp $
 #######################################################################
 

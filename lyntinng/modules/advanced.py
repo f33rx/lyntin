@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.5 2002/04/04 01:04:31 willhelm Exp $
+# $Id: advanced.py,v 1.6 2002/04/11 01:50:07 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -55,6 +55,9 @@ def import_cmd(session, words, input):
       _module = sys.modules[mod]
       try:
         _module.unload()
+      except:
+        pass
+      try:
         reload(_module)
         _module = sys.modules[mod]
         _module.load()

@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: gag.py,v 1.8 2002/03/19 23:05:44 willhelm Exp $
+# $Id: gag.py,v 1.9 2002/03/24 21:00:17 willhelm Exp $
 #######################################################################
 """
 This module defines the GagManager which handles gags in Lyntin.

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001
+# copyright (c) Free Software Foundation 2001
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: testserver.py,v 1.1.1.1 2001/12/01 04:27:46 willhelm Exp $
+# $Id: testserver.py,v 1.2 2002/01/20 07:21:02 willhelm Exp $
 #######################################################################
 """
 This testserver just allows someone to test Lyntin without

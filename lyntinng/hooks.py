@@ -1,11 +1,11 @@
 #######################################################################
 # This file is part of Lyntin.
 # copyright (c) Lyn Headley 1996-2000
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: hooks.py,v 1.1 2002/04/03 03:14:15 willhelm Exp $
 ##################################################################
 """
 Holds all the hook constants for all the hooks that Lyntin has.

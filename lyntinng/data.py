@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2002
+# copyright (c) Free Software Foundation 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: data.py,v 1.2 2002/03/30 18:36:27 willhelm Exp $
+# $Id: data.py,v 1.3 2002/04/01 18:24:36 willhelm Exp $
 #######################################################################
 """
 This module defines the databuffer for grepping data.  It keeps 

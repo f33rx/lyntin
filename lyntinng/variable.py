@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: variable.py,v 1.8 2002/03/19 23:05:44 willhelm Exp $
+# $Id: variable.py,v 1.9 2002/04/11 03:19:56 willhelm Exp $
 #######################################################################
 """
 This module defines the VariableManager which handles variables.
@@ -82,6 +82,25 @@ class VariableManager(manager.Manager):
     list = self._variables.keys()
     list.sort()
     return list
+
+  def getVariable(self, name, default=None):
+    """ Returns the value for a given variable.
+
+    arguments:
+
+      'name' -- (string) the name of the variable.
+
+      'default=None' -- the default value to return if
+                        the variable doesn't exist
+
+    returns:
+
+      the variable value or the default
+    """
+    if self._variables.has_key(name):
+      return self._variables[name]
+    else:
+      return default
 
   def _setBuiltinVars(self):
     """ Adds a series of built-in variables."""

@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.29 2002/04/11 02:56:58 willhelm Exp $
+# $Id: session.py,v 1.30 2002/04/11 03:19:56 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.

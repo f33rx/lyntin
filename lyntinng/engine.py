@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Will Guaraldi 2001, 2002
+# copyright (c) Free Software Foundation 2001, 2002
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.28 2002/04/08 21:53:05 willhelm Exp $
+# $Id: engine.py,v 1.29 2002/04/11 01:50:07 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
