@@ -37,7 +37,7 @@ def handle_mud_output(output, ses):
     if not string.split(output):
         return # just whitespace
 
-    #log(output)
+    log(output)
 
     #import pdb; pdb.set_trace()
     # I st... er 'adopted' this code from 'telnet.py', which comes with
@@ -59,7 +59,6 @@ def handle_mud_output(output, ses):
             elif opt == WONT:
                 if c == '\001':
                     data.theapp.ui.OnEcho()
-
             # we don't take orders
             # FIXME
             elif opt == DO:
