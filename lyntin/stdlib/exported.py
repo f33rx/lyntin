@@ -14,76 +14,111 @@
 
 import data, mud, app, hooks, scheduler
 
-##################################################################
-# The preferred way of interacting with lyntin.
-# Treat `str' as either a lyntin command (if it begins with a "#")
-# or as input to a mud
 def lyntin_command(str):
+    """lyntin_command(str) -> none
+
+    The preferred way of interacting with lyntin.
+    Treat 'str' as either a lyntin command (begins with a '#'
+    just like you would type at the prompt) or a mud command.
+    """
     data.theapp.PreHandleUserInput(str)
 
+def lyntin_add_command(str, func):
+    """lyntin_add_command(str, func) -> none
 
-##################################################################
-# return the session named sesname
+    Takes in a string and a function and adds the str -> func
+    binding to the command hash.
+    """
+    data.theapp.AddCommand(str, func)
+
+
 def get_session(sesname):
+    """get_session(sesname) -> session ob
+
+    Takes in a session name (string) and returns a session object.
+    """
     return data.GetSes(sesname)[0]
 
 
-##################################################################
-# return a list of all active sessions
 def get_active_sessions():
+    """get_active_sessions() -> session ob list
+
+    Returns a list of active sessions.
+    """
     return data.GetSes('all')
 
 
-##################################################################
-# get the current session
 def get_current_session():
+    """get_current_session() -> session ob
+
+    Gets the current session ob.
+    """
     return data.currsession
 
 
-##################################################################
-# set the current session
 def set_current_session(ses):
+    """set_current_session(ses) -> none
+
+    Sets the current session.
+    """
     data.currsession = ses
 
 
-##################################################################
-# return the number of encountered errors
 def get_num_errors():
+    """get_num_errors() -> int
+
+    Returns the number of encountered errors.
+    """
     return data.theapp.numerrors
 
 
-##################################################################
-# set the number of encountered errors
 def set_num_errors(num):
+    """set_num_errors(num) -> none
+
+    Sets the number of encountered errors.  Be careful using this
+    as Lyntin keeps track of the number of errors for a reason.
+    """
     data.theapp.numerrors = num
 
 
-##################################################################
-# return a reference to the history list
 def get_history():
+    """get_history() -> history list
+
+    Returns a reference to the history list.
+    """
     return data.history
 
 
-##################################################################
-# set the history list to a supplied list
 def set_history(lst):
+    """set_history(lst) -> none
+
+    Sets the history list to the supplied list.
+    """
     data.history = lst
 
 
-##################################################################
-# return a list of entries from ses's databuffer which match str
 def grep_databuffer(str, ses):
+    """grep_databuffer(str, ses) -> list of entries
+
+    Returns a list of entries from the ses's databuffer which
+    match the str.
+    """
     return ses.databuf.grep(str)
 
     
-##################################################################
-# return a list of lines from ses's databuffer which match str
 def grep_databuffer_lines(str, ses):
+    """grep_databuffer_lines(str, ses) -> list of lines
+
+    Returns a list of lines from the ses's databuffer which
+    match the string.
+    """
     return ses.databuf.greplines(str)
 
-##################################################################
-# print a line to the screen with an added \n
 def print_line(str):
+    """print_line(str) -> none
+
+    Prints a line to the screen with an added \n.
+    """
     data.player.PutUntouchedLine(str)
 
 ##################################################################

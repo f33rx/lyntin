@@ -9,6 +9,11 @@
 """
 defines lyntin's user-level commands
 (of course they can all be used from user code too)
+
+Commands can also be written in modules and when the modules are imported
+(via the #import command) the commands can be added to the command
+hash by importing exported.py and using the lyntin_add_command function
+there.
 """
 
 import string, regex, sys, regsub, socket, time
