@@ -290,13 +290,17 @@ def Ses(words, input, seslist):
                 Putline('ses: session "'+ses.name+'" already exists.')
                 return
 
-        # extract parameters
-        name = to[0]
-        host = to[1]
-        port = string.atoi(to[2])
-
-        # try to connect with the given parameters
         try:
+            # extract parameters
+            name = to[0]
+            host = to[1]
+            port = string.atoi(to[2])
+        except ValueError:
+            Putline('ses: bad arguments: #session sesname hostname port')
+            return
+
+        try:
+            # try to connect with the given parameters
             Putline("ses: Trying to connect...")
             thisses = data.UserSession(name,host,port)
             
