@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: manager.py,v 1.10 2002/10/20 16:09:57 willhelm Exp $
+# $Id: manager.py,v 1.11 2002/11/06 03:03:19 willhelm Exp $
 #######################################################################
 """
 Managers manage things.  Most X{manager}s subclass the "manager.Manager"
@@ -124,6 +124,7 @@ class Manager:
         being held by this manager
     @rtype: list of strings
     """
+    pass
     
   def getStatus(self, ses):
     """
