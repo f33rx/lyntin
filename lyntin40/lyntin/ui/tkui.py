@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.19 2004/03/30 00:22:00 willhelm Exp $
+# $Id: tkui.py,v 1.20 2004/04/18 08:24:51 glasssnake Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -1016,7 +1016,7 @@ def buffer_write(msg, txtbuffer, currentcolor, unfinishedcolor):
     if line.endswith("\n"):
       line = (pretext + line[:-1].replace("\n", "\n" + pretext) + "\n")
     else:
-      line = pretext + line.replace("\n", "\n" + pretext)
+      line = pretext + line.replace("\n", "\n" + pretext) + "\n"
 
 
   # we remove all \\r stuff because it's icky
