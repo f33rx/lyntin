@@ -429,6 +429,11 @@ def Run():
    """
    cl = client()
    data.theapp = cl
+
+   # needed to wait until data.theapp is there until we can
+   # add all the commands (which is what InitPlayer does).
+   player.InitPlayer()
+
    cl.PreInitialize()
     
    cl.CommandLine1()
@@ -447,7 +452,6 @@ def Run():
    try:
       import user
       player.ImportUser()
-      player.InitPlayer()
    except ImportError:
       player.Putline('Unable to load user customizations')
     

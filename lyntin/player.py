@@ -1190,3 +1190,4 @@ def InitPlayer():
     data.theapp.AddCommand("tickset", player.Tickset)
     data.theapp.AddCommand("verbose", player.Verbose)
     data.theapp.AddCommand("version", player.Version)
+    data.theapp.AddCommand("read", player.ParseFile)
