@@ -16,7 +16,8 @@ import os, string, types, traceback
 import data, player, mud, hooks, cmdparse
 import dict_plus
 
-_ltd = ''           # LYNTINDIR
+"""LYNTINDIR"""
+_ltd = ''
 
 
 class Client(dict_plus.c):

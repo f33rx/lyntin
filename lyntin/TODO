@@ -2,38 +2,31 @@ For a more up-to-date TODO, please check the web-site:
 http://lyntin.sourceforge.net
 
 -------------------------------------------------------------
-re-route Put* functions through the session so then
-we can turn quell them on a session by session basis--they're 
-really session oriented.
-
-finish cleaning up modules
-
-fix spacing problems in tkgui
+FOR 2.0 release:
 
 finish up help files
  - help files on modules
 
+
+
+------------------------------------------------------------
+FOR 3.0 release?:
+
+re-organize modules?
+
+re-route Put* functions through the session so then
+we can turn quell them on a session by session basis--they're 
+really session oriented.
+
 fix all the files--
  - consistent indentation 
- - doc-strings
  - consistent naming
-
-fix lyntin messages
- - consistent messaging
- - consistent use of PutMessage, PutError, and PutRaw
-
-
 
 build some kind of sleep command.  so you can sleep some arbitrary amount
 between alias commands.
 
 Replicate more of tintin's functionality.
  - colors
-
-embed lyntin into a C program.
- - portable disabling of echo
- - portable tab completion
- - very fast action parsing
 
 support grepping of _second_ part of actions, aliases?
 
@@ -44,8 +37,6 @@ add pattern variables to substitutes
 
 interpreter mode, in which everything typed is sent to a python interpreter.
 - avoids needing #@ all the time, also allow multiline stuff
-
-clean up command dispatch
 
 allow multiple actions with the same key (use a setaction method of session
 class, stupid)
@@ -62,7 +53,4 @@ fix telnet client
 
 alias/action groups
 
-!!! add put_line to exported
-
 put command_separator in user_custom
-

@@ -37,6 +37,7 @@ version = "lyntin 2.0b3, copyright 2000, see http://lyntin.sourceforge.net"
 """The application global variable.  It becomes an instance of app.client."""
 theapp = None
 
+
 """initdir is the base directory to look for lyntin files and other such
 goodies in."""
 initdir = ''
@@ -48,6 +49,7 @@ else:
     initdir = os.getcwd()
 if initdir[-1] != os.sep:
     initdir = initdir + os.sep
+
 
 """datadir is the directory to store the log in. Default to initdir"""
 datadir = ''
@@ -69,39 +71,50 @@ except:
     player.PutError('Unable to write log to LYNTINDATADIR %s!'%datadir)
     logfile = None
 
+
 """The lyntin character: prepended to all lyntin commands."""
 ltchar = '#'
 
+
 """Current number of derived sessions.  (Heck if i know what this is.)"""
 numsessions = 0
+
 
 """The timeout value which is how long we wait on a socket for data.  Keep
 this low."""
 timeout = .01
 
+
 """ The initial session started for the user, from which other
 sessions inherit """
 common = None
 
+
 """currsession is the current session.  It is initialized to common."""
 currsession = None
+
 
 """sessionlist is the list of session objects.  Starts out with just the
 common session."""
 sessionlist = None
 
+
 """BUFSIZE is the amount of data that we read each loop."""
 BUFSIZE = 4096
 
+
 """var_regex is the regular expression that matches variables."""
 var_regex = regex.compile('%\([0-9]+\)')
+
 
 """history is the list of the last 30 or so commands the user has
 recently typed."""
 history = []
 
+
 """this is the maximum size of the history list."""
 histsize = 30
+
 
 """this sets whether we're in debug mode or not.  affects mud.log."""
 debug = 1
@@ -199,6 +212,12 @@ class Session:
         self.sorck = None # the socket
         self.domain = None
         self.handlers = []
+
+        self.verbose = 1      # verbose mode--do we want to print
+                              # lots of silly messages 1/0
+
+        self.quietmode = 0    # quells PutMessage totally
+
         
         if name:
             self.name = name
@@ -240,7 +259,6 @@ class Session:
         pass
 
 
-    
 class UserSession(Session):
     """
     session class for the user interface
@@ -266,11 +284,6 @@ class UserSession(Session):
         self.ticker = 0
         self.tickaction = ''
         self.warnedtick = 0
-        self.verbose = 1      # verbose mode--do we want to print
-                              # lots of silly messages 1/0
-
-        self.quietmode = 0    # quells PutMessage totally
-
         self.handlers.append(handler.AppHandler())
 
     def tickUpdate(self):
