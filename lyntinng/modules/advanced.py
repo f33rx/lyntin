@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: advanced.py,v 1.1 2002/02/27 03:39:34 willhelm Exp $
 #######################################################################
 import traceback, sys, string
 import exported, engine
@@ -33,6 +33,7 @@ def python_cmd(session, words, input):
   except:
     exported.write_error("Error in raw python stuff.")
     exported.write_error(string.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])))
+    exported.tally_error()
 
 
 def _import_user_module():

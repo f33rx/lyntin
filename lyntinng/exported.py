@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.1 2002/02/23 21:11:24 willhelm Exp $
+# $Id: exported.py,v 1.2 2002/03/01 03:46:07 willhelm Exp $
 #######################################################################
 """
 This is the easy module programmers interface and is guaranteed
@@ -191,3 +191,11 @@ def get_engine():
 
   """
   return engine.myengine
+
+def tally_error():
+  """
+  This adds one to the current error count and checks to see
+  if we're over our limit.  If we are, it enqueues a shutdown
+  event which will shutdown Lyntin.
+  """
+  engine.myengine.tallyError()

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.16 2002/03/01 03:46:07 willhelm Exp $
+# $Id: engine.py,v 1.17 2002/03/02 18:10:39 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -28,6 +28,7 @@ import Queue, traceback, copy, string, re, thread
 
 import threadmanager, session, ui.ui, alias, lyntin, utils, event
 import history, action, alias, gag, highlight, substitute, variable
+import exported
 
 """
 myengine is a singleton.  so when it gets instantiated, this
@@ -248,7 +249,7 @@ class Engine:
           input = mem.split(" ", 1)
           if len(input) < 2:
             self._current_session = self._sessions[ses]
-            self.writeMessage(ses + " now current session.")
+            exported.write_message(ses + " now current session.")
           else:
             self._sessions[ses].handleUserData(mem.split(" ", 1)[1], 
                                                      internal)
@@ -396,7 +397,7 @@ class Engine:
       self._current_session = self._sessions[name]
 
     else:
-      self.writeError("No session of that name.")
+      exported.write_error("No session of that name.")
 
   def writeSession(self, message):
     """ Writes a message to the socket.
@@ -427,7 +428,7 @@ class Engine:
       session = self._current_session
 
     if session.getName() == "common":
-      self.writeError("Can't close the common session.")
+      exported.write_error("Can't close the common session.")
       return 0
          
     session.shutdown(())
@@ -475,12 +476,24 @@ class Engine:
         # print e, e.__dict__
         e.execute()
       except KeyboardInterrupt:
+        self.tallyError()
         pass
       except SystemExit:
         pass
       except:
+        self.tallyError()
         traceback.print_exc()
       self._num_events_processed += 1
+        
+  def tallyError(self):
+    """ Adds one to the error count.
+
+    If we see more than 20 errors, we shutdown.
+    """
+    lyntin.errorcount = lyntin.errorcount + 1
+    if lyntin.errorcount > 20:
+      exported.write_error("Error count exceeded--shutting down.")
+      event.ShutdownEvent().enqueue()
 
   def shutdown(self, args):
     """ Sets the shutdown status for the engine."""
@@ -504,7 +517,8 @@ class Engine:
             "   thread manager: " + repr(self._threadman) + "\n" + 
             "   speedwalking: " + repr(lyntin.speedwalk) + "\n" +
             "   ansicolor: " + repr(lyntin.ansicolor) + "\n" +
-            "   ticks: " + repr(self._tick) + "\n")
+            "   ticks: " + repr(self._tick) + "\n" +
+            "   errors: " + repr(lyntin.errorcount) + "\n")
 
 
     # print info from each session

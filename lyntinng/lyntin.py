@@ -5,7 +5,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: lyntin.py,v 1.8 2002/02/27 02:25:22 willhelm Exp $
+# $Id: lyntin.py,v 1.9 2002/03/02 23:21:34 willhelm Exp $
 #######################################################################
 """
 This module holds the Lyntin "global variables" and constants as well
@@ -107,6 +107,10 @@ datadir = "./"
 # such are located.
 lyntindir = "."
 
+# Lyntin counts the total number of errors it's encountered.
+# This enables us to shut ourselves down if we encounter too
+# many indicating a "bigger problem".
+errorcount = 0
 
 if __name__ == '__main__':
   try:

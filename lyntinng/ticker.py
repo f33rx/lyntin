@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.10 2002/02/23 21:10:32 willhelm Exp $
+# $Id: ticker.py,v 1.11 2002/02/27 02:25:22 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -58,19 +58,43 @@ class Ticker:
 
     You'll get a warning message this many seconds before
     the tick.
+
+    arguments:
+
+      'value' -- the number of seconds before the tick to do 
+                 the warning
+
     """
     self._tickwarn = value
 
   def getTickWarn(self):
-    """ Returns the tick warning length."""
+    """ Returns the tick warning length.
+
+    returns:
+
+      (int) the number of seconds to warn before
+
+    """
     return self._tickwarn
 
   def setSessionName(self, name):
-    """ Sets the session name."""
+    """ Sets the session name.
+
+    arguments:
+
+      'name' -- the name of the session that owns this ticker
+
+    """
     self._sessionname = name
 
   def getSessionName(self):
-    """ Returns the session name."""
+    """ Returns the session name.
+
+    returns:
+
+      session name string
+
+    """
     return self._sessionname
 
   def enableTicker(self):
@@ -99,6 +123,11 @@ class Ticker:
     This gets called by the TIMER_HOOK in the engine every
     second.  It figures out if this current second marks a tick
     or a tickwarning and does accordingly.
+
+    arguments:
+
+      'args' -- tuple containing the current tick
+
     """
     tick = args[0]
 
