@@ -59,13 +59,13 @@ if initdir[-1] != os.sep:
 """datadir is the directory to store the log in. Default to initdir"""
 datadir = ''
 if os.environ.has_key('LYNTINDATADIR'):
-	datadir = os.environ['LYNTINDATADIR']
-	if not datadir:
-		datadir = initdir
+   datadir = os.environ['LYNTINDATADIR']
+   if not datadir:
+      datadir = initdir
 else:
-	datadir = initdir
+   datadir = initdir
 if datadir[-1] != os.sep:
-	datadir = datadir + os.sep
+   datadir = datadir + os.sep
 
 
 """the logfile."""
