@@ -68,7 +68,7 @@ class BaseGUI:
 	yet, it should be opened by this.
 	"""
 	if self.status('scrollback')==1:
-	    #scroll it back here.  not after the else
+	    scrollback_scroll('back')
 	    pass
 	else:
 	    self.scrollback_open()
@@ -81,15 +81,23 @@ class BaseGUI:
 	if it's not.
 	"""
 	if self.status('scrollback')==1:
-	    #scroll it forward
+	    self.scrollback_scroll('forward')
 	    pass
 	return None
+
+    def scrollback_scroll(self,direction='back'):
+        """scroll_forward(self,direction='back')->None
+
+	Actually does the scrolling.  Override me.
+	"""
+    	return None
 
     def scrollback_close(self):
 	"""ScrollbackClose(self)->None
 
 	Closes scrollback.
 	"""
+	self.status('scrollback',0)
 	return None
 
     def mainloop(self):
@@ -104,8 +112,11 @@ class BaseGUI:
 	    except SystemExit:
 		return
 
-    def Prompt(self): 
-	"""Prompt(self) -> None
+    def Prompt(self):
+        self.prompt()
+
+    def prompt(self): 
+	"""prompt(self) -> None
 	
 	FIXME -- What about this one?
 	Sets a prompt for the user.
@@ -121,6 +132,9 @@ class BaseGUI:
         return self.supports('echo')
 
     def WarnNoEcho(self):
+        self.warn_no_echo()
+
+    def warn_no_echo(self):
 	pass
     
     def echo(self,yesno):
@@ -132,7 +146,7 @@ class BaseGUI:
 	    self.status('echo',1)
 	else:
 	    self.status('echo',0)
-	
+
     def OnEcho(self):
 	"""OnEcho(self) -> None
 
@@ -158,8 +172,8 @@ class BaseGUI:
 	"""
         pass
 
-    def print_string(self,line,modifiers=None,ending='\n'):
-	"""print_string(self,line)->None
+    def print_string(self,line,modifiers=None,ending='\n',target=None):
+	"""print_string(self,line,modifiers=None,ending='\n',window=None)->None
 
 	Print a string to the UI after processing for escapes such
 	as ANSI colors.  The variable 'ending' can be set to '' to
@@ -180,6 +194,17 @@ class BaseGUI:
 	be the most all around useful solution.  This
 	documentation will obviously need to be trimmed before the
 	release because it will be wrong then.
+
+	9/29/00
+	Added the target argument to be sure that expansion is easily
+	possible when it is desired.  The target will be any output
+	method but most likely a window (such as the main window...)
+	and, once phased in, None will refer to the default window for
+	the UI class while other arguments will refer to a specific
+	target class of some sort with a print_string method which can
+	be used exactly like this one (yeehaw!) to enable multiple
+	windows (and possibly logs) to be used for certain output in
+	all GUIs.  What a mouthful!  -- James
 	"""
 	pass #because this isn't real
 
@@ -210,7 +235,8 @@ class BaseGUI:
     def PutReallyUntouchedLine(self, line):
 	"""PutReallyUntouchedLine(self, line) -> None
 
-	Prints a line for the user without any preprocessing
+	Prints a line for the user without any preprocessing or trailing
+	newline
 	"""
 	self.print_string(line,ending='')
 
@@ -225,4 +251,4 @@ class BaseGUI:
 	return self.get_input()
 
 if __name__ == '__main__':
-    Gui()
+    BaseGUI()
