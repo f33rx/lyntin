@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: action.py,v 1.14 2002/03/29 18:09:59 willhelm Exp $
+# $Id: action.py,v 1.15 2002/04/02 03:22:45 willhelm Exp $
 #######################################################################
 """
 This module defines the ActionManager which handles managing actions 
@@ -189,7 +189,7 @@ class ActionManager(manager.Manager):
         if var.find(response):
           response = re.sub(var, varvals[var], response)
 
-      # replace occurrances of '$i' with val up to the ;
+      # replace occurrances of '$i' with val replacing ; with \;
       if ("$" + var[1:]).find(response) != -1:
         response = re.sub("$" + var[1:],
                    varvals[var].replace(";", "\;"), 

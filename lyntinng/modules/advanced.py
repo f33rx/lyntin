@@ -4,9 +4,9 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.3 2002/03/22 01:27:24 willhelm Exp $
+# $Id: advanced.py,v 1.4 2002/03/28 04:15:07 willhelm Exp $
 #######################################################################
-import traceback, sys, string
+import traceback, os, sys, string
 import exported, engine, ui.ui
 
 """

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.50 2002/04/01 18:45:20 willhelm Exp $
+# $Id: basic.py,v 1.51 2002/04/01 18:54:07 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -174,6 +174,10 @@ def datagrep_cmd(session, words, input):
     exported.write_error("syntax: datagrep {pattern}")
     return
 
+  if (session.getName() == "common"):
+    exported.write_error("datagrep cannot be applied to common session.")
+    return
+
   pattern = utils.strip_braces(input.split(" ", 1)[1])
   ret = session.getDataBuffer().grepbuffer(pattern)
   exported.write_message("datagrep %s results:\n%s"
@@ -188,6 +192,10 @@ def datagreplines_cmd(session, words, input):
   """
   if (len(words) < 2):
     exported.write_error("syntax: datagreplines {pattern}")
+    return
+
+  if (session.getName() == "common"):
+    exported.write_error("datagrep cannot be applied to common session.")
     return
 
   pattern = utils.strip_braces(input.split(" ", 1)[1])
@@ -233,11 +241,11 @@ def diagnostics_cmd(session, words, input):
   """
   import os, sys
   message = "Diagnostics:\n"
-  message = message + engine.myengine.getDiagnostics()
+  message = message + exported.get_engine().getDiagnostics()
 
   message = message + "Thread statii:\n"
 
-  data = engine.myengine.checkthreads()
+  data = exported.get_engine().checkthreads()
   for mem in data:
     message += mem + "\n"
       
@@ -336,7 +344,7 @@ def help_cmd(session, words, input):
     data += utils.columnize(textlist=topic_list, indent=3)
 
     data += "\n\nCommands Available:\n"
-    command_list = engine.myengine.getCommands()
+    command_list = exported.get_commands()
     command_list.sort()
     data += utils.columnize(textlist=command_list, indent=3)
 
@@ -427,12 +435,12 @@ def if_cmd(session, words, input):
   inputadjusted = input.split(" ", 1)[1]
   expr, action = utils.split_braced(inputadjusted)
 
-  expr = expr.replace(" && ", " and ")
-  expr = expr.replace(" || ", " or ")
+  expr = expr.replace("&&", " and ")
+  expr = expr.replace("||", " or ")
 
   try:
     if eval(expr):
-      engine.myengine.handleUserData(action)
+      exported.lyntin_command(action)
   except SyntaxError:
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
@@ -469,7 +477,8 @@ def killall_cmd(session, words, input):
 
   Wipes all the sessions of all information.
   """
-  for mem in engine.myengine._sessions.values():
+  # for mem in engine.myengine._sessions.values():
+  for mem in exported.get_active_sessions():
     mem.clear()
     exported.write_message("killall: session %s cleared." % mem.getName())
 
@@ -663,9 +672,10 @@ def session_cmd(session, words, input):
   """
   if len(words) == 1:
     data = "Sessions available:\n"
-    for mem in engine.myengine.getSessions():
-      s = engine.myengine.getSession(mem)
-      data = data + "   " + s.getName() + ": " + repr(s._socket) + "\n"
+    # for mem in engine.myengine.getSessions():
+    for mem in exported.get_sessions():
+      data = data + "   " + mem.getName() + ": " + repr(mem._socket) + "\n"
+
     exported.write_message(data[:-1])
     return
 
@@ -675,7 +685,7 @@ def session_cmd(session, words, input):
 
   inputadjusted = input.split(' ', 1)[1]
   sessionname, b = utils.split_braced(inputadjusted)
-  host, port = b.split(" ")
+  host, port = b.split(' ')
 
   if port.isdigit():
     port = int(port)
@@ -691,7 +701,7 @@ def session_cmd(session, words, input):
   # it's lame, but whatever
   count = 0
   test = sessionname
-  while not engine.myengine.isUniqueSessionName(test):
+  while not exported.get_engine().isUniqueSessionName(test):
     test = sessionname + repr(count)
     count = count + 1
 
@@ -704,24 +714,24 @@ def session_cmd(session, words, input):
     sock = net.SocketCommunicator()
 
     # create a session for it...
-    ses = engine.myengine.createSession()
+    ses = exported.get_engine().createSession()
     ses.setName(sessionname)
     ses.setSocketCommunicator(sock)
     sock.setSession(ses)
-    engine.myengine.registerSession(ses, sessionname)
-    engine.myengine.changeSession(sessionname)
+    exported.get_engine().registerSession(ses, sessionname)
+    exported.get_engine().changeSession(sessionname)
 
     # connect to the mud...
     sock.connect(host, port, sessionname)
 
     # start the network thread
-    engine.myengine.startthread("network", sock.run)
+    exported.get_engine().startthread("network", sock.run)
 
   except:
     traceback.print_exc()
     try: 
-      engine.myengine.unregisterSession(sessionname)
-      engine.myengine.closeSession(sessionname)
+      exported.get_engine().unregisterSession(sessionname)
+      exported.get_engine().closeSession(sessionname)
       sock.shutdown()
     except:
       pass
@@ -796,7 +806,7 @@ def substitute_cmd(session, words, input):
     (a, b) = utils.split_braced(inputadjusted)
 
     session.getManager("substitute").addSubstitute(a, b)
-    exported.write_message("substitute: " + a + " -> '" + b + "'")
+    exported.write_message("substitute: '" + a + "' -> '" + b + "'")
   except:
     exported.write_error("substitute: cannot be set.")
     traceback.print_exc()
@@ -836,7 +846,7 @@ def tick_cmd(session, words, input):
   session ticks.
   """
   if session.getTicker().isEnabled():
-    currenttick = engine.myengine.getCurrentTick()
+    currenttick = exported.get_engine().getCurrentTick()
     ticklen = session.getTicker().getTickLen()
     tickstart = session.getTicker().getTickStart()
     nexttick = repr(ticklen - ((currenttick - tickstart) % ticklen))
@@ -1055,7 +1065,7 @@ def zap_cmd(session, words, input):
   This closes a session and should close the socket and cause
   the SocketCommunicator to garbage collect.
   """
-  if engine.myengine.closeSession(session):
+  if exported.get_engine().closeSession(session):
     exported.write_message("zap: session " + 
                                  session.getName() + 
                                  " zapped!")
@@ -1088,7 +1098,7 @@ def load():
   exported.add_command("ignore", ignore_cmd)
   # exported.add_command("import", import_cmd)
   exported.add_command("info", info_cmd)
-  exported.add_command("killall", killall_cmd)
+  exported.add_command("^killall", killall_cmd)
   exported.add_command("log", log_cmd)
   exported.add_command("loop", loop_cmd)
   # exported.add_command("map", map_cmd)

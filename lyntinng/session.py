@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.25 2002/04/01 18:24:36 willhelm Exp $
+# $Id: session.py,v 1.26 2002/04/03 03:14:15 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -114,9 +114,14 @@ class Session:
       data += "   ignore: actions are ignored.\n"
 
     if self._ignoresubs == 0:
-      data += "   ignore: substitutions are active."
+      data += "   togglesubs: substitutions are active.\n"
     else:
-      data += "   ignore: substitutions are ignored."
+      data += "   togglesubs: substitutions are ignored.\n"
+
+    if self._verbatim == 0:
+      data += "   verbatim: input is parsed."
+    else:
+      data += "   verbatim: imput is passed verbatim."
 
     return data
 
