@@ -10,10 +10,11 @@
 ##################################################################
 """
 Textui is the text user interface (the default).  It's _real_
-basic.
+basic as it's designed to work almost everywhere you can have
+a command prompt.
 """
 
-import data, string, sys, mud, app, select, os, time, regsub
+import data, string, sys, mud, app, select, os,  regsub
 from basegui import BaseGUI
 import exported
 
@@ -21,7 +22,7 @@ import exported
 if os.name != 'posix':
     import thread
 
-# see if they have termios
+# see if they have termios for echo abilities
 try:
     import termios, TERMIOS
 except ImportError:
@@ -37,17 +38,14 @@ if tio:
     onecho_attr = echonew
     offecho_attr = echonew
 
-# a thread-function for windows which polls for user input
-def GetInputLine(host):
-    # this can't be good--FIXME
-    """
-    while 1:
-        while host.line_read != '':
-            time.sleep(0.1)
-        host.line_read = sys.stdin.readline()
+def getinputline(host):
+    """getinputline(host) -> None
+
+    This polls for user input by blocking on readline.
     """
     while not host.closing:
         host.line_read = sys.stdin.readline()
+
 
 class Textui(BaseGUI):
     closing = 0
@@ -61,7 +59,7 @@ class Textui(BaseGUI):
     def setup(self):
         if os.name != 'posix':
             self.line_read = ''
-            thread.start_new_thread(GetInputLine, (self,))
+            thread.start_new_thread(getinputline, (self,))
             
     """over-ridden from BaseGUI"""
     def close(self):

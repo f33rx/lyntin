@@ -123,14 +123,9 @@ class Client(dict_plus.c):
             ui = null
             self.ui = ui
             ui.app = self
-         if sys.argv[1] == '-c2' and not self.ui:
-            import cursesui2
-            ui = cursesui2.Cursesui()
-            self.ui = ui
-            ui.app = self
          if sys.argv[1] == '-curses' and not self.ui:
             import cursesui
-            ui = cursesui.Textui()
+            ui = cursesui.Cursesui()
             self.ui = ui
             ui.app = self
          if sys.argv[1] == '-nc' and not self.ui:
@@ -140,7 +135,7 @@ class Client(dict_plus.c):
             ui.app = self
          if sys.argv[1] == '-tk' and not self.ui:
             import tkgui
-            ui = tkgui.Gui()
+            ui = tkgui.TkGui()
             self.ui = ui
             ui.app = self # circular ref... *shudder*
 

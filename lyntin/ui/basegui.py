@@ -1,41 +1,28 @@
 """
-The general style of the functions in this file is like the
-following and is different from the former style to improve
-readability and everyone's ability to not need a reference
-as much.  As it is, it would be a problem for Scrollback
-and ScrollBack... is it two words and even if it's one,
-does it deserve two caps?  Quite the dilemna, I know.  I
-would be up all night trying to decide so instead, the new
-standard is word_word_word() and no caps.  The old
-functions will be supported for a time but seeing that they
-did not follow a standard anyway, I picked from the two
-choices the one which I believed the most programmer
-friendly.  -- James
-
-To implement a ui override the following functions:
+To implement a ui, override the following functions:
    def setup(self)
-   setup your ui
+     setup your ui
 
    def scrollback_scroll(self,direction='back')
-   scrollback for your ui
+     scrollback for your ui
 
    def prompt(self)
-   print a prompt in your ui
+     print a prompt in your ui
 
    def echo(self, yesno)
-   turns on or off echo
+     turns on or off echo
 
    def warn_no_echo(self)
 
    def close(self)
-   closes the ui
+     closes the ui
 
    def print_string(self,line,modifiers=None,ending='\n',target=None)
-   prints strings to the user.  these could be user strings or
-   strings from lyntin or the mud.
+     prints strings to the user.  these could be user strings or
+     strings from lyntin or the mud.
 
    def get_input(self)
-   retrieves a line of input from the ui
+     retrieves a line of input from the ui
 
 """
 
