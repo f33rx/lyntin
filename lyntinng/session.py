@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.76 2003/01/28 22:38:02 willhelm Exp $
+# $Id: session.py,v 1.77 2003/01/28 22:47:23 willhelm Exp $
 #######################################################################
 """
 Holds the functionality involved in X{session}s.  Sessions are copied 
@@ -222,7 +222,7 @@ class Session:
       mem.clear(self)
 
     self._ticker.clear()
-    self._databuffer.clear()
+    self._databuffer = []
 
 
   ### ------------------------------------------------
