@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: helpmanager.py,v 1.2 2002/05/09 03:53:06 jmberne Exp $
+# $Id: helpmanager.py,v 1.3 2002/05/09 23:20:12 willhelm Exp $
 #######################################################################
 """
 The help manager holds a hierarchy of help files indexed by category.
@@ -26,25 +26,23 @@ class HelpManager:
   def __init__(self):
     self._help_tree = {}
 
-  def addHelp(self, helpname, helptext, categorylist=[]):
+  def addHelp(self, fqn, helptext):
     """
     Adds a help text to the hierarchy.
 
     arguments:
       
-      'helpname' -- (string) the name of the help text
+      'fqn' -- (string) a . delimited string of categories
+               and finally a helpname
 
       'helptext' -- (string) the help data in raw text format
 
-      'categorylist=[]' -- (list of strings) the category hierarchy
-                           (in order!) of where this text resides.
-                           If it's not specified, we'll try to
-                           figure it out from the first line of the
-                           text. 
-
     """
-    if not helpname or not helptext:
-      return
+
+    categorylist, helpname = self.splitName(fqn)
+
+    if not helptext or not helpname:
+      raise ValueError, "Help name and text are required."
 
     # If we want to add other directives, we should build in a
     # "readDirectives" method which sets various variables.
@@ -67,6 +65,7 @@ class HelpManager:
 
     place[helpname] = helptext
 
+
   def removeHelp(self, fqn):
     """
     Takes in a fully-qualified name and attempts to remove it
@@ -77,9 +76,21 @@ class HelpManager:
       'fqn' -- (string) a . delimited string of categories
                and finally a helpname
     """
-    fqn = fqn.split(".")
-    # FIXME - finish this
-    
+    category, name = self.splitName(fqn)
+
+    place = self._help_tree
+    for mem in fqn:
+      if place.has_key(mem):
+        place = place[mem]
+      else:
+        raise ValueError, "That topic does not exist."
+
+    if place.has_key(name):
+      del place[name]
+    else:
+      raise ValueError, "That topic does not exist."
+
+
   def getHelp(self, fqn):
     """ Retrieves the help topic requested.
 
@@ -96,17 +107,16 @@ class HelpManager:
       help text found or a columnized text of what tree elements
       exist at that level.
     """
-    if not fqn:
-      fqn = ""
+    
+    categorylist, name = self.splitName(fqn)
 
-    keys = fqn.split(".")
-    if keys[0] == "root":
-      keys = keys[1:]
+    categorylist.append(name)
+
     tree = self._help_tree
     breadcrumbs = "root"
     found = 1
 
-    for mem in keys:
+    for mem in categorylist:
       if type(tree) == type({}):
         if tree.has_key(mem):
           tree = tree[mem]
@@ -119,9 +129,9 @@ class HelpManager:
         break
     
     if found == 0 and fqn != "": 
-      # first find all instances of keys[0] in the help tree.
+      # first find all instances of categorylist[0] in the help tree.
       potentialroots = []
-      start = keys[0]
+      start = categorylist[0]
 
       tosearch = [ ("root",self._help_tree) ]
       while tosearch:
@@ -129,17 +139,17 @@ class HelpManager:
         tosearch = tosearch[1:]
         for key in nextnode.keys():
           currentbreadcrumbs = nextbreadcrumbs + "." + key
-          if key == keys[0]:
+          if key == categorylist[0]:
             potentialroots.append( (currentbreadcrumbs,nextnode[key]) )
           if type(nextnode[key]) == type({}):
             tosearch.append( (currentbreadcrumbs,nextnode[key]) )
 
       foundnodes = []
 
-      # Now walk through all of the nodes named keys[0] and see if they
-      # have they have keys[1:] under them.
+      # Now walk through all of the nodes named categorylist[0] and see if
+      # they have they have categorylist[1:] under them.
       for bc,node in potentialroots:
-        for key in keys[1:]:
+        for key in categorylist[1:]:
           if type(node) != type({}) or not node.has_key(key):
             bc=None
             node=None
@@ -183,3 +193,21 @@ class HelpManager:
         self.printTree(tree[mem], tab + "  ")
       else:
         print tab + "  " + "node: " + mem
+
+  def splitName(self, fqn):
+    """ Splits an fqn into a category list and a help text name.
+
+      'fqn' -- (string) a . delimited string of categories
+               and finally a helpname
+    """
+    if not fqn:
+      fqn = ""
+
+    keys = fqn.split(".")
+    if len(keys) > 1 and keys[0] == "root":
+      keys = keys[1:]
+
+    if len(keys) > 0:
+      return (keys[:-1], keys[-1])
+    else:
+      return ([], "")

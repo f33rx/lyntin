@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: exported.py,v 1.17 2002/05/08 02:07:03 jmberne Exp $
+# $Id: exported.py,v 1.18 2002/05/09 00:10:41 willhelm Exp $
 #######################################################################
 """
 This is the API for lyntin internals and is guaranteed to change 
@@ -47,10 +47,15 @@ def add_command(command, func, arguments=None, argoptions=None, helptext=""):
 
     'argoptions=None' -- (string) options for how to parse the argument stuff.
 
+    'helptext=""' -- (string) the help text for this command
+
   """
   get_engine().addCommand(command, func, arguments, argoptions)
   if helptext:
-    add_help(command, helptext)
+    try:
+      add_help(command, helptext)
+    except:
+      pass
 
 def remove_command(str):
   """ Removes a command from Lyntin.
@@ -70,22 +75,20 @@ def get_commands():
   """
   return get_engine().getCommands()
 
-def add_help(helpname, helptext, categorylist=[]):
+def add_help(fqn, helptext):
   """ Adds a help topic to the structure.
 
   see corresponding helpmanager.HelpManager.addHelp method.
 
   arguments:
 
-    'helpname' -- (string) name of the help text
+    'fqn' -- (string) a . delmited string of categories ending
+             with a help name.
 
     'helptext' -- (string) the help text
 
-    'categorylist=[]' -- (list of strings) category of the help 
-                         text
-
   """
-  get_engine().getHelpManager().addHelp(helpname, helptext, categorylist)
+  get_engine().getHelpManager().addHelp(fqn, helptext)
 
 def remove_help(fqn):
   """ Removes a help topic from Lyntin.
