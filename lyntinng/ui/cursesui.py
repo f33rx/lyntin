@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License.  See
 # the file LICENSE in the distribution for details.
-# $Id: cursesui.py,v 1.10 2002/05/03 23:38:50 willhelm Exp $
+# $Id: cursesui.py,v 1.12 2002/05/29 23:58:03 willhelm Exp $
 #######################################################################
 """
 This module holds the Curses ui.  It could use some _serious_ work.
@@ -70,7 +70,8 @@ class Cursesui(ui.BaseUI):
     #supported prompts
     self._Prompts = { '' : '\nlyntin: ', ui.ERROR :'\nerror: ',
                       ui.LTDATA : '\nlyntin: ', ui.TESTDATA : '\nTEST: ',
-                      ui.USERDATA : '\necho: ', ui.MUDDATA : '\n'}
+                      ui.USERDATA : '', ui.MUDDATA : ''}
+
     #partial color code support
     self._isPartialLine = 0
     self._partialLine = ''
@@ -86,7 +87,8 @@ class Cursesui(ui.BaseUI):
     
     if curses.has_colors():
       self._colors = 1
-      #create color pairs -> colorpair 0 is hard set white black, so avoid setting again.
+      # create color pairs -> colorpair 0 is hard set white black, so 
+      # avoid setting again.
       colorPair = 0
       for backgroundColor in self._colorList[1:]:
         for foregroundColor in self._colorList:
@@ -160,30 +162,30 @@ class Cursesui(ui.BaseUI):
     curses.echo()
     curses.endwin()
 
+
   def getPrompt(self, message_type):
     """
     returns the prompt as a string
     """
-
     userPrompt = ""
-    try:
-      userPrompt = self._Prompts[message_type]
-    except:
-      raise MessageTypeUnknown
-    
-    return userPrompt
+    if self._Prompts.has_key(message_type):
+      return self._Prompts[message_type]
+    else:
+      return ""
+
 
   def getColor(self, ansi_code):
     """
     getColor string -> ansi code which is everything inbetween [ and m
-    returns a string code like Xb 3740 where X is the attribute and 3740 is the color
+    returns a string code like Xb 3740 where X is the attribute and 3740 
+    is the color.
     NOTE: this needs to have a color state to remember colors and attributes.
     """
     #FIXME:
     # Possible design change
-    #   Make each attribute a on/off switch.  Then as reading in attr's just turn on.
-    #   Might simplify all the term checking at the end of getColor and handle
-    #   properly attributes being left on
+    #   Make each attribute a on/off switch.  Then as reading in attr's just
+    #   turn on.  Might simplify all the term checking at the end of getColor
+    #   and handle properly attributes being left on
     
     #check for a ; -> single terms
     if ansi_code == '':
@@ -294,7 +296,8 @@ class Cursesui(ui.BaseUI):
     for aLetter in range(1,(len(splitColor[0]) - 1)):
       combinedAttr = combinedAttr|self._attrDict[splitColor[0][aLetter]]
      
-    message = message.replace("\n" , prompt)
+    if prompt:
+      message = prompt + message.replace("\n" , prompt)
     
     #if more than one line split it
     if message.count("\n") > 0:
@@ -357,6 +360,9 @@ class Cursesui(ui.BaseUI):
 
     if message.data == '':
       return
+
+    if message.type == ui.USERDATA and message.data[-1] == "\n":
+      message.data = message.data[:-1]
 
     # set prompt
     myPrompt = self.getPrompt(message.type)
