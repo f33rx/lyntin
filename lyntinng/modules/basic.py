@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.26 2002/03/10 02:07:24 willhelm Exp $
+# $Id: basic.py,v 1.27 2002/03/10 05:03:52 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported
@@ -691,11 +691,12 @@ def tick_cmd(session, words, input):
   Displays the # of seconds left before the ticker for this
   session ticks.
   """
-  if session.getTicker().isEnabled()
+  if session.getTicker().isEnabled():
     currenttick = engine.myengine.getCurrentTick()
-    tick = session.getTicker().getTickLen()
-    exported.write_message("tick: next tick in " + 
-                    repr(currenttick % tick) + " seconds.")
+    ticklen = session.getTicker().getTickLen()
+    tickstart = session.getTicker().getTickStart()
+    nexttick = repr(ticklen - ((currenttick - tickstart) % ticklen))
+    exported.write_message("tick: next tick in " + nexttick + " seconds.")
   else:
     exported.write_message("tick: ticker is not enabled.")
 

@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: ticker.py,v 1.13 2002/03/10 04:49:31 willhelm Exp $
+# $Id: ticker.py,v 1.14 2002/03/10 05:03:52 willhelm Exp $
 #######################################################################
 """
 This module handles ticker data.
@@ -76,6 +76,16 @@ class Ticker:
 
     """
     return self._tickwarn
+
+  def getTickStart(self):
+    """ Returns the tick start time.
+
+    returns:
+
+      (int) when this ticker was started
+
+    """
+    return self._tickstart
 
   def setSessionName(self, name):
     """ Sets the session name.
