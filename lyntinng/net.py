@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: net.py,v 1.20 2002/05/22 01:29:36 willhelm Exp $
+# $Id: net.py,v 1.21 2002/05/29 23:58:03 willhelm Exp $
 #######################################################################
 """
 This holds the SocketCommunicator class which handles socket
@@ -122,23 +122,41 @@ class SocketCommunicator:
     self._sock = sock
     self._sessionname = sessionname
     exported.write_message("Connection made.")
+
+  def pollForData(self):
+    readers, e, w = select.select([self._sock], [], [], .1)
+    if readers:
+      return readers[0].recv(1024)
+    else:
+      return None
   
   def run(self):
     """ Polls a socket and returns any data sitting there."""
     try:
+      data = None
       while not self._shutdownflag:
-        readers,e,w = select.select([self._sock], [], [], .1)
-        if readers:
-          data = readers[0].recv(1024)
-          if data == '':
+          newdata = self.pollForData()
+          if newdata == '':
             if self._shutdownflag == 0 and self._session: 
               self._session.shutdown(())
             return
 
-          if IAC in data or self._nego_buffer != '':
-            data = self.handleNego(self._nego_buffer + data)
+          if newdata:
+            if data:
+              data = data + newdata
+            else:
+              data = newdata
+              
+          if data:
+            if data[-1] == "\n" or not newdata:
+              # actually handle whatever we've gotten because
+              # we got a full line, or we polled for more and there was none.
 
-          self.handleData(data)
+              if IAC in data or self._nego_buffer != '':
+                data = self.handleNego(self._nego_buffer + data)
+
+              self.handleData(data)
+              data = None
 
     except SystemExit:
       if self._shutdownflag == 0 and self._session:

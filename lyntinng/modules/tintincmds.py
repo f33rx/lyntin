@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.25 2002/06/04 00:52:39 willhelm Exp $
+# $Id: tintincmds.py,v 1.26 2002/06/04 03:47:23 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -398,9 +398,9 @@ def if_cmd(session, args, input):
 
   try:
     if eval(expr):
-      exported.lyntin_command(action)
+      exported.lyntin_command(action, internal=1)
     elif elseaction:
-      exported.lyntin_command(elseaction)
+      exported.lyntin_command(elseaction, internal=1)
   except SyntaxError:
     exported.write_error("if: invalid syntax / syntax error.")
   except Exception, e:
