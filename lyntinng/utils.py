@@ -105,7 +105,7 @@ def http_get(url):
 
 
 # handles regular expression syntax and flags
-REG_REGEXP = re.compile("^r{.*}[Ii]*$")
+REG_REGEXP = re.compile("^r\[.*\][Ii]*$")
 
 # for finding variables in the subject
 SUBVAR_REGEXP = re.compile("%_?[0-9]+")
@@ -136,7 +136,7 @@ def compile_regexp(str):
     # this is something we should compile as a regular expression
     # without doing any finagling
 
-    end_index = str.rfind("}")
+    end_index = str.rfind("]")
     # handle flags issues
     flags = str[end_index+1:]
     if flags == 'i' or flags == 'I':
