@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.80 2002/04/29 04:21:40 willhelm Exp $
+# $Id: basic.py,v 1.81 2002/04/29 23:14:13 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -814,6 +814,71 @@ def speedwalk_cmd(session, args, input):
 commands_dict["speedwalk"] = (speedwalk_cmd, "option:booleanornone=")
 
 
+def swdir_cmd(session, args, input):
+  """#swdir [<alias> <dir>]
+
+  This adds speedwalking aliases and tells you the current speedwalking dirs
+  already registered.
+  """
+  alias = args["alias"]
+  dir = args["dir"]
+  quiet = args["quiet"]
+
+  # they typed '#swdir'--print out all the current speedwalking dirs
+  if not alias and not dir:
+    data = session.getManager("speedwalk").getDirsInfo()
+    if data == '':
+      data = "swdir: no speedwalking dirs defined."
+
+    exported.write_message(data)
+    return
+
+  # they typed '#swdir dd*' and are looking for matching speedwalking dirs
+  if not alias:
+    data = session.getManager("speedwalk").getDirsInfo(alias)
+    if data == '':
+      data = "swdir: no speedwalking dirs defined."
+
+    exported.write_message(data)
+    return
+
+  try:
+    session.getManager("speedwalk").addDir(alias, dir)
+    if not quiet:
+      exported.write_message("swdir: {%s} {%s} added." % (alias, dir))
+  except SpeedwalkError, e:
+    exported.write_error("swdir: cannot add alias: %s." % e)
+
+commands_dict["swdir"] = (swdir_cmd, "alias= dir= quiet:boolean=false")
+
+
+def swexclude_cmd(session, args, input):
+  """#swexclude [<exclusion>]
+
+  This adds speedwalking exclusions and tells you the current exclusions
+  already registered. Exclusions are a bit like antisubstitutes, but for
+  speedwalking. Examples: 'news', 'sense' -- mud commands which shouldn't
+  get speedwalk-parsing.
+  """
+  exclusion = args["exclusion"]
+  quiet = args["quiet"]
+
+  # they typed '#swexclude'--print out all current speedwalking exclusions
+  if not exclusion:
+    data = session.getManager("speedwalk").getExclusionsInfo()
+    if data == '':
+      data = "swexcl: no speedwalking exclusions defined."
+
+    exported.write_message(data)
+    return
+
+  session.getManager("speedwalk").addExclusion(exclusion)
+  if not quiet:
+    exported.write_message("swexclude: {%s} added." % exclusion)
+
+commands_dict["swexclude"] = (swexclude_cmd, "exclusion= quiet:boolean=false")
+
+
 def substitute_cmd(session, args, input):
   """#substitue [<item> <substitution>]
 
@@ -987,10 +1052,10 @@ commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
 
 
 def unsomething_cmd(session, args, input):
-  """#un(gag|substitute|variable|action|alias) <text>
+  """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
 
-  Allows you to remove gags|substitutes|variables|actions|aliases
-  from whatever manager is handling that thing.  This function
+  Allows you to remove gags|substitutes|variables|actions|aliases|swdirs|
+  swexcludes from whatever manager is handling that thing.  This function
   handles all these commands.
   """
   removedthings = []
@@ -1024,7 +1089,14 @@ def unsomething_cmd(session, args, input):
     removedthings = session.getManager("variable").removeVariables(text)
     singular = "variable"
     plural = "variables"
-      
+  elif "unswdir".find(command) == 0:
+    removedthings = session.getManager("speedwalk").removeDir(text)
+    singular = "swdir"
+    plural = "speedwalking dirs"
+  elif "unswexclude".find(command) == 0:
+    removedthings = session.getManager("speedwalk").removeExclude(text)
+    singular = "swexclude"
+    plural = "speedwalking excludes"
 
   if len(removedthings) == 0:
     exported.write_message("un%s: No %s removed." % (singular, plural))
@@ -1043,6 +1115,8 @@ commands_dict["unaction"] = (unsomething_cmd, "var")
 commands_dict["unalias"] = (unsomething_cmd, "var")
 commands_dict["ungag"] = (unsomething_cmd, "var")
 commands_dict["unhighlight"] = (unsomething_cmd, "var")
+commands_dict["unswdir"] = (unsomething_cmd, "var")
+commands_dict["unswexclude"] = (unsomething_cmd, "var")
 commands_dict["unsubstitute"] = (unsomething_cmd, "var")
 commands_dict["unvariable"] = (unsomething_cmd, "var")
 
