@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: session.py,v 1.27 2002/04/04 01:04:30 willhelm Exp $
+# $Id: session.py,v 1.28 2002/04/08 21:53:05 willhelm Exp $
 #######################################################################
 """
 Holds the session class.  Sessions are copied from the common session.
@@ -219,7 +219,7 @@ class Session:
     output for internal stuff too.  1 if internal, 0 if not.
     """
     # we deal with possible variables...
-    if not self._verbatim or (len(input) > 0 and input[0] != lyntin.commandchar):
+    if self._verbatim == 0 or (len(input) > 0 and input[0] == lyntin.commandchar):
       varexpansion = self.getManager("variable").expand(input)
       if varexpansion:
         varexpansion = self.getManager("variable").unescapeVariables(varexpansion)
