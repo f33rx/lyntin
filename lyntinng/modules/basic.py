@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.84 2002/05/03 23:38:50 willhelm Exp $
+# $Id: basic.py,v 1.85 2002/05/04 04:31:48 willhelm Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks
@@ -1114,74 +1114,61 @@ def togglesubs_cmd(session, args, input):
 commands_dict["togglesubs"] = (togglesubs_cmd, "option:booleanornone=")
 
 
-def unsomething_cmd(session, args, input):
-  """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
-
-  Allows you to remove gags|substitutes|variables|actions|aliases|swdirs|
-  swexcludes from whatever manager is handling that thing.  This function
-  handles all these commands.
-  """
-  removedthings = []
-  singular = ''
-  plural = ''
-
-  command = args["command"]
-  text = args["var"]
-
-  if "unaction".find(command) == 0:
-    removedthings = session.getManager("action").removeActions(text)
-    singular = "action"
-    plural = "actions"
-  elif "unalias".find(command) == 0:
-    removedthings = session.getManager("alias").removeAliases(text)
-    singular = "alias"
-    plural = "aliases"
-  elif "ungag".find(command) == 0:
-    removedthings = session.getManager("gag").removeGags(text)
-    singular = "gag"
-    plural = "gags"
-  elif "unhighlight".find(command) == 0:
-    removedthings = session.getManager("highlight").removeHighlights(text)
-    singular = "highlight"
-    plural = "highlights"
-  elif "unsubstitute".find(command) == 0:
-    removedthings = session.getManager("substitute").removeSubstitutes(text)
-    singular = "substitute"
-    plural = "substitutes"
-  elif "unvariable".find(command) == 0:
-    removedthings = session.getManager("variable").removeVariables(text)
-    singular = "variable"
-    plural = "variables"
-  elif "unswdir".find(command) == 0:
-    removedthings = session.getManager("speedwalk").removeDir(text)
-    singular = "swdir"
-    plural = "speedwalking dirs"
-  elif "unswexclude".find(command) == 0:
-    removedthings = session.getManager("speedwalk").removeExclude(text)
-    singular = "swexclude"
-    plural = "speedwalking excludes"
-
-  if len(removedthings) == 0:
-    exported.write_message("un%s: No %s removed." % (singular, plural))
-    return
-
-  data = ''
-  for mem in removedthings:
-    if type(mem) == type( (1,2) ):
-      data += singular + " {" + mem[0] + "} {" + mem[1] + "} removed.\n"
+class Unsomethinger:
+  def __init__(self, managername, removalfunction, singular=None, plural=None ):
+    self.managername = managername
+    self.removalfunction = removalfunction
+    if singular:
+      self.singular = singular
     else:
-      data += singular + " {" + mem + "} removed.\n"
+      self.singular = managername
+    if plural:
+      self.plural = plural
+    else:
+      self.plural = self.singular + "s"
 
-  exported.write_message(data[:-1])
+  def __call__(self, session, args, input):
+    """#un(gag|substitute|variable|action|alias|swdir|swexclude) <text>
 
-commands_dict["unaction"] = (unsomething_cmd, "var")
-commands_dict["unalias"] = (unsomething_cmd, "var")
-commands_dict["ungag"] = (unsomething_cmd, "var")
-commands_dict["unhighlight"] = (unsomething_cmd, "var")
-commands_dict["unswdir"] = (unsomething_cmd, "var")
-commands_dict["unswexclude"] = (unsomething_cmd, "var")
-commands_dict["unsubstitute"] = (unsomething_cmd, "var")
-commands_dict["unvariable"] = (unsomething_cmd, "var")
+    Allows you to remove gags|substitutes|variables|actions|aliases|swdirs|
+    swexcludes from whatever manager is handling that thing.  This function
+    handles all these commands.
+    """
+    text = args["var"]
+    quiet = args["quiet"]
+
+    removedthings = self.removalfunction(session.getManager(self.managername),text)
+    
+    if not quiet:
+      if len(removedthings) == 0:
+        exported.write_message("un%s: No %s removed." % (self.singular, self.plural))
+
+      data = ''
+      for mem in removedthings:
+        if type(mem) == type( (1,2) ):
+          data += self.singular + " {" + mem[0] + "} {" + mem[1] + "} removed.\n"
+        else:
+          data += self.singular + " {" + mem + "} removed.\n"
+
+      exported.write_message(data[:-1])
+
+  
+commands_dict["unaction"] = (
+  Unsomethinger("action",lambda m,t:m.removeActions(t)), "var quiet:boolean=false")
+commands_dict["unalias"] = (
+  Unsomethinger("alias",lambda m,t:m.removeAliases(t)), "var quiet:boolean=false")
+commands_dict["ungag"] = (
+  Unsomethinger("gag",lambda m,t:m.removeGags(t)), "var quiet:boolean=false")
+commands_dict["unhighlight"] = (
+  Unsomethinger("highlight",lambda m,t:m.removeHighlights(t)), "var quiet:boolean=false")
+commands_dict["unswdir"] = (
+  Unsomethinger("speedwalk",lambda m,t:m.removeDir(t),"swdir","speedwalking dirs"), "var quiet:boolean=false")
+commands_dict["unswexclude"] = (
+  Unsomethinger("speedwalk",lambda m,t:m.removeExclude(t),"swexclude","speedwalking excludes"), "var quiet:boolean=false")
+commands_dict["unsubstitute"] = (
+  Unsomethinger("substitute",lambda m,t:m.removeSubstitutes(t)), "var quiet:boolean=false")
+commands_dict["unvariable"] = (
+  Unsomethinger("variable",lambda m,t:m.removeVariables(t)), "var quiet:boolean=false")
 
 
 def variable_cmd(session, args, input):
