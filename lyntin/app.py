@@ -162,7 +162,7 @@ class Client(dict_plus.c):
          for opt in sys.argv[1:]:
             if opt[0] == '-': pass
             else:
-               player.DispatchCommand('#read %s'%opt,[data.common])
+               player.dispatch_command('#read %s'%opt,[data.common])
 
 
    def Initialize(self):
@@ -298,7 +298,7 @@ class Client(dict_plus.c):
          # did player specify a target session for this command?
          if seslist:
             if self.IsSessionChange(words):
-               player.SetSes(seslist[0])
+               player.set_session(seslist[0])
             # recursively handle whatever was typed
             else:
                oldses = data.currsession
@@ -309,7 +309,7 @@ class Client(dict_plus.c):
             return 0
          else:
             # ok, just apply a command to the current session
-            player.DispatchCommand(input, [data.currsession])
+            player.dispatch_command(input, [data.currsession])
             return 0
       return 1
     
@@ -388,7 +388,7 @@ class Client(dict_plus.c):
          ans = "no session active. " + \
                "use the #session command to start one"
          player.Putline(ans)
-         player.Prompt()
+         player.prompt()
 
 
    def DoSpeedWalk(self, input):
@@ -485,8 +485,8 @@ def run():
    data.sessionlist = [data.common]
 
    # needed to wait until data.theapp is there until we can
-   # add all the commands (which is what InitPlayer does).
-   player.InitPlayer()
+   # add all the commands (which is what init_player does).
+   player.init_player()
 
    cl.PreInitialize()
     
@@ -505,7 +505,7 @@ def run():
    # process user customizations
    try:
       import user
-      player.ImportUser()
+      player.import_user()
    except ImportError:
       player.Putline('Unable to load user customizations')
     
@@ -514,7 +514,7 @@ def run():
       cl.ui.WarnNoEcho()
 
    cl.Initialize()
-   player.Prompt()
+   player.prompt()
    cl.ui.mainloop()
 
 def strip_final_elt_if(seq, remlist):

@@ -23,14 +23,14 @@ import data, mud, app, hooks, cmdparse, os
 user = None
 
 # exceptions
-class SesError: pass
+class SessionError: pass
 
 command_table = {}
 
 # parse command intended for client, (i.e. one prefaced by data.ltchar)
 # allow abbreviations for most commands
-def DispatchCommand(input, seslist):
-    """DispatchCommand(input, seslist) -> None
+def dispatch_command(input, seslist):
+    """dispatch_command(input, seslist) -> None
 
     input - the input string
     seslist - list of session objects
@@ -50,7 +50,7 @@ def DispatchCommand(input, seslist):
     if input[0] == data.ltchar:
         input = input[1:]
     if not seslist:
-        raise SesError, 'No session supplied'
+        raise SessionError, 'No session supplied'
 
     if len(input) <= 0:
         return
@@ -83,8 +83,8 @@ def DispatchCommand(input, seslist):
 ### Player library functions
 ###
 
-def ExpandCommand(s, list):
-    """ExpandCommand(s, list) -> string
+def expand_command(s, list):
+    """expand_command(s, list) -> string
 
     Inputs a string and a list and returns a list of all the elements
     in the list that match the string.
@@ -106,8 +106,8 @@ def ExpandCommand(s, list):
                 ret = ret + [s]
     return ret
 
-def SetSes(ses):
-    """SetSes(ses) -> None
+def set_session(ses):
+    """set_session(ses) -> None
 
     Sets the active session.  Run set_session hook *before*
     the actual switch
@@ -118,15 +118,15 @@ def SetSes(ses):
     ans = 'ok, session "' + ses.name + '" activated.'
     Putline(ans)
 
-def Prompt():
-    """Prompt() -> None
+def prompt():
+    """prompt() -> None
 
     Prints a prompt.
     """
     data.theapp.ui.Prompt()
 
-def TimeUpdate(seslist):
-    """TimeUpdate(seslist) -> None
+def time_update(seslist):
+    """time_update(seslist) -> None
 
     Checks the current time and does time-related stuff (via the ticker).
     """
@@ -137,22 +137,25 @@ def TimeUpdate(seslist):
             TickerUpdate((ses,))
         ses.lastclock = click
 
-def ImportUser():
-    """ImportUser() -> None
+def import_user():
+    """import_user() -> None
 
     Want to delay this.
     (i have no clue what this means.)
     """
     global user
-    user = GetUserModule()
+    user = get_user_module()
 
-def GetUserModule():
-    """GetUserModule() -> None
+def get_user_module():
+    """get_user_module() -> None
 
     Imports the user module and returns it.
     """
     import user
     return user
+
+
+
 
 def Putline(line):
     """Putline(line) -> None
@@ -225,7 +228,7 @@ def UnCommand(words, input, seslist):
     if un[0] == '{' and un[-1] == '}':
         un = un[1:-1]
 
-    acs = ExpandCommand(un, data.theapp.commands)
+    acs = expand_command(un, data.theapp.commands)
 
     if acs:
         for ac in acs:
@@ -383,7 +386,7 @@ def Char(words, input, seslist):
         if len(words) == 1:
             PutReallyUntouchedLine("CURRENT LYNTIN CHARACTER: '%s'\n"%data.ltchar)
             if not data.currsession.connected:
-                Prompt()
+                prompt()
         elif len(words) == 2:
             c = words[1]
             if len(c) != 1:
@@ -392,7 +395,7 @@ def Char(words, input, seslist):
                 data.ltchar = c
                 PutReallyUntouchedLine("OK, LYNTIN CHARACTER SET TO '%s'\n"%c)
                 if not data.currsession.connected:
-                    Prompt()
+                    prompt()
         else:
             Putline('char: command requires zero or one argument')
             Putline("char")
@@ -1224,7 +1227,7 @@ def TickerUpdate(seslist):
 ### This function adds all the standard commands to data.theapp.commands
 ###
 
-def InitPlayer():
+def init_player():
     import player
     data.theapp.AddCommand("version", player.Version)
     data.theapp.AddCommand("alias", player.Alias)

@@ -24,10 +24,12 @@ WONT = chr(252) # '\374'
 WILL = chr(251) # '\373'
 
 
-# see if anything from the mud triggered an action/gag/sub
-# if so, handle it.  
-# then display stuff from the mud to the user
-def HandleMudOutput(output, ses):
+def handle_mud_output(output, ses):
+    """handle_mud_output(output, ses) -> None
+
+    See if anything from the mud triggered an action/gag/sub
+    if so, handle it.  Then display stuff from the mud to the user.
+    """
     if not output:
         return
     if not string.split(output):

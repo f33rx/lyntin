@@ -9,7 +9,7 @@
 #
 # a handler intercepts server output at a primitive level,
 # and can respond to it or change the input for the next handler.
-# $Id: handler.py,v 1.2 2000/10/11 01:21:02 willhelm Exp $
+# $Id: handler.py,v 1.3 2001/04/28 06:51:50 willhelm Exp $
 ##################################################################
 
 """
@@ -39,7 +39,7 @@ class AppHandler:
 
         if read:
             # handle actions and displaying stuff from mud
-            mud.HandleMudOutput(read, session)
+            mud.handle_mud_output(read, session)
 
         return (CONTINUE, read)
 

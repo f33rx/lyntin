@@ -267,7 +267,7 @@ class UserSession(Session):
         self.handlers.append(handler.AppHandler())
 
     def tickUpdate(self):
-        player.TimeUpdate((self,))
+        player.time_update((self,))
 
     def __repr__(self):
         if self.connected:
@@ -314,7 +314,7 @@ class UserSession(Session):
             # no more live sessions
             currsession = common
             player.Putline('no more active sessions')
-            player.Prompt()
+            player.prompt()
         theapp.ui.OnEcho()
 
     # write text to session's log file, but only if logging is turned on
