@@ -6,7 +6,7 @@
 VERSION
 =======
 
-$Id: README,v 1.8 2002/03/25 02:11:10 willhelm Exp $
+$Id: README,v 1.9 2002/06/24 01:19:47 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://Lyntin.sourceforge.net/
@@ -67,39 +67,6 @@ more we have to go by to understand what the problem is.
 
 
 
-HOW TO CONTRIBUTE
-=================
-
-Development and maintenance is entirely done by the maintainer right now.
-If you're interested in sending in bug fixes, please feel welcome.  I'm
-extremely accomodating to most methods of sending in patches.
-
-A diff -u output file is great for this sort of thing.
-
-All patches and such things should be sent to the mailing list at:
-
-   lyntin-devl@lists.sourceforge.net
-
-
-
-OTHER CONCERNS
-==============
-
-The latest release of Lyntin is always available from:
-
-   http://lyntin.sourceforge.net/
-
-Lyntin is still under development, and there aren't many testers, so
-we apologize profusely for any bugs you may encounter and such.
-
-In general, work on Lyntin progresses as time allows.  I respond to
-emails on the mailing list within a day or so.  Most issues are tracked
-via the bug-tracker and task-tracker on our SourceForge project site.
-If you have problems and fix them, by all means send us patches and
-we'll happily work with them and credit you.
-
-
-
 LYNTIN vs. TINTIN
 =================
 
@@ -107,11 +74,34 @@ Lyntin has many of the same features as Tintin and the commands
 are based on Tintin.  However, there are a series of Tintin
 commands we do not currently support for various reasons:
 
-   * some because Lyntin is written in Python and exposes the user to
-     the Python interpreter making a series of the commands kind
+   * some because Lyntin is written in Python and exposes the user
+     to the Python interpreter making a series of the commands kind
      of silly
    * a few because Lyntin has better ways to do things
    * a paltry few because we haven't gotten around to it
+
+If you miss some Tintin things, it's pretty easy to implement your
+own commands in Lyntin.  See the ``HACKING`` document for more
+information.
+
+There are two user input evaluation modes in Lyntin: Lyntin mode and
+Tintin mode.  You can switch modes using the command-line argument::
+
+   --evalmode tintin
+   or
+   --evalmode lyntin
+
+or ingame with::
+
+   #config evalmode lyntin
+   or
+   #config evalmode tintin
+
+The evalmodes differ in how variables and placement variables are
+expanded as well as the time at which they're expanded.  Tintin mode
+emulates how Tintin works.  Lyntin mode is born from our own preferred
+user input evaluation.  There are probably good and bad points of 
+each which is beyond the scope of this document.
 
 
 
@@ -138,8 +128,39 @@ let us know.
 
 
 
+HOW TO CONTRIBUTE
+=================
+
+Development and maintenance is entirely done by the maintainer right now.
+If you're interested in sending in bug fixes, please feel welcome.  I'm
+extremely accomodating to most methods of sending in patches.
+
+A diff -u output file is great for this sort of thing.
+
+All patches and such things should be sent to the mailing list at:
+
+   lyntin-devl@lists.sourceforge.net
+
+Patches will not be applied unless the author either yields the
+copyright to the FSF or to us (and then we'll yield it to the FSF).
+
+Please read through the web-site areas on coding conventions and such
+before sending in code.
+
+
+
 ERRATA
 ======
+
+The latest release of Lyntin is always available from:
+
+   http://lyntin.sourceforge.net/
+
+In general, work on Lyntin progresses as time allows.  I respond to
+emails on the mailing list within a day or so.  Most issues are tracked
+via the bug-tracker and task-tracker on our SourceForge project site.
+If you have problems and fix them, by all means send us patches and
+we'll happily work with them and credit you.
 
 That should be about it.  In-game help is accessed by typing #help.
 When you start Lyntin for the first time, type ``#help general``

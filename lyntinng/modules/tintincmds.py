@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tintincmds.py,v 1.36 2002/07/12 00:11:56 willhelm Exp $
+# $Id: tintincmds.py,v 1.37 2002/07/12 03:46:12 jmberne Exp $
 #######################################################################
 import string, traceback
 import net, utils, engine, lyntin, exported, hooks, modutils
@@ -512,6 +512,10 @@ def showme_cmd(ses, args, input):
     varexpansion = varman.expand(ses, input)
     if varexpansion:
       input = varexpansion
+
+  input = input.replace("\\;", ";")
+  input = input.replace("\\$", "$")
+  input = input.replace("\\%", "%")
 
   exported.write_message(input)
      

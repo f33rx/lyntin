@@ -5,7 +5,7 @@
 VERSION
 =======
 
-$Id: HACKING,v 1.11 2002/06/24 01:19:47 willhelm Exp $
+$Id: HACKING,v 1.12 2002/06/25 01:46:44 willhelm Exp $
 
 For more up-to-date information, please check the web-site:
 http://lyntin.sourceforge.net/
@@ -15,9 +15,11 @@ http://lyntin.sourceforge.net/
 NOTES
 =====
 
-This entire document is written off the top of my head and the contents
-of it are likely to change before 3.0 actually gets released.  When
-in doubt, read the code.
+This document is very much written off the top of my head.  The contents
+may not be accurate--when in doubt, read the code.  The code is very
+well documented and will provide much insight as to how things work.
+If you have questions after analyzing the code, ask on the lyntin-devl
+mailing list.
 
 
 
@@ -28,16 +30,18 @@ Lyntin was built for the hacker mudder.  This is a special breed of
 person who muds and has a series of complex problems they want to
 solve and mere aliases and triggers just aren't going to do the trick.
 
+(At this point I should mention that I also use Lyntin to debug
+applications that use ASCII-oriented protocols like HTTP.)
+
 Tintin has a series of commands that implements a macro language.
 Building "macros" in this way is complex and solves a small set of 
 problems, but the more complex problems really need a full language 
 and a library to solve.  The Tintin way of solving this is to keep
 adding commands that fill out the macro language to handle string
 functions and such.  Lyntin takes a different approach leaving
-those sorts of things to Python.  As such, Lyntin was built with Python 
-and allows hackers to use Python to enhance Lyntin.
+those sorts of things to Python.  
 
-Because Lyntin is so inextricably intertwined with Python, you can
+Lyntin is inextricably intertwined with Python so you can
 extend Lyntin to do anything without going through hoops: check your
 email, record URLs you see and open up a browser to visit them, export
 mudmail, building complex bots, web-servers, AIM clients, automappers....
@@ -46,13 +50,34 @@ There a a few different methods of hacking Lyntin to suit your needs.
 They are briefly outlined here and described in more detail in their 
 respective sections:
 
-
 1. editing the source code
 2. building modules
 3. command line
 
 
-Before we continue, we should cover Lyntin's architecture first.
+Before we continue, we should ramble on about Lyntin's architecture 
+first.  But before that, we should cover Lyntin's philosophy.
+
+
+
+PHILOSOPHY
+==========
+
+If you enter into the Python interactive mode (by typing ``python``
+at the prompt) and type ``import this`` you get a list of Python's
+design philosophies.  When working on Lyntin, we have similar
+thoughts:
+
+* Beautiful is better than ugly.
+* Simple is better than complex.
+* Readability before most things.
+* Even readable things need documentation.
+* Optimization if we have to.
+* Leave power and choice in the hands of the user.
+* Get it right the third time--the first two times explore the issue
+  and perhaps implement solutions until the true solution is obvious.
+* Discussion before implementation.
+* Possibly specification and test cases before implementation.
 
 
 
@@ -86,7 +111,6 @@ accessing Lyntin internals without causing them to block.
 
 The engine holds:
 
-
 * the HistoryManager
 * the ThreadManager
 * the HelpManager
@@ -101,7 +125,6 @@ All these things exist on the *engine scoping*.
 
 Each session has:
 
-
 * its own SocketCommunicator which abstracts socket
   connections and network issues
 * a Ticker which allows you to do things at intervals
@@ -115,7 +138,7 @@ for every session instance.
 MANAGERS
 ========
 
-Managers manage things.  Most managers subclass the 'manager.Manager' 
+Managers manage things.  Most managers subclass the ``manager.Manager``
 class.  It doesn't really provide a lot of functionality, but it 
 allows us to group them all and treat them all the same.  Adding 
 new managers is much easier because of this.
@@ -136,8 +159,31 @@ DATA HANDLING
 =============
 
 Data comes from one of a couple of sources: the user or the mud.
+
+USER DATA
+---------
+
 User data (sometimes called "input") is received from the ui.BaseUI
-subclasses and tossed into an ``event.InputEvent``.
+subclasses and tossed into an ``event.InputEvent``.  When the
+engine handles the event, it is first passed to the engine's
+``handleUserInput`` method which deals with global things such
+as splitting the input into a series of separate commands.  Read
+the docstring for more information.
+
+The user input is then passed to the session in question's 
+``handleUserInput`` method which does some stuff and passes it
+through the ``user_filter_hook``.  This is where the magic happens.
+All user input handlers in Lyntin (the alias manager, the variable
+manager ...) register with the user_filter_hook at various 
+priorities.  The ``handleUserInput`` hook then cycles through the
+user filters in order of priority.
+
+For more specific information, read through the docstrings of
+the methods and classes involved.
+
+
+MUD DATA
+--------
 
 Data can also come from the mud.  Mud data comes from the 
 SocketCommunicator and is encapsulated in an ``event.MudEvent``.
@@ -147,13 +193,13 @@ SocketCommunicator and is encapsulated in an ``event.MudEvent``.
 THE UI
 ======
 
-All user interfaces extend the ui.BaseUI class in the ui module.
+All user interfaces extend the ``ui.BaseUI`` class in the ``ui`` module.
 It has a series of methods which need to be overridden to give
 the ui functionality.  In addition, ui's can specify additional
 Lyntin commands, they can bind to Lyntin hooks (most ui's bind
-to the hooks.startup_hook allowing them to perform certain functionality
-on Lyntin startup rather than module loading time), and anything
-else that modules can do.
+to the ``startup_hook`` allowing them to perform certain functionality
+at Lyntin startup rather than when the module is imported or when
+the ui is instantiated), and anything else that modules can do.
 
 Lyntin comes with a text ui which can be used over telnet/ssh
 or in a command shell.  It also comes with a tk gui.  The tk gui
@@ -166,6 +212,8 @@ Feel free to extend the ui code and send in patches.  Or even
 write your own ui based on another widget set or whatever you
 want to do.
 
+For more information, read the ``ui`` module.
+
 
 
 HOOKS
@@ -173,14 +221,18 @@ HOOKS
 
 The engine is augmented by a series of hooks which allow modules to
 execute functions without having to change Lyntin's internals.  An
-example of this would be the startup and shutdown hooks.  Any functions
-that hook into these hooks will be executed upon startup or shutdown
-of Lyntin.  Lyntin also uses these hooks to implement its functionality.
+example of this would be the ``startup_hook`` and ``shutdown_hook``.  
+Any functions that hook into these hooks will be executed upon 
+startup or shutdown of Lyntin.  Lyntin also uses these hooks to 
+implement its functionality.
 
-For example, the TkGui uses the hooks.startup_hook to instantiate its gui 
-interface and set itself up.
+For example, the tk ui uses the ``startup_hook`` to register with
+the ``to_user_hook``, add the tkui help topic, and start the ui
+user listener thread.
 
-Most hooks and the Hook class are in the ``hooks`` module.  
+Hooks and the Hook class are defined in the ``hooks`` module as is
+a whole lot of documentation on which hooks exist, and what is
+passed to them.
 
 
 
@@ -265,16 +317,13 @@ you add your own functions to the ``user`` module and then these would
 be available to you at the Lyntin command line.
 
 In 3.0 ``user`` is a Lyntin module in the modules directory.  It does 
-not come with Lyntin--it's something you'll have to create.  This is a 
-little weird in that you have to go write your own ``user`` module, but 
-on the flip side, it helps when you upgrade Lyntin--you won't accidentally
-overwrite your ``user`` Lyntin module because it doesn't come with
-Lyntin.
+not come with Lyntin--it's something you can create if you want to 
+build your own environment to execute #@ python commands in.
 
 If you don't have a ``user`` module, raw Python code gets executed in 
 the ``advanced`` module where the #@ functionality exists.
 
-A basic ``user`` module would be as follows::
+A basic ``user`` module could be as follows::
 
    """
    This is my user.py module.  I can do whatever I want in here.
@@ -306,10 +355,9 @@ Now at the Lyntin command prompt I can do things like::
 THE END
 =======
 
-That about covers it.  If you have questions, sign onto the Lyntin
-developers list and ask them.  The list is low volume high signal.
+That about covers it.  If you have questions, subscribe to the
+lyntin-devl mailing list and ask us.  The list is low volume high signal.
 
    http://sourceforge.net/mail/?group_id=6730
 
 Happy hacking!
-

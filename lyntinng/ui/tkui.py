@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.7 2002/07/12 00:11:57 willhelm Exp $
+# $Id: tkui.py,v 1.8 2002/07/12 00:17:23 willhelm Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -264,7 +264,7 @@ class Tkui(ui.BaseUI):
     temp = self._txt.index("end")
     ind = temp.find(".")
     temp = temp[:ind]
-    if (int(temp) > 800):
+    if (temp.isdigit() and int(temp) > 800):
       self._txt.delete ("1.0", "100.end")
 
   def write(self, args):

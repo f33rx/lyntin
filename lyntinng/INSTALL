@@ -4,7 +4,7 @@
 VERSION
 =======
 
-$Id: INSTALL,v 1.4 2002/03/19 23:05:44 willhelm Exp $
+$Id: INSTALL,v 1.5 2002/06/24 01:19:47 willhelm Exp $
 
 For more up-to-date documentation, check out the web-site at:
 http://lyntin.sourceforge.net/
@@ -22,13 +22,13 @@ revisited and re-written at some point.
 UNIX/LINUX
 ==========
 
-1. make sure you have at least Python 2.0--You can do this by 
+1. Make sure you have at least Python 2.0--you can do this by 
    running "python" and seeing what version it says it is.  If 
    you don't have Python 2.0 or later installed, Lyntin won't work.
-2. download the version of Lyntin you're looking for (below) 
-3. untar the client into ~/lyntin or something along those lines
-4. do "chmod 777 lyntin.py" to set the lyntin.py file to be executable
-5. run lyntin.py
+2. Download the version of Lyntin you're looking for (below) 
+3. Untar the client into ~/lyntin or something along those lines
+4. Do ``chmod 777 lyntin.py`` to set the lyntin.py file to be executable
+5. Run lyntin.py
 
 lyntin.py takes a series of options.  For a list of options 
 and explanations, run::
@@ -40,10 +40,10 @@ and explanations, run::
 WINDOWS
 =======
 
-1. make sure you have at least Python 2.0
-2. unzip the client into c:\lyntin
-3. double-click on lyntin.py to run lyntin
-4. probably want to build a shortcut for Lyntin to make it easier
-   to run from your desktop.  the shortcut should use pythonw.exe
+1. Make sure you have at least Python 2.0
+2. Unzip the client into c:\lyntin
+3. Double-click on lyntin.py to run Lyntin
+4. You probably want to build a shortcut for Lyntin to make it easier
+   to run from your desktop.  The shortcut should use pythonw.exe
    instead of python.exe--this will start Lyntin without that silly
    extra window.
