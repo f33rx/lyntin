@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: basic.py,v 1.19 2002/02/23 21:10:32 willhelm Exp $
+# $Id: basic.py,v 1.20 2002/02/27 02:25:22 willhelm Exp $
 #######################################################################
 import re, string, traceback
 import net, utils, engine, lyntin, exported
@@ -330,6 +330,14 @@ def highlight_cmd(session, words, input):
     exported.write_error("highlight: cannot be set.")
     traceback.print_exc()
 
+
+def history_cmd(session, words, input):
+  """#history
+
+  Prints the history list.
+  """
+  exported.write_message("History:\n" +
+          exported.get_engine().getHistoryManager().getHistory())
 
 def info_cmd(session, words, input):
   """#info
@@ -836,7 +844,7 @@ def load():
   engine.myengine.addCommand("gag", gag_cmd)
   engine.myengine.addCommand("help", help_cmd)
   engine.myengine.addCommand("highlight", highlight_cmd)
-  # engine.myengine.addCommand("history", history_cmd)
+  engine.myengine.addCommand("history", history_cmd)
   # engine.myengine.addCommand("ignore", ignore_cmd)
   # engine.myengine.addCommand("import", import_cmd)
   engine.myengine.addCommand("info", info_cmd)

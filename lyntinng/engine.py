@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: engine.py,v 1.14 2002/02/24 00:32:26 willhelm Exp $
+# $Id: engine.py,v 1.15 2002/02/27 02:25:21 willhelm Exp $
 #######################################################################
 """
 This holds the Engine which both contains most of the other objects
@@ -25,8 +25,9 @@ It also holds a series of helper functions for making common engine
 calls easier to deal with.
 """
 import Queue, traceback, copy, string, re, thread
-import threadmanager, session, ui.ui, alias, lyntin, utils
-import action, alias, gag, highlight, substitute, variable, event
+
+import threadmanager, session, ui.ui, alias, lyntin, utils, event
+import history, action, alias, gag, highlight, substitute, variable
 
 """
 myengine is a singleton.  so when it gets instantiated, this
@@ -83,6 +84,9 @@ class Engine:
     # counts the total number of events processed--for diagnostics
     self._num_events_processed = 0
 
+    # our history manager
+    self._historymanager = history.HistoryManager()
+
     # holds all the sessions
     self._sessions = {}
 
@@ -94,6 +98,7 @@ class Engine:
 
     # we register ourselves with the shutdown hook
     self.register(SHUTDOWN_HOOK, self.shutdown)
+
 
 
   def initialize(self):
@@ -192,7 +197,7 @@ class Engine:
     The engine.handleUserInput deals with global stuff and then
     passes the modified input to the session for session-oriented
     handling.  The session can call this method again with
-    expanded input--this this method is considered recursive.
+    expanded input--this method is considered recursive.
 
     internal tells whether to spam the input hook and
     things of that nature.
@@ -216,6 +221,11 @@ class Engine:
         myengine.spamhook(INPUT_HOOK, (mem,))
 
       # FIXME - handle history stuff
+      if mem[0] == "!":
+        memhistory = self.getHistoryManager().getHistoryItem(mem)
+        if memhistory != -1:
+          self.handleUserData(memhistory)
+          return
 
       # if it starts with a # it's a loop, session or command.
       if len(mem) > 0 and mem[0] == lyntin.commandchar:
@@ -225,8 +235,9 @@ class Engine:
         # is it a loop (aka repeating command)?
         if re.compile('^\d+$').match(ses):
           num = int(ses)
-          for i in range(num):
-            self.handleUserData(mem.split(" ", 1)[1], internal)
+          if mem.find(" ") != -1:
+            for i in range(num):
+              self.handleUserData(mem.split(" ", 1)[1], internal)
           return
 
         # is it a session?
@@ -721,3 +732,13 @@ class Engine:
       return self._command_list["@"]
 
     return None
+
+  def getHistoryManager(self):
+    """ Retrieves the history manager.
+
+    returns:
+
+      history.HistoryManager instance
+
+    """
+    return self._historymanager

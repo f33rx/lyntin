@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id$
+# $Id: exported.py,v 1.1 2002/02/23 21:11:24 willhelm Exp $
 #######################################################################
 """
 This is the easy module programmers interface and is guaranteed
@@ -182,3 +182,12 @@ def grep_databuffer(str, session):
 def grep_databuffer_lines(str, session):
   pass
 
+def get_engine():
+  """ Nice way of retrieving the engine instance.
+
+  returns:
+
+    engine.Engine instance
+
+  """
+  return engine.myengine
