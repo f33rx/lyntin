@@ -4,12 +4,12 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.34 2002/12/06 04:34:29 willhelm Exp $
+# $Id: textui.py,v 1.35 2002/12/07 00:23:33 willhelm Exp $
 #######################################################################
 """
 Holds the text ui class.
 """
-import string, re, sys, os
+import string, re, sys, os, select
 import lyntin, ansi, engine, hooks, event, utils, ui, exported
 
 HELP_TEXT = """
@@ -24,6 +24,7 @@ The textui has no special features.
 # but only if the module is present
 try:
   import termios
+  print "imported termios"
 except ImportError:
   tio = 0
 else:
@@ -32,6 +33,14 @@ else:
   echonew = termios.tcgetattr(stdinfd)
   onecho_attr = echonew[3]
   offecho_attr = echonew[3] & ~termios.ECHO
+
+try:
+  import readline
+  print "imported readline"
+except ImportError:
+  rline = 0
+else:
+  rline = 1
 
 myui = None
 
@@ -72,10 +81,11 @@ class Textui(ui.BaseUI):
                            "Your password will be visible.")
       
   def shutdown(self, args):
-    """ makes sure we're echoing!"""
+    """ Shuts down the textui and makes sure that we're echoing!"""
     self.turnonecho()
 
   def turnonecho(self):
+    """ Turns on echo if termios module is present."""
     if tio == 0:
       return
     global onecho_attr
@@ -88,6 +98,7 @@ class Textui(ui.BaseUI):
       exported.write_error("textui: unable to turn on echo: %s" % e)
 
   def turnoffecho(self):
+    """ Turns off echo if termios module is present."""
     if tio == 0:
       return
     global offecho_attr
@@ -113,30 +124,53 @@ class Textui(ui.BaseUI):
       self._do_i_echo = 1
       self.turnonecho()
 
+  def _posix_readline_input(self):
+    """
+    If the os is posix and the readline module is present, then we 
+    use raw_input to grab user input.
+    """
+    return raw_input()
+
+  def _posix_input(self):
+    """
+    If the os is posix and there is no readline module, then we
+    use sys.stdin.readline().
+
+    FIXME - We might not actually need this one at all.
+    """
+    readers,w,e = select.select([sys.stdin], [], [])
+    if readers:
+      for mem in readers:
+        try:
+          return mem.readline()
+        except IOError:
+          pass
+
+  def _non_posix_input(self):
+    return sys.stdin.readline()
+
   def run(self):
     """ This is the poll loop for user input."""
-
-    # FIXME - should look into reworking this code
-    import event, sys, select, os
     try:
-      if os.name == 'posix':
-        while not self.shutdownflag:
-          readers,w,e = select.select([sys.stdin], [], [])
-          if readers:
-            for mem in readers:
-              try:
-                data = mem.readline()
-                self.handleinput(data)
-              except IOError:
-                pass
-      else:
-        while not self.shutdownflag:
-          self.handleinput(sys.stdin.readline())
+      while not self.shutdownflag:
+        if os.name == 'posix':
+          if rline == 1:
+            data = self._posix_readline_input()
+          else:
+            # data = self._posix_input()
+            data = self._posix_readline_input()
+        else:
+          data = self._non_posix_input()
+
+        self.handleinput(data)
+        if data.find("#end") == 0:
+          break
+
 
     except select.error, e:
       (errno,name) = e
       if errno == 4:
-        exported.write_message("system exit: you'll be back...")
+        exported.write_message("system exit: select.error.")
         event.ShutdownEvent().enqueue()
         return
 
@@ -162,7 +196,7 @@ class Textui(ui.BaseUI):
     line = message.data
     ses = message.session
 
-    if self.showTextForSession(ses) == 0:
+    if line == '' or self.showTextForSession(ses) == 0:
       return
 
     # we prepend the session name to the text if this is not the 
