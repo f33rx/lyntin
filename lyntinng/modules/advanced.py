@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: advanced.py,v 1.7 2002/04/11 03:58:22 willhelm Exp $
+# $Id: advanced.py,v 1.8 2002/04/12 15:44:40 willhelm Exp $
 #######################################################################
 import traceback, os, sys, string
 import exported, engine, ui.ui, utils
@@ -44,7 +44,7 @@ def import_cmd(session, words, input):
   """
   import sys
 
-  if len(words) == 0:
+  if len(words) == 1:
     exported.write_error("syntax: #import <modulename>")
     return
 
@@ -56,15 +56,15 @@ def import_cmd(session, words, input):
 
     _module = sys.modules[mod]
     try:
-      if len(modarray) == 2 and modarray[0] == "modules":
+      if (_module.__dict__.has_key("unload")):
         try:
           _module.unload()
         except:
-          pass
+          exported.write_error("import: module %s didn't unload properly. %s" % (mod, e))
 
       reload(_module)
 
-      if len(modarray) == 2 and modarray[0] == "modules":
+      if (_module.__dict__.has_key("load")):
         _module = sys.modules[mod]
         _module.load()
       exported.write_message("import: module %s reloaded." % mod)
@@ -80,7 +80,7 @@ def import_cmd(session, words, input):
       else:
         _module = getattr(__import__( mod ), name)
 
-      if len(modarray) == 2 and modarray[0] == "modules":
+      if (_module.__dict__.has_key("load")):
         _module.load()
 
       exported.write_message("import successful.")
