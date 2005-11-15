@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: event.py,v 1.8 2003/09/09 22:44:07 willhelm Exp $
+# $Id: event.py,v 1.9 2004/03/30 00:22:00 willhelm Exp $
 #######################################################################
 """
 Holds the X{event} structures in Lyntin.  All events inherit from 
@@ -64,7 +64,7 @@ class Event:
     """
     pass
 
-
+import sys
 class ShutdownEvent(Event):
   """
   This calls sys.exit(0) which will trigger the Python atexit stuff.
@@ -75,7 +75,8 @@ class ShutdownEvent(Event):
 
   def execute(self):
     """ Execute the shutdown."""
-    sys.exit(0)
+    exported.hook_spam("shutdown_hook", {})
+    #sys.exit(0)
 
 
 class MudEvent(Event):
