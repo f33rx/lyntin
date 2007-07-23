@@ -4,7 +4,7 @@
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: tkui.py,v 1.24 2004/09/19 07:17:18 glasssnake Exp $
+# $Id: tkui.py,v 1.25 2005/12/03 09:16:57 glasssnake Exp $
 #######################################################################
 """
 This is a tk oriented user interface for lyntin.  Based on
@@ -198,11 +198,7 @@ class Tkui(base.BaseUI):
 
     self.settitle()
 
-    if os.name == 'posix':
-      fnt = tkFont.Font(family="Courier", size=12)
-    else:
-      fnt = tkFont.Font(family="Fixedsys", size=12)
-
+    fnt = tkFont.Font(family="Fixedsys", size=14)
 
     self._entry = CommandEntry(self._tk, self, fg='white', bg='black',
                                insertbackground='yellow', font=fnt, 
