@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Free Software Foundation 2001, 2002
+# copyright (c) Free Software Foundation 2001-2007
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: base.py,v 1.8 2004/04/16 22:05:48 willhelm Exp $
+# $Id: base.py,v 1.9 2004/04/18 08:24:51 glasssnake Exp $
 #######################################################################
 """
 Holds the base ui class for Lyntin as well as the get_ui function

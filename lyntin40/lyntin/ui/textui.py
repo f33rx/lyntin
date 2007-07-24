@@ -1,10 +1,10 @@
 #######################################################################
 # This file is part of Lyntin.
-# copyright (c) Free Software Foundation 2001, 2002
+# copyright (c) Free Software Foundation 2001-2007
 #
 # Lyntin is distributed under the GNU General Public License license.  See the
 # file LICENSE for distribution details.
-# $Id: textui.py,v 1.8 2003/10/18 16:39:30 willhelm Exp $
+# $Id: textui.py,v 1.9 2004/04/06 14:05:43 glasssnake Exp $
 #######################################################################
 """
 Holds the text ui class.
