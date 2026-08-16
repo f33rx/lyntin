@@ -19,7 +19,9 @@ the original CVS branches are kept as git branches.
 
 - Lyn Headley - original author
 - Will Guaraldi - longtime maintainer
-- Contributors from the SourceForge era, preserved in the commit history
+- Eugene ("glasssnake") - maintainer from 2004
+- Joshua Berne, James Andariese, Manuel Klimek, "odbrazen" - contributors
+  from the SourceForge era, preserved in the commit history
 
 Now maintained by Dalton Perdue.
 
